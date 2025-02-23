@@ -1,0 +1,10 @@
+/Assets/
+/Library/
+/Temp/
+/Logs/
+/obj/
+/Build/
+/Builds/
+.codegpt
+.git_backup
+/Packages/com.esri.arcgis-maps-sdk/

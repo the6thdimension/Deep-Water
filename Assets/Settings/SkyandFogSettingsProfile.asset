@@ -221,7 +221,7 @@ MonoBehaviour:
     m_OverrideState: 1
     m_Value: 0
   cloudSimpleMode:
-    m_OverrideState: 0
+    m_OverrideState: 1
     m_Value: 0
   m_CloudPreset:
     m_OverrideState: 1
@@ -393,11 +393,11 @@ MonoBehaviour:
     m_OverrideState: 0
     m_Value: 0
   microErosionFactor:
-    m_OverrideState: 0
-    m_Value: 0.5
+    m_OverrideState: 1
+    m_Value: 0.65
   microErosionScale:
-    m_OverrideState: 0
-    m_Value: 200
+    m_OverrideState: 1
+    m_Value: 300
   ambientLightProbeDimmer:
     m_OverrideState: 1
     m_Value: 1
@@ -552,6 +552,9 @@ MonoBehaviour:
   sliceDistributionUniformity:
     m_OverrideState: 0
     m_Value: 0.75
+  multipleScatteringIntensity:
+    m_OverrideState: 0
+    m_Value: 0
   m_FogControlMode:
     m_OverrideState: 1
     m_Value: 0
@@ -608,7 +611,7 @@ MonoBehaviour:
     m_Value: 4
   cloudType:
     m_OverrideState: 1
-    m_Value: 0
+    m_Value: 1
   skyAmbientMode:
     m_OverrideState: 0
     m_Value: 1
@@ -617,7 +620,7 @@ MonoBehaviour:
     m_Value: 6378.1
   renderingSpace:
     m_OverrideState: 1
-    m_Value: 0
+    m_Value: 1
   centerMode:
     m_OverrideState: 0
     m_Value: 0

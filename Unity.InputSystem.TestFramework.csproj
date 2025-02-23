@@ -67,9 +67,9 @@
   <ItemGroup>
     <Compile Include="Library\PackageCache\com.unity.inputsystem\Tests\TestFixture\AssemblyInfo.cs" />
     <Compile Include="Library\PackageCache\com.unity.inputsystem\Tests\TestFixture\ScopedDisposable.cs" />
-    <Compile Include="Library\PackageCache\com.unity.inputsystem\Tests\TestFixture\AssetDatabaseUtils.cs" />
     <Compile Include="Library\PackageCache\com.unity.inputsystem\Tests\TestFixture\WinUserInput.cs" />
     <Compile Include="Library\PackageCache\com.unity.inputsystem\Tests\TestFixture\InputTestRuntime.cs" />
+    <Compile Include="Library\PackageCache\com.unity.inputsystem\Tests\TestFixture\AssetDatabaseUtils.cs" />
     <Compile Include="Library\PackageCache\com.unity.inputsystem\Tests\TestFixture\InputTestFixture.cs" />
   </ItemGroup>
   <ItemGroup>

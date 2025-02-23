@@ -66,9 +66,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Library\PackageCache\com.unity.editorcoroutines\Editor\EditorCoroutine.cs" />
+    <Compile Include="Library\PackageCache\com.unity.editorcoroutines\Editor\EditorWindowCoroutineExtension.cs" />
     <Compile Include="Library\PackageCache\com.unity.editorcoroutines\Editor\EditorCoroutineUtility.cs" />
     <Compile Include="Library\PackageCache\com.unity.editorcoroutines\Editor\EditorWaitForSeconds.cs" />
-    <Compile Include="Library\PackageCache\com.unity.editorcoroutines\Editor\EditorWindowCoroutineExtension.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Library\PackageCache\com.unity.editorcoroutines\Editor\Unity.EditorCoroutines.Editor.asmdef" />

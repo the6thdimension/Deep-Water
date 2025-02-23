@@ -66,17 +66,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Plugins\NWH\WheelController\Friction\StandardFrictionModel.cs" />
+    <Compile Include="Assets\Plugins\NWH\WheelController\Editor\FrictionPresetEditor.cs" />
+    <Compile Include="Assets\Plugins\NWH\WheelController\Wheel.cs" />
+    <Compile Include="Assets\Plugins\NWH\WheelController\Friction\FrictionPresetCollection.cs" />
+    <Compile Include="Assets\Plugins\NWH\WheelController\Test\APITest.cs" />
+    <Compile Include="Assets\Plugins\NWH\WheelController\Friction\FrictionPreset.cs" />
     <Compile Include="Assets\Plugins\NWH\WheelController\Friction\Friction.cs" />
     <Compile Include="Assets\Plugins\NWH\WheelController\Friction\IFrictionModel.cs" />
     <Compile Include="Assets\Plugins\NWH\WheelController\Spring.cs" />
     <Compile Include="Assets\Plugins\NWH\WheelController\Damper.cs" />
     <Compile Include="Assets\Plugins\NWH\WheelController\WheelController.cs" />
     <Compile Include="Assets\Plugins\NWH\WheelController\WheelHit.cs" />
-    <Compile Include="Assets\Plugins\NWH\WheelController\Editor\FrictionPresetEditor.cs" />
-    <Compile Include="Assets\Plugins\NWH\WheelController\Wheel.cs" />
-    <Compile Include="Assets\Plugins\NWH\WheelController\Friction\FrictionPresetCollection.cs" />
-    <Compile Include="Assets\Plugins\NWH\WheelController\Test\APITest.cs" />
-    <Compile Include="Assets\Plugins\NWH\WheelController\Friction\FrictionPreset.cs" />
     <Compile Include="Assets\Plugins\NWH\WheelController\Editor\WheelControllerEditor.cs" />
   </ItemGroup>
   <ItemGroup>

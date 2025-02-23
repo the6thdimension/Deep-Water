@@ -77,36 +77,36 @@
     <Analyzer Include="C:\Users\SIX\Unity Projects\RH Navy Sims\Deep Water\Library\PackageCache\com.unity.entities\Unity.Entities\SourceGenerators\Unity.Entities.Analyzer.CodeFixes.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\SceneSectionStreamingSystem.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\GlobalAssetObjectResolver.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\ResolveSceneReferenceSystem.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\ResolveSceneSectionUtility.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\WeakAssetReferenceLoadingSystem.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\Hybrid\FileUtilityHybrid.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\AssemblyInfo.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\LiveConversionPatcher.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\EntitySceneOptimization.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\SceneWithBuildConfigurationGUIDs.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\AssetObjectManifest.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\SceneSectionReferencedUnityObjects.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\SceneBoundingVolume.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\ResourceCatalogData.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\Hybrid\SerializeUtilityHybrid.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\EntityScenesPaths.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\SceneSectionStreamingSystem.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\EditorRenderData.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\SubScene.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\EntityChangeSetSerialization.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\PublicEntityRef.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\GlobalAssetObjectResolver.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\Hybrid\ReferencedUnityObjects.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\LiveConversion\LiveConversionSceneChangeTracker.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\ResolveSceneReferenceSystem.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\Hybrid\CompanionSceneUtility.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\SceneSystemGroup.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\ResolveSceneSectionUtility.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\WeakAssetReferenceLoadingSystem.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\Hybrid\FileUtilityHybrid.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\EditorUpdateUtility.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\AssemblyInfo.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\LiveConversionPatcher.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\AsyncLoadSceneOperation.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\EntitySceneOptimization.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\AssetDependencyTracker.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\SceneHeaderUtility.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\SceneWithBuildConfigurationGUIDs.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\SceneSystem.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\AssetObjectManifest.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\AssetDatabaseCompatibility.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Scenes\SceneSectionReferencedUnityObjects.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Library\PackageCache\com.unity.entities\Unity.Scenes\Unity.Scenes.asmdef" />

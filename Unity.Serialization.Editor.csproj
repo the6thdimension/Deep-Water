@@ -66,8 +66,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Library\PackageCache\com.unity.serialization\Editor\Unity.Serialization.Editor\DefaultEditorPropertyBagInitializer.cs" />
-    <Compile Include="Library\PackageCache\com.unity.serialization\Editor\Unity.Serialization.Editor\UserSettings.cs" />
     <Compile Include="Library\PackageCache\com.unity.serialization\Editor\Unity.Serialization.Editor\SessionState.cs" />
+    <Compile Include="Library\PackageCache\com.unity.serialization\Editor\Unity.Serialization.Editor\UserSettings.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Library\PackageCache\com.unity.serialization\Editor\Unity.Serialization.Editor\Unity.Serialization.Editor.asmdef" />

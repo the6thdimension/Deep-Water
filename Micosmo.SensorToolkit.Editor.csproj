@@ -66,28 +66,28 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\SensorToolkit\Sensors\src\Editor\ArcSensor2DEditor.cs" />
-    <Compile Include="Assets\SensorToolkit\Sensors\src\Editor\SteerSeekDrawer.cs" />
-    <Compile Include="Assets\SensorToolkit\Sensors\src\Editor\ArcSensorEditor.cs" />
     <Compile Include="Assets\SensorToolkit\Sensors\src\Editor\NavMeshMaskDrawer.cs" />
-    <Compile Include="Assets\SensorToolkit\Sensors\src\Editor\RaySensor2DEditor.cs" />
-    <Compile Include="Assets\SensorToolkit\Sensors\src\Editor\TagSelectorPropertyDrawer.cs" />
     <Compile Include="Assets\SensorToolkit\Sensors\src\Editor\RangeSensorEditor.cs" />
     <Compile Include="Assets\SensorToolkit\Sensors\src\Editor\TriggerSensorEditor.cs" />
     <Compile Include="Assets\SensorToolkit\Sensors\src\Editor\RaySensorEditor.cs" />
     <Compile Include="Assets\SensorToolkit\Sensors\src\Editor\BasePulsableEditor.cs" />
     <Compile Include="Assets\SensorToolkit\Sensors\src\Editor\FOVCollider2DEditor.cs" />
-    <Compile Include="Assets\SensorToolkit\Sensors\src\Editor\NavMeshSensorEditor.cs" />
-    <Compile Include="Assets\SensorToolkit\Sensors\src\Editor\BaseSensorEditor.cs" />
     <Compile Include="Assets\SensorToolkit\Sensors\src\Editor\FOVColliderEditor.cs" />
     <Compile Include="Assets\SensorToolkit\Sensors\src\Editor\SteeringSensorEditor.cs" />
     <Compile Include="Assets\SensorToolkit\Sensors\src\Editor\RangeSensor2DEditor.cs" />
     <Compile Include="Assets\SensorToolkit\Sensors\src\Editor\BooleanSensorEditor.cs" />
     <Compile Include="Assets\SensorToolkit\Sensors\src\Editor\EditorUtils.cs" />
-    <Compile Include="Assets\SensorToolkit\Sensors\src\Editor\TriggerSensor2DEditor.cs" />
     <Compile Include="Assets\SensorToolkit\Sensors\src\Editor\SteeringSensor2DEditor.cs" />
-    <Compile Include="Assets\SensorToolkit\Sensors\src\Editor\LOSSensorEditor.cs" />
     <Compile Include="Assets\SensorToolkit\Sensors\src\Editor\LOSSensor2DEditor.cs" />
     <Compile Include="Assets\SensorToolkit\Sensors\src\Editor\UserSignalsEditor.cs" />
+    <Compile Include="Assets\SensorToolkit\Sensors\src\Editor\SteerSeekDrawer.cs" />
+    <Compile Include="Assets\SensorToolkit\Sensors\src\Editor\ArcSensorEditor.cs" />
+    <Compile Include="Assets\SensorToolkit\Sensors\src\Editor\RaySensor2DEditor.cs" />
+    <Compile Include="Assets\SensorToolkit\Sensors\src\Editor\TagSelectorPropertyDrawer.cs" />
+    <Compile Include="Assets\SensorToolkit\Sensors\src\Editor\NavMeshSensorEditor.cs" />
+    <Compile Include="Assets\SensorToolkit\Sensors\src\Editor\BaseSensorEditor.cs" />
+    <Compile Include="Assets\SensorToolkit\Sensors\src\Editor\TriggerSensor2DEditor.cs" />
+    <Compile Include="Assets\SensorToolkit\Sensors\src\Editor\LOSSensorEditor.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\SensorToolkit\Sensors\src\Editor\Micosmo.SensorToolkit.Editor.asmdef" />

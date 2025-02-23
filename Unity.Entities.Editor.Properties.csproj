@@ -65,18 +65,18 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.0.31f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\ContentProvider\Selection\Internal\UnityObjectContentProvider.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\ContentProvider\Selection\ContentStatus.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\ContentProvider\Selection\Internal\SerializableContent.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\ContentProvider\Selection\InspectorContentParameters.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\ContentProvider\Selection\Internal\SerializableContent+SetTargetVisitor.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\ContentProvider\Selection\Internal\DynamicInspectionContext.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\ContentProvider\Selection\Internal\ContentWindow.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\ContentProvider\Selection\Internal\UnityObjectContentProvider.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\ContentProvider\Selection\SelectionUtility.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\ContentProvider\Selection\Internal\InspectorContent.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\ContentProvider\Selection\AssemblyInfo.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\ContentProvider\Selection\ContentProvider+ChangeContext.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\ContentProvider\Selection\Internal\SerializableContent.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\ContentProvider\Selection\InspectorContentParameters.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\ContentProvider\Selection\Internal\SerializableContent+SetTargetVisitor.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\ContentProvider\Selection\Internal\InspectorContentEditor.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\ContentProvider\Selection\Internal\DynamicInspectionContext.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\ContentProvider\Selection\Internal\ContentWindow.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\ContentProvider\Selection\ContentWindowParameters.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\ContentProvider\Selection\Internal\DisplayContent.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\ContentProvider\Selection\Internal\ContentNotReady.cs" />

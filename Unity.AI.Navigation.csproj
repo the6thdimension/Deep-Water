@@ -65,13 +65,13 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.0.31f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Library\PackageCache\com.unity.ai.navigation\Runtime\NavMeshLink.cs" />
     <Compile Include="Library\PackageCache\com.unity.ai.navigation\Runtime\AssemblyInfo.cs" />
+    <Compile Include="Library\PackageCache\com.unity.ai.navigation\Runtime\NavMeshModifier.cs" />
+    <Compile Include="Library\PackageCache\com.unity.ai.navigation\Runtime\NavMeshModifierVolume.cs" />
+    <Compile Include="Library\PackageCache\com.unity.ai.navigation\Runtime\NavMeshLink.cs" />
     <Compile Include="Library\PackageCache\com.unity.ai.navigation\Runtime\NavMeshSurface.cs" />
     <Compile Include="Library\PackageCache\com.unity.ai.navigation\Runtime\NavMeshLink.deprecated.cs" />
-    <Compile Include="Library\PackageCache\com.unity.ai.navigation\Runtime\NavMeshModifier.cs" />
     <Compile Include="Library\PackageCache\com.unity.ai.navigation\Runtime\HelpUrls.cs" />
-    <Compile Include="Library\PackageCache\com.unity.ai.navigation\Runtime\NavMeshModifierVolume.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Library\PackageCache\com.unity.ai.navigation\Runtime\Unity.AI.Navigation.asmdef" />

@@ -80,12 +80,12 @@
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Transforms\ParentSystem.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Transforms\TransformHelpers.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Transforms\LocalTransform.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Transforms\Parent.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Transforms\AssemblyInfo.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Transforms\LocalToWorldSystem.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Transforms\LocalToWorld.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Transforms\EndFrameTransformSystems.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Transforms\PostTransformMatrix.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Transforms\Parent.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Transforms\AssemblyInfo.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Transforms\EndFrameTransformSystems.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Library\PackageCache\com.unity.entities\Unity.Transforms\Unity.Transforms.asmdef" />

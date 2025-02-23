@@ -65,22 +65,22 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.0.31f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\StreamDeckIntegration\Scripts\Json\JsonData.cs" />
-    <Compile Include="Assets\StreamDeckIntegration\Scripts\Attributes\StreamDeckDialAttribute.cs" />
     <Compile Include="Assets\StreamDeckIntegration\Scripts\StreamDeckSocket.cs" />
     <Compile Include="Assets\StreamDeckIntegration\Scripts\StreamDeckPreferences.cs" />
     <Compile Include="Assets\StreamDeckIntegration\Scripts\Log.cs" />
+    <Compile Include="Assets\StreamDeckIntegration\Scripts\StreamDeck.cs" />
+    <Compile Include="Assets\StreamDeckIntegration\Scripts\StreamDeckHelper.cs" />
+    <Compile Include="Assets\StreamDeckIntegration\Scripts\AssemblyInfo.cs" />
+    <Compile Include="Assets\StreamDeckIntegration\Scripts\StreamDeckButtonData.cs" />
+    <Compile Include="Assets\StreamDeckIntegration\Scripts\Attributes\StreamDeckGroupAttribute.cs" />
+    <Compile Include="Assets\StreamDeckIntegration\Scripts\Json\JsonData.cs" />
+    <Compile Include="Assets\StreamDeckIntegration\Scripts\Attributes\StreamDeckDialAttribute.cs" />
     <Compile Include="Assets\StreamDeckIntegration\Scripts\Json\JsonParser.cs" />
     <Compile Include="Assets\StreamDeckIntegration\Scripts\StreamDeckReflection.cs" />
     <Compile Include="Assets\StreamDeckIntegration\Scripts\StreamDeckRuntime.cs" />
     <Compile Include="Assets\StreamDeckIntegration\Scripts\Attributes\StreamDeckButtonAttribute.cs" />
     <Compile Include="Assets\StreamDeckIntegration\Scripts\StreamDeckSettings.cs" />
-    <Compile Include="Assets\StreamDeckIntegration\Scripts\StreamDeck.cs" />
-    <Compile Include="Assets\StreamDeckIntegration\Scripts\StreamDeckHelper.cs" />
     <Compile Include="Assets\StreamDeckIntegration\Scripts\StreamDeckDialAction.cs" />
-    <Compile Include="Assets\StreamDeckIntegration\Scripts\AssemblyInfo.cs" />
-    <Compile Include="Assets\StreamDeckIntegration\Scripts\StreamDeckButtonData.cs" />
-    <Compile Include="Assets\StreamDeckIntegration\Scripts\Attributes\StreamDeckGroupAttribute.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\StreamDeckIntegration\Scripts\Plugins\LICENSE.txt" />

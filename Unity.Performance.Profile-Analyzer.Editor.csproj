@@ -65,22 +65,15 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.0.31f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\DepthSliceUI.cs" />
     <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\MarkerData.cs" />
-    <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\ProgressBarDisplay.cs" />
-    <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\ProfileAnalysis.cs" />
-    <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\Draw2D.cs" />
     <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\FrameTime.cs" />
-    <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\ProfilerWindowInterface.cs" />
     <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\TimingOptions.cs" />
-    <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\Units.cs" />
     <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\ProfileDataView.cs" />
     <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\ThreadIdentifier.cs" />
     <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\ComparisonTable.cs" />
     <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\TopMarkerList.cs" />
     <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\Analytics.cs" />
     <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\MarkerColumnFilter.cs" />
-    <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\BoxAndWhiskerPlot.cs" />
     <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\ProfileTable.cs" />
     <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\Columns.cs" />
     <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\DepthSliceDropdown.cs" />
@@ -88,16 +81,23 @@
     <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\ThreadFrameTime.cs" />
     <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\AssemblyInfo.cs" />
     <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\ThreadData.cs" />
-    <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\ThreadSelection.cs" />
-    <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\FrameTimeGraph.cs" />
     <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\ProfileAnalyzerExportWindow.cs" />
-    <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\ThreadSelectionWindow.cs" />
     <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\Histogram.cs" />
     <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\ProfileAnalyzer.cs" />
-    <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\ProfileData.cs" />
-    <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\TopMarkers.cs" />
     <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\ProfileAnalyzerWindow.cs" />
     <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\MarkerPairing.cs" />
+    <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\DepthSliceUI.cs" />
+    <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\ProgressBarDisplay.cs" />
+    <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\ProfileAnalysis.cs" />
+    <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\Draw2D.cs" />
+    <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\ProfilerWindowInterface.cs" />
+    <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\Units.cs" />
+    <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\BoxAndWhiskerPlot.cs" />
+    <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\ThreadSelection.cs" />
+    <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\FrameTimeGraph.cs" />
+    <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\ThreadSelectionWindow.cs" />
+    <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\ProfileData.cs" />
+    <Compile Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\TopMarkers.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Library\PackageCache\com.unity.performance.profile-analyzer\Editor\Unity.Performance.Profile-Analyzer.Editor.asmdef" />

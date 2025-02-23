@@ -66,17 +66,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Library\PackageCache\com.unity.settings-manager\Editor\ISettingsRepository.cs" />
+    <Compile Include="Library\PackageCache\com.unity.settings-manager\Editor\SettingsDictionary.cs" />
+    <Compile Include="Library\PackageCache\com.unity.settings-manager\Editor\UserSettingsProvider.cs" />
+    <Compile Include="Library\PackageCache\com.unity.settings-manager\Editor\UserSetting.cs" />
+    <Compile Include="Library\PackageCache\com.unity.settings-manager\Editor\UserSettings.cs" />
     <Compile Include="Library\PackageCache\com.unity.settings-manager\Editor\SettingsGUILayout.cs" />
     <Compile Include="Library\PackageCache\com.unity.settings-manager\Editor\PackageSettingsRepository.cs" />
     <Compile Include="Library\PackageCache\com.unity.settings-manager\Editor\ValueWrapper.cs" />
     <Compile Include="Library\PackageCache\com.unity.settings-manager\Editor\FileSettingsRepository.cs" />
     <Compile Include="Library\PackageCache\com.unity.settings-manager\Editor\ProjectUserSettings.cs" />
-    <Compile Include="Library\PackageCache\com.unity.settings-manager\Editor\SettingsDictionary.cs" />
     <Compile Include="Library\PackageCache\com.unity.settings-manager\Editor\UserSettingsRepository.cs" />
-    <Compile Include="Library\PackageCache\com.unity.settings-manager\Editor\UserSettingsProvider.cs" />
     <Compile Include="Library\PackageCache\com.unity.settings-manager\Editor\Attributes.cs" />
-    <Compile Include="Library\PackageCache\com.unity.settings-manager\Editor\UserSetting.cs" />
-    <Compile Include="Library\PackageCache\com.unity.settings-manager\Editor\UserSettings.cs" />
     <Compile Include="Library\PackageCache\com.unity.settings-manager\Editor\Settings.cs" />
   </ItemGroup>
   <ItemGroup>

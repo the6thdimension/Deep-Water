@@ -77,12 +77,12 @@
     <Analyzer Include="C:\Users\SIX\Unity Projects\RH Navy Sims\Deep Water\Library\PackageCache\com.unity.entities\Unity.Entities\SourceGenerators\Unity.Entities.Analyzer.CodeFixes.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Build\AlwaysIncludeBakingSystemAttribute.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Build\AssemblyInfo.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Build\EntitiesClientSettings.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Build\BakingSystemFilterSettings.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Build\EntitiesBuildSettingsProvider.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Build\DotsGlobalSettings.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Build\AlwaysIncludeBakingSystemAttribute.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Library\PackageCache\com.unity.entities\Unity.Entities.Build\Unity.Entities.Build.asmdef" />

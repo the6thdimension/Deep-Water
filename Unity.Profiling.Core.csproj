@@ -66,11 +66,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Library\PackageCache\com.unity.profiling.core\Runtime\ProfilerMarker3Params.cs" />
+    <Compile Include="Library\PackageCache\com.unity.profiling.core\Runtime\ProfilerCounterValue.cs" />
+    <Compile Include="Library\PackageCache\com.unity.profiling.core\Runtime\ProfilerMarker2Params.cs" />
     <Compile Include="Library\PackageCache\com.unity.profiling.core\Runtime\ProfilerCategory.cs" />
     <Compile Include="Library\PackageCache\com.unity.profiling.core\Runtime\ProfilerUtility.cs" />
     <Compile Include="Library\PackageCache\com.unity.profiling.core\Runtime\ProfilerMarkerExtensions.cs" />
-    <Compile Include="Library\PackageCache\com.unity.profiling.core\Runtime\ProfilerCounterValue.cs" />
-    <Compile Include="Library\PackageCache\com.unity.profiling.core\Runtime\ProfilerMarker2Params.cs" />
     <Compile Include="Library\PackageCache\com.unity.profiling.core\Runtime\ProfilerMarker1Param.cs" />
     <Compile Include="Library\PackageCache\com.unity.profiling.core\Runtime\ProfilerCounter.cs" />
   </ItemGroup>

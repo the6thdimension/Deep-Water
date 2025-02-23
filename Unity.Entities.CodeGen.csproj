@@ -77,26 +77,26 @@
     <Analyzer Include="C:\Users\SIX\Unity Projects\RH Navy Sims\Deep Water\Library\PackageCache\com.unity.entities\Unity.Entities\SourceGenerators\Unity.Entities.Analyzer.CodeFixes.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.CodeGen\StaticTypeRegistry\StaticTypeRegistryPostProcessor.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.CodeGen\StaticTypeRegistry\MonoExtensions.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.CodeGen\StaticTypeRegistry\ILHelper.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.CodeGen\CecilHelpers.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.CodeGen\StaticTypeRegistry\FieldInfoGeneration.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.CodeGen\StaticTypeRegistry\SystemInfoGeneration.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.CodeGen\StaticTypeRegistry\TypeInfoGeneration.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.CodeGen\CecilExtensionMethods.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.CodeGen\Cloner\TypeDefinitionExtensions.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.CodeGen\EntitiesILPostProcessorProfileMarker.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.CodeGen\Cloner\Cloner.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.CodeGen\ComponentDataPP.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.CodeGen\ISystemPostProcessor.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.CodeGen\TestCaseILPP.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.CodeGen\StaticTypeRegistry\TypeUtils.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.CodeGen\ListExtensions.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.CodeGen\StaticTypeRegistry\StaticTypeRegistryPostProcessor.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.CodeGen\StaticTypeRegistry\MonoExtensions.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.CodeGen\CecilHelpers.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.CodeGen\StaticTypeRegistry\FieldInfoGeneration.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.CodeGen\CecilExtensionMethods.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.CodeGen\ComponentDataPP.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.CodeGen\ISystemPostProcessor.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.CodeGen\StaticTypeRegistry\TypeHash.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.CodeGen\UserError.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.CodeGen\AssemblyInfo.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.CodeGen\FoundErrorInUserCodeException.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.CodeGen\ListExtensions.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.CodeGen\EntitiesILPostProcessor.cs" />
   </ItemGroup>
   <ItemGroup>

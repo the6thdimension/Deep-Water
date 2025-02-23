@@ -65,10 +65,10 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.0.31f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Samples\Input System\1.11.2\Visualizers\InputActionVisualizer.cs" />
     <Compile Include="Assets\Samples\Input System\1.11.2\Visualizers\InputControlVisualizer.cs" />
-    <Compile Include="Assets\Samples\Input System\1.11.2\Visualizers\InputVisualizer.cs" />
     <Compile Include="Assets\Samples\Input System\1.11.2\Visualizers\VisualizationHelpers.cs" />
+    <Compile Include="Assets\Samples\Input System\1.11.2\Visualizers\InputActionVisualizer.cs" />
+    <Compile Include="Assets\Samples\Input System\1.11.2\Visualizers\InputVisualizer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Samples\Input System\1.11.2\Visualizers\Unity.InputSystem.Visualizers.asmdef" />

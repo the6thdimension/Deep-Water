@@ -66,15 +66,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Library\PackageCache\com.unity.searcher\Editor\Searcher\SearcherDatabaseBase.cs" />
-    <Compile Include="Library\PackageCache\com.unity.searcher\Editor\Searcher\SearcherAdapter.cs" />
     <Compile Include="Library\PackageCache\com.unity.searcher\Editor\Searcher\SearcherWindow.cs" />
     <Compile Include="Library\PackageCache\com.unity.searcher\Editor\Searcher\SearcherDatabase.cs" />
-    <Compile Include="Library\PackageCache\com.unity.searcher\Editor\Searcher\Searcher.cs" />
     <Compile Include="Library\PackageCache\com.unity.searcher\Editor\Searcher\SearcherTreeUtility.cs" />
-    <Compile Include="Library\PackageCache\com.unity.searcher\Editor\Searcher\SearcherHighlighter.cs" />
-    <Compile Include="Library\PackageCache\com.unity.searcher\Editor\AssemblyInfo.cs" />
     <Compile Include="Library\PackageCache\com.unity.searcher\Editor\Searcher\SearcherItem.cs" />
     <Compile Include="Library\PackageCache\com.unity.searcher\Editor\Searcher\SearcherControl.cs" />
+    <Compile Include="Library\PackageCache\com.unity.searcher\Editor\Searcher\SearcherAdapter.cs" />
+    <Compile Include="Library\PackageCache\com.unity.searcher\Editor\Searcher\Searcher.cs" />
+    <Compile Include="Library\PackageCache\com.unity.searcher\Editor\Searcher\SearcherHighlighter.cs" />
+    <Compile Include="Library\PackageCache\com.unity.searcher\Editor\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Library\PackageCache\com.unity.searcher\Editor\Unity.Searcher.Editor.asmdef" />

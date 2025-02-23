@@ -79,31 +79,31 @@
   <ItemGroup>
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\LivePropertyBridge.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\SearchBridge.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\MenuWrapper.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\EditorPerformanceTrackerBridge.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\GameObjectChangeTrackerBridge.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\EditorApplicationBridge.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\LocalizationDatabaseBridge.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\EditorGUIUtilityBridge.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\DragAndDropBridge.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\ClipboardUtilityBridge.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\SelectionBridge.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\EditorSceneManagerBridge.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\PrefabUtilityBridge.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\InspectorWindowBridge.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\EditorWindowBridge.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\AssemblyInfo.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\EditorStyleUSSBridge.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\ProfilerWindowBridge.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\PropertyEditorBridge.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\MenuUtilsBridge.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\PreferencesProviderBridge.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\StageNavigationBridge.cs" />
-    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\EditorGUILayoutBridge.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\EditorGUIBridge.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\SceneHierarchyHooksBridge.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\SubSceneGUIBridge.cs" />
     <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\EditorHeaderItemAttributeBridge.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\MenuWrapper.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\EditorPerformanceTrackerBridge.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\EditorApplicationBridge.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\LocalizationDatabaseBridge.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\EditorGUIUtilityBridge.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\DragAndDropBridge.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\AssemblyInfo.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\ProfilerWindowBridge.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\PropertyEditorBridge.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\MenuUtilsBridge.cs" />
+    <Compile Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\EditorGUILayoutBridge.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Library\PackageCache\com.unity.entities\Unity.Entities.Editor\Unity.InternalAPIEditorBridge.002\Unity.InternalAPIEditorBridge.002.asmdef" />

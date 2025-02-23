@@ -1,5 +1,5 @@
 # Ignore Unity cache and build files
-/Assets/FDS Assets/Naval Vessels/
+#/Assets/FDS Assets/Naval Vessels/
 /Library/
 /Temp/
 /Logs/

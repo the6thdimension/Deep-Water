@@ -1,0 +1,1189 @@
+fileFormatVersion: 2
+guid: daa4249c578ebad499726bb5254e3462
+ModelImporter:
+  serializedVersion: 22200
+  internalIDToNameTable: []
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: DeckAccessories
+    second: {fileID: 2100000, guid: 35cb800268116e148b3dd5a14ab05440, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: DeckMaterial
+    second: {fileID: 2100000, guid: cea151fec8385844d8a6aaa298a2f388, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Hull
+    second: {fileID: 2100000, guid: 2ea9cb50fca7db44db6a72881a4315e8, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Island
+    second: {fileID: 2100000, guid: fdc5ef786d464df42840830e8b41cf2a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: LowerDeck
+    second: {fileID: 2100000, guid: 250a561f51023b140b781f6cb8590406, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material
+    second: {fileID: 2100000, guid: 244540412fb01654881f190da7f1b810, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Tiedown
+    second: {fileID: 2100000, guid: 8b58e51b5eaa78140878f6e1753fb0d9, type: 2}
+  materials:
+    materialImportMode: 2
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    removeConstantScaleCurves: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations:
+    - serializedVersion: 16
+      name: Scene
+      takeName: Scene
+      internalID: -623603649343465320
+      firstFrame: 1
+      lastFrame: 400
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: ArrestorPylons
+        weight: 1
+      - path: ArrestorPylons/AresstingWires
+        weight: 1
+      - path: Catapult_1
+        weight: 1
+      - path: Catapult_1/BlastShield_1
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty/Armature.003
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty/Armature.003/Bone
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty/Armature.003/Bone/Bone_end
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty/Armature.003/Bone/node5.002
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty/Armature.009
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty/Armature.009/Bone
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty/Armature.009/Bone/Bone.001
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty/Armature.009/Bone/Bone.001/Bone.001_end
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty/Armature.009/Bone.002
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty/Armature.009/Bone.002/Bone.002_end
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.001
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.001/Armature.001
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.001/Armature.001/Bone
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.001/Armature.001/Bone/Bone_end
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.001/Armature.001/Bone/node5.152
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.001/Armature.002
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.001/Armature.002/Bone
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.001/Armature.002/Bone/Bone.001
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.001/Armature.002/Bone/Bone.001/Bone.001_end
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.001/Armature.002/Bone.002
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.001/Armature.002/Bone.002/Bone.002_end
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.002
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.002/Armature.004
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.002/Armature.004/Bone
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.002/Armature.004/Bone/Bone_end
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.002/Armature.004/Bone/node5.155
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.002/Armature.005
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.002/Armature.005/Bone
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.002/Armature.005/Bone/Bone.001
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.002/Armature.005/Bone/Bone.001/Bone.001_end
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.002/Armature.005/Bone.002
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.002/Armature.005/Bone.002/Bone.002_end
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.003
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.003/Armature.006
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.003/Armature.006/Bone
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.003/Armature.006/Bone/Bone_end
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.003/Armature.006/Bone/node5.158
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.003/Armature.007
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.003/Armature.007/Bone
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.003/Armature.007/Bone/Bone.001
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.003/Armature.007/Bone/Bone.001/Bone.001_end
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.003/Armature.007/Bone.002
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.003/Armature.007/Bone.002/Bone.002_end
+        weight: 1
+      - path: Catapult_1/BlastShield_1/node5.153
+        weight: 1
+      - path: Catapult_1/BlastShield_1/node5.154
+        weight: 1
+      - path: Catapult_1/BlastShield_1/node5.156
+        weight: 1
+      - path: Catapult_1/BlastShield_1/node5.157
+        weight: 1
+      - path: Catapult_1/BlastShield_1/node5.159
+        weight: 1
+      - path: Catapult_1/BlastShield_1/node5.160
+        weight: 1
+      - path: Catapult_1/BlastShield_1/node5.164
+        weight: 1
+      - path: Catapult_1/BlastShield_1/node5.193
+        weight: 1
+      - path: Catapult_1/BlastShield_1/node5.232
+        weight: 1
+      - path: Catapult_1/BlastShield_1/node5.239
+        weight: 1
+      - path: Catapult_1/Shuttle_1
+        weight: 1
+      - path: Catapult_2
+        weight: 1
+      - path: Catapult_2/BlastShield_2
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.005
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.005/Armature.008
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.005/Armature.008/Bone
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.005/Armature.008/Bone/Bone_end
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.005/Armature.008/Bone/node5.161
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.005/Armature.010
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.005/Armature.010/Bone
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.005/Armature.010/Bone/Bone.001
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.005/Armature.010/Bone/Bone.001/Bone.001_end
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.005/Armature.010/Bone.002
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.005/Armature.010/Bone.002/Bone.002_end
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.006
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.006/Armature.011
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.006/Armature.011/Bone
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.006/Armature.011/Bone/Bone_end
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.006/Armature.011/Bone/node5.166
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.006/Armature.012
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.006/Armature.012/Bone
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.006/Armature.012/Bone/Bone.001
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.006/Armature.012/Bone/Bone.001/Bone.001_end
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.006/Armature.012/Bone.002
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.006/Armature.012/Bone.002/Bone.002_end
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.007
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.007/Armature.013
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.007/Armature.013/Bone
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.007/Armature.013/Bone/Bone_end
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.007/Armature.013/Bone/node5.169
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.007/Armature.014
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.007/Armature.014/Bone
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.007/Armature.014/Bone/Bone.001
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.007/Armature.014/Bone/Bone.001/Bone.001_end
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.007/Armature.014/Bone.002
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.007/Armature.014/Bone.002/Bone.002_end
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.008
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.008/Armature.015
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.008/Armature.015/Bone
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.008/Armature.015/Bone/Bone_end
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.008/Armature.015/Bone/node5.172
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.008/Armature.016
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.008/Armature.016/Bone
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.008/Armature.016/Bone/Bone.001
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.008/Armature.016/Bone/Bone.001/Bone.001_end
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.008/Armature.016/Bone.002
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.008/Armature.016/Bone.002/Bone.002_end
+        weight: 1
+      - path: Catapult_2/BlastShield_2/node5.162
+        weight: 1
+      - path: Catapult_2/BlastShield_2/node5.163
+        weight: 1
+      - path: Catapult_2/BlastShield_2/node5.167
+        weight: 1
+      - path: Catapult_2/BlastShield_2/node5.168
+        weight: 1
+      - path: Catapult_2/BlastShield_2/node5.170
+        weight: 1
+      - path: Catapult_2/BlastShield_2/node5.171
+        weight: 1
+      - path: Catapult_2/BlastShield_2/node5.173
+        weight: 1
+      - path: Catapult_2/BlastShield_2/node5.174
+        weight: 1
+      - path: Catapult_2/BlastShield_2/node5.179
+        weight: 1
+      - path: Catapult_2/BlastShield_2/node5.192
+        weight: 1
+      - path: Catapult_2/Shuttle_2
+        weight: 1
+      - path: Catapult_3
+        weight: 1
+      - path: Catapult_3/BlastShield_3
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.010
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.010/Armature.017
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.010/Armature.017/Bone
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.010/Armature.017/Bone/Bone_end
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.010/Armature.017/Bone/node5.175
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.010/Armature.018
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.010/Armature.018/Bone
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.010/Armature.018/Bone/Bone.001
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.010/Armature.018/Bone/Bone.001/Bone.001_end
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.010/Armature.018/Bone.002
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.010/Armature.018/Bone.002/Bone.002_end
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.011
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.011/Armature.019
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.011/Armature.019/Bone
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.011/Armature.019/Bone/Bone_end
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.011/Armature.019/Bone/node5.180
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.011/Armature.020
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.011/Armature.020/Bone
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.011/Armature.020/Bone/Bone.001
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.011/Armature.020/Bone/Bone.001/Bone.001_end
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.011/Armature.020/Bone.002
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.011/Armature.020/Bone.002/Bone.002_end
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.012
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.012/Armature.021
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.012/Armature.021/Bone
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.012/Armature.021/Bone/Bone_end
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.012/Armature.021/Bone/node5.183
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.012/Armature.022
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.012/Armature.022/Bone
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.012/Armature.022/Bone/Bone.001
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.012/Armature.022/Bone/Bone.001/Bone.001_end
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.012/Armature.022/Bone.002
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.012/Armature.022/Bone.002/Bone.002_end
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.013
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.013/Armature.023
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.013/Armature.023/Bone
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.013/Armature.023/Bone/Bone_end
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.013/Armature.023/Bone/node5.186
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.013/Armature.024
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.013/Armature.024/Bone
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.013/Armature.024/Bone/Bone.001
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.013/Armature.024/Bone/Bone.001/Bone.001_end
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.013/Armature.024/Bone.002
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.013/Armature.024/Bone.002/Bone.002_end
+        weight: 1
+      - path: Catapult_3/BlastShield_3/node5.176
+        weight: 1
+      - path: Catapult_3/BlastShield_3/node5.177
+        weight: 1
+      - path: Catapult_3/BlastShield_3/node5.181
+        weight: 1
+      - path: Catapult_3/BlastShield_3/node5.182
+        weight: 1
+      - path: Catapult_3/BlastShield_3/node5.184
+        weight: 1
+      - path: Catapult_3/BlastShield_3/node5.185
+        weight: 1
+      - path: Catapult_3/BlastShield_3/node5.187
+        weight: 1
+      - path: Catapult_3/BlastShield_3/node5.188
+        weight: 1
+      - path: Catapult_3/BlastShield_3/node5.561
+        weight: 1
+      - path: Catapult_3/BlastShield_3/node5.568
+        weight: 1
+      - path: Catapult_3/BlastShield_3/node5.570
+        weight: 1
+      - path: Catapult_3/BlastShield_3/node5.572
+        weight: 1
+      - path: Catapult_3/BlastShield_3/node5.574
+        weight: 1
+      - path: Catapult_3/Shuttle_3
+        weight: 1
+      - path: Catapult_4
+        weight: 1
+      - path: Catapult_4/BlastShield_4
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.015
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.015/Armature.025
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.015/Armature.025/Bone
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.015/Armature.025/Bone/Bone_end
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.015/Armature.025/Bone/node5.189
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.015/Armature.026
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.015/Armature.026/Bone
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.015/Armature.026/Bone/Bone.001
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.015/Armature.026/Bone/Bone.001/Bone.001_end
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.015/Armature.026/Bone.002
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.015/Armature.026/Bone.002/Bone.002_end
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.016
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.016/Armature.027
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.016/Armature.027/Bone
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.016/Armature.027/Bone/Bone_end
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.016/Armature.027/Bone/node5.194
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.016/Armature.028
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.016/Armature.028/Bone
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.016/Armature.028/Bone/Bone.001
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.016/Armature.028/Bone/Bone.001/Bone.001_end
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.016/Armature.028/Bone.002
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.016/Armature.028/Bone.002/Bone.002_end
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.017
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.017/Armature.029
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.017/Armature.029/Bone
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.017/Armature.029/Bone/Bone_end
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.017/Armature.029/Bone/node5.197
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.017/Armature.030
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.017/Armature.030/Bone
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.017/Armature.030/Bone/Bone.001
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.017/Armature.030/Bone/Bone.001/Bone.001_end
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.017/Armature.030/Bone.002
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.017/Armature.030/Bone.002/Bone.002_end
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.018
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.018/Armature.031
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.018/Armature.031/Bone
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.018/Armature.031/Bone/Bone_end
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.018/Armature.031/Bone/node5.200
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.018/Armature.032
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.018/Armature.032/Bone
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.018/Armature.032/Bone/Bone.001
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.018/Armature.032/Bone/Bone.001/Bone.001_end
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.018/Armature.032/Bone.002
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.018/Armature.032/Bone.002/Bone.002_end
+        weight: 1
+      - path: Catapult_4/BlastShield_4/node5.012
+        weight: 1
+      - path: Catapult_4/BlastShield_4/node5.014
+        weight: 1
+      - path: Catapult_4/BlastShield_4/node5.016
+        weight: 1
+      - path: Catapult_4/BlastShield_4/node5.018
+        weight: 1
+      - path: Catapult_4/BlastShield_4/node5.178
+        weight: 1
+      - path: Catapult_4/BlastShield_4/node5.190
+        weight: 1
+      - path: Catapult_4/BlastShield_4/node5.191
+        weight: 1
+      - path: Catapult_4/BlastShield_4/node5.195
+        weight: 1
+      - path: Catapult_4/BlastShield_4/node5.196
+        weight: 1
+      - path: Catapult_4/BlastShield_4/node5.198
+        weight: 1
+      - path: Catapult_4/BlastShield_4/node5.199
+        weight: 1
+      - path: Catapult_4/BlastShield_4/node5.201
+        weight: 1
+      - path: Catapult_4/BlastShield_4/node5.202
+        weight: 1
+      - path: Catapult_4/Shuttle_4
+        weight: 1
+      - path: Details_0
+        weight: 1
+      - path: Details_1
+        weight: 1
+      - path: Details_3
+        weight: 1
+      - path: Details_4
+        weight: 1
+      - path: Elevator1
+        weight: 1
+      - path: Elevator2
+        weight: 1
+      - path: Elevator3
+        weight: 1
+      - path: FlightDeck
+        weight: 1
+      - path: RadarAntenna
+        weight: 1
+      - path: RadarAntenna/Radar_1
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: Shuttle1
+      takeName: Scene
+      internalID: -8800838248204228948
+      firstFrame: 150
+      lastFrame: 240
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: ArrestorPylons
+        weight: 0
+      - path: ArrestorPylons/AresstingWires
+        weight: 1
+      - path: Catapult_1
+        weight: 0
+      - path: Catapult_1/BlastShield_1
+        weight: 0
+      - path: Catapult_1/BlastShield_1/Empty
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty/Armature.003
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty/Armature.003/Bone
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty/Armature.003/Bone/Bone_end
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty/Armature.003/Bone/node5.002
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty/Armature.009
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty/Armature.009/Bone
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty/Armature.009/Bone/Bone.001
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty/Armature.009/Bone/Bone.001/Bone.001_end
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty/Armature.009/Bone.002
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty/Armature.009/Bone.002/Bone.002_end
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.001
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.001/Armature.001
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.001/Armature.001/Bone
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.001/Armature.001/Bone/Bone_end
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.001/Armature.001/Bone/node5.152
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.001/Armature.002
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.001/Armature.002/Bone
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.001/Armature.002/Bone/Bone.001
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.001/Armature.002/Bone/Bone.001/Bone.001_end
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.001/Armature.002/Bone.002
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.001/Armature.002/Bone.002/Bone.002_end
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.002
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.002/Armature.004
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.002/Armature.004/Bone
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.002/Armature.004/Bone/Bone_end
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.002/Armature.004/Bone/node5.155
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.002/Armature.005
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.002/Armature.005/Bone
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.002/Armature.005/Bone/Bone.001
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.002/Armature.005/Bone/Bone.001/Bone.001_end
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.002/Armature.005/Bone.002
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.002/Armature.005/Bone.002/Bone.002_end
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.003
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.003/Armature.006
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.003/Armature.006/Bone
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.003/Armature.006/Bone/Bone_end
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.003/Armature.006/Bone/node5.158
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.003/Armature.007
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.003/Armature.007/Bone
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.003/Armature.007/Bone/Bone.001
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.003/Armature.007/Bone/Bone.001/Bone.001_end
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.003/Armature.007/Bone.002
+        weight: 1
+      - path: Catapult_1/BlastShield_1/Empty.003/Armature.007/Bone.002/Bone.002_end
+        weight: 1
+      - path: Catapult_1/BlastShield_1/node5.153
+        weight: 1
+      - path: Catapult_1/BlastShield_1/node5.154
+        weight: 1
+      - path: Catapult_1/BlastShield_1/node5.156
+        weight: 1
+      - path: Catapult_1/BlastShield_1/node5.157
+        weight: 1
+      - path: Catapult_1/BlastShield_1/node5.159
+        weight: 1
+      - path: Catapult_1/BlastShield_1/node5.160
+        weight: 1
+      - path: Catapult_1/BlastShield_1/node5.164
+        weight: 1
+      - path: Catapult_1/BlastShield_1/node5.193
+        weight: 1
+      - path: Catapult_1/BlastShield_1/node5.232
+        weight: 1
+      - path: Catapult_1/BlastShield_1/node5.239
+        weight: 1
+      - path: Catapult_1/Shuttle_1
+        weight: 1
+      - path: Catapult_2
+        weight: 0
+      - path: Catapult_2/BlastShield_2
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.005
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.005/Armature.008
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.005/Armature.008/Bone
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.005/Armature.008/Bone/Bone_end
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.005/Armature.008/Bone/node5.161
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.005/Armature.010
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.005/Armature.010/Bone
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.005/Armature.010/Bone/Bone.001
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.005/Armature.010/Bone/Bone.001/Bone.001_end
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.005/Armature.010/Bone.002
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.005/Armature.010/Bone.002/Bone.002_end
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.006
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.006/Armature.011
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.006/Armature.011/Bone
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.006/Armature.011/Bone/Bone_end
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.006/Armature.011/Bone/node5.166
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.006/Armature.012
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.006/Armature.012/Bone
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.006/Armature.012/Bone/Bone.001
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.006/Armature.012/Bone/Bone.001/Bone.001_end
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.006/Armature.012/Bone.002
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.006/Armature.012/Bone.002/Bone.002_end
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.007
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.007/Armature.013
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.007/Armature.013/Bone
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.007/Armature.013/Bone/Bone_end
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.007/Armature.013/Bone/node5.169
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.007/Armature.014
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.007/Armature.014/Bone
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.007/Armature.014/Bone/Bone.001
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.007/Armature.014/Bone/Bone.001/Bone.001_end
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.007/Armature.014/Bone.002
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.007/Armature.014/Bone.002/Bone.002_end
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.008
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.008/Armature.015
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.008/Armature.015/Bone
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.008/Armature.015/Bone/Bone_end
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.008/Armature.015/Bone/node5.172
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.008/Armature.016
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.008/Armature.016/Bone
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.008/Armature.016/Bone/Bone.001
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.008/Armature.016/Bone/Bone.001/Bone.001_end
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.008/Armature.016/Bone.002
+        weight: 1
+      - path: Catapult_2/BlastShield_2/Empty.008/Armature.016/Bone.002/Bone.002_end
+        weight: 1
+      - path: Catapult_2/BlastShield_2/node5.162
+        weight: 1
+      - path: Catapult_2/BlastShield_2/node5.163
+        weight: 1
+      - path: Catapult_2/BlastShield_2/node5.167
+        weight: 1
+      - path: Catapult_2/BlastShield_2/node5.168
+        weight: 1
+      - path: Catapult_2/BlastShield_2/node5.170
+        weight: 1
+      - path: Catapult_2/BlastShield_2/node5.171
+        weight: 1
+      - path: Catapult_2/BlastShield_2/node5.173
+        weight: 1
+      - path: Catapult_2/BlastShield_2/node5.174
+        weight: 1
+      - path: Catapult_2/BlastShield_2/node5.179
+        weight: 1
+      - path: Catapult_2/BlastShield_2/node5.192
+        weight: 1
+      - path: Catapult_2/Shuttle_2
+        weight: 1
+      - path: Catapult_3
+        weight: 0
+      - path: Catapult_3/BlastShield_3
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.010
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.010/Armature.017
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.010/Armature.017/Bone
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.010/Armature.017/Bone/Bone_end
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.010/Armature.017/Bone/node5.175
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.010/Armature.018
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.010/Armature.018/Bone
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.010/Armature.018/Bone/Bone.001
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.010/Armature.018/Bone/Bone.001/Bone.001_end
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.010/Armature.018/Bone.002
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.010/Armature.018/Bone.002/Bone.002_end
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.011
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.011/Armature.019
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.011/Armature.019/Bone
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.011/Armature.019/Bone/Bone_end
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.011/Armature.019/Bone/node5.180
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.011/Armature.020
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.011/Armature.020/Bone
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.011/Armature.020/Bone/Bone.001
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.011/Armature.020/Bone/Bone.001/Bone.001_end
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.011/Armature.020/Bone.002
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.011/Armature.020/Bone.002/Bone.002_end
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.012
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.012/Armature.021
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.012/Armature.021/Bone
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.012/Armature.021/Bone/Bone_end
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.012/Armature.021/Bone/node5.183
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.012/Armature.022
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.012/Armature.022/Bone
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.012/Armature.022/Bone/Bone.001
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.012/Armature.022/Bone/Bone.001/Bone.001_end
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.012/Armature.022/Bone.002
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.012/Armature.022/Bone.002/Bone.002_end
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.013
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.013/Armature.023
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.013/Armature.023/Bone
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.013/Armature.023/Bone/Bone_end
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.013/Armature.023/Bone/node5.186
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.013/Armature.024
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.013/Armature.024/Bone
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.013/Armature.024/Bone/Bone.001
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.013/Armature.024/Bone/Bone.001/Bone.001_end
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.013/Armature.024/Bone.002
+        weight: 1
+      - path: Catapult_3/BlastShield_3/Empty.013/Armature.024/Bone.002/Bone.002_end
+        weight: 1
+      - path: Catapult_3/BlastShield_3/node5.176
+        weight: 1
+      - path: Catapult_3/BlastShield_3/node5.177
+        weight: 1
+      - path: Catapult_3/BlastShield_3/node5.181
+        weight: 1
+      - path: Catapult_3/BlastShield_3/node5.182
+        weight: 1
+      - path: Catapult_3/BlastShield_3/node5.184
+        weight: 1
+      - path: Catapult_3/BlastShield_3/node5.185
+        weight: 1
+      - path: Catapult_3/BlastShield_3/node5.187
+        weight: 1
+      - path: Catapult_3/BlastShield_3/node5.188
+        weight: 1
+      - path: Catapult_3/BlastShield_3/node5.561
+        weight: 1
+      - path: Catapult_3/BlastShield_3/node5.568
+        weight: 1
+      - path: Catapult_3/BlastShield_3/node5.570
+        weight: 1
+      - path: Catapult_3/BlastShield_3/node5.572
+        weight: 1
+      - path: Catapult_3/BlastShield_3/node5.574
+        weight: 1
+      - path: Catapult_3/Shuttle_3
+        weight: 1
+      - path: Catapult_4
+        weight: 0
+      - path: Catapult_4/BlastShield_4
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.015
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.015/Armature.025
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.015/Armature.025/Bone
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.015/Armature.025/Bone/Bone_end
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.015/Armature.025/Bone/node5.189
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.015/Armature.026
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.015/Armature.026/Bone
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.015/Armature.026/Bone/Bone.001
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.015/Armature.026/Bone/Bone.001/Bone.001_end
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.015/Armature.026/Bone.002
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.015/Armature.026/Bone.002/Bone.002_end
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.016
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.016/Armature.027
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.016/Armature.027/Bone
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.016/Armature.027/Bone/Bone_end
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.016/Armature.027/Bone/node5.194
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.016/Armature.028
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.016/Armature.028/Bone
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.016/Armature.028/Bone/Bone.001
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.016/Armature.028/Bone/Bone.001/Bone.001_end
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.016/Armature.028/Bone.002
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.016/Armature.028/Bone.002/Bone.002_end
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.017
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.017/Armature.029
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.017/Armature.029/Bone
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.017/Armature.029/Bone/Bone_end
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.017/Armature.029/Bone/node5.197
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.017/Armature.030
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.017/Armature.030/Bone
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.017/Armature.030/Bone/Bone.001
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.017/Armature.030/Bone/Bone.001/Bone.001_end
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.017/Armature.030/Bone.002
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.017/Armature.030/Bone.002/Bone.002_end
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.018
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.018/Armature.031
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.018/Armature.031/Bone
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.018/Armature.031/Bone/Bone_end
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.018/Armature.031/Bone/node5.200
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.018/Armature.032
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.018/Armature.032/Bone
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.018/Armature.032/Bone/Bone.001
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.018/Armature.032/Bone/Bone.001/Bone.001_end
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.018/Armature.032/Bone.002
+        weight: 1
+      - path: Catapult_4/BlastShield_4/Empty.018/Armature.032/Bone.002/Bone.002_end
+        weight: 1
+      - path: Catapult_4/BlastShield_4/node5.012
+        weight: 1
+      - path: Catapult_4/BlastShield_4/node5.014
+        weight: 1
+      - path: Catapult_4/BlastShield_4/node5.016
+        weight: 1
+      - path: Catapult_4/BlastShield_4/node5.018
+        weight: 1
+      - path: Catapult_4/BlastShield_4/node5.178
+        weight: 1
+      - path: Catapult_4/BlastShield_4/node5.190
+        weight: 1
+      - path: Catapult_4/BlastShield_4/node5.191
+        weight: 1
+      - path: Catapult_4/BlastShield_4/node5.195
+        weight: 1
+      - path: Catapult_4/BlastShield_4/node5.196
+        weight: 1
+      - path: Catapult_4/BlastShield_4/node5.198
+        weight: 1
+      - path: Catapult_4/BlastShield_4/node5.199
+        weight: 1
+      - path: Catapult_4/BlastShield_4/node5.201
+        weight: 1
+      - path: Catapult_4/BlastShield_4/node5.202
+        weight: 1
+      - path: Catapult_4/Shuttle_4
+        weight: 1
+      - path: Details_0
+        weight: 0
+      - path: Details_1
+        weight: 0
+      - path: Details_3
+        weight: 0
+      - path: Details_4
+        weight: 0
+      - path: Elevator1
+        weight: 0
+      - path: Elevator2
+        weight: 0
+      - path: Elevator3
+        weight: 0
+      - path: FlightDeck
+        weight: 0
+      - path: RadarAntenna
+        weight: 0
+      - path: RadarAntenna/Radar_1
+        weight: 1
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 1
+    isReadable: 0
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
+    importVisibility: 1
+    importBlendShapes: 1
+    importCameras: 1
+    importLights: 1
+    nodeNameCollisionStrategy: 1
+    fileIdsGeneration: 2
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    keepQuads: 0
+    weldVertices: 1
+    bakeAxisConversion: 0
+    preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    optimizeBones: 1
+    meshOptimizationFlags: -1
+    indexFormat: 0
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVMarginMethod: 1
+    secondaryUVMinLightmapResolution: 40
+    secondaryUVMinObjectScale: 1
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+    strictVertexDataChecks: 0
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  referencedClips: []
+  importAnimation: 1
+  humanDescription:
+    serializedVersion: 3
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    globalScale: 1
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  autoGenerateAvatarMappingIfUnspecified: 1
+  animationType: 2
+  humanoidOversampling: 1
+  avatarSetup: 1
+  addHumanoidExtraRootOnlyWhenUsingAvatar: 1
+  importBlendShapeDeformPercent: 1
+  remapMaterialsIfMaterialImportModeIsNone: 0
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

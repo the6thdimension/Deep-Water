@@ -1,4 +1,5 @@
-/Assets/FDS Assets/
+# Ignore Unity cache and build files
+/Assets/FDS Assets/Naval Vessels/
 /Library/
 /Temp/
 /Logs/
@@ -8,3 +9,12 @@
 .codegpt
 .git_backup
 /Packages/com.esri.arcgis-maps-sdk/
+
+
+# Ignore user-specific settings
+/UserSettings/
+/*.csproj
+/*.sln
+
+# Track .meta files (important)
+!Assets/**/*.meta

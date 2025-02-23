@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: b1052cd625bd2544da0e157cf9c8e9ea
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 179109
+  packageName: Stream Deck Integration
+  packageVersion: 1.3.0
+  assetPath: Assets/StreamDeckIntegration/com.adamcarballo.unity-integration.streamDeckPlugin
+  uploadId: 633929

@@ -1,0 +1,195 @@
+{
+    "name": "RHMILCOM",
+    "maps": [
+        {
+            "name": "HELOAIR",
+            "id": "39df8b2b-b95d-4740-97f5-1158fe5bd426",
+            "actions": [
+                {
+                    "name": "Throttle Control",
+                    "type": "Button",
+                    "id": "b056f1f0-7856-4b69-a4b3-be83858226b9",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Pitch Yaw Roll",
+                    "type": "Button",
+                    "id": "680983dd-c4b6-4097-bcc0-5bb2fb89d2d5",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Ignition",
+                    "type": "Button",
+                    "id": "cf279b03-abb4-4387-ad7f-31fbecbaeca6",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "RH_HeloThrottle",
+                    "id": "629cc003-58c6-4afd-908b-1305a50088e8",
+                    "path": "1DAxis",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Throttle Control",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "negative",
+                    "id": "e192a7e1-cc38-4cb3-a9c9-4f7ab618db42",
+                    "path": "<Keyboard>/minus",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Throttle Control",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "positive",
+                    "id": "e164ae89-42ea-4971-af7f-37497a3520c7",
+                    "path": "<Keyboard>/equals",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Throttle Control",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "RH_HeloPitchAxis",
+                    "id": "8a185f58-7ed2-4ded-ad41-000344c79556",
+                    "path": "1DAxis",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pitch Yaw Roll",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "negative",
+                    "id": "7b7584bb-0f34-43d0-890b-4b598b4df107",
+                    "path": "<Joystick>/stick/up",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pitch Yaw Roll",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "positive",
+                    "id": "43c51b30-7f15-4d7c-a39e-f309b70378de",
+                    "path": "<Joystick>/stick/down",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pitch Yaw Roll",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "RH_HeloYawAxis",
+                    "id": "fdd19a56-1ca6-4acd-9e0c-1019da469ab4",
+                    "path": "1DAxis",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pitch Yaw Roll",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "negative",
+                    "id": "78d55d1f-eaf5-4ae6-92e8-46a4d77786a9",
+                    "path": "<HID::Logitech Logitech Extreme 3D>/rz",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pitch Yaw Roll",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "positive",
+                    "id": "38174834-70ab-47ee-844b-0e32aa08ea8b",
+                    "path": "<HID::Logitech Logitech Extreme 3D>/rz",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pitch Yaw Roll",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "RH_HeloRollAxis",
+                    "id": "fd682132-e8fa-4b27-b8f0-8a8a8a7bb468",
+                    "path": "1DAxis",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pitch Yaw Roll",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "negative",
+                    "id": "f6a40664-55ff-40fe-aac7-3be9d5a1a0f7",
+                    "path": "<Joystick>/stick/left",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pitch Yaw Roll",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "positive",
+                    "id": "2264b4c1-6361-4256-b25c-8fefc57b39b2",
+                    "path": "<Joystick>/stick/right",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pitch Yaw Roll",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "8c95bdcd-ea24-4919-abfa-ca75f04fc588",
+                    "path": "<HID::Logitech Logitech Extreme 3D>/button7",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Ignition",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "94bfc9e2-f2d2-4fc4-a98d-19e8d6d81d3c",
+                    "path": "<Keyboard>/s",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Ignition",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

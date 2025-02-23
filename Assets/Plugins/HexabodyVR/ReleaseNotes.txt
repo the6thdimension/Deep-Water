@@ -1,0 +1,113 @@
+Version 1.43
+
+Fixed missing pelvis collider physic material
+Fixed hand drift bug
+Fixed hand from offsetting if rig was disabled then re-enabled
+
+Version 1.42
+
+Fix CollisiontDetector using deltaTime instead of fixedDeltatime
+
+Version 1.41
+
+Fixed MoveToPosition not working correctly
+Added Reset player position example for falling through the world with HexaResetZone
+
+Version 1.4
+
+Physics hands updated with experimental (and optional) hand stuck detection. 
+Reworked the logic that checks if additional air crouching is allowed.
+Fixed an issue with grounded angle check that feeds in the slope angle friction curve.
+Pelvis collider will now try to remain above the locoball collider to prevent getting stuck.
+
+HurricaneVR users will need to update to 2.5.1 and re-extract the integration there.
+
+
+
+Version 1.3.3
+
+Completely re-worked the V4 jump system, tests show it's near accurate to hitting the desired jump height
+that is defined in the crouch -> height JumpHeight curve.
+Fixed hand physics tracking when the player is moving in real life.
+Improved hand physics tracking when smooth and snap turning.
+
+
+Version 1.3.2
+
+HexaV4:
+	Tweaked behaviour to auto stand speed when walking / running and not actively crouching. Auto stand will now occur
+	based on the amount of input movement detected.
+	Crouch limits renamed to "RunningCrouchLevel" and "WalkingCrouchLevel" and changed to be % of leg.
+	Added GroundedRadius field to control the sphere cast size that detects whether the player is grounded or not.
+		The default size is reduced to .05f from the full size of the ball to detect only grounded when the bottom of the ball
+		is close to the surface. This will help with the new Air Max Crouch lift that is only available when not grounded.
+
+	
+Version 1.3.1
+
+Fixed an issue where calibrating without the HMD on would lead to a divide by 0 error.
+Added additional checks to determine when the ungrounded max crouch level is allowed.
+
+Version 1.3
+
+V4 Iteration of the HexaBody is now complete. Featuring improvements to locomotion, standing, crouching, and jumping.
+
+Some notable improvements with the new player:
+	-Increased anti roll resistance, helping unwanted movement especially on slopes.
+	-Reworked jump height system using kinematics to solve crouch -> jump height
+	-Optional jump horizontal velocity bonus based on crouch amount.
+	-Slope angle friction curves applied to the locomotion ball.
+	-HMD Detection to keep the player in it's placed position.
+	-Retract / Stomp curves to control ball lift during the jump cycle.
+	-Customizable crouch offset levels
+	-Smooth acceleration with direction acceleration curves to control changing of direction responsiveness.
+	-Vaulting is now easier with customizable max crouch height while not grounded (lift the ball even higher).
+	-Fine control of movement / crouching / standing based on amount the joystick is moved.
+	-Optional height calibration saving to player prefs to assist in debugging cycles.
+
+Version 1.24
+Added SlipperMaterial field and EnableSlippery() / DisableSlipperyMethods()
+When enabled the slippery material will be applied to the locoball, and reset to previous values when disabled.
+
+Version 1.23
+Flattened Camera X rotation before rotating torso in FaceDirection method
+Capped locoball angular velocity when not grounded
+
+Version 1.22
+
+Added CalibrateHeightOnStart option and set to default to false. 
+
+
+Version 1.21
+Fixes:
+The FenderSphere mesh object used for visualizing the body had it's sphere collider left on by accident. The player v3 prefab
+has been updated with it removed, if you unpacked your prefab make sure to remove it as it would affect friction when up against something.
+
+Version 1.2
+
+Fixes:
+Changed the steamvr bindings manifest key to prevent conflicts with the one from hurricanevr
+
+Added MoveToPosition which takes the position that the bottom of the locosphere will land and moves all of the 
+	necessary rigidbodies maintaining their offset from the locoball
+	
+Added FaceDirection which takes a vector and rotates the torso so that the camera faces this direction
+
+HexaBodyPlayer3:
+Add LeftShoulder and RightShoulder transform fields
+Add LeftHandRigidbody and RightHandRigidbody fields
+Added DefaultArmLength field and SetArmLength method that will create joint limits from the shoulder to the hand
+MaxDistance on HexaHands should be updated when calibrating arm length on the hexabody
+v3 prefabs updated with new required fields
+
+HexaHands:
+Add Shoulder transform, if provided will be the anchor for limiting the hand distance by "MaxDistance"
+
+Added steamvr readme for setup
+
+
+Version 1.1
+
+Added SteamVR bindings integration package and updated the input collector to use SteamVR Inputs 
+Install SteamVR from the asset store, unload the package, and Save And Generate the action classes when prompted
+Add HEXA_STEAMVR scripting define symbol to make use of the bindings

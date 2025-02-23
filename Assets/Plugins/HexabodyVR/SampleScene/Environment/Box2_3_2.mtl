@@ -1,0 +1,5 @@
+newmtl HexaYellow
+map_Kd GridBox_Default.png
+Kd 0.8679245 0.6902221 0.1678533
+d 1
+

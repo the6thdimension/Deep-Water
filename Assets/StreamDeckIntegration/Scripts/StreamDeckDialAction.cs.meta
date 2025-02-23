@@ -1,0 +1,10 @@
+fileFormatVersion: 2
+guid: d761cafaaad74e7888738dc4b2dc8068
+timeCreated: 1686142636
+AssetOrigin:
+  serializedVersion: 1
+  productId: 179109
+  packageName: Stream Deck Integration
+  packageVersion: 1.3.0
+  assetPath: Assets/StreamDeckIntegration/Scripts/StreamDeckDialAction.cs
+  uploadId: 633929

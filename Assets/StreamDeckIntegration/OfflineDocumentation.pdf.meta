@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 8abea42ca3aea794fb9b568240393df3
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 179109
+  packageName: Stream Deck Integration
+  packageVersion: 1.3.0
+  assetPath: Assets/StreamDeckIntegration/OfflineDocumentation.pdf
+  uploadId: 633929

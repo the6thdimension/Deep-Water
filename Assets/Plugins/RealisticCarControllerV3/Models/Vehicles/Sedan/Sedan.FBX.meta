@@ -1,0 +1,227 @@
+fileFormatVersion: 2
+guid: 6990e150d24ced3479192332fbd062ee
+ModelImporter:
+  serializedVersion: 19301
+  internalIDToNameTable: []
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Sedan_Black
+    second: {fileID: 2100000, guid: 9f7d2a6202b68d44a8f396e140bc7312, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Sedan_Body
+    second: {fileID: 2100000, guid: 3959a84daac15ed4b816a1c719630ae1, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Sedan_Brakelights
+    second: {fileID: 2100000, guid: 73a4b366f46d5634690dfb055af3bfce, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Sedan_Buttom
+    second: {fileID: 2100000, guid: e7f4713530af4d74680548e4b0e3f775, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Sedan_Carpet
+    second: {fileID: 2100000, guid: 6c3f97e2d86f5a64ba73fb9b0314da6d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Sedan_Chrome
+    second: {fileID: 2100000, guid: 2bd205266f95bec4f9c056d7725ac823, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Sedan_Console
+    second: {fileID: 2100000, guid: c0061892b3e160b4b97d3a04ed81ea57, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Sedan_Dash
+    second: {fileID: 2100000, guid: 67f2ab32abe281d439acbb23bf970f07, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Sedan_DoorButtons
+    second: {fileID: 2100000, guid: 765506bcdc76c224582a357cd5a13629, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Sedan_Engine
+    second: {fileID: 2100000, guid: e02bb8c66c9887b45890cec14c5624db, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Sedan_Leather
+    second: {fileID: 2100000, guid: 8ee44abdb4295af4c91552ef245fbf8d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Sedan_Lights
+    second: {fileID: 2100000, guid: 7e9f1ff95b639534aaaf382ea30b475e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Sedan_Lights_Headlight
+    second: {fileID: 2100000, guid: b5c8bb9306507e94bac6dba20f37df11, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Sedan_Lights_Indicator
+    second: {fileID: 2100000, guid: 31c9f69925f8a3c4995dc8a8652c5acc, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Sedan_Lights_Park
+    second: {fileID: 2100000, guid: e82caa7228a3be94ea536b3d2ca31e2f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Sedan_Radiator
+    second: {fileID: 2100000, guid: fc46f1a5c670dda4ead4b3f446b1a7b9, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Sedan_Rims
+    second: {fileID: 2100000, guid: f1be7eaeef4c7e84289ab790fd8b03af, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Sedan_SteeringWheel
+    second: {fileID: 2100000, guid: 0db49c75bff626545929610b94a5846e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Sedan_Tyre
+    second: {fileID: 2100000, guid: 108f75f5dff11354d9cc8bc74c6f4e8b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Sedan_Windows
+    second: {fileID: 2100000, guid: 54e854b5e2636034fa29888eca63278b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Sedan_Wood
+    second: {fileID: 2100000, guid: c99e1b74c7a22374bba05d982c79101a, type: 2}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Sedan_Black
+    second: {fileID: 2800000, guid: 53957b07be126284cba42b2917949c5b, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Sedan_Carpet
+    second: {fileID: 2800000, guid: b807601c3e44fb94690dc1f25828d8e9, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Sedan_Chrome
+    second: {fileID: 2800000, guid: 111e405d2d9a93d4ca78a761847267b6, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Sedan_Leather
+    second: {fileID: 2800000, guid: 39fcd374d7cd886478853bd024eab5ee, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Sedan_Lights
+    second: {fileID: 2800000, guid: b25df8c86b19372459371dcbf63a49b2, type: 3}
+  materials:
+    materialImportMode: 1
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 3
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 33
+    meshCompression: 0
+    addColliders: 0
+    useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
+    importVisibility: 0
+    importBlendShapes: 1
+    importCameras: 0
+    importLights: 0
+    fileIdsGeneration: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    keepQuads: 0
+    weldVertices: 1
+    preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    meshOptimizationFlags: -1
+    indexFormat: 0
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  referencedClips: []
+  importAnimation: 0
+  humanDescription:
+    serializedVersion: 3
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    globalScale: 33
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+    hasExtraRoot: 1
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  autoGenerateAvatarMappingIfUnspecified: 1
+  animationType: 2
+  humanoidOversampling: 1
+  avatarSetup: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

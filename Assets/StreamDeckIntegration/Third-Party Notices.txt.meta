@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: c2dbea8ff6fb36b499bd82863475ff8e
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 179109
+  packageName: Stream Deck Integration
+  packageVersion: 1.3.0
+  assetPath: Assets/StreamDeckIntegration/Third-Party Notices.txt
+  uploadId: 633929

@@ -80,120 +80,124 @@
     <Compile Include="Assets\Obi\Editor\Common\Blueprints\Properties\BaseTypes\ObiBlueprintFloatProperty.cs" />
     <Compile Include="Assets\Obi\Editor\ObiParticleSelection.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Editor\HVRHandSetup.cs" />
+    <Compile Include="Assets\Obi\Editor\Common\Blueprints\Brushes\BrushModes\ObiFloatAddBrushMode.cs" />
     <Compile Include="Assets\Obi\Editor\Common\ObiSettingsProvider.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Blueprints\Properties\ObiBlueprintColor.cs" />
+    <Compile Include="Assets\HurricaneVR\Framework\Editor\HVRSocketableEditor.cs" />
     <Compile Include="Assets\Scripts\Radar Scripts\Editor\RH_RadarModuleEditor.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Blueprints\Brushes\BrushModes\ObiFloatCopyBrushMode.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Editor\HVRCommentsInspector.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Blueprints\Properties\BaseTypes\ObiBlueprintBoolProperty.cs" />
+    <Compile Include="Assets\Obi\Editor\Common\Blueprints\Properties\BaseTypes\ObiBlueprintIntProperty.cs" />
+    <Compile Include="Assets\Obi\Editor\Common\Blueprints\RenderModes\ObiBlueprintRenderModeDistanceConstraints.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Blueprints\Properties\ObiBlueprintMass.cs" />
+    <Compile Include="Assets\HurricaneVR\Framework\Editor\HVRGunCreator.cs" />
+    <Compile Include="Assets\Obi\Editor\Common\Blueprints\RenderModes\ObiBlueprintRenderMode.cs" />
+    <Compile Include="Assets\RH Utilities\Editor\RH_SceneManagerWindow.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Blueprints\BlueprintEditorTools\ObiBlueprintEditorTool.cs" />
     <Compile Include="Assets\AerialArcade\Code\Scripts\Input\Editor\XboxAirplane_Input_Editor.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Editor\HVRCockingHandleEditor.cs" />
+    <Compile Include="Assets\Obi\Editor\Common\Utils\ObiParticleAttachmentEditor.cs" />
+    <Compile Include="Assets\Obi\Editor\Common\Blueprints\RenderModes\ObiBlueprintRenderModeParticles.cs" />
+    <Compile Include="Assets\RH Testing Suite\Editor\RHTestSuiteWindow.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Blueprints\Properties\BaseTypes\ObiBlueprintMaskProperty.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Editor\HVRSocketableTagsEditor.cs" />
+    <Compile Include="Assets\Obi\Editor\Common\ObiOniInitialize.cs" />
     <Compile Include="Assets\Obi\Editor\RopeAndRod\ObiBoneEditor.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Blueprints\ObiParticleEditorDrawing.cs" />
+    <Compile Include="Assets\Obi\Editor\Common\Utils\BooleanPreference.cs" />
+    <Compile Include="Assets\HurricaneVR\Framework\Editor\HVREditorExtensions.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Rendering\ObiParticleRendererEditor.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Blueprints\Properties\ObiBlueprintFilterCategory.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Utils\ObiEditorUtils.cs" />
     <Compile Include="Assets\Obi\Editor\RopeAndRod\ObiRopeChainRendererEditor.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Blueprints\Brushes\BrushModes\IObiBrushMode.cs" />
+    <Compile Include="Assets\Obi\Editor\RopeAndRod\Blueprints\ObiRopeBaseBlueprintEditor.cs" />
     <Compile Include="Assets\AerialArcade\Code\Scripts\Controller\Editor\AirplaneController_Editor.cs" />
+    <Compile Include="Assets\Scripts\Radar Scripts\Editor\VLSManagerEditor.cs" />
+    <Compile Include="Assets\Obi\Editor\Common\Blueprints\Brushes\BrushModes\ObiColorPaintBrushMode.cs" />
+    <Compile Include="Assets\HurricaneVR\Framework\Editor\HVREditorManager.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Blueprints\Brushes\ObiBrushMirrorSettings.cs" />
+    <Compile Include="Assets\Obi\Editor\Common\Blueprints\Properties\ObiBlueprintRadius.cs" />
+    <Compile Include="Assets\Obi\Editor\Common\Blueprints\Properties\ObiBlueprintFilterMask.cs" />
+    <Compile Include="Assets\Scripts\Missile Scripts\Editor\MissileSuiteEditor.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Blueprints\ObiActorBlueprintEditor.cs" />
+    <Compile Include="Assets\HurricaneVR\Framework\Editor\HVRManagementWindow.cs" />
+    <Compile Include="Assets\HurricaneVR\Framework\Editor\HVRPosableHandEditor.cs" />
+    <Compile Include="Assets\Obi\Editor\Common\Solver\ObiSolverEditor.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Editor\HVRButtonEditor.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Blueprints\RenderModes\ObiBlueprintRenderModeBendConstraints.cs" />
+    <Compile Include="Assets\Obi\Editor\Common\Blueprints\BlueprintEditorTools\ObiTethersTool.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Editor\HVRPhysicsPoserEditor.cs" />
     <Compile Include="Assets\Obi\Editor\RopeAndRod\ObiPathEditor.cs" />
+    <Compile Include="Assets\RH Utilities\Editor\SceneThumbnailGenerator.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Editor\HVRRotationLimiterEditor.cs" />
+    <Compile Include="Assets\Obi\Editor\RopeAndRod\ObiRopeExtrudedRendererEditor.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Editor\HVRPhysicsButtonEditor.cs" />
     <Compile Include="Assets\Obi\Editor\RopeAndRod\ObiDraggableIcon.cs" />
     <Compile Include="Assets\AerialArcade\Code\Scripts\Input\Editor\AIAirplaneEditor.cs" />
+    <Compile Include="Assets\Obi\Editor\RopeAndRod\ObiRopeSectionEditor.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Editor\HVRPhysicsLeverCreatorEditor.cs" />
     <Compile Include="Assets\Obi\Editor\RopeAndRod\ObiPathHandles.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Editor\DefaultEditor.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Collisions\ObiColliderEditor.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Blueprints\RenderModes\ObiBlueprintRenderModeTetherConstraints.cs" />
+    <Compile Include="Assets\Obi\Editor\Common\Blueprints\Properties\IObiPropertyEditableProvider.cs" />
+    <Compile Include="Assets\Obi\Editor\RopeAndRod\ObiRopeMeshRendererEditor.cs" />
+    <Compile Include="Assets\HurricaneVR\Framework\Editor\HVRStabberEditor.cs" />
+    <Compile Include="Assets\RH Utilities\Editor\EditorInputDialog.cs" />
+    <Compile Include="Assets\Obi\Editor\Common\Blueprints\Properties\ObiBlueprintSelected.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Blueprints\Brushes\BrushModes\ObiIntPaintBrushMode.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Blueprints\Brushes\BrushModes\ObiFloatPaintBrushMode.cs" />
+    <Compile Include="Assets\Obi\Editor\Common\Utils\ObiRaycastHit.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Constraints\ObiConstraintParametersDrawer.cs" />
+    <Compile Include="Assets\Obi\Editor\RopeAndRod\IgnoredBoneDrawer.cs" />
+    <Compile Include="Assets\Obi\Editor\RopeAndRod\ObiRodEditor.cs" />
     <Compile Include="Assets\Scripts\FighterJet Scripts\Editor\FlightControllerManagerEditor.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Blueprints\Brushes\BrushModes\ObiFloatSmoothBrushMode.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Blueprints\Properties\BaseTypes\ObiBlueprintProperty.cs" />
+    <Compile Include="Assets\Obi\Editor\Common\Blueprints\Brushes\ObiRaycastBrush.cs" />
     <Compile Include="Assets\AerialArcade\Code\Scripts\Input\Editor\BaseAirplane_Input_Editor.cs" />
     <Compile Include="Assets\Obi\Editor\RopeAndRod\ObiRopeLineRendererEditor.cs" />
+    <Compile Include="Assets\Obi\Editor\Common\Blueprints\RenderModes\ObiBlueprintRenderModeShapeMatchingConstraints.cs" />
+    <Compile Include="Assets\Obi\Editor\RopeAndRod\BonePropertyCurveDrawer.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Blueprints\Brushes\BrushModes\ObiColorSmoothBrushMode.cs" />
     <Compile Include="Assets\Obi\Editor\RopeAndRod\ObiRopeEditor.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Blueprints\BlueprintEditorTools\ObiParticleSelectionEditorTool.cs" />
+    <Compile Include="Assets\Obi\Editor\Common\Blueprints\Brushes\BrushModes\ObiMasterSlavePaintBrushMode.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Blueprints\BlueprintEditorTools\ObiPropertyTextureEditorTool.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Editor\CustomContexts.cs" />
+    <Compile Include="Assets\HurricaneVR\Framework\Editor\HVREditorPreferences.cs" />
+    <Compile Include="Assets\Obi\Editor\Common\Utils\PreviewHelpers.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Blueprints\BlueprintEditorTools\ObiPaintBrushEditorTool.cs" />
+    <Compile Include="Assets\Obi\Editor\RopeAndRod\ObiRopeCursorEditor.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Editor\HVRGunBoltEditor.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Editor\EnumFlagDrawer.cs" />
+    <Compile Include="Assets\Obi\Editor\Common\Blueprints\Brushes\ObiBrushBase.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Blueprints\RenderModes\ObiBlueprintRenderModeAerodynamicConstraints.cs" />
+    <Compile Include="Assets\Obi\Editor\Common\ObiAboutWindow.cs" />
+    <Compile Include="Assets\HurricaneVR\Framework\Editor\HVRSocketableTagDrawer.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Editor\HVRTriggerAnimatorEditor.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Editor\HVRGunPartEditor.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Blueprints\ObiMeshUtils.cs" />
+    <Compile Include="Assets\HurricaneVR\Framework\Editor\LayerMaskDrawer.cs" />
+    <Compile Include="Assets\HurricaneVR\Framework\Editor\DrawIfPropertyDrawer.cs" />
     <Compile Include="Assets\StreamDeckIntegration\Demo\Editor\StreamDeckStaticExample.cs" />
+    <Compile Include="Assets\Obi\Editor\Common\Blueprints\RenderModes\ObiBlueprintRenderModeMesh.cs" />
     <Compile Include="Assets\AerialArcade\Code\Editor\AirplaneMenus.cs" />
+    <Compile Include="Assets\Obi\Editor\ObiStitcherEditor.cs" />
+    <Compile Include="Assets\Obi\Editor\Common\Blueprints\ObiMeshBasedActorBlueprintEditor.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Collisions\ObiDistanceFieldEditor.cs" />
+    <Compile Include="Assets\Obi\Editor\Common\Blueprints\Brushes\BrushModes\ObiSelectBrushMode.cs" />
+    <Compile Include="Assets\Obi\Editor\Common\Blueprints\Properties\BaseTypes\ObiBlueprintColorProperty.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Editor\HVRSocketableTagDropDown.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Editor\HVRPhysicsDialEditor.cs" />
     <Compile Include="Assets\Obi\Editor\Common\ObiEditorSettings.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Editor\HVRSetupWindow.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Editor\EmbeddedAssetEditor.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Editor\HVRPhysicsDrawerEditor.cs" />
-    <Compile Include="Assets\HurricaneVR\Framework\Editor\HVRHandPoserEditor.cs" />
-    <Compile Include="Assets\Obi\Editor\Common\Blueprints\Brushes\BrushModes\ObiFloatAddBrushMode.cs" />
-    <Compile Include="Assets\HurricaneVR\Framework\Editor\HVRSocketableEditor.cs" />
-    <Compile Include="Assets\Obi\Editor\Common\Blueprints\Properties\BaseTypes\ObiBlueprintIntProperty.cs" />
-    <Compile Include="Assets\Obi\Editor\Common\Blueprints\RenderModes\ObiBlueprintRenderModeDistanceConstraints.cs" />
-    <Compile Include="Assets\HurricaneVR\Framework\Editor\HVRGunCreator.cs" />
-    <Compile Include="Assets\Obi\Editor\Common\Blueprints\RenderModes\ObiBlueprintRenderMode.cs" />
-    <Compile Include="Assets\Obi\Editor\Common\Utils\ObiParticleAttachmentEditor.cs" />
-    <Compile Include="Assets\Obi\Editor\Common\Blueprints\RenderModes\ObiBlueprintRenderModeParticles.cs" />
-    <Compile Include="Assets\Obi\Editor\Common\ObiOniInitialize.cs" />
-    <Compile Include="Assets\Obi\Editor\Common\Utils\BooleanPreference.cs" />
-    <Compile Include="Assets\HurricaneVR\Framework\Editor\HVREditorExtensions.cs" />
-    <Compile Include="Assets\Obi\Editor\RopeAndRod\Blueprints\ObiRopeBaseBlueprintEditor.cs" />
-    <Compile Include="Assets\Scripts\Radar Scripts\Editor\VLSManagerEditor.cs" />
-    <Compile Include="Assets\Obi\Editor\Common\Blueprints\Brushes\BrushModes\ObiColorPaintBrushMode.cs" />
-    <Compile Include="Assets\HurricaneVR\Framework\Editor\HVREditorManager.cs" />
-    <Compile Include="Assets\Obi\Editor\Common\Blueprints\Properties\ObiBlueprintRadius.cs" />
-    <Compile Include="Assets\Obi\Editor\Common\Blueprints\Properties\ObiBlueprintFilterMask.cs" />
-    <Compile Include="Assets\Scripts\Missile Scripts\Editor\MissileSuiteEditor.cs" />
-    <Compile Include="Assets\HurricaneVR\Framework\Editor\HVRManagementWindow.cs" />
-    <Compile Include="Assets\HurricaneVR\Framework\Editor\HVRPosableHandEditor.cs" />
-    <Compile Include="Assets\Obi\Editor\Common\Solver\ObiSolverEditor.cs" />
-    <Compile Include="Assets\Obi\Editor\Common\Blueprints\BlueprintEditorTools\ObiTethersTool.cs" />
-    <Compile Include="Assets\Obi\Editor\RopeAndRod\ObiRopeExtrudedRendererEditor.cs" />
-    <Compile Include="Assets\Obi\Editor\RopeAndRod\ObiRopeSectionEditor.cs" />
-    <Compile Include="Assets\Obi\Editor\Common\Blueprints\Properties\IObiPropertyEditableProvider.cs" />
-    <Compile Include="Assets\Obi\Editor\RopeAndRod\ObiRopeMeshRendererEditor.cs" />
-    <Compile Include="Assets\HurricaneVR\Framework\Editor\HVRStabberEditor.cs" />
-    <Compile Include="Assets\Obi\Editor\Common\Blueprints\Properties\ObiBlueprintSelected.cs" />
-    <Compile Include="Assets\Obi\Editor\Common\Utils\ObiRaycastHit.cs" />
-    <Compile Include="Assets\Obi\Editor\RopeAndRod\IgnoredBoneDrawer.cs" />
-    <Compile Include="Assets\Obi\Editor\RopeAndRod\ObiRodEditor.cs" />
-    <Compile Include="Assets\Obi\Editor\Common\Blueprints\Brushes\ObiRaycastBrush.cs" />
-    <Compile Include="Assets\Obi\Editor\Common\Blueprints\RenderModes\ObiBlueprintRenderModeShapeMatchingConstraints.cs" />
-    <Compile Include="Assets\Obi\Editor\RopeAndRod\BonePropertyCurveDrawer.cs" />
-    <Compile Include="Assets\Obi\Editor\Common\Blueprints\Brushes\BrushModes\ObiMasterSlavePaintBrushMode.cs" />
-    <Compile Include="Assets\HurricaneVR\Framework\Editor\HVREditorPreferences.cs" />
-    <Compile Include="Assets\Obi\Editor\Common\Utils\PreviewHelpers.cs" />
-    <Compile Include="Assets\Obi\Editor\RopeAndRod\ObiRopeCursorEditor.cs" />
-    <Compile Include="Assets\Obi\Editor\Common\Blueprints\Brushes\ObiBrushBase.cs" />
-    <Compile Include="Assets\Obi\Editor\Common\ObiAboutWindow.cs" />
-    <Compile Include="Assets\HurricaneVR\Framework\Editor\HVRSocketableTagDrawer.cs" />
-    <Compile Include="Assets\HurricaneVR\Framework\Editor\LayerMaskDrawer.cs" />
-    <Compile Include="Assets\HurricaneVR\Framework\Editor\DrawIfPropertyDrawer.cs" />
-    <Compile Include="Assets\Obi\Editor\Common\Blueprints\RenderModes\ObiBlueprintRenderModeMesh.cs" />
-    <Compile Include="Assets\Obi\Editor\ObiStitcherEditor.cs" />
-    <Compile Include="Assets\Obi\Editor\Common\Blueprints\ObiMeshBasedActorBlueprintEditor.cs" />
-    <Compile Include="Assets\Obi\Editor\Common\Blueprints\Brushes\BrushModes\ObiSelectBrushMode.cs" />
-    <Compile Include="Assets\Obi\Editor\Common\Blueprints\Properties\BaseTypes\ObiBlueprintColorProperty.cs" />
     <Compile Include="Assets\Obi\Editor\RopeAndRod\ObiPathSmootherEditor.cs" />
+    <Compile Include="Assets\HurricaneVR\Framework\Editor\HVRHandPoserEditor.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Editor\EmbeddedAssetDrawer.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Blueprints\Brushes\ObiScreenSpaceBrush.cs" />
   </ItemGroup>
@@ -1349,38 +1353,6 @@
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.0.31f1\Editor\Data\UnityReferenceAssemblies\unity-4.8-api\Facades\System.Xml.XPath.XDocument.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Unity.ShaderGraph.Editor">
-      <HintPath>Library\ScriptAssemblies\Unity.ShaderGraph.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.RenderPipelines.Core.ShaderLibrary">
-      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Core.ShaderLibrary.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.RenderPipelines.GPUDriven.Runtime">
-      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.GPUDriven.Runtime.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.RenderPipelines.HighDefinition.Editor">
-      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.HighDefinition.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.VisualEffectGraph.Editor">
-      <HintPath>Library\ScriptAssemblies\Unity.VisualEffectGraph.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary">
-      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.TextMeshPro">
-      <HintPath>Library\ScriptAssemblies\Unity.TextMeshPro.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.RenderPipelines.Core.Runtime">
-      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Core.Runtime.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="UnityEditor.UI">
       <HintPath>Library\ScriptAssemblies\UnityEditor.UI.dll</HintPath>
       <Private>False</Private>
@@ -1393,6 +1365,10 @@
       <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Core.Runtime.Shared.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Unity.ShaderGraph.Editor">
+      <HintPath>Library\ScriptAssemblies\Unity.ShaderGraph.Editor.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Unity.RenderPipelines.Core.Editor.Shared">
       <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Core.Editor.Shared.dll</HintPath>
       <Private>False</Private>
@@ -1401,12 +1377,36 @@
       <HintPath>Library\ScriptAssemblies\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Unity.RenderPipelines.Core.ShaderLibrary">
+      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Core.ShaderLibrary.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.RenderPipelines.GPUDriven.Runtime">
+      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.GPUDriven.Runtime.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Unity.Rendering.LightTransport.Editor">
       <HintPath>Library\ScriptAssemblies\Unity.Rendering.LightTransport.Editor.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Unity.RenderPipelines.HighDefinition.Editor">
+      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.HighDefinition.Editor.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Unity.VisualEffectGraph.Runtime">
       <HintPath>Library\ScriptAssemblies\Unity.VisualEffectGraph.Runtime.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.VisualEffectGraph.Editor">
+      <HintPath>Library\ScriptAssemblies\Unity.VisualEffectGraph.Editor.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary">
+      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>Library\ScriptAssemblies\Unity.TextMeshPro.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.RenderPipelines.HighDefinition.Runtime">
@@ -1425,6 +1425,10 @@
       <HintPath>Library\ScriptAssemblies\Unity.Rendering.LightTransport.Runtime.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Unity.RenderPipelines.Core.Runtime">
+      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Core.Runtime.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Assembly-CSharp-firstpass.csproj" />
@@ -1432,72 +1436,72 @@
     <ProjectReference Include="Assembly-CSharp-Editor-firstpass.csproj" />
     <ProjectReference Include="UnityEngine.TestRunner.csproj" />
     <ProjectReference Include="UnityEditor.TestRunner.csproj" />
-    <ProjectReference Include="Micosmo.SensorToolkit.Editor.csproj" />
-    <ProjectReference Include="Unity.AI.Navigation.csproj" />
-    <ProjectReference Include="NWH.NRigidbody.csproj" />
-    <ProjectReference Include="Unity.InputSystem.Recorder.csproj" />
-    <ProjectReference Include="Unity.Timeline.csproj" />
-    <ProjectReference Include="Unity.TestTools.CodeCoverage.Editor.csproj" />
-    <ProjectReference Include="NWH.Common.csproj" />
-    <ProjectReference Include="Unity.Performance.Profile-Analyzer.Editor.csproj" />
-    <ProjectReference Include="Unity.Serialization.csproj" />
-    <ProjectReference Include="Unity.VisualScripting.Core.csproj" />
-    <ProjectReference Include="Unity.Serialization.Editor.csproj" />
-    <ProjectReference Include="Unity.Collections.Editor.csproj" />
-    <ProjectReference Include="CesiumEditor.csproj" />
-    <ProjectReference Include="Unity.Profiling.Core.csproj" />
-    <ProjectReference Include="Unity.VisualScripting.Shared.Editor.csproj" />
-    <ProjectReference Include="Unity.VisualScripting.Core.Editor.csproj" />
-    <ProjectReference Include="F10.StreamDeckIntegration.csproj" />
-    <ProjectReference Include="Unity.AI.Navigation.Updater.csproj" />
-    <ProjectReference Include="Unity.Mathematics.Extensions.csproj" />
-    <ProjectReference Include="Micosmo.SensorToolkit.csproj" />
-    <ProjectReference Include="Unity.Entities.Build.csproj" />
-    <ProjectReference Include="Unity.Postprocessing.Editor.csproj" />
-    <ProjectReference Include="FR2.csproj" />
-    <ProjectReference Include="Unity.PlasticSCM.Editor.csproj" />
-    <ProjectReference Include="Unity.VisualScripting.SettingsProvider.Editor.csproj" />
-    <ProjectReference Include="Unity.Deformations.csproj" />
-    <ProjectReference Include="Unity.VisualScripting.State.csproj" />
-    <ProjectReference Include="Unity.AI.Navigation.Editor.ConversionSystem.csproj" />
-    <ProjectReference Include="Unity.Mathematics.Extensions.Hybrid.csproj" />
-    <ProjectReference Include="CesiumRuntime.csproj" />
-    <ProjectReference Include="Unity.Scenes.Editor.csproj" />
-    <ProjectReference Include="Unity.Entities.Editor.Properties.csproj" />
-    <ProjectReference Include="Unity.VisualScripting.Flow.csproj" />
-    <ProjectReference Include="NWH.WheelController.csproj" />
     <ProjectReference Include="com.unity.cinemachine.editor.csproj" />
+    <ProjectReference Include="Micosmo.SensorToolkit.Editor.csproj" />
     <ProjectReference Include="Unity.InputSystem.ForUI.csproj" />
     <ProjectReference Include="Unity.Searcher.Editor.csproj" />
+    <ProjectReference Include="Unity.AI.Navigation.csproj" />
     <ProjectReference Include="Unity.Rider.Editor.csproj" />
     <ProjectReference Include="Unity.Transforms.Hybrid.csproj" />
+    <ProjectReference Include="Unity.InputSystem.Recorder.csproj" />
+    <ProjectReference Include="NWH.NRigidbody.csproj" />
     <ProjectReference Include="Unity.Timeline.Editor.csproj" />
+    <ProjectReference Include="Unity.Timeline.csproj" />
     <ProjectReference Include="Unity.TestTools.CodeCoverage.Editor.OpenCover.Model.csproj" />
     <ProjectReference Include="Unity.Entities.UI.Editor.csproj" />
+    <ProjectReference Include="Unity.TestTools.CodeCoverage.Editor.csproj" />
+    <ProjectReference Include="NWH.Common.csproj" />
     <ProjectReference Include="Unity.ScriptableBuildPipeline.Editor.csproj" />
     <ProjectReference Include="Unity.Mathematics.Editor.csproj" />
+    <ProjectReference Include="Unity.Performance.Profile-Analyzer.Editor.csproj" />
     <ProjectReference Include="Unity.ScriptableBuildPipeline.csproj" />
     <ProjectReference Include="Unity.Collections.csproj" />
     <ProjectReference Include="Unity.InputSystem.InGameHints.csproj" />
     <ProjectReference Include="F10.StreamDeckIntegration.Editor.csproj" />
+    <ProjectReference Include="Unity.Serialization.csproj" />
+    <ProjectReference Include="Unity.VisualScripting.Core.csproj" />
+    <ProjectReference Include="Unity.Serialization.Editor.csproj" />
+    <ProjectReference Include="Unity.Collections.Editor.csproj" />
     <ProjectReference Include="Unity.Entities.Hybrid.csproj" />
+    <ProjectReference Include="Unity.Profiling.Core.csproj" />
+    <ProjectReference Include="Unity.VisualScripting.Shared.Editor.csproj" />
+    <ProjectReference Include="Unity.VisualScripting.Core.Editor.csproj" />
+    <ProjectReference Include="Unity.AI.Navigation.Updater.csproj" />
+    <ProjectReference Include="Unity.Mathematics.Extensions.csproj" />
+    <ProjectReference Include="Micosmo.SensorToolkit.csproj" />
+    <ProjectReference Include="CesiumEditor.csproj" />
+    <ProjectReference Include="Unity.Entities.Build.csproj" />
     <ProjectReference Include="Unity.TestTools.CodeCoverage.Editor.OpenCover.Mono.Reflection.csproj" />
+    <ProjectReference Include="F10.StreamDeckIntegration.csproj" />
     <ProjectReference Include="Unity.VisualScripting.Flow.Editor.csproj" />
     <ProjectReference Include="Unity.Transforms.csproj" />
+    <ProjectReference Include="Unity.Postprocessing.Editor.csproj" />
+    <ProjectReference Include="FR2.csproj" />
     <ProjectReference Include="Unity.Scenes.csproj" />
     <ProjectReference Include="Unity.EditorCoroutines.Editor.csproj" />
+    <ProjectReference Include="Unity.PlasticSCM.Editor.csproj" />
+    <ProjectReference Include="Unity.VisualScripting.SettingsProvider.Editor.csproj" />
     <ProjectReference Include="Unity.VisualScripting.State.Editor.csproj" />
     <ProjectReference Include="Unity.AI.Navigation.Editor.csproj" />
     <ProjectReference Include="Cinemachine.csproj" />
     <ProjectReference Include="Unity.Mathematics.csproj" />
+    <ProjectReference Include="Unity.Deformations.csproj" />
+    <ProjectReference Include="Unity.VisualScripting.State.csproj" />
     <ProjectReference Include="Unity.Postprocessing.Runtime.csproj" />
+    <ProjectReference Include="Unity.AI.Navigation.Editor.ConversionSystem.csproj" />
     <ProjectReference Include="Unity.Burst.Editor.csproj" />
     <ProjectReference Include="Unity.Entities.Hybrid.HybridComponents.csproj" />
+    <ProjectReference Include="Unity.Mathematics.Extensions.Hybrid.csproj" />
+    <ProjectReference Include="CesiumRuntime.csproj" />
     <ProjectReference Include="Unity.Burst.csproj" />
-    <ProjectReference Include="Unity.VisualStudio.Editor.csproj" />
+    <ProjectReference Include="Unity.Scenes.Editor.csproj" />
     <ProjectReference Include="InputSystem.Samples.Visualizers.csproj" />
+    <ProjectReference Include="Unity.Entities.Editor.Properties.csproj" />
     <ProjectReference Include="Unity.Entities.UI.csproj" />
+    <ProjectReference Include="Unity.VisualStudio.Editor.csproj" />
     <ProjectReference Include="Unity.Entities.csproj" />
+    <ProjectReference Include="Unity.VisualScripting.Flow.csproj" />
+    <ProjectReference Include="NWH.WheelController.csproj" />
     <ProjectReference Include="Unity.InputSystem.csproj" />
     <ProjectReference Include="Unity.Entities.Editor.csproj" />
   </ItemGroup>

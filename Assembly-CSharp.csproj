@@ -284,6 +284,7 @@
     <Compile Include="Assets\Obi\Scripts\Common\Backends\Interface\Constraints\IConstraintsBatchImpl.cs" />
     <Compile Include="Assets\Obi\Scripts\Common\Backends\Burst\Constraints\Pin\BurstPinConstraintsBatch.cs" />
     <Compile Include="Assets\Obi\Scripts\Common\Blueprints\Constraints\Batches\ObiChainConstraintsBatch.cs" />
+    <Compile Include="Assets\RH Radar Suite\LOD\PassiveDetectionModule.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Scripts\Components\HVRGrabbableImpactHaptics.cs" />
     <Compile Include="Assets\Obi\Scripts\Common\Backends\Oni\Constraints\StretchShear\OniStretchShearConstraintsBatchImpl.cs" />
     <Compile Include="Assets\Obi\Scripts\Common\Backends\Burst\Constraints\Pin\BurstPinConstraints.cs" />
@@ -311,6 +312,7 @@
     <Compile Include="Assets\Obi\Scripts\Common\DataStructures\NativeList\ObiNativeList.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Scripts\Core\Bags\HVRForceGrabberBag.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Scripts\ControllerInput\InputEvents\HVRGripButtonEvents.cs" />
+    <Compile Include="Assets\RH Radar Suite\LOD\BasicRadarModule.cs" />
     <Compile Include="Assets\Scripts\Aircraft_Handlers\FixedWing_Handlers\Editors\FixedWingController_Editor.cs" />
     <Compile Include="Assets\AerialArcade\Code\Scripts\Audio\AirplaneAudio.cs" />
     <Compile Include="Assets\Obi\Scripts\Common\Backends\Oni\Constraints\Distance\OniDistanceConstraintsImpl.cs" />
@@ -394,6 +396,7 @@
     <Compile Include="Assets\Obi\Scripts\Common\Collisions\ObiHeightFieldContainer.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Scripts\Core\Sockets\HVRSocketContainer.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Scripts\Core\Sockets\HVRSocketable.cs" />
+    <Compile Include="Assets\RH Radar Suite\LOD\ThreeDTrackingModule.cs" />
     <Compile Include="Assets\Obi\Scripts\Common\Backends\Null\NullSolverImpl.cs" />
     <Compile Include="Assets\AerialArcade\Code\Scripts\Input\AIAirplaneController.cs" />
     <Compile Include="Assets\AerialArcade\Code\Scripts\Characteristics\Airplane_Characteristics.cs" />
@@ -407,11 +410,13 @@
     <Compile Include="Assets\HurricaneVR\Framework\Scripts\Components\HVRDamageHandlerBase.cs" />
     <Compile Include="Assets\Obi\Scripts\Common\Backends\Burst\Solver\UpdateVelocitiesJob.cs" />
     <Compile Include="Assets\Obi\Scripts\RopeAndRod\DataStructures\Path\DataChannels\ObiThicknessDataChannel.cs" />
+    <Compile Include="Assets\RH Radar Suite\Core\RadarContact.cs" />
     <Compile Include="Assets\Obi\Scripts\Common\Rendering\ObiParticleRenderer.cs" />
     <Compile Include="Assets\Obi\Samples\RopeAndRod\SampleResources\Scripts\RopeTenser.cs" />
     <Compile Include="Assets\Obi\Scripts\Common\Backends\Oni\Constraints\Tether\OniTetherConstraintsBatchImpl.cs" />
     <Compile Include="Assets\Obi\Scripts\Common\DataStructures\Voxelization\MeshVoxelizer.cs" />
     <Compile Include="Assets\Obi\Scripts\RopeAndRod\Blueprints\ObiRodBlueprint.cs" />
+    <Compile Include="Assets\RH Radar Suite\Core\IRadarLODModule.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Scripts\Core\Player\HVRJointHand.cs" />
     <Compile Include="Assets\Scripts\Aircraft_Handlers\FixedWing_Handlers\TaxiAI\Scripts\CarDriver.cs" />
     <Compile Include="Assets\Samples\Input System\1.11.2\Simple Demo\SimpleControls.cs" />
@@ -439,6 +444,7 @@
     <Compile Include="Assets\HurricaneVR\Framework\Scripts\Weapons\Guns\HVRGunPart.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Scripts\Core\Sockets\HVREnumSocketFilter.cs" />
     <Compile Include="Assets\Obi\Scripts\Common\Backends\Burst\DataStructures\BurstAabb.cs" />
+    <Compile Include="Assets\RH Radar Suite\LOD\HighFidelityModule.cs" />
     <Compile Include="Assets\HurricaneVR\TechDemo\Scripts\DemoFullStabConfetti.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Scripts\Components\HVRDestructible.cs" />
     <Compile Include="Assets\Obi\Scripts\Common\Collisions\ObiRigidbody2D.cs" />
@@ -503,6 +509,7 @@
     <Compile Include="Assets\Obi\Scripts\Common\Utils\Forces\ObiAmbientForceZone.cs" />
     <Compile Include="Assets\Obi\Scripts\Common\Backends\Burst\Constraints\ColliderCollision\BurstColliderFrictionConstraints.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Scripts\Core\HVRGrabberManager.cs" />
+    <Compile Include="Assets\RH Radar Suite\LOD\DopplerRadarModule.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Scripts\Core\Utils\EmbeddedAttribute.cs" />
     <Compile Include="Assets\AerialArcade\Code\Scripts\Avionics.cs" />
     <Compile Include="Assets\Obi\Scripts\Common\Backends\Interface\Constraints\IPinConstraintsBatchImpl.cs" />
@@ -578,6 +585,7 @@
     <Compile Include="Assets\HurricaneVR\Framework\Scripts\Core\HandPoser\Data\HVRRuntimePosesData.cs" />
     <Compile Include="Assets\Obi\Scripts\Common\Backends\Burst\Constraints\ColliderCollision\ApplyCollisionConstraintsJob.cs" />
     <Compile Include="Assets\SensorToolkit\Integrations\PlayMaker\Actions\SensorGetLineOfSightResult.cs" />
+    <Compile Include="Assets\RH Radar Suite\Core\RadarSignature.cs" />
     <Compile Include="Assets\RH Testing Suite\Examples\ExampleModelTest.cs" />
     <Compile Include="Assets\Obi\Scripts\Common\DataStructures\ParticlePair.cs" />
     <Compile Include="Assets\Obi\Scripts\Common\Collisions\ColliderTrackers\Trackers2D\ObiEdgeShapeTracker2D.cs" />
@@ -658,6 +666,7 @@
     <Compile Include="Assets\Obi\Scripts\RopeAndRod\DataStructures\Path\Interpolators\ObiColorInterpolator3D.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Scripts\Components\HVRClimbable.cs" />
     <Compile Include="Assets\Obi\Scripts\Common\DataStructures\NativeList\ObiNativeQueryResultList.cs" />
+    <Compile Include="Assets\RH Radar Suite\Core\RadarSuiteController.cs" />
     <Compile Include="Assets\Obi\Scripts\Common\Utils\Attributes\SerializeProperty.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Scripts\Shared\HVRInputSettings.cs" />
     <Compile Include="Assets\SensorToolkit\Integrations\PlayMaker\Actions\SensorToolkitAction.cs" />
@@ -737,6 +746,7 @@
     <Compile Include="Assets\HurricaneVR\Framework\Scripts\Components\HVRDestroyListener.cs" />
     <Compile Include="Assets\Obi\Scripts\Common\Utils\Coroutines\EditorCoroutine.cs" />
     <Compile Include="Assets\Obi\Scripts\Common\DataStructures\SimplexCounts.cs" />
+    <Compile Include="Assets\RH Radar Suite\Utils\RadarVisualizer.cs" />
     <Compile Include="Assets\Scripts\Aircraft_Handlers\FixedWing_Handlers\TaxiAI\Mouse3D.cs" />
     <Compile Include="Assets\Obi\Scripts\Common\Backends\Burst\Constraints\Density\BurstDensityConstraintsBatch.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Scripts\Components\HVRControllerOffset.cs" />

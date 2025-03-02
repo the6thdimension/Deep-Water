@@ -146,6 +146,7 @@
     <Compile Include="Assets\Obi\Editor\RopeAndRod\ObiRopeMeshRendererEditor.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Editor\HVRStabberEditor.cs" />
     <Compile Include="Assets\RH Utilities\Editor\EditorInputDialog.cs" />
+    <Compile Include="Assets\RH Radar Suite\Editor\RadarSuiteControllerEditor.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Blueprints\Properties\ObiBlueprintSelected.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Blueprints\Brushes\BrushModes\ObiIntPaintBrushMode.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Blueprints\Brushes\BrushModes\ObiFloatPaintBrushMode.cs" />

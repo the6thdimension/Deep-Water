@@ -629,7 +629,6 @@
     <Compile Include="Assets\Obi\Scripts\Common\Backends\Burst\Constraints\Aerodynamics\BurstAerodynamicConstraintsBatch.cs" />
     <Compile Include="Assets\Obi\Samples\RopeAndRod\SampleResources\Scripts\RopeSweepCut.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Scripts\Core\Utils\HVRJointUtilities.cs" />
-    <Compile Include="Assets\FDS Assets\Naval Vessels\CVN-78\Scripts\Carrier Controller\CarrierController.cs" />
     <Compile Include="Assets\Obi\Scripts\Common\Blueprints\Constraints\Batches\ObiDistanceConstraintsBatch.cs" />
     <Compile Include="Assets\AerialArcade\Code\Scripts\hudInfo.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Scripts\Components\HVRParentOnStart.cs" />
@@ -800,6 +799,7 @@
     <Compile Include="Assets\HurricaneVR\Framework\Scripts\Components\HVRRingHighlight.cs" />
     <Compile Include="Assets\Obi\Scripts\Common\DataStructures\NativeList\ObiNativeBIHNodeList.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Scripts\Components\HVRMeshRendererHighlight.cs" />
+    <Compile Include="Assets\_Archive\Carrier_legacy\Carrier Controller\CarrierController.cs" />
     <Compile Include="Assets\Obi\Scripts\Common\Backends\Burst\Solver\PredictPositionsJob.cs" />
     <Compile Include="Assets\Samples\Input System\1.11.2\Custom Device\CustomDevice.cs" />
     <Compile Include="Assets\Scripts\Aircraft_Handlers\MouseFlight\Scripts\Waypoint.cs" />
@@ -844,6 +844,7 @@
     <Compile Include="Assets\Obi\Scripts\Common\DataStructures\NativeList\ObiNativeDistanceFieldHeaderList.cs" />
     <Compile Include="Assets\Obi\Samples\RopeAndRod\SampleResources\Scripts\CursorController.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Scripts\Components\HVRPhysicsButton.cs" />
+    <Compile Include="Assets\_Archive\Carrier_legacy\Carrier Controller\CarrierEditor.cs" />
     <Compile Include="Assets\Obi\Scripts\Common\Rendering\ParticleImpostorRendering.cs" />
     <Compile Include="Assets\Obi\Scripts\Common\DataStructures\NativeList\ObiNativeRigidbodyList.cs" />
     <Compile Include="Assets\Obi\Scripts\Common\Actors\IObiParticleCollection.cs" />
@@ -857,7 +858,6 @@
     <Compile Include="Assets\HurricaneVR\Framework\Scripts\Components\HVRPhysicsDrawer.cs" />
     <Compile Include="Assets\Obi\Scripts\RopeAndRod\DataStructures\Path\DataChannels\ObiPointsDataChannel.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Scripts\Core\HandPoser\HVRHandAnimator.cs" />
-    <Compile Include="Assets\FDS Assets\Naval Vessels\CVN-78\Scripts\Carrier Controller\CarrierEditor.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Obi\Resources\ObiMaterials\ParticleShader.shader" />

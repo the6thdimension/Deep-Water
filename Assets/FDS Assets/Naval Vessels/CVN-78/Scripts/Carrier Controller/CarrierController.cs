@@ -102,6 +102,14 @@ public class CarrierController : MonoBehaviour
     //Hangar
     public GameObject FA18E;
 
+    // Animator parameter hashes — cached once. Using StringToHash gives compile-time-equivalent
+    // safety: typos collapse to a single source-of-truth here, and Unity skips the hash lookup
+    // at call time. Replaces the previous string-based SetTrigger("Raise"/"Lower"/"Launch")
+    // which had no protection against renames in the AnimatorController.
+    private static readonly int Anim_Raise  = Animator.StringToHash("Raise");
+    private static readonly int Anim_Lower  = Animator.StringToHash("Lower");
+    private static readonly int Anim_Launch = Animator.StringToHash("Launch");
+
 
     // Start is called before the first frame update
     void Start()
@@ -171,28 +179,24 @@ public class CarrierController : MonoBehaviour
     public void RaiseBackBlast(GameObject cat)
     {
         Animator catAnim = cat.GetComponent<Animator>();
-
-        catAnim.SetTrigger("Raise");
+        if (catAnim == null) return;
+        catAnim.SetTrigger(Anim_Raise);
     }
 
     public void LowerBackBlast(GameObject cat)
     {
         Animator catAnim = cat.GetComponent<Animator>();
-
-        catAnim.SetTrigger("Lower");
+        if (catAnim == null) return;
+        catAnim.SetTrigger(Anim_Lower);
     }
 
     public void LaunchCat(GameObject shuttle)
     {
         Animator shutAnim = shuttle.GetComponent<Animator>();
-
-
-        shutAnim.SetTrigger("Launch");
-
+        if (shutAnim == null) return;
+        shutAnim.SetTrigger(Anim_Launch);
 
         StartCoroutine(shuttleRelease(Aircraft1));
-       
-        
     }
     
     IEnumerator shuttleRelease(GameObject Aircraft1)

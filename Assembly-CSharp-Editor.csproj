@@ -170,6 +170,7 @@
     <Compile Include="Assets\Obi\Editor\Common\Blueprints\Properties\BaseTypes\ObiBlueprintIntProperty.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Blueprints\RenderModes\ObiBlueprintRenderModeDistanceConstraints.cs" />
     <Compile Include="Assets\HurricaneVR\Framework\Editor\HVRGunCreator.cs" />
+    <Compile Include="Assets\_SCENES\Editor\CVN78SceneCleanup.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Blueprints\RenderModes\ObiBlueprintRenderMode.cs" />
     <Compile Include="Assets\RH Utilities\Editor\RH_SceneManagerWindow.cs" />
     <Compile Include="Assets\Obi\Editor\Common\Utils\ObiParticleAttachmentEditor.cs" />

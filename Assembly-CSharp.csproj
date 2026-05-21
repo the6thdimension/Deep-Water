@@ -2098,6 +2098,7 @@
     <ProjectReference Include="Unity.Entities.Build.csproj" />
     <ProjectReference Include="com.unity.cinemachine.editor.csproj" />
     <ProjectReference Include="Unity.AppUI.csproj" />
+    <ProjectReference Include="CarrierOps.Examples.Editor.csproj" />
     <ProjectReference Include="FR2.csproj" />
     <ProjectReference Include="Unity.Barracuda.ONNX.csproj" />
     <ProjectReference Include="F10.StreamDeckIntegration.csproj" />
@@ -2107,6 +2108,7 @@
     <ProjectReference Include="Unity.AI.MCP.Editor.csproj" />
     <ProjectReference Include="Unity.Transforms.csproj" />
     <ProjectReference Include="Unity.Mathematics.Extensions.csproj" />
+    <ProjectReference Include="CarrierOps.csproj" />
     <ProjectReference Include="Unity.AppUI.Navigation.csproj" />
     <ProjectReference Include="NWH.Common.csproj" />
     <ProjectReference Include="glTFast.Editor.csproj" />

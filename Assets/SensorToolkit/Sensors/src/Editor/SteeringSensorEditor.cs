@@ -8,6 +8,7 @@ namespace Micosmo.SensorToolkit.Editors {
     [CanEditMultipleObjects]
     public class SteeringSensorEditor : BasePulsableEditor<SteeringSensor> {
         SerializedProperty isSpherical;
+        SerializedProperty upDirection;
         SerializedProperty resolution;
         SerializedProperty seek;
         SerializedProperty interest;
@@ -28,11 +29,11 @@ namespace Micosmo.SensorToolkit.Editors {
 
         protected override void OnEnable() {
             base.OnEnable();
-
             if (serializedObject == null) return;
             sensor = serializedObject.targetObject as SteeringSensor;
 
             isSpherical = serializedObject.FindProperty("isSpherical");
+            upDirection = serializedObject.FindProperty("upDirection");
             resolution = serializedObject.FindProperty("resolution");
             seek = serializedObject.FindProperty("seek");
             interest = serializedObject.FindProperty("interest");
@@ -54,6 +55,9 @@ namespace Micosmo.SensorToolkit.Editors {
             EditorGUI.BeginChangeCheck();
 
             EditorGUILayout.PropertyField(isSpherical);
+            if (!sensor.IsSpherical) {
+                EditorGUILayout.PropertyField(upDirection);
+            }
             EditorGUILayout.PropertyField(resolution);
             EditorGUILayout.PropertyField(pulseMode, new GUIContent("Pulse Mode"));
             if (sensor.PulseMode != PulseRoutine.Modes.Manual) {

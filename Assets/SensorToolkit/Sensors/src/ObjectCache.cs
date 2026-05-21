@@ -32,7 +32,9 @@ namespace Micosmo.SensorToolkit
                 return component as T;
             } else {
                 T tc = null;
-                ofObj?.TryGetComponent(out tc);
+                if (ofObj) {
+                    ofObj.TryGetComponent(out tc);
+                }
                 component = tc as Component;
                 type = typeof(T);
                 obj = ofObj;
@@ -46,7 +48,10 @@ namespace Micosmo.SensorToolkit
             if (type == typeof(T) && ReferenceEquals(ofObj, obj)) {
                 return component as T;
             } else {
-                component = ofObj?.GetComponentInParent<T>() as Component;
+                component = null;
+                if (ofObj) {
+                    component = ofObj.GetComponentInParent<T>() as Component;
+                }
                 type = typeof(T);
                 obj = ofObj;
                 return component as T;
@@ -59,7 +64,10 @@ namespace Micosmo.SensorToolkit
             if (type == typeof(T) && ReferenceEquals(ofObj, obj)) {
                 return component as T;
             } else {
-                component = ofObj?.GetComponentInChildren<T>() as Component;
+                component = null;
+                if (ofObj) {
+                    component = ofObj.GetComponentInChildren<T>() as Component;
+                }
                 type = typeof(T);
                 obj = ofObj;
                 return component as T;

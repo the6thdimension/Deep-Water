@@ -10,19 +10,21 @@ namespace Micosmo.SensorToolkit {
         public Vector3 PrevSamplePosition;
         public Vector3 Velocity;
 
-        public void Sample(GameObject target) {
+        public void Sample(GameObject target) => Sample(target.transform.position);
+
+        public void Sample(Vector3 newPosition) {
             if (PrevSampleTime == 0) {
                 PrevSampleTime = Time.time;
-                PrevSamplePosition = target.transform.position;
+                PrevSamplePosition = newPosition;
                 Velocity = Vector3.zero;
                 return;
             }
-            
+
             var sampleTime = Time.time;
             if (sampleTime == PrevSampleTime) {
                 return;
             }
-            var samplePosition = target.transform.position;
+            var samplePosition = newPosition;
             var deltaTime = sampleTime - PrevSampleTime;
             if (deltaTime > 0) {
                 Velocity = (samplePosition - PrevSamplePosition) / deltaTime;
@@ -30,7 +32,7 @@ namespace Micosmo.SensorToolkit {
             PrevSampleTime = sampleTime;
             PrevSamplePosition = samplePosition;
         }
-        
+
     }
 
 }

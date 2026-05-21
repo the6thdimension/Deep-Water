@@ -57,7 +57,7 @@ namespace Micosmo.SensorToolkit {
         public bool LimitViewAngle;
 
         [Tooltip("When LimitViewAngle is true an object must be within this horizontal view angle to be detected.")]
-        [Range(0f, 90f)]
+        [Range(0f, 180f)]
         public float MaxHorizAngle = 45;
 
         // A struct specifying how visibility is scaled as a function of horizontal view angle. Choices are Step, Linear Decay or a Curve.
@@ -155,7 +155,6 @@ namespace Micosmo.SensorToolkit {
 
             config.InputSignal = inputSignal;
             config.OwnedColliders = GetInputColliders(inputSignal.Object, clist);
-            config.Origin = transform.position;
             config.Frame = frame;
             config.MinimumVisibility = MinimumVisibility;
             config.BlocksLineOfSight = BlocksLineOfSight;
@@ -181,7 +180,7 @@ namespace Micosmo.SensorToolkit {
         #endregion
 
         #region Internals
-        ReferenceFrame frame => new ReferenceFrame(transform);
+        ReferenceFrame frame => ReferenceFrame.From(transform);
 
         // Maps a GameObject to a list of raycast target positions for calculating line of sight
         Dictionary<GameObject, LOSTest3D> losTests = new Dictionary<GameObject, LOSTest3D>();
@@ -334,7 +333,7 @@ namespace Micosmo.SensorToolkit {
             }
 
             if (LimitViewAngle) {
-                SensorGizmos.FOVGizmo(frame, transform.position, LimitDistance ? MaxDistance : 1f, MaxHorizAngle, MaxVertAngle);
+                FOVRange.Of(MaxHorizAngle, MaxVertAngle, LimitDistance ? MaxDistance : float.PositiveInfinity).DrawGizmos(frame);
             }
 
             if (!ShowDetectionGizmos || ShowRayCastDebug == null) {

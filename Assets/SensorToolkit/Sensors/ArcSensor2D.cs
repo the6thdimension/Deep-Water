@@ -49,11 +49,17 @@ namespace Micosmo.SensorToolkit {
         #region Events
         [SerializeField]
         ObstructionEvent onObstruction;
-        public ObstructionEvent OnObstruction => onObstruction;
+        public ObstructionEvent OnObstruction {
+            get => onObstruction;
+            set => onObstruction = value;
+        }
 
         [SerializeField]
         ObstructionEvent onClear;
-        public ObstructionEvent OnClear => onClear;
+        public ObstructionEvent OnClear {
+            get => onClear;
+            set => onClear = value;
+        }
 
         public override event Action OnPulsed;
         #endregion
@@ -250,7 +256,7 @@ namespace Micosmo.SensorToolkit {
             clearDetectedObjects();
 
             var saveQHT = Physics2D.queriesHitTriggers;
-            Physics2D.queriesHitTriggers = !IgnoreTriggerColliders;
+            Physics2D.queriesHitTriggers = !IgnoreTriggerColliders; // Must keep this, Raycast with single result doesn't support ContactFilter
             SampleArc();
             Physics2D.queriesHitTriggers = saveQHT;
 
@@ -416,7 +422,12 @@ namespace Micosmo.SensorToolkit {
                     }
                     return 0;
                 } else {
-                    return Physics2D.RaycastNonAlloc(SegmentRay.origin, SegmentRay.direction, results, SegmentLength, combinedLayers);
+                    var filter = new ContactFilter2D {
+                        useLayerMask = true,
+                        layerMask = combinedLayers,
+                        useTriggers = !sensor.IgnoreTriggerColliders,
+                    };
+                    return Physics2D.Raycast(SegmentRay.origin, SegmentRay.direction, filter, results, SegmentLength);
                 }
             }
         }

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: a54f5af7229bfa04a9e46f34cbb9af52
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 205336
+  packageName: SensorToolkit 2
+  packageVersion: 2.5.18
+  assetPath: Assets/SensorToolkit/Examples/assets/Developer/TestProjectiveSphere.unity
+  uploadId: 902008

@@ -6,3 +6,10 @@ NativeFormatImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 160954
+  packageName: VFX Arsenal - Flame and Shock
+  packageVersion: 1.1
+  assetPath: Assets/VFX Arsenal/Editor/VFX Arsenal Gradients.gradients
+  uploadId: 356917

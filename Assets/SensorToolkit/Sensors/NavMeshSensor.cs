@@ -81,6 +81,11 @@ namespace Micosmo.SensorToolkit {
             };
         }
 
+        // Returns the raw NavMeshHit, useful to get at the NavMeshHit.mask property
+        public NavMeshHit GetNavMeshHit() {
+            return hit;
+        }
+
         public override void PulseAll() => Pulse();
 
         public override void Clear() {
@@ -151,7 +156,6 @@ namespace Micosmo.SensorToolkit {
                 yield return routine.Current;
             }
         }
-
 
         void Awake() {
             if (onObstruction == null) {

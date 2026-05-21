@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 644dba950ddf5da459a35827a7432351
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 205336
+  packageName: SensorToolkit 2
+  packageVersion: 2.5.18
+  assetPath: Assets/SensorToolkit/Examples/assets/Developer/TestRecursivePulse/TriggerDisableOnDetection.unity
+  uploadId: 902008

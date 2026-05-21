@@ -6,57 +6,6 @@ namespace Micosmo.SensorToolkit {
 
     public class LOSUtils {
 
-        static Vector3[] points = new Vector3[8];
-        public static float MinAngleToBounds(Vector3 viewPos, Vector3 viewDir, Vector3 viewRight, Bounds bounds) {
-            var center = bounds.center;
-            var extents = bounds.extents;
-            points[0] = center + new Vector3(extents.x, extents.y, extents.z);
-            points[1] = center + new Vector3(extents.x, extents.y, -extents.z);
-            points[2] = center + new Vector3(-extents.x, extents.y, extents.z);
-            points[3] = center + new Vector3(-extents.x, extents.y, -extents.z);
-            points[4] = center + new Vector3(extents.x, -extents.y, extents.z);
-            points[5] = center + new Vector3(extents.x, -extents.y, -extents.z);
-            points[6] = center + new Vector3(-extents.x, -extents.y, extents.z);
-            points[7] = center + new Vector3(-extents.x, -extents.y, -extents.z);
-
-            float minProj = Mathf.Infinity;
-            float maxProj = Mathf.NegativeInfinity;
-
-            foreach (var point in points) {
-                var delta = (point - viewPos);
-                var proj = Vector3.Dot(delta, viewRight);
-                var dist = Vector3.Dot(delta, viewDir);
-
-                if (dist <= 0f) {
-                    continue;
-                }
-
-                var normProj = proj / dist;
-
-                if (normProj < minProj) {
-                    minProj = normProj;
-                }
-                if (normProj > maxProj) {
-                    maxProj = normProj;
-                }
-            }
-
-            if (minProj < 0f && maxProj > 0f) {
-                return 0f;
-            }
-            
-            var closest = Mathf.Min(Mathf.Abs(minProj), Mathf.Abs(maxProj));
-            return Mathf.Rad2Deg * Mathf.Abs(Mathf.Atan(closest));
-        }
-
-        public static float AngleToPoint(Vector3 viewPos, Vector3 viewDir, Vector3 viewRight, Vector3 target) {
-            var delta = (target - viewPos);
-            var proj = Vector3.Dot(delta, viewRight);
-            var dist = Vector3.Dot(delta, viewDir);
-            var normProj = (dist > 0) ? (proj / dist) : Mathf.Infinity;
-            return Mathf.Rad2Deg * Mathf.Abs(Mathf.Atan(normProj));
-        }
-
         public static void MapBoundsToEdges(Vector2 viewPos, Bounds bounds, List<Edge2D> storeIn) {
             var center = (Vector2)bounds.center;
             var extents = (Vector2)bounds.extents;

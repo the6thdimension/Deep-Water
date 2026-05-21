@@ -9,6 +9,11 @@ namespace Micosmo.SensorToolkit.Editors {
     [CustomEditor(typeof(LOSSensor))]
     [CanEditMultipleObjects]
     public class LOSSensorEditor : BaseSensorEditor<LOSSensor> {
+
+        static string horizAngleMessage =
+            "Angle can't exceed 90 when Point Sampling Method is set to Quality. Recommend changing " +
+            "Point Sampling Method to Fast. In most cases Fast is superior to Quality anyway.";
+        
         SerializedProperty inputSensor;
         SerializedProperty blocksLineOfSight;
         SerializedProperty ignoreTriggerColliders;
@@ -125,6 +130,9 @@ namespace Micosmo.SensorToolkit.Editors {
             EditorGUILayout.PropertyField(limitViewAngle);
             if (sensor.LimitViewAngle) {
                 EditorGUILayout.PropertyField(maxHorizAngle);
+                if (sensor.MaxHorizAngle > 90f && sensor.PointSamplingMethod == PointSamplingMethod.Quality) {
+                    EditorGUILayout.HelpBox(horizAngleMessage, MessageType.Error);
+                }
                 ScalingFunctionProperty(visibilityByHorizAngle);
                 EditorGUILayout.PropertyField(maxVertAngle);
                 ScalingFunctionProperty(visibilityByVertAngle);

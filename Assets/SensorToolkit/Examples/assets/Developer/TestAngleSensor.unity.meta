@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 18fac94dc45eadc4b8bb7df8045c7628
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 205336
+  packageName: SensorToolkit 2
+  packageVersion: 2.5.18
+  assetPath: Assets/SensorToolkit/Examples/assets/Developer/TestAngleSensor.unity
+  uploadId: 902008

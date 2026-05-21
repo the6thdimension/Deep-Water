@@ -40,6 +40,10 @@ namespace Micosmo.SensorToolkit {
             }
         }
 
+        public void UpdateUpDirection(Vector3 up) {
+            dangerMap.UpdateAxis(up);
+        }
+
         public void Dispose() {
             if (dangerMap.IsCreated) {
                 dangerMap.Dispose();
@@ -98,6 +102,9 @@ namespace Micosmo.SensorToolkit {
                 }
                 sharedDangerMap = DirectionalGrid.CreateMatching(dangerMap, Allocator.Persistent);
             }
+            if (sharedDangerMap.Axis != dangerMap.Axis) {
+                sharedDangerMap.UpdateAxis(dangerMap.Axis);
+            }
             var job = new SteerDangerJob {
                 Position = owner.transform.position,
                 DangerItems = sharedDangerItems,
@@ -115,7 +122,7 @@ namespace Micosmo.SensorToolkit {
             if (!sharedDangerItems.IsCreated) {
                 return;
             }
-            dangerMap.Copy(sharedDangerMap);
+            dangerMap.Copy(sharedDangerMap, true);
             sharedDangerItems.Dispose();
         }
         
@@ -134,7 +141,7 @@ namespace Micosmo.SensorToolkit {
             return signal.Object != null;
         }
         public void DrawGizmos(ISteeringSensor owner, float offset, float scale, float width) {
-            SensorGizmos.PushColor(STPrefs.AvoidColour);
+            SensorGizmos.PushColor(STPrefs.DangerColour);
             dangerMap.DrawGizmos(owner.transform.position, offset, scale, width);
             SensorGizmos.PopColor();
         }

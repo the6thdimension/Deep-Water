@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: fa5c76e2adec4c24e8482a0493bdf468
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 205336
+  packageName: SensorToolkit 2
+  packageVersion: 2.5.18
+  assetPath: Assets/SensorToolkit/Examples/assets/Developer/TestRecursivePulse/TestRecursivePulse.cs
+  uploadId: 902008

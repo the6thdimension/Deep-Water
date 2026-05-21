@@ -11,11 +11,19 @@ namespace Micosmo.SensorToolkit {
 
         public static ObservableEffect Create(params IObservable[] obs) => Create(null, obs, false);
         public static ObservableEffect Create(Action action, params IObservable[] obs) => Create(action, obs, true);
+        public static ObservableEffect Create(Func<Action> action, params IObservable[] obs) => Create(action, obs, true);
         public static ObservableEffect CreateNoFireImmediate(Action action, params IObservable[] obs) => Create(action, obs, false);
+        public static ObservableEffect CreateNoFireImmediate(Func<Action> action, params IObservable[] obs) => Create(action, obs, false);
         public static ObservableEffect Create(Action action, IEnumerable<IObservable> obs, bool fireImmediate = true) {
+            return Create(() => {
+                action?.Invoke();
+                return null;
+            }, obs, fireImmediate);
+        }
+        public static ObservableEffect Create(Func<Action> action, IEnumerable<IObservable> obs, bool fireImmediate = true) {
             var instance = new ObservableEffect(action, obs);
             if (fireImmediate) {
-                action?.Invoke();
+                instance.cleanup = action?.Invoke();
             }
             return instance;
         }
@@ -23,11 +31,12 @@ namespace Micosmo.SensorToolkit {
         public event Action OnChanged;
 
         List<IObservable> observables = new List<IObservable>();
-        Action action;
+        Func<Action> action;
+        Action cleanup;
 
         ObservableEffect() { }
 
-        ObservableEffect(Action action, IEnumerable<IObservable> dependencies) {
+        ObservableEffect(Func<Action> action, IEnumerable<IObservable> dependencies) {
             foreach (var o in dependencies) {
                 observables.Add(o);
                 o.OnChanged += FireEvent;
@@ -36,13 +45,17 @@ namespace Micosmo.SensorToolkit {
         }
 
         public void Dispose() {
+            cleanup?.Invoke();
+            cleanup = null;
+            action = null;
             foreach (var o in observables) {
                 o.OnChanged -= FireEvent;
             }
         }
 
         void FireEvent() {
-            action?.Invoke();
+            cleanup?.Invoke();
+            cleanup = action?.Invoke();
             OnChanged?.Invoke();
         }
     }

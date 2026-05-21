@@ -1,6 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Micosmo.SensorToolkit {
     public class STPrefs : ScriptableObject {
@@ -19,6 +22,7 @@ namespace Micosmo.SensorToolkit {
             new Color(1f, .26f, .26f)
         };
 
+        public static bool ShowUserComments => Instance?.showUserComments ?? false;
         public static Color RedEditorTextColour => Instance?.redEditorTextColour ?? new Color(1f, .2f, .2f);
         public static Color ActiveSensorEditorColour => Instance?.activeSensorEditorColour ?? new Color(51 / 255f, 1f, 1f, .4f);
         public static Color SignalBoundsColour => Instance?.signalBoundsColour ?? defaultCyan;
@@ -31,11 +35,16 @@ namespace Micosmo.SensorToolkit {
         public static Color LOSFovColour => Instance?.losFovColour ?? Color.yellow;
         public static Color[] RayVisibilityGradient => Instance?.rayVisibilityGradient ?? defaultVisibilityGradientColours;
         public static Color LOSRayBlockedColour => Instance?.losRayBlockedColour ?? Color.red;
-        public static Color AvoidColour => Instance?.avoidColour ?? Color.red;
-        public static Color SeekColour => Instance?.seekColour ?? Color.yellow;
-        public static Color SteeringVectorColour => Instance?.steeringVectorColour ?? Color.green;
+        public static Color SteeringVectorColour => Instance?.steeringVectorColour ?? Color.cyan;
+        public static Color InterestColour => Instance?.interestColour ?? Color.yellow;
+        public static Color DangerColour => Instance?.dangerColour ?? Color.red;
+        public static Color LowSpeedColour => Instance?.lowSpeedColour ?? Color.blue;
+        public static Color CollisionSpeedColour => Instance?.collisionSpeedColour ?? new Color(69f / 255, 6f / 255, 46f / 255);
+        public static Color HighSpeedColour => Instance?.highSpeedColour ?? new Color(0.8f, 1f, 1f);
+        public static Color DecisionColour => Instance?.decisionColour ?? Color.green;
 
         [Header("Sensor Editors")]
+        [SerializeField] bool showUserComments = false;
         [SerializeField] Color redEditorTextColour = new Color(1f, .2f, .2f);
         [SerializeField] Color activeSensorEditorColour = new Color(51 / 255f, 1f, 1f, .4f);
 
@@ -58,22 +67,29 @@ namespace Micosmo.SensorToolkit {
         [SerializeField] Color losRayBlockedColour = Color.red;
 
         [Header("Steering Sensor Widgets")]
-        [SerializeField] Color avoidColour = Color.red;
-        [SerializeField] Color seekColour = Color.yellow;
-        [SerializeField] Color steeringVectorColour = Color.green;
+        [SerializeField] Color steeringVectorColour = Color.cyan;
+        [SerializeField] Color dangerColour = Color.red;
+        [SerializeField] Color interestColour = Color.yellow;
+        [SerializeField] Color lowSpeedColour = Color.blue;
+        [SerializeField] Color collisionSpeedColour = new Color(69f / 255, 6f / 255, 46f / 255);
+        [SerializeField] Color highSpeedColour = new Color(0.8f, 1f, 1f);
+        [SerializeField] Color decisionColour = Color.green;
 
         static STPrefs instance;
         static STPrefs Instance {
             get {
 #if UNITY_EDITOR
                 if (instance == null) {
-                    var instances = Resources.FindObjectsOfTypeAll<STPrefs>();
-                    if (instances.Length > 1) {
-                        for (var i = 1; i < instances.Length; i++) {
-                            Debug.LogError("Duplicate SensorToolkit preferences", instances[i]);
+                    string[] guids = AssetDatabase.FindAssets("t:STPrefs");
+                    if (guids.Length > 1) {
+                        for (var i = 1; i < guids.Length; i++) {
+                            Debug.LogError("Duplicate SensorToolkit preferences: " + guids[i]);
                         }
                     }
-                    instance = instances.Length > 0 ? instances[0] : null;
+                    if (guids.Length > 0) {
+                        var path = AssetDatabase.GUIDToAssetPath(guids[0]);
+                        instance = AssetDatabase.LoadAssetAtPath<STPrefs>(path);
+                    }
                 }
                 return instance;
 #else

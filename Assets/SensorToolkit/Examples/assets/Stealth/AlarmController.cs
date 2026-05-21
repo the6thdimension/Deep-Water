@@ -13,7 +13,7 @@ namespace Micosmo.SensorToolkit.Example
         public static AlarmController Instance {
             get {
                 if (instance == null) {
-                    instance = GameObject.FindObjectOfType<AlarmController>();
+                    instance = Object.FindAnyObjectByType<AlarmController>();
                 }
                 return instance;
             }

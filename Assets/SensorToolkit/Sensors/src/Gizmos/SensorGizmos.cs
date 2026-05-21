@@ -9,19 +9,19 @@ namespace Micosmo.SensorToolkit {
 
     public static partial class SensorGizmos {
 
-        public static void FOVGizmo(ReferenceFrame frame, Vector3 pos, float length, float horizAngle, float vertAngle) {
-            var m = Matrix4x4.TRS(pos, Quaternion.LookRotation(frame.Forward, frame.Up), Vector3.one);
+        public static void FOVGizmo(ReferenceFrame frame, float length, float horizAngle, float vertAngle) {
+            var m = Matrix4x4.TRS(frame.Position, Quaternion.LookRotation(frame.Forward, frame.Up), Vector3.one);
             PushMatrix(m);
 
             if (horizAngle != 0) {
                 PushColor(STPrefs.LOSFovColour);
-                CircleSector(pos, frame.Forward, frame.Up, horizAngle, length);
+                CircleSector(frame.Position, frame.Forward, frame.Up, horizAngle, length);
                 PopColor();
             }
             
             if (vertAngle != 0) {
                 PushColor(STPrefs.LOSFovColour);
-                CircleSector(pos, frame.Forward, frame.Right, vertAngle, length);
+                CircleSector(frame.Position, frame.Forward, frame.Right, vertAngle, length);
                 PopColor();
             }
 

@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-namespace Micosmo.SensorToolkit
-{
+namespace Micosmo.SensorToolkit {
     /*
      * The Range Sensor detects objects that are inside its detection volume. It uses the family of Overlap functions inside Physics or Physics2D. 
      * A detected object will have one or more Collider that overlaps the detection volume.
@@ -178,18 +177,28 @@ namespace Micosmo.SensorToolkit
 
         class OverlapCircleTest : ITestNonAlloc<RangeSensor2D, Collider2D> {
             public int Test(RangeSensor2D sensor, Collider2D[] results) {
-                return Physics2D.OverlapCircleNonAlloc(sensor.transform.position, sensor.Circle.Radius, results, sensor.DetectsOnLayers);
+                var filter = new ContactFilter2D {
+                    useLayerMask = true,
+                    layerMask = sensor.DetectsOnLayers,
+                    useTriggers = !sensor.IgnoreTriggerColliders
+                };
+                return Physics2D.OverlapCircle(sensor.transform.position, sensor.Circle.Radius, filter, results);
             }
         }
         void DrawCircleGizmo() {
             SensorGizmos.PushColor(STPrefs.RangeColour);
-            SensorGizmos.CircleGizmo(transform.position, Circle.Radius);
+            SensorGizmos.CircleGizmo(transform.position, -Vector3.forward, Circle.Radius);
             SensorGizmos.PopColor();
         }
 
         class OverlapBoxTest : ITestNonAlloc<RangeSensor2D, Collider2D> {
             public int Test(RangeSensor2D sensor, Collider2D[] results) {
-                return Physics2D.OverlapBoxNonAlloc(sensor.transform.position, 2*sensor.Box.HalfExtents, sensor.transform.eulerAngles.z, results, sensor.DetectsOnLayers);
+                var filter = new ContactFilter2D {
+                    useLayerMask = true,
+                    layerMask = sensor.DetectsOnLayers,
+                    useTriggers = !sensor.IgnoreTriggerColliders
+                };
+                return Physics2D.OverlapBox(sensor.transform.position, 2 * sensor.Box.HalfExtents, sensor.transform.eulerAngles.z, filter, results);
             }
         }
         void DrawBoxGizmo() {
@@ -203,10 +212,15 @@ namespace Micosmo.SensorToolkit
         class OverlapCapsuleTest : ITestNonAlloc<RangeSensor2D, Collider2D> {
             public int Test(RangeSensor2D sensor, Collider2D[] results) {
                 var pos = sensor.transform.position;
-                var size = new Vector2(sensor.Capsule.Radius*2, sensor.Capsule.Height);
+                var size = new Vector2(sensor.Capsule.Radius * 2, sensor.Capsule.Height);
                 var dir = CapsuleDirection2D.Vertical;
                 var angle = sensor.transform.eulerAngles.z;
-                return Physics2D.OverlapCapsuleNonAlloc(pos, size, dir, angle, results, sensor.DetectsOnLayers);
+                var filter = new ContactFilter2D {
+                    useLayerMask = true,
+                    layerMask = sensor.DetectsOnLayers,
+                    useTriggers = !sensor.IgnoreTriggerColliders
+                };
+                return Physics2D.OverlapCapsule(pos, size, dir, angle, filter, results);
             }
         }
         void DrawCapsuleGizmo() {

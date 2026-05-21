@@ -16,16 +16,28 @@ namespace Micosmo.SensorToolkit.Editors {
 
                 EditorGUI.BeginChangeCheck();
 
+#if UNITY_6000_0_OR_NEWER
                 string[] areaNames = UnityEngine.AI.NavMesh.GetAreaNames();
-                string[] completeAreaNames = new string[areaNames.Length];
+#else
+                string[] areaNames = GameObjectUtility.GetNavMeshAreaNames();
+#endif
+                List<string> completeAreaNames = new List<string>();
 
                 foreach (string name in areaNames) {
-                    completeAreaNames[UnityEngine.AI.NavMesh.GetAreaFromName(name)] = name;
+#if UNITY_6000_0_OR_NEWER
+                    var id = UnityEngine.AI.NavMesh.GetAreaFromName(name);
+#else
+                    var id = GameObjectUtility.GetNavMeshAreaFromName(name);
+#endif
+                    while (id >= completeAreaNames.Count) {
+                        completeAreaNames.Add("");
+                    }
+                    completeAreaNames[id] = name;
                 }
 
                 int mask = serializedProperty.intValue;
 
-                mask = EditorGUI.MaskField(position, mask, completeAreaNames);
+                mask = EditorGUI.MaskField(position, mask, completeAreaNames.ToArray());
                 if (EditorGUI.EndChangeCheck()) {
                     serializedProperty.intValue = mask;
                 }

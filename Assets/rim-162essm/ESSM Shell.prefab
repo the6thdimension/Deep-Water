@@ -5140,6 +5140,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1932277188405946800}
   - component: {fileID: 8864312929819601909}
+  - component: {fileID: 1100110011001100110}
   m_Layer: 0
   m_Name: ESSM Shell
   m_TagString: Untagged
@@ -5192,6 +5193,26 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &1100110011001100110
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3376660235189274850}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2408b148a9f497438a80c14c36db4de, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  BoostDuration: 1.5
+  SustainDuration: 6.5
+  CoastTurnRateDegPerSec: 20
+  ProximityFuzeMeters: 40
+  MaxFlightSeconds: 45
+  MinWorldYBeforeSelfDestruct: -50
+  ImpactVfxPrefab: {fileID: 0}
+  ImpactVfxLifetimeSeconds: 3
 --- !u!1 &3443956028675841881
 GameObject:
   m_ObjectHideFlags: 0

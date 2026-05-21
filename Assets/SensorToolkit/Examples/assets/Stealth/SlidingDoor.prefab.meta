@@ -6,3 +6,10 @@ NativeFormatImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 205336
+  packageName: SensorToolkit 2
+  packageVersion: 2.5.18
+  assetPath: Assets/SensorToolkit/Examples/assets/Stealth/SlidingDoor.prefab
+  uploadId: 902008

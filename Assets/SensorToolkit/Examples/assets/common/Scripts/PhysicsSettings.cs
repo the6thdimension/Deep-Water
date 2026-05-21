@@ -7,8 +7,10 @@ namespace Micosmo.SensorToolkit.Example {
         public Vector3 GravityForce = Vector3.down * 9.81f;
 
         void Awake() {
+#if !UNITY_6000_0_OR_NEWER
             Physics.autoSyncTransforms = false;
             Physics2D.autoSyncTransforms = false;
+#endif
 
             Physics.gravity = GravityForce;
             Physics2D.gravity = GravityForce;

@@ -1054,6 +1054,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isSpherical:
     value: 0
+  upDirection:
+    value: {x: 0, y: 1, z: 0}
   resolution:
     value: 3
   seek:
@@ -1064,6 +1066,7 @@ MonoBehaviour:
       DestinationPoint: {x: 0, y: 0, z: 0}
       DistanceOffset: 0
       StopAtDestination: 0
+    SeekDirection: {x: 0, y: 0, z: 0}
     ArriveDistanceThreshold: 0.5
     StoppingDistance: 1
   interest:
@@ -1073,16 +1076,16 @@ MonoBehaviour:
     SignalProcessors: []
     MappingFunction: 0
     RadialInterpolation:
-      OuterRadius: 2
       InnerRadius: 0
+      OuterRadius: 2
       Power: 1
   danger:
     Sensors: []
     SignalProcessors: []
     MappingFunction: 0
     RadialInterpolation:
-      OuterRadius: 2
       InnerRadius: 0
+      OuterRadius: 2
       Power: 1
   velocity:
     PreferredSpeed: 3

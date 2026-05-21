@@ -51,12 +51,8 @@ namespace Micosmo.SensorToolkit {
             get => new Bounds(Shape.center + safePosition, Shape.size);
             set => Shape = new Bounds(value.center - safePosition, value.size);
         }
-        public bool Equals(Signal other) {
-            return ReferenceEquals(Object, other.Object) && Strength == other.Strength && Shape == other.Shape;
-        }
-        public float DistanceTo(Vector3 point) {
-            return (Bounds.center - point).magnitude;
-        }
+        public bool Equals(Signal other) => ReferenceEquals(Object, other.Object) && Strength == other.Strength && Shape == other.Shape;
+        public float DistanceTo(Vector3 point) => (Bounds.center - point).magnitude;
     }
 
 }

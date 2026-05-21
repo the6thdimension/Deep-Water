@@ -12,7 +12,6 @@ namespace Micosmo.SensorToolkit {
      * agents, or a planar mode for ground-based agents.
      */
     [AddComponentMenu("Sensors/2D Steering Sensor")]
-    [ExecuteAlways]
     [HelpURL("https://micosmo.com/sensortoolkit2/docs/manual/sensors/steering")]
     public class SteeringSensor2D : BasePulsableSensor, IPulseRoutine, ISteeringSensor {
 
@@ -135,6 +134,9 @@ namespace Micosmo.SensorToolkit {
             danger.Clear();
             velocity.Clear();
             Decision.Clear();
+            if (!Application.isPlaying) {
+                DisposeGrids();
+            }
         }
         #endregion
 
@@ -204,16 +206,12 @@ namespace Micosmo.SensorToolkit {
 
         void OnEnable() {
             RecreateGrids();
-            if (Application.isPlaying) {
-                pulseRoutine.OnEnable();
-            }
+            pulseRoutine.OnEnable();
         }
 
         protected override void OnDisable() {
             base.OnDisable();
-            if (Application.isPlaying) {
-                pulseRoutine.OnDisable();
-            }
+            pulseRoutine.OnDisable();
             DisposeGrids();
         }
 
@@ -227,18 +225,10 @@ namespace Micosmo.SensorToolkit {
         }
 
         void Update() {
-            if (!Application.isPlaying) {
-                return;
-            }
-
             decision.Interpolate(Time.deltaTime);
         }
 
         void FixedUpdate() {
-            if (!Application.isPlaying) {
-                return;
-            }
-
             if (LocomotionMode == LocomotionMode2D.RigidBody2D) {
                 locomotion.RigidBody2DSeek(RigidBody, GetSteeringVector());
             }

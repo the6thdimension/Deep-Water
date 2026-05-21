@@ -4,17 +4,6 @@ using UnityEngine;
 
 namespace Micosmo.SensorToolkit {
 
-    [System.Serializable]
-    public struct ReferenceFrame {
-        public Vector3 Forward, Right, Up;
-        public ReferenceFrame(Vector3 forward, Vector3 right, Vector3 up) {
-            Forward = forward; Right = right; Up = up;
-        }
-        public ReferenceFrame(Transform transform) {
-            Forward = transform.forward; Right = transform.right; Up = transform.up;
-        }
-    }
-
     public static class MotionUtils {
 
         public static float SeekAccel(float maxSpeed, float vSteer, float velocity) {

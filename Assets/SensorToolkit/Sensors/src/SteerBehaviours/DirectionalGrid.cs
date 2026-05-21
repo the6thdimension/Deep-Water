@@ -11,7 +11,7 @@ namespace Micosmo.SensorToolkit {
         public NativeArray<float> Values;
         public NativeArray<Vector3> Directions;
         public int GridSize { get; }
-        public Vector3 Axis { get; }
+        public Vector3 Axis { get; private set; }
         public int CellCount => IsSpherical ? 6 * GridSize * GridSize : GridSize;
         public bool IsCreated { get; private set; }
 
@@ -34,6 +34,13 @@ namespace Micosmo.SensorToolkit {
         public static DirectionalGrid CreateSphere(int gridSize, Allocator allocator) => new DirectionalGrid(true, gridSize, Vector3.up, allocator);
         public static DirectionalGrid CreateCircle(int gridSize, Vector3 axis, Allocator allocator) => new DirectionalGrid(false, gridSize, axis, allocator);
 
+        public void UpdateAxis(Vector3 axis) {
+            Axis = axis;
+            if (!IsSpherical) {
+                CircleGrid.InitialiseDirections(this);
+            }
+        }
+        
         public int GetCell(Vector3 direction) => IsSpherical ? SphereGrid.GetCell(this, direction) : CircleGrid.GetCell(this, direction);
 
         public float SampleDirection(Vector3 direction) => IsSpherical ? SphereGrid.SampleDirection(this, direction) : CircleGrid.SampleDirection(this, direction);
@@ -124,10 +131,13 @@ namespace Micosmo.SensorToolkit {
             }
         }*/
 
-        public void Copy(DirectionalGrid other) {
+        public void Copy(DirectionalGrid other, bool ignoreAxis = false) {
             if (!CheckIsCompatible(this, other)) { return; }
             NativeArray<float>.Copy(other.Values, Values);
-            NativeArray<Vector3>.Copy(other.Directions, Directions);
+            if (!ignoreAxis) {
+                Axis = other.Axis;
+                NativeArray<Vector3>.Copy(other.Directions, Directions);
+            }
         }
 
         public void MergeVelocity(DirectionalGrid slowGrid, DirectionalGrid fastGrid, float preferredSpeed, float maxSpeed, float power) {
@@ -181,7 +191,7 @@ namespace Micosmo.SensorToolkit {
         }
 
         public bool IsCompatible(DirectionalGrid other) {
-            return IsCreated && IsSpherical == other.IsSpherical && GridSize == other.GridSize && Axis == other.Axis;
+            return IsCreated && IsSpherical == other.IsSpherical && GridSize == other.GridSize;
         }
         
         public static bool CheckIsCompatible(DirectionalGrid g1, DirectionalGrid g2) {
@@ -224,17 +234,17 @@ namespace Micosmo.SensorToolkit {
                 var dir = slowGrid.Directions[i];
                 var minStart = p + dir * rayOffset;
                 var minEnd = minStart + (dir * minVal * rayScale);
-                SensorGizmos.PushColor(Color.blue);
+                SensorGizmos.PushColor(STPrefs.LowSpeedColour);
                 SensorGizmos.ThickLineNoZTest(minStart, minEnd, rayWidth);
                 SensorGizmos.PopColor();
 
                 var maxStart = minStart + (dir * maxVal * rayScale);
                 var maxEnd = minStart + (dir * maxSpeed * rayScale);
-                SensorGizmos.PushColor(new Color(0.8f, 1f, 1f));
+                SensorGizmos.PushColor(STPrefs.HighSpeedColour);
                 SensorGizmos.ThickLineNoZTest(maxStart, maxEnd, rayWidth);
                 SensorGizmos.PopColor();
 
-                SensorGizmos.PushColor(new Color(69f / 255, 6f / 255, 46f / 255));
+                SensorGizmos.PushColor(STPrefs.CollisionSpeedColour);
                 SensorGizmos.ThickLineNoZTest(minEnd, maxStart, rayWidth);
                 SensorGizmos.PopColor();
             }

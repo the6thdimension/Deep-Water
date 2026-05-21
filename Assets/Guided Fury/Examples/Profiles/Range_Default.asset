@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 958a41783a9f05843970ffd048ba1a3d, type: 3}
+  m_Name: Range_Default
+  m_EditorClassIdentifier: GuidedFury::GuidedFury.ScriptableObjects.Profiles.MissileProfileSO
+  missileId: RANGE-1
+  displayName: Range Default
+  description: Generic test-range missile. Modest thrust, ProNav, ~3s burn.
+  icon: {fileID: 0}
+  dryMassKg: 80
+  propellantMassKg: 40
+  boostThrustN: 22000
+  boostDurationS: 3
+  cruiseSpeedMps: 250
+  l0UseGravity: 0
+  dragCoefficient: 0.25
+  referenceAreaM2: 0.03
+  guidanceLaw: 2
+  navigationGain: 3
+  maxLifetimeS: 20
+  fuzeProximityRadiusM: 8
+  fuzeArmDelayS: 0.5

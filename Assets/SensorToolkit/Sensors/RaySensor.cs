@@ -66,11 +66,17 @@ namespace Micosmo.SensorToolkit {
         #region Events
         [SerializeField]
         ObstructionEvent onObstruction;
-        public ObstructionEvent OnObstruction => onObstruction;
+        public ObstructionEvent OnObstruction {
+            get => onObstruction;
+            set => onObstruction = value;
+        }
 
         [SerializeField]
         ObstructionEvent onClear;
-        public ObstructionEvent OnClear => onClear;
+        public ObstructionEvent OnClear {
+            get => onClear;
+            set => onClear = value;
+        }
 
         public override event Action OnPulsed;
         #endregion

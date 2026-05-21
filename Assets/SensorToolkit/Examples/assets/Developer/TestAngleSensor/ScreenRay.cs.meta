@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 403866b322211be44a31664f59f00330
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 205336
+  packageName: SensorToolkit 2
+  packageVersion: 2.5.18
+  assetPath: Assets/SensorToolkit/Examples/assets/Developer/TestAngleSensor/ScreenRay.cs
+  uploadId: 902008

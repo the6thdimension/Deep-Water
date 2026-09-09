@@ -79,21 +79,40 @@ namespace RHRadarSuite
         private readonly List<Vector3> scanPoints = new List<Vector3>();
         private int maxScanPoints = 360;
         
-        // Properties
+        // Properties. Horizontal angle is body-relative: 0 = platform forward.
         public float CurrentHorizontalAngle => currentHorizontalAngle;
         public float CurrentVerticalAngle => currentVerticalAngle;
         public IReadOnlyList<Vector3> ScanPoints => scanPoints;
-        
+
         public override void Initialize(RadarSuiteController controller)
         {
             base.Initialize(controller);
-            
+
             targetBuffer = new Collider[maxTargets];
-            currentHorizontalAngle = transform.eulerAngles.y;
+            currentHorizontalAngle = 0f;
             currentVerticalAngle = 0f;
-            
+
             // Initialize beams
             InitializeBeams();
+        }
+
+        public override void ApplyProfile(RadarProfileSO profile)
+        {
+            base.ApplyProfile(profile);
+            if (profile == null) return;
+
+            horizontalBeamWidth = Mathf.Clamp(profile.beamWidthDeg, 1f, 90f);
+            verticalBeamWidth = Mathf.Clamp(profile.beamWidthDeg, 1f, 90f);
+            horizontalScanRate = Mathf.Clamp(profile.RotationDegPerSec, 1f, 360f);
+            detectionThreshold = Mathf.Clamp(profile.detectionThreshold, 0.01f, 1f);
+            rangeAccuracy = Mathf.Clamp(profile.rangeAccuracyM, 1f, 50f);
+        }
+
+        public override bool TryGetScanState(out float bodyAngleDeg, out float beamWidthDeg)
+        {
+            bodyAngleDeg = currentHorizontalAngle;
+            beamWidthDeg = horizontalBeamWidth;
+            return isActive;
         }
         
         private void InitializeBeams()
@@ -162,8 +181,8 @@ namespace RHRadarSuite
             currentHorizontalAngle = (currentHorizontalAngle + deltaHorizontal) % 360f;
             currentVerticalAngle = Mathf.Clamp(currentVerticalAngle + deltaVertical, -90f, 90f);
             
-            // Add scan point for visualization
-            Vector3 scanDirection = Quaternion.Euler(currentVerticalAngle, currentHorizontalAngle, 0) * Vector3.forward;
+            // Add scan point for visualization (body-relative angles -> world direction)
+            Vector3 scanDirection = RadarMath.BodyDirection(transform, currentHorizontalAngle, -currentVerticalAngle);
             AddScanPoint(transform.position + scanDirection * detectionRange);
         }
         
@@ -214,8 +233,8 @@ namespace RHRadarSuite
                 if (contacts.TryGetValue(target, out RadarContact contact))
                 {
                     // Update existing contact
-                    contact.Update(target.transform.position, signalStrength, RadarLOD.LOD4_3DTracking);
-                    
+                    contact.Update(target.transform.position, signalStrength, RadarLOD.LOD4_3DTracking, transform.position);
+
                     // Raise update event
                     RaiseContactUpdated(contact);
                 }
@@ -223,7 +242,7 @@ namespace RHRadarSuite
                 {
                     // Create new contact
                     contact = new RadarContact(target);
-                    contact.Update(target.transform.position, signalStrength, RadarLOD.LOD4_3DTracking);
+                    contact.Update(target.transform.position, signalStrength, RadarLOD.LOD4_3DTracking, transform.position);
                     
                     // Add to contacts dictionary
                     contacts.Add(target, contact);
@@ -285,8 +304,8 @@ namespace RHRadarSuite
                 baseStrength *= (1f - jammingEffectiveness);
             }
             
-            // Normalize to 0-1 range
-            return Mathf.Clamp01(baseStrength * 1000000000f); // Scale factor to bring into reasonable range
+            // Normalize to 0-1 range (scale calibrated from profile when one is applied)
+            return Mathf.Clamp01(baseStrength * signalScale);
         }
     }
     

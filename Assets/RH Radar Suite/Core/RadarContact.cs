@@ -48,6 +48,10 @@ namespace RHRadarSuite
         // LOD-specific data
         public RadarLOD DetectionLOD { get; private set; }
         public RadarSignature Signature { get; private set; }
+
+        // Position of the detecting radar at the last update — the origin that
+        // Range/Azimuth/Elevation are measured from
+        public Vector3 RadarOrigin { get; private set; }
         
         /// <summary>
         /// Create a new radar contact
@@ -89,6 +93,17 @@ namespace RHRadarSuite
         /// <param name="position">Current position</param>
         /// <param name="signalStrength">Signal strength (0-1)</param>
         /// <param name="detectionLOD">LOD level that detected this contact</param>
+        /// <param name="radarOrigin">Position of the detecting radar (Range/Azimuth/Elevation origin)</param>
+        public void Update(Vector3 position, float signalStrength, RadarLOD detectionLOD, Vector3 radarOrigin)
+        {
+            RadarOrigin = radarOrigin;
+            Update(position, signalStrength, detectionLOD);
+        }
+
+        /// <summary>
+        /// Update the contact using the previously stored radar origin.
+        /// Prefer the overload that passes the radar's position explicitly.
+        /// </summary>
         public void Update(Vector3 position, float signalStrength, RadarLOD detectionLOD)
         {
             // Calculate velocity if we have previous position data
@@ -119,9 +134,8 @@ namespace RHRadarSuite
             SignalStrength = signalStrength;
             DetectionLOD = detectionLOD;
             
-            // Calculate range, azimuth, and elevation from radar
-            Vector3 radarPosition = Camera.main ? Camera.main.transform.position : Vector3.zero;
-            Vector3 relativePosition = Position - radarPosition;
+            // Calculate range, azimuth, and elevation from the detecting radar
+            Vector3 relativePosition = Position - RadarOrigin;
             Range = relativePosition.magnitude;
             
             // Calculate azimuth (horizontal angle)

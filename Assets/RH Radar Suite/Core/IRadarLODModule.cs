@@ -37,7 +37,21 @@ namespace RHRadarSuite
         /// <param name="paramName">Name of the parameter</param>
         /// <returns>The parameter value, or null if not found</returns>
         object GetParameter(string paramName);
-        
+
+        /// <summary>
+        /// Apply an SO radar profile to this module (typed — preferred over SetParameter)
+        /// </summary>
+        /// <param name="profile">The profile to apply</param>
+        void ApplyProfile(RadarProfileSO profile);
+
+        /// <summary>
+        /// Current scan state for diagnostics/visualization, if this module sweeps a beam.
+        /// </summary>
+        /// <param name="bodyAngleDeg">Beam center bearing, degrees, body-relative (0 = platform forward)</param>
+        /// <param name="beamWidthDeg">Beam width in degrees</param>
+        /// <returns>True if this module has a meaningful sweeping beam</returns>
+        bool TryGetScanState(out float bodyAngleDeg, out float beamWidthDeg);
+
         /// <summary>
         /// Event fired when a new contact is detected
         /// </summary>
@@ -69,6 +83,10 @@ namespace RHRadarSuite
         protected LayerMask targetLayers;
         protected float updateInterval;
         protected int maxTargets;
+
+        // Interim Phase-1 signal normalization (see RadarMath.NominalSignalScale).
+        // Defaults to the historical constant so unprofiled radars behave as before.
+        protected float signalScale = 1_000_000_000f;
         
         // Events
         public event Action<RadarContact> OnContactDetected;
@@ -141,6 +159,32 @@ namespace RHRadarSuite
             }
         }
         
+        /// <summary>
+        /// Apply the common profile parameters. Modules override to also apply
+        /// their own typed fields (beam width, rotation, sector, thresholds).
+        /// </summary>
+        public virtual void ApplyProfile(RadarProfileSO profile)
+        {
+            if (profile == null) return;
+
+            detectionRange = profile.maxDetectionRangeM;
+            radarPower = profile.radarPower;
+            targetLayers = profile.targetLayers;
+            updateInterval = profile.updateInterval;
+            maxTargets = profile.maxTargets;
+            signalScale = profile.ActiveSignalScale;
+        }
+
+        /// <summary>
+        /// Default: no sweeping beam. Sweeping modules override.
+        /// </summary>
+        public virtual bool TryGetScanState(out float bodyAngleDeg, out float beamWidthDeg)
+        {
+            bodyAngleDeg = 0f;
+            beamWidthDeg = 0f;
+            return false;
+        }
+
         public virtual object GetParameter(string paramName)
         {
             switch (paramName)

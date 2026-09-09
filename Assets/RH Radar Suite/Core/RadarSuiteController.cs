@@ -12,6 +12,9 @@ namespace RHRadarSuite
     [AddComponentMenu("RH Radar Suite/Radar Suite Controller")]
     public class RadarSuiteController : MonoBehaviour
     {
+        [Tooltip("Optional SO radar profile — when set, controller and modules configure themselves from it on Initialize (and via ApplyProfile)")]
+        [SerializeField] private RadarProfileSO profile;
+
         [Tooltip("Current Level of Detail for the radar system")]
         [SerializeField] private RadarLOD currentLOD = RadarLOD.LOD1_PassiveDetection;
         
@@ -44,6 +47,10 @@ namespace RHRadarSuite
         // Internal references to LOD implementations
         private Dictionary<RadarLOD, IRadarLODModule> lodModules;
         private IRadarLODModule activeModule;
+
+        // Modules this controller added itself (and therefore owns and may destroy).
+        // Modules the user placed in the Inspector are reused, never destroyed.
+        private readonly List<Component> ownedModules = new List<Component>();
         
         // Radar state
         private bool isInitialized = false;
@@ -61,6 +68,8 @@ namespace RHRadarSuite
         public event Action OnRadarDeactivated;
         
         // Properties
+        public RadarProfileSO Profile => profile;
+        public IRadarLODModule ActiveModule => activeModule;
         public RadarLOD CurrentLOD => currentLOD;
         public bool IsActive => isActive;
         public bool IsInitialized => isInitialized;
@@ -110,8 +119,52 @@ namespace RHRadarSuite
             
             // Initialize LOD modules
             InitializeLODModules();
-            
+
+            // Profile wins over any hand-set values once assigned
+            if (profile != null)
+            {
+                ApplyProfile(profile);
+            }
+
             isInitialized = true;
+        }
+
+        /// <summary>
+        /// Apply an SO radar profile to this controller and every LOD module on
+        /// this GameObject. Safe to call in edit mode (configures serialized
+        /// fields) and at runtime.
+        /// </summary>
+        public void ApplyProfile(RadarProfileSO newProfile)
+        {
+            if (newProfile == null) return;
+
+            profile = newProfile;
+            maxDetectionRange = newProfile.maxDetectionRangeM;
+            radarPower = newProfile.radarPower;
+            targetLayers = newProfile.targetLayers;
+            updateInterval = newProfile.updateInterval;
+            maxTargets = newProfile.maxTargets;
+
+            if (!isActive)
+            {
+                currentLOD = newProfile.defaultLOD;
+            }
+
+            if (lodModules != null)
+            {
+                foreach (var module in lodModules.Values)
+                {
+                    module.ApplyProfile(newProfile);
+                }
+            }
+            else
+            {
+                // Edit mode / pre-initialization: apply to whatever modules exist
+                foreach (var module in GetComponents<RadarLODModuleBase>())
+                {
+                    module.ApplyProfile(newProfile);
+                }
+            }
         }
         
         /// <summary>
@@ -227,14 +280,14 @@ namespace RHRadarSuite
         private void InitializeLODModules()
         {
             lodModules = new Dictionary<RadarLOD, IRadarLODModule>();
-            
-            // Create and initialize all LOD modules
-            lodModules[RadarLOD.LOD1_PassiveDetection] = gameObject.AddComponent<PassiveDetectionModule>();
-            lodModules[RadarLOD.LOD2_BasicRadar] = gameObject.AddComponent<BasicRadarModule>();
-            lodModules[RadarLOD.LOD3_DopplerRadar] = gameObject.AddComponent<DopplerRadarModule>();
-            lodModules[RadarLOD.LOD4_3DTracking] = gameObject.AddComponent<ThreeDTrackingModule>();
-            lodModules[RadarLOD.LOD5_HighFidelity] = gameObject.AddComponent<HighFidelityModule>();
-            
+
+            // Reuse Inspector-configured modules; only add what's missing
+            lodModules[RadarLOD.LOD1_PassiveDetection] = GetOrCreateModule<PassiveDetectionModule>();
+            lodModules[RadarLOD.LOD2_BasicRadar] = GetOrCreateModule<BasicRadarModule>();
+            lodModules[RadarLOD.LOD3_DopplerRadar] = GetOrCreateModule<DopplerRadarModule>();
+            lodModules[RadarLOD.LOD4_3DTracking] = GetOrCreateModule<ThreeDTrackingModule>();
+            lodModules[RadarLOD.LOD5_HighFidelity] = GetOrCreateModule<HighFidelityModule>();
+
             // Initialize each module
             foreach (var module in lodModules.Values)
             {
@@ -247,6 +300,19 @@ namespace RHRadarSuite
             }
         }
         
+        private T GetOrCreateModule<T>() where T : Component, IRadarLODModule
+        {
+            T existing = GetComponent<T>();
+            if (existing != null)
+            {
+                return existing;
+            }
+
+            T created = gameObject.AddComponent<T>();
+            ownedModules.Add(created);
+            return created;
+        }
+
         private void Cleanup()
         {
             if (lodModules != null)
@@ -257,17 +323,18 @@ namespace RHRadarSuite
                     module.OnContactDetected -= HandleContactDetected;
                     module.OnContactLost -= HandleContactLost;
                     module.OnContactUpdated -= HandleContactUpdated;
-                    
-                    // Destroy component if it's a MonoBehaviour
-                    if (module is MonoBehaviour mb)
-                    {
-                        Destroy(mb);
-                    }
                 }
-                
+
                 lodModules.Clear();
             }
-            
+
+            // Modules are NOT destroyed here: Cleanup runs from OnDestroy, where
+            // the GameObject is already tearing every component down, and
+            // destroying siblings there double-destroys them. ownedModules exists
+            // so future explicit shutdown paths know which modules the controller
+            // created (Inspector-placed ones are never the controller's to destroy).
+            ownedModules.Clear();
+
             isInitialized = false;
         }
         

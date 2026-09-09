@@ -51,16 +51,37 @@ namespace RHRadarSuite
         private readonly List<Vector3> scanPoints = new List<Vector3>();
         private int maxScanPoints = 360;
         
-        // Properties
+        // Properties. Scan angle is body-relative: 0 = platform forward.
         public float CurrentScanAngle => currentScanAngle;
         public IReadOnlyList<Vector3> ScanPoints => scanPoints;
-        
+
         public override void Initialize(RadarSuiteController controller)
         {
             base.Initialize(controller);
-            
+
             targetBuffer = new Collider[maxTargets];
-            currentScanAngle = transform.eulerAngles.y;
+            currentScanAngle = 0f;
+        }
+
+        public override void ApplyProfile(RadarProfileSO profile)
+        {
+            base.ApplyProfile(profile);
+            if (profile == null) return;
+
+            beamWidth = Mathf.Clamp(profile.beamWidthDeg, 1f, 120f);
+            rotationSpeed = Mathf.Clamp(profile.RotationDegPerSec, 1f, 360f);
+            enableFullRotation = profile.fullRotation;
+            sectorSize = Mathf.Clamp(profile.sectorSizeDeg, 10f, 180f);
+            sectorCenter = Mathf.Repeat(profile.sectorCenterDeg, 360f);
+            detectionThreshold = Mathf.Clamp(profile.detectionThreshold, 0.01f, 1f);
+            rangeAccuracy = Mathf.Clamp(profile.rangeAccuracyM, 1f, 100f);
+        }
+
+        public override bool TryGetScanState(out float bodyAngleDeg, out float beamWidthDeg)
+        {
+            bodyAngleDeg = currentScanAngle;
+            beamWidthDeg = beamWidth;
+            return isActive;
         }
         
         public override void Activate()
@@ -108,26 +129,12 @@ namespace RHRadarSuite
             currentScanAngle = (currentScanAngle + deltaAngle) % 360f;
             
             // Check if we should scan at this angle
-            if (enableFullRotation || IsAngleInSector(currentScanAngle))
+            if (enableFullRotation || RadarMath.IsAngleInSector(currentScanAngle, sectorCenter, sectorSize))
             {
-                // Add scan point for visualization
-                Vector3 scanDirection = Quaternion.Euler(0, currentScanAngle, 0) * Vector3.forward;
+                // Add scan point for visualization (body-relative angle -> world direction)
+                Vector3 scanDirection = RadarMath.BodyDirection(transform, currentScanAngle);
                 AddScanPoint(transform.position + scanDirection * detectionRange);
             }
-        }
-        
-        private bool IsAngleInSector(float angle)
-        {
-            float halfSector = sectorSize / 2f;
-            float minAngle = (sectorCenter - halfSector + 360f) % 360f;
-            float maxAngle = (sectorCenter + halfSector + 360f) % 360f;
-            
-            if (minAngle > maxAngle)
-            {
-                return angle >= minAngle || angle <= maxAngle;
-            }
-            
-            return angle >= minAngle && angle <= maxAngle;
         }
         
         private void AddScanPoint(Vector3 point)
@@ -187,8 +194,8 @@ namespace RHRadarSuite
                 if (contacts.TryGetValue(target, out RadarContact contact))
                 {
                     // Update existing contact
-                    contact.Update(target.transform.position, signalStrength, RadarLOD.LOD2_BasicRadar);
-                    
+                    contact.Update(target.transform.position, signalStrength, RadarLOD.LOD2_BasicRadar, transform.position);
+
                     // Raise update event
                     RaiseContactUpdated(contact);
                 }
@@ -196,12 +203,12 @@ namespace RHRadarSuite
                 {
                     // Create new contact
                     contact = new RadarContact(target);
-                    
+
                     // Add range inaccuracy
                     Vector3 actualPosition = target.transform.position;
                     Vector3 detectedPosition = AddRangeInaccuracy(actualPosition);
-                    
-                    contact.Update(detectedPosition, signalStrength, RadarLOD.LOD2_BasicRadar);
+
+                    contact.Update(detectedPosition, signalStrength, RadarLOD.LOD2_BasicRadar, transform.position);
                     
                     // Update jamming info if applicable
                     if (signature != null && signature.IsJamming)
@@ -243,15 +250,12 @@ namespace RHRadarSuite
             // If full rotation is enabled, target is always in scan area
             if (enableFullRotation) return true;
             
-            // Calculate angle to target
+            // Calculate body-relative bearing to target (works on moving/turning platforms)
             Vector3 directionToTarget = target.transform.position - transform.position;
-            directionToTarget.y = 0; // Ignore height difference
-            
-            float angleToTarget = Vector3.SignedAngle(Vector3.forward, directionToTarget.normalized, Vector3.up);
-            angleToTarget = (angleToTarget + 360f) % 360f;
-            
-            // Check if angle is within current sector
-            return IsAngleInSector(angleToTarget);
+            float angleToTarget = RadarMath.BodyRelativeBearing(RadarMath.FlatForward(transform), directionToTarget);
+
+            // Check if bearing is within current sector
+            return RadarMath.IsAngleInSector(angleToTarget, sectorCenter, sectorSize);
         }
         
         private float CalculateSignalStrength(RadarSignature signature, float distance)
@@ -268,8 +272,8 @@ namespace RHRadarSuite
                 baseStrength *= signature.GetEffectiveRCS();
             }
             
-            // Normalize to 0-1 range
-            return Mathf.Clamp01(baseStrength * 1000000000f); // Scale factor to bring into reasonable range
+            // Normalize to 0-1 range (scale calibrated from profile when one is applied)
+            return Mathf.Clamp01(baseStrength * signalScale);
         }
         
         private Vector3 AddRangeInaccuracy(Vector3 actualPosition)

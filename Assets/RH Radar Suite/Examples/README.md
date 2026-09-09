@@ -1,21 +1,32 @@
 # RH Radar Suite Examples
 
-This folder contains example scenes demonstrating the functionality of the RH Radar Suite.
+This folder contains example content for the RH Radar Suite.
 
-## Basic Radar Example
+## RadarKitExample scene (generated)
 
-The `BasicRadarExample` scene demonstrates a simple radar setup with various targets. It includes:
-
-1. A radar platform with the RadarSuiteController attached
-2. Multiple target objects with RadarSignature components
-3. UI elements to display radar information
+Run **RH Navy Sims > Radar Suite > Build Example Scene** to generate
+`RadarKitExample.unity` here. It contains a ground radar tower, a picket ship
+with a naval surface-search radar, an orbiting patrol aircraft with a
+body-relative airborne-intercept radar (CircleFlyer), and five targets with
+varied RadarSignatures — including a stealth drone, a noise jammer (visible to
+the passive LOD), and an orbiting bandit.
 
 ### How to Use
 
-1. Open the `BasicRadarExample` scene
-2. Enter Play mode
-3. Use the RadarControlPanel (RH Navy Sims > Radar Suite > Radar Control Panel) to adjust radar settings
-4. Switch between different LOD levels to see how detection capabilities change
+1. Build the scene from the menu, then enter Play mode
+2. Watch the Scene view: each radar's RadarDiagnostics draws coverage,
+   the live sweep, and contacts (measured position, truth ghost, velocity)
+3. Toggle the diagnostic layers on the RadarDiagnostics component
+4. Use the RadarControlPanel (RH Navy Sims > Radar Suite > Radar Control Panel) to adjust radar settings
+5. Switch between different LOD levels to see how detection capabilities change
+
+## One-click radar outfitting
+
+Select any GameObject and use **GameObject > RH Navy Sims > Radar Suite >
+Add &lt;role&gt; Radar** — the controller, the profile's default LOD module, and
+the diagnostics gizmos are added and configured in one step (idempotent; your
+Inspector tuning on existing modules survives). Default profiles are created
+under `ScriptableObjects/Profiles/`.
 
 ### Key Components
 

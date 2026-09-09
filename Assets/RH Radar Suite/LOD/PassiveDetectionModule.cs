@@ -34,8 +34,22 @@ namespace RHRadarSuite
         public override void Initialize(RadarSuiteController controller)
         {
             base.Initialize(controller);
-            
+
             targetBuffer = new Collider[maxTargets];
+
+            // Historical passive normalization (1/R² one-way reception);
+            // overwritten by the calibrated scale when a profile is applied
+            signalScale = 1_000_000f;
+        }
+
+        public override void ApplyProfile(RadarProfileSO profile)
+        {
+            base.ApplyProfile(profile);
+            if (profile == null) return;
+
+            detectionThreshold = Mathf.Clamp(profile.detectionThreshold, 0.01f, 1f);
+            // Passive reception is one-way (1/R²) — use the R² calibration
+            signalScale = profile.PassiveSignalScale;
         }
         
         public override void Activate()
@@ -122,7 +136,7 @@ namespace RHRadarSuite
                     Vector3 detectedPosition = AddDirectionalInaccuracy(actualPosition);
                     
                     // Update existing contact
-                    contact.Update(detectedPosition, signalStrength, RadarLOD.LOD1_PassiveDetection);
+                    contact.Update(detectedPosition, signalStrength, RadarLOD.LOD1_PassiveDetection, transform.position);
                     
                     // Update jamming info
                     if (signature.IsJamming)
@@ -139,14 +153,14 @@ namespace RHRadarSuite
                     Vector3 actualPosition = target.transform.position;
                     Vector3 detectedPosition = AddDirectionalInaccuracy(actualPosition);
                     
-                    contact.Update(detectedPosition, signalStrength, RadarLOD.LOD1_PassiveDetection);
-                    
+                    contact.Update(detectedPosition, signalStrength, RadarLOD.LOD1_PassiveDetection, transform.position);
+
                     // Update jamming info
                     if (signature.IsJamming)
                     {
                         contact.UpdateJammingInfo(true, signature.JammingStrength);
                     }
-                    
+
                     // Add to contacts dictionary
                     contacts.Add(target, contact);
                     
@@ -190,8 +204,8 @@ namespace RHRadarSuite
             // Apply sensitivity multiplier
             baseStrength *= sensitivity;
             
-            // Normalize to 0-1 range
-            return Mathf.Clamp01(baseStrength * 1000000f); // Scale factor to bring into reasonable range
+            // Normalize to 0-1 range (scale calibrated from profile when one is applied)
+            return Mathf.Clamp01(baseStrength * signalScale);
         }
         
         private Vector3 AddDirectionalInaccuracy(Vector3 actualPosition)

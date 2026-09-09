@@ -56,8 +56,16 @@ namespace RHRadarSuite
         public override void Initialize(RadarSuiteController controller)
         {
             base.Initialize(controller);
-            
+
             targetBuffer = new Collider[maxTargets];
+        }
+
+        public override void ApplyProfile(RadarProfileSO profile)
+        {
+            base.ApplyProfile(profile);
+            if (profile == null) return;
+
+            detectionThreshold = Mathf.Clamp(profile.detectionThreshold, 0.01f, 1f);
         }
         
         public override void Activate()
@@ -131,8 +139,8 @@ namespace RHRadarSuite
                 if (contacts.TryGetValue(target, out RadarContact contact))
                 {
                     // Update existing contact
-                    contact.Update(target.transform.position, signalStrength, RadarLOD.LOD5_HighFidelity);
-                    
+                    contact.Update(target.transform.position, signalStrength, RadarLOD.LOD5_HighFidelity, transform.position);
+
                     // Raise update event
                     RaiseContactUpdated(contact);
                 }
@@ -140,7 +148,7 @@ namespace RHRadarSuite
                 {
                     // Create new contact
                     contact = new RadarContact(target);
-                    contact.Update(target.transform.position, signalStrength, RadarLOD.LOD5_HighFidelity);
+                    contact.Update(target.transform.position, signalStrength, RadarLOD.LOD5_HighFidelity, transform.position);
                     
                     // Add to contacts dictionary
                     contacts.Add(target, contact);
@@ -185,8 +193,8 @@ namespace RHRadarSuite
                 baseStrength *= signature.GetEffectiveRCS();
             }
             
-            // Normalize to 0-1 range
-            return Mathf.Clamp01(baseStrength * 1000000000f); // Scale factor to bring into reasonable range
+            // Normalize to 0-1 range (scale calibrated from profile when one is applied)
+            return Mathf.Clamp01(baseStrength * signalScale);
         }
     }
 }

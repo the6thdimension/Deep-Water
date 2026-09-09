@@ -69,6 +69,16 @@ current implementation, attributed and file-specific:
 - **[Meyer] No consumer contract.** Guided Fury seekers, ship combat systems, and AI
   can't yet ask this radar a question ("best track bearing 045?"). The suite emits
   events but has no queryable track picture.
+- **[Barton, addendum found during Phase 1] Contacts measured from the camera.**
+  `RadarContact.Update` computed Range/Azimuth/Elevation from `Camera.main.transform`
+  — every readout was camera-relative, not radar-relative. Fixed 2026-09-08
+  (`RadarOrigin` passed by every module on every update).
+- **[Skolnik, addendum, quantified] The magic constant made the range knob a lie.**
+  With the hard-coded `1e9` normalization, a power-1 / RCS-1 radar crossed the 0.1
+  threshold only inside ~316 m — nothing was ever detectable at the advertised
+  5 km default. Fixed 2026-09-08 by `RadarMath.NominalSignalScale`: profiles
+  calibrate the scale so a nominal target at max range sits at 4× threshold
+  (interim abstraction; the real equation remains Phase 2).
 
 **Consensus:** keep the architecture (controller + LOD modules + signature + events),
 fix usability and truth-in-visualization first (that is the owner's stated goal),
@@ -86,38 +96,47 @@ finishes early.
 running radar with legible gizmos. Works identically on a parked truck and a
 moving aircraft.*
 
-- [ ] **RadarProfileSO** (P1/Pat1). ScriptableObject radar profile: role enum
-  (GroundSearch / AirSearch / FireControl / AirborneIntercept / NavalSurface),
-  max range, power, beam width, rotation rpm / sector, elevation min/max
-  (stored now, enforced Phase 2), update interval, accuracy σ, default LOD,
-  target layers. `ApplyTo(RadarSuiteController)` writes typed fields — no
-  string parameters.
-- [ ] **Built-in profile presets** created programmatically (Guided Fury
-  asset-builder pattern): Ground Search, Air Search (ground-based), Naval
-  Surface Search, Airborne Intercept. Editor command under
-  `RH Navy Sims > Radar Suite > Create Default Profiles`.
-- [ ] **One-click attach.** Menu + hierarchy context command: `Add Radar (profile…)`
-  on selected GameObject — adds controller + needed LOD modules (reusing any
-  already present), applies profile, adds gizmo component. Idempotent.
-- [ ] **Fix duplicate-module initialization.** `InitializeLODModules` must
-  `GetComponent` first and only `AddComponent` what's missing; Inspector tuning
-  survives. (Panel finding, Meyer.)
-- [ ] **Body-relative angles.** Sector/sweep math relative to the platform's own
-  yaw/frame so aerial + turning platforms work. (Panel finding, Stimson.)
-- [ ] **Diagnostic gizmo suite** (Stimson's three questions, three toggles):
-  coverage (range ring + sector arc + elevation-limited volume from profile),
-  activity (current sweep wedge at true beam width, scan history trail),
-  truth-vs-measurement (contact markers at *measured* pos, line to radar,
-  velocity vector, ghost link to truth pos, fade-out on lost contacts,
-  Handles labels with range/bearing/signal in Scene view).
-- [ ] **Editor-time preview.** Coverage + sector gizmos draw from serialized
-  config while NOT in play mode, so a user can aim a radar before pressing play.
-- [ ] **Phase-1 example scene seed.** `Examples/RadarKitExample` — one ground
-  radar, one naval radar, one moving airborne radar, a few signature targets;
-  replaces the README-only promise.
-- [ ] **Phase-1 EditMode tests.** Profile ApplyTo round-trip; idempotent attach
-  (no duplicate modules after attaching twice); body-relative sector math on a
-  rotated transform.
+- [x] **RadarProfileSO** (P1/Pat1) — DONE 2026-09-08. `ScriptableObjects/RadarProfileSO.cs`:
+  role enum, range/power/layers/threshold, beam + rotation rpm + sector
+  (body-relative), elevation min/max (stored now, enforced Phase 2), timing,
+  accuracy, default LOD. `ApplyTo(controller)` → typed `ApplyProfile` on the
+  controller and every module — no string parameters.
+- [x] **Built-in profile presets** — DONE 2026-09-08. `Editor/RadarKit.cs`
+  (Guided Fury asset-builder pattern): GroundSearch, AirSearch, NavalSurfaceSearch,
+  FireControl, AirborneIntercept created on demand under
+  `RH Navy Sims > Radar Suite > Create Default Profiles`
+  (assets land in `ScriptableObjects/Profiles/`).
+- [x] **One-click attach** — DONE 2026-09-08. Hierarchy context menu
+  `GameObject > RH Navy Sims > Radar Suite > Add <role> Radar`: controller +
+  default-LOD module + diagnostics, profile applied, Undo-aware, idempotent.
+- [x] **Fix duplicate-module initialization** — DONE 2026-09-08.
+  `InitializeLODModules` reuses existing components (`GetOrCreateModule`);
+  Inspector tuning survives; controller tracks which modules it created.
+- [x] **Body-relative angles** — DONE 2026-09-08. `Core/RadarMath.cs` (pure
+  static, P6 seed): `FlatForward` / `BodyRelativeBearing` / `BodyDirection` /
+  `IsAngleInSector` (DeltaAngle-based, wrap-safe). Basic, Doppler, and 3D
+  modules all converted; aerial + turning platforms now scan their own frame.
+- [x] **Diagnostic gizmo suite** — DONE 2026-09-08. `Utils/RadarDiagnostics.cs`,
+  three toggleable layers: Coverage (range ring / sector arc / elevation wedge),
+  Activity (sweep wedge at true beam width + fading trail), Measurements
+  (measured marker + bearing line + velocity vector + truth-ghost link +
+  lost-contact fade-out X), Handles labels (radar summary + per-contact
+  RNG/BRG/EL/SIG).
+- [x] **Editor-time preview** — DONE 2026-09-08. Coverage layer draws from the
+  assigned profile outside play mode ("EDIT PREVIEW" label) so radars can be
+  aimed before pressing play.
+- [x] **Phase-1 example scene builder** — DONE 2026-09-08.
+  `RH Navy Sims > Radar Suite > Build Example Scene` generates
+  `Examples/RadarKitExample.unity`: ground tower, picket ship, orbiting patrol
+  aircraft (CircleFlyer), five signature targets incl. a stealth drone, a noise
+  jammer, and an orbiting bandit.
+- [ ] **Phase-1 EditMode tests — written 2026-09-08, execution PENDING.**
+  `Tests/Editor/RadarKitPhase1Tests.cs` (7 tests: sector wrap, body-relative
+  bearing, FlatForward under pitch/roll, signal-scale calibration, ApplyProfile
+  round-trip, idempotent attach, Inspector-module reuse). Whole suite compiles
+  clean against the 6000.4.11f1 reference set (offline csc check), but the
+  unity-mcp bridge was down this session — run `RHRadarSuite.Tests.Editor` in
+  the Test Runner to close this item (Meyer's rule: not done until it runs).
 
 ## Phase 2 — Physical honesty (detection you can reason about)
 

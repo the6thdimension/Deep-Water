@@ -54,7 +54,7 @@ namespace Micosmo.SensorToolkit {
 
         public void RigidBody2DSeek(Rigidbody2D rb, Vector2 vSteer) {
             var dir = Vector3.ProjectOnPlane(Strafing.GetFaceTarget(rb.transform, vSteer), Vector3.back).normalized;
-            if (rb.isKinematic) {
+            if (rb.bodyType == RigidbodyType2D.Kinematic) {
                 RigidBody2DSeekKinematic(rb, vSteer, dir);
             } else {
                 RigidBody2DSeekWithForces(rb, vSteer, dir);
@@ -68,7 +68,7 @@ namespace Micosmo.SensorToolkit {
 
         void FlyableSeekWithForces(Rigidbody rb, Vector3 vSteer, Vector3 tdir, Vector3 tup) {
             var angularAccel = MotionUtils.SeekAngularAccel(attenMaxTurnAccel, attenMaxTurnSpeed, Mathf.Rad2Deg * rb.angularVelocity, rb.rotation, Quaternion.LookRotation(tdir, tup));
-            var transAccel = MotionUtils.SeekAccel(attenMaxSpeed, vSteer, rb.linearVelocity);
+            var transAccel = MotionUtils.SeekAccel(attenMaxSpeed, vSteer, rb.GetLinearVelocity());
             AccelerateForces(rb, angularAccel, transAccel);
         }
 
@@ -80,7 +80,7 @@ namespace Micosmo.SensorToolkit {
 
         void CharacterSeekWithForces(Rigidbody rb, Vector3 vSteer, Vector3 tdir, Vector3 tup) {
             var angularAccel = MotionUtils.SeekAngularAccel(attenMaxTurnAccel, attenMaxTurnSpeed, Mathf.Rad2Deg * rb.angularVelocity, rb.rotation, Quaternion.LookRotation(tdir, tup));
-            var transAccel = MotionUtils.SeekAccel(attenMaxSpeed, vSteer, rb.linearVelocity);
+            var transAccel = MotionUtils.SeekAccel(attenMaxSpeed, vSteer, rb.GetLinearVelocity());
             AccelerateForces(rb, angularAccel, transAccel);
         }
 
@@ -98,7 +98,7 @@ namespace Micosmo.SensorToolkit {
 
         void RigidBody2DSeekWithForces(Rigidbody2D rb, Vector2 vSteer, Vector2 tdir) {
             var angularAccel = MotionUtils.SeekAngularAccel2D(attenMaxTurnAccel, attenMaxTurnSpeed, rb.angularVelocity, rb.transform.up, tdir);
-            var transAccel = MotionUtils.SeekAccel(attenMaxSpeed, vSteer, rb.linearVelocity);
+            var transAccel = MotionUtils.SeekAccel(attenMaxSpeed, vSteer, rb.GetLinearVelocity());
             AccelerateForces(rb, angularAccel, transAccel);
         }
 
@@ -124,10 +124,10 @@ namespace Micosmo.SensorToolkit {
             if (constrainMotion) {
                 rb.angularVelocity = Vector3.ClampMagnitude(rb.angularVelocity, Mathf.Deg2Rad * attenMaxTurnSpeed);
 
-                var vel = rb.linearVelocity;
+                var vel = rb.GetLinearVelocity();
                 var dirDotForward = Vector3.Dot(vel.normalized, rb.transform.forward);
                 var maxVel = Mathf.Abs(dirDotForward) * attenMaxSpeed + (1f - Mathf.Abs(dirDotForward)) * attenMaxStrafeSpeed;
-                rb.linearVelocity = Vector3.ClampMagnitude(rb.linearVelocity, maxVel);
+                rb.SetLinearVelocity(Vector3.ClampMagnitude(rb.GetLinearVelocity(), maxVel));
             }
         }
 
@@ -188,10 +188,10 @@ namespace Micosmo.SensorToolkit {
             if (constrainMotion) {
                 rb.angularVelocity = Mathf.Clamp(rb.angularVelocity, -attenMaxTurnSpeed, attenMaxTurnSpeed);
 
-                var vel = rb.linearVelocity;
+                var vel = rb.GetLinearVelocity();
                 var dirDotForward = Vector3.Dot(vel.normalized, rb.transform.up);
                 var maxVel = Mathf.Abs(dirDotForward) * attenMaxSpeed + (1f - Mathf.Abs(dirDotForward)) * attenMaxStrafeSpeed;
-                rb.linearVelocity = Vector3.ClampMagnitude(rb.linearVelocity, maxVel);
+                rb.SetLinearVelocity(Vector3.ClampMagnitude(rb.GetLinearVelocity(), maxVel));
             }
         }
 
@@ -213,6 +213,40 @@ namespace Micosmo.SensorToolkit {
 
             rb.rotation = rb.rotation + kinematicAngularVelocity2D * Time.fixedDeltaTime;
             rb.position = rb.position + kinematicVelocity2D * Time.fixedDeltaTime;
+        }
+    }
+
+    static class RigidbodyVelocityCompat {
+        public static Vector3 GetLinearVelocity(this Rigidbody rb) {
+#if UNITY_6000_0_OR_NEWER
+            return rb.linearVelocity;
+#else
+            return rb.velocity;
+#endif
+        }
+
+        public static void SetLinearVelocity(this Rigidbody rb, Vector3 v) {
+#if UNITY_6000_0_OR_NEWER
+            rb.linearVelocity = v;
+#else
+            rb.velocity = v;
+#endif
+        }
+
+        public static Vector2 GetLinearVelocity(this Rigidbody2D rb) {
+#if UNITY_6000_0_OR_NEWER
+            return rb.linearVelocity;
+#else
+            return rb.velocity;
+#endif
+        }
+
+        public static void SetLinearVelocity(this Rigidbody2D rb, Vector2 v) {
+#if UNITY_6000_0_OR_NEWER
+            rb.linearVelocity = v;
+#else
+            rb.velocity = v;
+#endif
         }
     }
 

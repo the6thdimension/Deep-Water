@@ -159,8 +159,10 @@ namespace Micosmo.SensorToolkit {
         public List<GameObject> GetDetections(List<GameObject> storeIn = null) => SignalsToObjects(GetSignals(), storeIn ?? objectWorkList);
         public List<GameObject> GetDetections(string withTag, List<GameObject> storeIn = null) => SignalsToObjects(GetSignals(withTag), storeIn ?? objectWorkList);
         public List<GameObject> GetDetections(Predicate<Signal> predicate, List<GameObject> storeIn = null) => SignalsToObjects(GetSignals(predicate), storeIn ?? objectWorkList);
-        public List<T> GetDetectedComponents<T>(List<T> storeIn) where T : Component => SignalsToComponents(GetSignals(), storeIn);
-        public List<T> GetDetectedComponents<T>(string withTag, List<T> storeIn) where T : Component => SignalsToComponents(GetSignals(withTag), storeIn);
+        // We can't pre-allocate a List<T> for all T, so if null is given for storeIn then create a new List<T>. The storeIn parameter is not defaulted to null
+        // in this case, to hint at this behaviour being different.
+        public List<T> GetDetectedComponents<T>(List<T> storeIn) where T : Component => SignalsToComponents(GetSignals(), storeIn ?? new List<T>());
+        public List<T> GetDetectedComponents<T>(string withTag, List<T> storeIn) where T : Component => SignalsToComponents(GetSignals(withTag), storeIn ?? new List<T>());
         public List<Component> GetDetectedComponents(Type t, List<Component> storeIn = null) => SignalsToComponents(GetSignals(), t, storeIn ?? componentWorkList);
         public List<Component> GetDetectedComponents(Type t, string withTag, List<Component> storeIn = null) => SignalsToComponents(GetSignals(withTag), t, storeIn ?? componentWorkList);
         public List<Signal> GetSignalsByDistance(List<Signal> storeIn = null) => OrderedByDistance(GetSignals(storeIn));
@@ -175,12 +177,12 @@ namespace Micosmo.SensorToolkit {
         public List<GameObject> GetDetectionsBySignalStrength(List<GameObject> storeIn = null) => SignalsToObjects(GetSignalsBySignalStrength(), storeIn ?? objectWorkList);
         public List<GameObject> GetDetectionsBySignalStrength(string withTag, List<GameObject> storeIn = null) => SignalsToObjects(GetSignalsBySignalStrength(withTag), storeIn ?? objectWorkList);
         public List<GameObject> GetDetectionsBySignalStrength(Predicate<Signal> predicate, List<GameObject> storeIn = null) => SignalsToObjects(GetSignalsBySignalStrength(predicate), storeIn ?? objectWorkList);
-        public List<T> GetDetectedComponentsByDistance<T>(List<T> storeIn) where T : Component => SignalsToComponents(GetSignalsByDistance(), storeIn);
-        public List<T> GetDetectedComponentsByDistance<T>(string withTag, List<T> storeIn) where T : Component => SignalsToComponents(GetSignalsByDistance(withTag), storeIn);
+        public List<T> GetDetectedComponentsByDistance<T>(List<T> storeIn) where T : Component => SignalsToComponents(GetSignalsByDistance(), storeIn ?? new List<T>());
+        public List<T> GetDetectedComponentsByDistance<T>(string withTag, List<T> storeIn) where T : Component => SignalsToComponents(GetSignalsByDistance(withTag), storeIn ?? new List<T>());
         public List<Component> GetDetectedComponentsByDistance(Type t, List<Component> storeIn = null) => SignalsToComponents(GetSignalsByDistance(), t, storeIn ?? componentWorkList);
         public List<Component> GetDetectedComponentsByDistance(Type t, string withTag, List<Component> storeIn = null) => SignalsToComponents(GetSignalsByDistance(withTag), t, storeIn ?? componentWorkList);
-        public List<T> GetDetectedComponentsBySignalStrength<T>(List<T> storeIn) where T : Component => SignalsToComponents(GetSignalsBySignalStrength(), storeIn);
-        public List<T> GetDetectedComponentsBySignalStrength<T>(string withTag, List<T> storeIn) where T : Component => SignalsToComponents(GetSignalsBySignalStrength(withTag), storeIn);
+        public List<T> GetDetectedComponentsBySignalStrength<T>(List<T> storeIn) where T : Component => SignalsToComponents(GetSignalsBySignalStrength(), storeIn ?? new List<T>());
+        public List<T> GetDetectedComponentsBySignalStrength<T>(string withTag, List<T> storeIn) where T : Component => SignalsToComponents(GetSignalsBySignalStrength(withTag), storeIn ?? new List<T>());
         public List<Component> GetDetectedComponentsBySignalStrength(Type t, List<Component> storeIn = null) => SignalsToComponents(GetSignalsBySignalStrength(), t, storeIn ?? componentWorkList);
         public List<Component> GetDetectedComponentsBySignalStrength(Type t, string withTag, List<Component> storeIn = null) => SignalsToComponents(GetSignalsBySignalStrength(withTag), t, storeIn ?? componentWorkList);
         public List<Signal> GetSignalsByDistanceToPoint(Vector3 point, List<Signal> storeIn = null) => OrderedByDistanceToPoint(GetSignals(storeIn), point);
@@ -189,8 +191,8 @@ namespace Micosmo.SensorToolkit {
         public List<GameObject> GetDetectionsByDistanceToPoint(Vector3 point, List<GameObject> storeIn = null) => SignalsToObjects(GetSignalsByDistanceToPoint(point), storeIn ?? objectWorkList);
         public List<GameObject> GetDetectionsByDistanceToPoint(Vector3 point, string withTag, List<GameObject> storeIn = null) => SignalsToObjects(GetSignalsByDistanceToPoint(point, withTag), storeIn ?? objectWorkList);
         public List<GameObject> GetDetectionsByDistanceToPoint(Vector3 point, Predicate<Signal> predicate, List<GameObject> storeIn = null) => SignalsToObjects(GetSignalsByDistanceToPoint(point, predicate), storeIn ?? objectWorkList);
-        public List<T> GetDetectedComponentsByDistanceToPoint<T>(Vector3 point, List<T> storeIn) => SignalsToComponents(GetSignalsByDistanceToPoint(point), storeIn);
-        public List<T> GetDetectedComponentsByDistanceToPoint<T>(Vector3 point, string withTag, List<T> storeIn) => SignalsToComponents(GetSignalsByDistanceToPoint(point, withTag), storeIn);
+        public List<T> GetDetectedComponentsByDistanceToPoint<T>(Vector3 point, List<T> storeIn) => SignalsToComponents(GetSignalsByDistanceToPoint(point), storeIn ?? new List<T>());
+        public List<T> GetDetectedComponentsByDistanceToPoint<T>(Vector3 point, string withTag, List<T> storeIn) => SignalsToComponents(GetSignalsByDistanceToPoint(point, withTag), storeIn ?? new List<T>());
         public List<Component> GetDetectedComponentsByDistanceToPoint(Vector3 point, Type t, List<Component> storeIn = null) => SignalsToComponents(GetSignalsByDistanceToPoint(point), t, storeIn ?? new List<Component>());
         public List<Component> GetDetectedComponentsByDistanceToPoint(Vector3 point, Type t, string withTag, List<Component> storeIn = null) => SignalsToComponents(GetSignalsByDistanceToPoint(point, withTag), t, storeIn ?? new List<Component>());
         public Signal GetNearestSignal() => FirstOrDefault(GetSignalsByDistance());
@@ -438,6 +440,11 @@ namespace Micosmo.SensorToolkit {
                 processed = default;
                 return false;
             }
+            var go = processedSignal.Object as GameObject;
+            if (!ReferenceEquals(go, null) && SignalFilter != null && !SignalFilter.IsPassingTagFilter(go)) {
+                processed = default;
+                return false;
+            }
             if (signalProcessors != null) {
                 foreach (var processor in signalProcessors) {
                     if (processor == null) {
@@ -448,11 +455,6 @@ namespace Micosmo.SensorToolkit {
                         return false;
                     }
                 }
-            }
-            var go = processedSignal.Object as GameObject;
-            if (!ReferenceEquals(go, null) && SignalFilter != null && !SignalFilter.IsPassingTagFilter(go)) {
-                processed = default;
-                return false;
             }
             processed = processedSignal;
             return true;

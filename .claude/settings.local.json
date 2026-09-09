@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p .claude/skills)",
+      "Bash(cp -r \"Library/PackageCache/com.unity.dt.app-ui@7899845e6a4a/Plugins~/skills/.\" .claude/skills/)",
+      "mcp__unity-mcp__Unity_ManageEditor",
+      "mcp__unity-mcp__Unity_ManageScene",
+      "mcp__unity-mcp__Unity_Camera_Capture"
+    ]
+  }
+}

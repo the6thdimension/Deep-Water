@@ -50,6 +50,11 @@ namespace Micosmo.SensorToolkit {
             }
             SetColor(Color);
         }
+        public static void WithColor(Color c, System.Action action) {
+            PushColor(c);
+            action();
+            PopColor();
+        }
         static void SetColor(Color c) {
             if (colorStack.Count > 0) {
                 colorStack[colorStack.Count - 1] = c;

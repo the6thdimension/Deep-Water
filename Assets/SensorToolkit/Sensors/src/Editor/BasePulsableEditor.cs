@@ -15,8 +15,14 @@ namespace Micosmo.SensorToolkit.Editors {
             OnStopTesting?.Invoke();
             ActivePulsable.Value = null;
         }
+        [InitializeOnEnterPlayMode]
+        static void OnEnterPlayMode(EnterPlayModeOptions options) {
+            if (options.HasFlag(EnterPlayModeOptions.DisableDomainReload)) {
+                StopAllTesting();
+            }
+        }
     }
-
+    
     public abstract class BasePulsableEditor<T> : Editor where T : BasePulsableSensor {
 
         T pulsable;
@@ -24,8 +30,10 @@ namespace Micosmo.SensorToolkit.Editors {
         protected bool IsActivePulsable => EditorState.ActivePulsable.Value == pulsable;
         protected abstract bool canTest { get; }
 
-        protected bool showDetections => EditorApplication.isPlaying || EditorApplication.isPaused || IsTesting;
-        bool showTestButton => !showDetections;
+        bool isInGame => EditorApplication.isPlaying || EditorApplication.isPaused;
+        protected bool showDetections => isInGame || IsTesting;
+
+        SerializedProperty comment;
 
         protected virtual void OnEnable() {
             if (serializedObject == null) {
@@ -39,6 +47,8 @@ namespace Micosmo.SensorToolkit.Editors {
             if ((EditorApplication.isPlaying || EditorApplication.isPaused) && EditorState.ActivePulsable.Value == null) {
                 EditorState.ActivePulsable.Value = pulsable;
             }
+
+            comment = serializedObject.FindProperty("comment");
         }
 
         protected virtual void OnDisable() {
@@ -65,20 +75,26 @@ namespace Micosmo.SensorToolkit.Editors {
             if (IsActivePulsable) {
                 DrawActive(rect);
             }
+            if (STPrefs.ShowUserComments) {
+                EditorGUILayout.PropertyField(comment);
+            }
             OnPulsableGUI();
             EditorGUILayout.EndVertical();
 
             EditorGUILayout.Space();
 
-            if (canTest && showTestButton) {
-                if (GUILayout.Button("Test", GUILayout.Width(100))) {
-                    StartTesting();
-                }
-            } else if (!showTestButton && !IsActivePulsable) {
+            EditorGUILayout.BeginHorizontal();
+            if (showDetections && !IsActivePulsable) {
                 if (GUILayout.Button("Show Gizmos", GUILayout.Width(100))) {
                     EditorState.ActivePulsable.Value = pulsable;
                 }
             }
+            if (canTest && !isInGame) {
+                if (GUILayout.Button("Test", GUILayout.Width(100))) {
+                    StartTesting();
+                }
+            }
+            EditorGUILayout.EndHorizontal();
         }
 
         void DrawActive(Rect rect) {
@@ -90,7 +106,7 @@ namespace Micosmo.SensorToolkit.Editors {
 
         void OnPulsedHandler() {
             Repaint();
-            if (IsTesting || Application.isPlaying || pulsable == null) {
+            if (Application.isPlaying || pulsable == null) {
                 return;
             }
             IsTesting = true;
@@ -98,8 +114,11 @@ namespace Micosmo.SensorToolkit.Editors {
         }
 
         void StartTesting() {
-            if (IsTesting || Application.isPlaying || pulsable == null) {
+            if (Application.isPlaying || pulsable == null) {
                 return;
+            }
+            if (IsTesting) {
+                EditorState.StopAllTesting();
             }
             pulsable.PulseAll();
             EditorState.ActivePulsable.Value = pulsable;
@@ -110,6 +129,7 @@ namespace Micosmo.SensorToolkit.Editors {
                 return;
             }
             IsTesting = false;
+            pulsable.Clear();
             SceneView.RepaintAll();
         }
 

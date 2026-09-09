@@ -94,7 +94,12 @@ namespace Micosmo.SensorToolkit {
                 highSpeedMap = DirectionalGrid.CreateCircle(resolution * 4, up, Allocator.Persistent);
             }
         }
-        
+
+        public void UpdateUpDirection(Vector3 up) {
+            lowSpeedMap.UpdateAxis(up);
+            highSpeedMap.UpdateAxis(up);
+        }
+
         public void Dispose() {
             if (lowSpeedMap.IsCreated) {
                 lowSpeedMap.Dispose();
@@ -240,8 +245,8 @@ namespace Micosmo.SensorToolkit {
             velocities = nextVelocities;
             nextVelocities = temp;
 
-            lowSpeedMap.Copy(sharedLowSpeed);
-            highSpeedMap.Copy(sharedHighSpeed);
+            lowSpeedMap.Copy(sharedLowSpeed, true);
+            highSpeedMap.Copy(sharedHighSpeed, true);
             completePreferredSpeed = runningPreferredSpeed;
             completeMaxSpeed = runningMaxSpeed;
 

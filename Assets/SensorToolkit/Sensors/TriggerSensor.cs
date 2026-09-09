@@ -89,17 +89,16 @@ namespace Micosmo.SensorToolkit
         }
 
         void OnTriggerEnter(Collider other) {
-            int currCount;
-            if (!colliderCount.TryGetValue(other, out currCount)) {
+            if (!colliderCount.TryGetValue(other, out var currCount)) {
+                colliderCount[other] = 1;
                 AddCollider(other, true);
-                currCount = 0;
+            } else {
+                colliderCount[other] = currCount + 1;
             }
-            colliderCount[other] = currCount + 1;
         }
 
         void OnTriggerExit(Collider other) {
-            int currCount;
-            if (colliderCount.TryGetValue(other, out currCount)) {
+            if (colliderCount.TryGetValue(other, out var currCount)) {
                 if (currCount == 1) {
                     colliderCount.Remove(other);
                     RemoveCollider(other, true);

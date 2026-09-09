@@ -79,10 +79,13 @@ namespace Micosmo.SensorToolkit
                 }
             }
 
-            mesh = new Mesh();
+            if (mesh == null) {
+                mesh = new Mesh();
+                mesh.name = "FOV2DColliderPoints";
+            }
+            mesh.Clear();
             mesh.vertices = pts3D;
             mesh.triangles = triangles;
-            mesh.name = "FOV2DColliderPoints";
         }
 
         void OnDrawGizmosSelected() {

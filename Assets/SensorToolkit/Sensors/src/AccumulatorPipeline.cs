@@ -46,12 +46,19 @@ namespace Micosmo.SensorToolkit {
         [NonSerialized] int accumulatorCount = 0;
         
         [NonSerialized] HashSet<REF> toRemove = new HashSet<REF>();
-        [NonSerialized] List<Accumulator<REF, T>> added = new List<Accumulator<REF, T>>();
         [NonSerialized] HashSet<Accumulator<REF, T>> changed = new HashSet<Accumulator<REF, T>>();
         [NonSerialized] List<T> removed = new List<T>();
 
-        [SerializeField] int prevSignalCount;
+        struct Event {
+            public enum Type { Add, Change, Remove }
+            public Type type;
+            public T target;
+        }
+        [NonSerialized] List<Event> eventQueue = new List<Event>();
+
+        int prevSignalCount = -1;
         int timestamp = 0;
+        bool isPlayingEvents = false;
         
         public T GetOutput(REF go) {
             return accumulators[outputToMap[go]].Output;
@@ -80,6 +87,12 @@ namespace Micosmo.SensorToolkit {
         }
 
         public void UpdateAllInputs(List<T> nextInputs) {
+            if (!AssertRecursionLimitNotReached()) {
+                return;
+            }
+
+            timestamp += 1;
+
             toRemove.Clear();
             foreach (var input in inputToMap) {
                 toRemove.Add(input.Key);
@@ -94,17 +107,38 @@ namespace Micosmo.SensorToolkit {
                 RemoveInputInternal(remaining);
             }
 
-            PlayEvents();
+            SerializeEvents();
+            if (!isPlayingEvents) {
+                PlayEvents();
+            }
         }
 
         public void UpdateInput(T signal) {
+            if (!AssertRecursionLimitNotReached()) {
+                return;
+            }
+
+            timestamp += 1;
+
             UpdateInputInternal(signal);
-            PlayEvents();
+            SerializeEvents();
+            if (!isPlayingEvents) {
+                PlayEvents();
+            }
         }
         
         public void RemoveInput(REF forObject) {
+            if (!AssertRecursionLimitNotReached()) {
+                return;
+            }
+
+            timestamp += 1;
+
             RemoveInputInternal(forObject);
-            PlayEvents();
+            SerializeEvents();
+            if (!isPlayingEvents) {
+                PlayEvents();
+            }
         }
 
         public void OnBeforeSerialize() { }
@@ -121,6 +155,20 @@ namespace Micosmo.SensorToolkit {
             }*/
         }
 
+        int recursionCount = 0;
+        bool AssertRecursionLimitNotReached() {
+            if (!isPlayingEvents) {
+                recursionCount = 0;
+                return true;
+            }
+            recursionCount += 1;
+            if (recursionCount > 10) {
+                Debug.LogError("It appears that a sensor is being pulsed recursively from a detection event handler. This will be ignored to avoid a stack overflow. To avoid this error make sure that any detection event handlers are not causing a sensor to change its list of detections, and therefore firing a new sequence of events.");
+                return false;
+            }
+            return true;
+        }
+        
         void UpdateInputInternal(T signal) {
             if (ReferenceEquals(signal.Object, null)) {
                 return;
@@ -169,10 +217,11 @@ namespace Micosmo.SensorToolkit {
                 accumulatorCount += 1;
 
                 outputToMap[acc.OutputTarget] = accIndex;
-                OnAddedEvent(acc);
             }
             inputToMap[inputTarget] = accIndex;
-            accumulators[accIndex].UpdateInput(inputTarget, processed, timestamp);
+            if (accumulators[accIndex].UpdateInput(inputTarget, processed, timestamp)) {
+                OnChangedEvent(accumulators[accIndex]);
+            }
         }
         
         void RemoveInputFromMap(REF inputObject, int accIndex) {
@@ -199,10 +248,6 @@ namespace Micosmo.SensorToolkit {
             }
         }
 
-        void OnAddedEvent(Accumulator<REF, T> signal) {
-            added.Add(signal);
-        }
-
         void OnChangedEvent(Accumulator<REF, T> signal) {
             changed.Add(signal);
         }
@@ -212,35 +257,58 @@ namespace Micosmo.SensorToolkit {
             removed.Add(signal.PreviousOutput);
         }
 
-        void PlayEvents() {
+        void SerializeEvents() {
             foreach (var change in changed) {
                 var previousOutput = change.PreviousOutput;
-                if (previousOutput.Object != null) {
-                    OnChange?.Invoke(previousOutput, change.Output);
+                if (ReferenceEquals(previousOutput.Object, null)) {
+                    eventQueue.Add(new Event { type = Event.Type.Add, target = change.Output });
+                } else {
+                    eventQueue.Add(new Event { type = Event.Type.Change, target = previousOutput });
+                    eventQueue.Add(new Event { type = Event.Type.Change, target = change.Output });
                 }
             }
-
             foreach (var remove in removed) {
-                OnRemove?.Invoke(remove);
+                eventQueue.Add(new Event { type = Event.Type.Remove, target = remove });
             }
-
-            foreach (var add in added) {
-                OnAdd?.Invoke(add.Output);
-            }
-
-            var signalCount = Outputs.Count;
-            if (prevSignalCount == 0 && signalCount > 0) {
-                OnSome?.Invoke();
-            } else if (prevSignalCount > 0 && signalCount == 0) {
-                OnNone?.Invoke();
-            }
-            prevSignalCount = signalCount;
-
-            added.Clear();
             changed.Clear();
             removed.Clear();
+        }
 
-            timestamp += 1;
+        void PlayEvents() {
+            isPlayingEvents = true;
+            try {
+                var eventIndex = 0;
+                while (eventIndex < eventQueue.Count) {
+                    var evt = eventQueue[eventIndex];
+                    switch (evt.type) {
+                        case Event.Type.Add:
+                            OnAdd?.Invoke(evt.target);
+                            break;
+                        case Event.Type.Change:
+                            // We store the prevValue as current index. The next value in the next index.
+                            eventIndex++;
+                            var changeTo = eventQueue[eventIndex];
+                            OnChange?.Invoke(evt.target, changeTo.target);
+                            break;
+                        case Event.Type.Remove:
+                            OnRemove?.Invoke(evt.target);
+                            break;
+                    }
+                    eventIndex += 1;
+                }
+                eventQueue.Clear();
+
+                var signalCount = Outputs.Count;
+                // prevSignalCount initialized to -1, so event always triggers on first update
+                if (prevSignalCount <= 0 && signalCount > 0) {
+                    OnSome?.Invoke();
+                } else if (prevSignalCount != 0 && signalCount == 0) {
+                    OnNone?.Invoke();
+                }
+                prevSignalCount = signalCount;
+            } finally {
+                isPlayingEvents = false;
+            }
         }
 
         AccumulatorCache accumulatorCache = new AccumulatorCache();

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 6b4bcf4c4b1f93b46b89ebb9cc44a343
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 205336
+  packageName: SensorToolkit 2
+  packageVersion: 2.5.18
+  assetPath: Assets/SensorToolkit/Sensors/src/ProjectiveSphere.cs
+  uploadId: 902008

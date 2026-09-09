@@ -166,14 +166,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4dc9111abad19254791505b103b55a57, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  radarModules:
-  - {fileID: 0}
-  - {fileID: 0}
-  shipRadars:
-  - radarGameObject: {fileID: 1345291345}
-    isActive: 1
-  - radarGameObject: {fileID: 826104874}
-    isActive: 1
 --- !u!114 &43397663
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -204,10 +196,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac8ae19ae9a91b54c87fb22e3be48394, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  missilePrefab: {fileID: 229188457069786514, guid: 0863926d4f1a37d4fa607113d9e82507,
-    type: 3}
-  missileCount: 32
-  radar: {fileID: 1345291347}
 --- !u!4 &307190897 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 605743de53f53b54d9aa2157a5d5de13,
@@ -226,13 +214,41 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e516de03e5f0a02428b6eb9254421441, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  missileConfig: {fileID: 11400000, guid: 380d4cb2c7b4ef34792097143bf70ade, type: 2}
-  missilePrefab: {fileID: 3376660235189274850, guid: 85c324f4829cc3e4e9d2ca84ce4dbb15,
-    type: 3}
-  launchPoint: {fileID: 1840746875}
-  totalMissiles: 30
-  potentialTargetsMono: []
-  manualTargetMono: {fileID: 0}
+--- !u!114 &307190899
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 307190894}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d689b53eb2e382446b03a022ea4a6355, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BurkeVLSSystem
+  Variant: 96
+  Cells:
+  - LaunchPoint: {fileID: 1840746875}
+    HatchAnimator: {fileID: 0}
+  - LaunchPoint: {fileID: 0}
+    HatchAnimator: {fileID: 0}
+  - LaunchPoint: {fileID: 0}
+    HatchAnimator: {fileID: 0}
+  InitialLoadout:
+  - Missile: {fileID: 11400000, guid: 33651749b1cb5f04a9fd215d4f588b38, type: 2}
+    Quantity: 30
+  - Missile: {fileID: 0}
+    Quantity: 0
+  AutoLoadOnAwake: 1
+  HatchOpenDelay: 0.35
+  PreLaunchDelay: 0.1
+  InterShotDelay: 0.25
+  CellCooldown: 1
+  PostLaunchHatchDelay: 0.1
+  HatchOpenTrigger: Open
+  HatchCloseTrigger: Close
+  EjectionImpulse: 1.9
+  FallbackLaunchEuler: {x: -90, y: 0, z: 0}
 --- !u!1 &395421242
 GameObject:
   m_ObjectHideFlags: 0
@@ -291,47 +307,86 @@ PrefabInstance:
     - target: {fileID: 1932277188405946800, guid: 85c324f4829cc3e4e9d2ca84ce4dbb15,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 1
+      value: 0.6217006
       objectReference: {fileID: 0}
     - target: {fileID: 1932277188405946800, guid: 85c324f4829cc3e4e9d2ca84ce4dbb15,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0.63807374
       objectReference: {fileID: 0}
     - target: {fileID: 1932277188405946800, guid: 85c324f4829cc3e4e9d2ca84ce4dbb15,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0.31700745
       objectReference: {fileID: 0}
     - target: {fileID: 1932277188405946800, guid: 85c324f4829cc3e4e9d2ca84ce4dbb15,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: 0.32535627
       objectReference: {fileID: 0}
     - target: {fileID: 1932277188405946800, guid: 85c324f4829cc3e4e9d2ca84ce4dbb15,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
+      value: -144.048
       objectReference: {fileID: 0}
     - target: {fileID: 1932277188405946800, guid: 85c324f4829cc3e4e9d2ca84ce4dbb15,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
+      value: 88.92
       objectReference: {fileID: 0}
     - target: {fileID: 1932277188405946800, guid: 85c324f4829cc3e4e9d2ca84ce4dbb15,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
+      value: -88.16
       objectReference: {fileID: 0}
     - target: {fileID: 3376660235189274850, guid: 85c324f4829cc3e4e9d2ca84ce4dbb15,
         type: 3}
       propertyPath: m_Name
       value: ESSM Shell
       objectReference: {fileID: 0}
+    - target: {fileID: 8931383589997992894, guid: 85c324f4829cc3e4e9d2ca84ce4dbb15,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.53
+      objectReference: {fileID: 0}
+    - target: {fileID: 8931383589997992894, guid: 85c324f4829cc3e4e9d2ca84ce4dbb15,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -20.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8931383589997992894, guid: 85c324f4829cc3e4e9d2ca84ce4dbb15,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8931383589997992894, guid: 85c324f4829cc3e4e9d2ca84ce4dbb15,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8931383589997992894, guid: 85c324f4829cc3e4e9d2ca84ce4dbb15,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8931383589997992894, guid: 85c324f4829cc3e4e9d2ca84ce4dbb15,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8931383589997992894, guid: 85c324f4829cc3e4e9d2ca84ce4dbb15,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3376660235189274850, guid: 85c324f4829cc3e4e9d2ca84ce4dbb15,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 678728549}
   m_SourcePrefab: {fileID: 100100000, guid: 85c324f4829cc3e4e9d2ca84ce4dbb15, type: 3}
 --- !u!1 &540546111
 GameObject:
@@ -633,6 +688,56 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0863926d4f1a37d4fa607113d9e82507, type: 3}
+--- !u!1 &678728546 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3376660235189274850, guid: 85c324f4829cc3e4e9d2ca84ce4dbb15,
+    type: 3}
+  m_PrefabInstance: {fileID: 477459724}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &678728549
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 678728546}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89deb68ee5969cd499fa0cc22831aae4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ESSMHomingMissile6DoF
+  Target: {fileID: 1890496443}
+  SeekerRange: 50000
+  SeekerFovDeg: 60
+  NavigationConstant: 3.5
+  MaxLateralAccel: 40
+  SeekerOcclusionMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  RequireLineOfSight: 0
+  BoostThrust: 140000
+  BoostDuration: 1.4
+  SustainThrust: 18000
+  SustainDuration: 7
+  LifeTime: 20
+  ReferenceArea: 0.065
+  AirDensity: 1.225
+  BaseDragCoefficient: 0.18
+  AlphaDragScale: 1.8
+  LiftSlope: 3.5
+  SideForceSlope: 2.5
+  PitchMoment: 4500
+  YawMoment: 4500
+  RollDamping: 1800
+  PitchDamping: 1200
+  YawDamping: 1200
+  ProximityFuzeRadius: 7
+  ImpactMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  ImpactRaySafety: 1.2
+  ExplosionPrefab: {fileID: 0}
+  DrawDebug: 0
 --- !u!1 &721937642
 GameObject:
   m_ObjectHideFlags: 0
@@ -865,12 +970,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &826104874 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 9184041754274814660, guid: 605743de53f53b54d9aa2157a5d5de13,
-    type: 3}
-  m_PrefabInstance: {fileID: 1271141049}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &941925173
 GameObject:
   m_ObjectHideFlags: 0
@@ -1154,6 +1253,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 307190898}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 605743de53f53b54d9aa2157a5d5de13,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 307190899}
     - targetCorrespondingSourceObject: {fileID: -1252370995611363245, guid: 605743de53f53b54d9aa2157a5d5de13,
         type: 3}
       insertIndex: -1
@@ -1166,6 +1269,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 1345291352}
+    - targetCorrespondingSourceObject: {fileID: -1252370995611363245, guid: 605743de53f53b54d9aa2157a5d5de13,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1345291353}
   m_SourcePrefab: {fileID: 100100000, guid: 605743de53f53b54d9aa2157a5d5de13, type: 3}
 --- !u!1 &1345291345 stripped
 GameObject:
@@ -1185,16 +1292,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a17341ecbda7fb64db549214126a92d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  target: {fileID: 0}
-  proportionalGain: 1
-  scanningSpeed: 30
-  targetMask:
-    serializedVersion: 2
-    m_Bits: 0
-  detectionRange: 100
-  missiles: []
-  azimuthSpan: 360
-  showScanVolume: 1
 --- !u!114 &1345291351
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1250,6 +1347,55 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1345291353
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1345291345}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f15b5535ef7faf4593e576357f04f7f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SPG62FireControlRadar
+  VLS: {fileID: 307190899}
+  RadarOrigin: {fileID: 1345291356}
+  Mode: 1
+  ManualSTTTarget: {fileID: 0}
+  AutoDesignateBestTrack: 1
+  InstrumentedRange: 185000
+  AzimuthFovDeg: 120
+  ElevationFovDeg: 60
+  AzimuthScanRateDegPerSec: 45
+  ElevationScanRateDegPerSec: 20
+  ScanUpdatePeriod: 0.1
+  TargetMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  MaxTargetsPerSweep: 256
+  TrackAcquireThreshold: 0.35
+  LockThreshold: 0.65
+  TrackTimeout: 6
+  QualityRiseRate: 1.8
+  QualityDecayRate: 0.9
+  MissileToFire: {fileID: 11400000, guid: 33651749b1cb5f04a9fd215d4f588b38, type: 2}
+  SalvoSize: 2
+  InterSalvoDelay: 0.2
+  MinFireInterval: 1
+  MinEngagementRange: 2000
+  MaxEngagementRange: 160000
+  AutoFireWhenLocked: 0
+  DrawGizmos: 1
+  ScanColor: {r: 0.15, g: 0.9, b: 1, a: 0.35}
+  TrackColor: {r: 1, g: 0.9, b: 0.15, a: 0.8}
+  LockColor: {r: 1, g: 0.2, b: 0.15, a: 0.95}
+--- !u!4 &1345291356 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8487595861917635065, guid: 605743de53f53b54d9aa2157a5d5de13,
+    type: 3}
+  m_PrefabInstance: {fileID: 1271141049}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1449302046 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7092112505271660121, guid: 20f415e1f800ec445a14f9d9107fd103,
@@ -1268,10 +1414,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c7e7198a4a885234aadd23b45ace1ef3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  thrust: 1000
-  steeringSpeed: 10
-  target: {fileID: 0}
-  trackingDistance: 60
 --- !u!54 &1449302051
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1279,10 +1421,10 @@ Rigidbody:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1449302046}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Mass: 100
-  m_Drag: 0
-  m_AngularDrag: 0.05
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -1683,6 +1825,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1704,6 +1848,7 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -1744,63 +1889,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff01e5806f7269f4e8703a9f30c8db8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  target: {fileID: 0}
-  missileType: 7
-  maxSpeed: 1372
-  rotateSpeed: 250
-  fuel: 100
-  thrust: 2680
-  armingDistance: 0
-  ceiling: 19812
-  range: 50004
-  cost: 972000
-  speed: 4.96
-  rb: {fileID: 0}
-  thrustCurve:
-    m_Curve:
-    - time: -0.02083335
-      value: -0.10000616
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - time: 0.005016922
-      value: 0.31089073
-      inSlope: 2.4807537
-      outSlope: 22.146626
-      tangentMode: 1
-      weightedMode: 0
-      inWeight: 1
-      outWeight: 0.1155197
-    - time: 0.14428513
-      value: 0.87980443
-      inSlope: 1.2440408
-      outSlope: 0.42959228
-      tangentMode: 1
-      weightedMode: 0
-      inWeight: 1
-      outWeight: 0.20787336
-    - time: 0.9417363
-      value: 0.9626143
-      inSlope: -0.24366918
-      outSlope: -0.24366918
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 1
-    - time: 1
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
 --- !u!54 &1583115821
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1808,10 +1896,10 @@ Rigidbody:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1583115813}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -1979,6 +2067,117 @@ Transform:
   m_Children: []
   m_Father: {fileID: 307190897}
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: -1.416}
+--- !u!1 &1890496439
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1890496443}
+  - component: {fileID: 1890496442}
+  - component: {fileID: 1890496441}
+  - component: {fileID: 1890496440}
+  m_Layer: 0
+  m_Name: Sphere
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!135 &1890496440
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1890496439}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.5
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!23 &1890496441
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1890496439}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 73c176f402d2c2f4d929aa5da7585d17, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!33 &1890496442
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1890496439}
+  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!4 &1890496443
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1890496439}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -7823.7573, y: 3122.5215, z: -3199.2666}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1901745724
 GameObject:
   m_ObjectHideFlags: 0
@@ -2232,3 +2431,4 @@ SceneRoots:
   - {fileID: 941925175}
   - {fileID: 721937646}
   - {fileID: 477459724}
+  - {fileID: 1890496443}

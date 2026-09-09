@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: e77fc9afd958c154c9e4cfe6dc9067ed
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 205336
+  packageName: SensorToolkit 2
+  packageVersion: 2.5.18
+  assetPath: Assets/SensorToolkit/Sensors/src/AngleEnumerator.cs
+  uploadId: 902008

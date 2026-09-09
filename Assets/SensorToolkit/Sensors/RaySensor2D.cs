@@ -66,11 +66,17 @@ namespace Micosmo.SensorToolkit
         #region Events
         [SerializeField]
         ObstructionEvent onObstruction;
-        public ObstructionEvent OnObstruction => onObstruction;
+        public ObstructionEvent OnObstruction {
+            get => onObstruction;
+            set => onObstruction = value;
+        }
 
         [SerializeField]
         ObstructionEvent onClear;
-        public ObstructionEvent OnClear => onClear;
+        public ObstructionEvent OnClear {
+            get => onClear;
+            set => onClear = value;
+        }
 
         public override event Action OnPulsed;
         #endregion
@@ -300,7 +306,7 @@ namespace Micosmo.SensorToolkit
             clearDetectedObjects();
 
             var saveQHT = Physics2D.queriesHitTriggers;
-            Physics2D.queriesHitTriggers = !IgnoreTriggerColliders;
+            Physics2D.queriesHitTriggers = !IgnoreTriggerColliders; // Must keep this, Raycast with single result doesn't support ContactFilter
             var numberOfHits = physics.PerformTest(this, physicsTest);
             Physics2D.queriesHitTriggers = saveQHT;
 
@@ -417,7 +423,12 @@ namespace Micosmo.SensorToolkit
                     }
                     return 0;
                 } else {
-                    return Physics2D.RaycastNonAlloc(ray.origin, ray.direction, results, sensor.Length, combinedLayers);
+                    var filter = new ContactFilter2D {
+                        useLayerMask = true,
+                        layerMask = combinedLayers,
+                        useTriggers = !sensor.IgnoreTriggerColliders
+                    };
+                    return Physics2D.Raycast(ray.origin, ray.direction, filter, results, sensor.Length);
                 }
             }
         }
@@ -446,7 +457,12 @@ namespace Micosmo.SensorToolkit
                     }
                     return 0;
                 } else {
-                    return Physics2D.CircleCastNonAlloc(ray.origin, sensor.Circle.Radius, ray.direction, results, sensor.Length, combinedLayers);
+                    var filter = new ContactFilter2D {
+                        useLayerMask = true,
+                        layerMask = combinedLayers,
+                        useTriggers = !sensor.IgnoreTriggerColliders
+                    };
+                    return Physics2D.CircleCast(ray.origin, sensor.Circle.Radius, ray.direction, filter, results, sensor.Length);
                 }
             }
         }
@@ -462,14 +478,19 @@ namespace Micosmo.SensorToolkit
             public int Test(RaySensor2D sensor, RaycastHit2D[] results) {
                 LayerMask combinedLayers = sensor.DetectsOnLayers | sensor.ObstructedByLayers;
                 if (sensor.isSingleResult()) {
-                    var hit = Physics2D.BoxCast(sensor.transform.position, sensor.Box.HalfExtents, sensor.transform.eulerAngles.z, sensor.direction, sensor.Length, combinedLayers);
+                    var hit = Physics2D.BoxCast(sensor.transform.position, 2f*sensor.Box.HalfExtents, sensor.transform.eulerAngles.z, sensor.direction, sensor.Length, combinedLayers);
                     if (hit.collider != null) {
                         results[0] = hit;
                         return 1;
                     }
                     return 0;
                 } else {
-                    return Physics2D.BoxCastNonAlloc(sensor.transform.position, sensor.Box.HalfExtents, sensor.transform.eulerAngles.z, sensor.direction, results, sensor.Length, combinedLayers);
+                    var filter = new ContactFilter2D {
+                        useLayerMask = true,
+                        layerMask = combinedLayers,
+                        useTriggers = !sensor.IgnoreTriggerColliders
+                    };
+                    return Physics2D.BoxCast(sensor.transform.position, 2f*sensor.Box.HalfExtents, sensor.transform.eulerAngles.z, sensor.direction, filter, results, sensor.Length);
                 }
             }
         }
@@ -498,7 +519,12 @@ namespace Micosmo.SensorToolkit
                     }
                     return 0;
                 } else {
-                    return Physics2D.CapsuleCastNonAlloc(pos, size, dir, angle, sensor.direction, results, sensor.Length, combinedLayers);
+                    var filter = new ContactFilter2D {
+                        useLayerMask = true,
+                        layerMask = combinedLayers,
+                        useTriggers = !sensor.IgnoreTriggerColliders
+                    };
+                    return Physics2D.CapsuleCast(pos, size, dir, angle, sensor.direction, filter, results, sensor.Length);
                 }
             }
         }

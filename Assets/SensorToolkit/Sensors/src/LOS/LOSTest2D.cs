@@ -6,7 +6,6 @@ namespace Micosmo.SensorToolkit {
 
     public class LOSTest2D : BaseLOSTest {
 
-        LOSFieldOfView2D fov = new LOSFieldOfView2D();
         List<Edge2D> edges = new List<Edge2D>();
         List<Edge2D> projectedEdges = new List<Edge2D>();
         ComponentCache losColliderOwnerCache;
@@ -16,7 +15,7 @@ namespace Micosmo.SensorToolkit {
             base.DrawGizmos();
             SensorGizmos.PushColor(Color.blue);
             foreach (var edge in edges) {
-                edge.DrawGizmos(config.Origin.z);
+                edge.DrawGizmos(config.Frame.Position.z);
             }
             /*foreach (var edge in projectedEdges) {
                 edge.DrawGizmos(Config.Origin.z);
@@ -38,9 +37,9 @@ namespace Micosmo.SensorToolkit {
         }
 
         LOSRayResult DoTest(Vector3 testPoint) {
-            var delta = (Vector2)testPoint - (Vector2)config.Origin;
+            var delta = (Vector2)testPoint - (Vector2)config.Frame.Position;
 
-            var ray = new Ray(config.Origin, delta.normalized);
+            var ray = new Ray(config.Frame.Position, delta.normalized);
             var result = new LOSRayResult() { OriginPoint = ray.origin, TargetPoint = testPoint, VisibilityMultiplier = 1f };
             var hitInfo = Physics2D.Raycast(ray.origin, ray.direction, delta.magnitude, config.BlocksLineOfSight);
             if (hitInfo.collider != null) {
@@ -69,7 +68,7 @@ namespace Micosmo.SensorToolkit {
         }
 
         protected override bool IsInsideSignal() {
-            var origin = Config.Origin;
+            var origin = Config.Frame.Position;
             var bounds = Config.InputSignal.Bounds;
             origin.Set(origin.x, origin.y, bounds.center.z);
             return bounds.Contains(origin);
@@ -100,18 +99,18 @@ namespace Micosmo.SensorToolkit {
 
             var bounds = config.InputSignal.Bounds;
             bounds.center = (Vector2)bounds.center;
-            LOSUtils.MapBoundsToEdges(config.Origin, bounds, edges);
+            LOSUtils.MapBoundsToEdges(config.Frame.Position, bounds, edges);
 
             if (config.LimitViewAngle) {
-                fov.Set(config.MaxHorizAngle * 2f, config.Origin, Quaternion.LookRotation(config.Frame.Forward, config.Frame.Up));
-                fov.Clip(edges);
+                var fov = FOVRange2D.Of(config.MaxHorizAngle * 2f);
+                FOVCuttingPlanes2D.From(Config.Frame, fov).Clip(edges);
             }
             if (edges.Count == 0) {
                 return;
             }
 
             foreach (var edge in edges) {
-                projectedEdges.Add(edge.ProjectCircle(config.Origin));
+                projectedEdges.Add(edge.ProjectCircle(config.Frame.Position));
             }
 
             for (int i = 0; i < config.NumberOfRays; i++) {
@@ -122,7 +121,7 @@ namespace Micosmo.SensorToolkit {
                 var randomPoint = LOSUtils.GetRandomPointOnEdges(projectedEdges, nextSobol);
 
                 float boundsDist;
-                var ray = new Ray((Vector2)config.Origin, ((Vector2)(randomPoint - config.Origin)).normalized);
+                var ray = new Ray((Vector2)config.Frame.Position, ((Vector2)(randomPoint - config.Frame.Position)).normalized);
                 bounds.IntersectRay(ray, out boundsDist);
 
                 if (boundsDist == 0f) {
@@ -136,8 +135,8 @@ namespace Micosmo.SensorToolkit {
                     continue;
                 }
 
-                var intBoundsInPoint = ray.origin + ray.direction * boundsDist + new Vector3(0f, 0f, config.Origin.z);
-                var intBoundsOutPoint = LOSUtils.RaycastBoundsOutPoint(intBoundsInPoint, (intBoundsInPoint - Config.Origin).normalized, bounds);
+                var intBoundsInPoint = ray.origin + ray.direction * boundsDist + new Vector3(0f, 0f, config.Frame.Position.z);
+                var intBoundsOutPoint = LOSUtils.RaycastBoundsOutPoint(intBoundsInPoint, (intBoundsInPoint - Config.Frame.Position).normalized, bounds);
 
                 var midpoint = (intBoundsOutPoint + intBoundsInPoint) / 2f;
                 var penetration = midpoint - intBoundsInPoint;
@@ -154,12 +153,12 @@ namespace Micosmo.SensorToolkit {
             var visibilityScale = 1f;
             if (config.LimitDistance) {
                 var bounds = config.InputSignal.Bounds;
-                bounds.center.Set(bounds.center.x, bounds.center.y, config.Origin.z);
-                float distance = Mathf.Sqrt((bounds.SqrDistance(config.Origin)));
+                bounds.center.Set(bounds.center.x, bounds.center.y, config.Frame.Position.z);
+                float distance = Mathf.Sqrt((bounds.SqrDistance(config.Frame.Position)));
                 visibilityScale *= config.VisibilityByDistance.Evaluate(distance / config.MaxDistance);
             }
             if (config.LimitViewAngle) {
-                var horizAngle = LOSUtils.MinAngleToBounds(config.Origin, config.Frame.Forward, config.Frame.Right, Config.InputSignal.Bounds);
+                var horizAngle = Mathf.Abs(AngleUtils.PlanarAngleToBounds(config.Frame, Config.InputSignal.Bounds));
                 visibilityScale *= config.VisibilityByHorizAngle.Evaluate(horizAngle / config.MaxHorizAngle);
             }
             return visibilityScale;
@@ -168,11 +167,11 @@ namespace Micosmo.SensorToolkit {
         protected override float GetRayVisibilityScale(Vector3 target) {
             var visibilityScale = 1f;
             if (config.LimitDistance) {
-                float distance = (config.Origin - target).magnitude;
+                float distance = (config.Frame.Position - target).magnitude;
                 visibilityScale *= config.VisibilityByDistance.Evaluate(distance / config.MaxDistance);
             }
             if (config.LimitViewAngle) {
-                var horizAngle = LOSUtils.AngleToPoint(config.Origin, config.Frame.Forward, config.Frame.Right, target);
+                var horizAngle = Mathf.Abs(AngleUtils.PlanarAngleToPoint(config.Frame, target));
                 visibilityScale *= config.VisibilityByHorizAngle.Evaluate(horizAngle / config.MaxHorizAngle);
             }
             return visibilityScale;

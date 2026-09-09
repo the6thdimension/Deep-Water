@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: bcd6b545e44c45f48b19c363eb6497d5
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 205336
+  packageName: SensorToolkit 2
+  packageVersion: 2.5.18
+  assetPath: Assets/SensorToolkit/Sensors/src/LOS/AngleUtils.cs
+  uploadId: 902008

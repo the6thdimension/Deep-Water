@@ -6,6 +6,10 @@ namespace Micosmo.SensorToolkit {
 
     public abstract class BasePulsableSensor : MonoBehaviour {
 
+        // User-defined description for this sensor.
+        // Enable in SensorToolkit/Settings to view in inspectors
+        [SerializeField] string comment;
+
         PulseHandle runningPulse;
         PulseHandle pendingPulse;
 

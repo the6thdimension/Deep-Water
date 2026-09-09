@@ -54,7 +54,6 @@ namespace Micosmo.SensorToolkit {
             public List<Collider> OwnedColliders;
             public List<Collider2D> OwnedCollider2Ds;
 
-            public Vector3 Origin;
             public ReferenceFrame Frame;
 
             public float MinimumVisibility;

@@ -1,0 +1,21 @@
+!ATTENTION!
+This model use PBR multi-channel texture. PMX model will lose some of the texture information. You can repair it on your own using software. The user of Blender is suggested to use .blend file in the pack to ensure the complete of model information.
+
+---
+If you have limited time to read the license,
+`Promoted based on Attribution-No commercial license
+`Illegal using is not allowed
+`Promoting this model on other websites again is not allowed
+
+If you have enough time, I wish you can read the complete license behind.
+
+---
+You will be required to credit the author`s name(Martini-SF) of this model in/beside any promoted works with the joining of this model. You are allowed to add the credit on any ways you want only when the credit information can be conducted to audience clearly. (BY)
+
+You are not allowed to use this model for any direct commercial purpose, include sell (require other individual pay for obtaining) the model, sell (require other individual pay for obtaining) the works based on this model, use this model to make the commercial advertisement. If your work is freely opened for all the audiences and users, gaining profits through public video websites (Youtube e.g.) is allowed.
+
+Please legally use this model based on the local laws on your location. The author(Martini-SF) is free from any illegal using of this model.
+
+You are not allowed to release the raw resources of this model or works highly based on this model again. If you cosider your behaviour as reasonable, contact me.
+
+If you promise you can follow the license above, you will be able to use this model for any types of creation. Have a nice time ;-)

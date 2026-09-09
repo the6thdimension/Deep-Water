@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: eee3e84a3fc269e46a8db20cdffb5cc0
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 205336
+  packageName: SensorToolkit 2
+  packageVersion: 2.5.18
+  assetPath: Assets/SensorToolkit/Examples/assets/Developer/TestProjectiveSphere/TestProjectiveSphere.cs
+  uploadId: 902008

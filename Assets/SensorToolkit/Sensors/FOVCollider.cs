@@ -59,10 +59,10 @@ namespace Micosmo.SensorToolkit
             triangles = new int[baseTriangleIndices + arcTriangleIndices + sideTriangleIndices*4];
 
             // Base points
-            pts[0] = Quaternion.Euler(-ElevationAngle / 2f, -FOVAngle / 2f, 0f) * Vector3.forward * NearDistance; // Bottom Left
-            pts[1] = Quaternion.Euler(ElevationAngle / 2f, -FOVAngle / 2f, 0f) * Vector3.forward * NearDistance; // Bottom Right
-            pts[2] = Quaternion.Euler(ElevationAngle / 2f, FOVAngle / 2f, 0f) * Vector3.forward * NearDistance; // Top Right
-            pts[3] = Quaternion.Euler(-ElevationAngle / 2f, FOVAngle / 2f, 0f) * Vector3.forward * NearDistance; // Top Left
+            pts[0] = Quaternion.Euler(-ElevationAngle / 2f, -FOVAngle / 2f, 0f) * Vector3.forward * NearDistance; // Top Left
+            pts[1] = Quaternion.Euler(ElevationAngle / 2f, -FOVAngle / 2f, 0f) * Vector3.forward * NearDistance; // Bottom Left
+            pts[2] = Quaternion.Euler(ElevationAngle / 2f, FOVAngle / 2f, 0f) * Vector3.forward * NearDistance; // Bottom Right
+            pts[3] = Quaternion.Euler(-ElevationAngle / 2f, FOVAngle / 2f, 0f) * Vector3.forward * NearDistance; // Top Right
             triangles[0] = 2; triangles[1] = 1; triangles[2] = 0; triangles[3] = 3; triangles[4] = 2; triangles[5] = 0;
 
             for (int y = 0; y < 2+Resolution; y++) {
@@ -93,19 +93,19 @@ namespace Micosmo.SensorToolkit
                 var tiTop = baseTriangleIndices + arcTriangleIndices + x*3;
                 var tiBottom = tiTop + sideTriangleIndices;
                 if (x == 0) {
-                    triangles[tiTop] = 2;
-                    triangles[tiTop+1] = 3;
+                    triangles[tiTop] = 3;
+                    triangles[tiTop+1] = 0;
                     triangles[tiTop + 2] = iTop;
 
-                    triangles[tiBottom] = 0;
-                    triangles[tiBottom + 1] = 1;
+                    triangles[tiBottom] = 1;
+                    triangles[tiBottom + 1] = 2;
                     triangles[tiBottom + 2] = iBottom;
                 } else {
                     triangles[tiTop] = iTop;
-                    triangles[tiTop + 1] = 2;
+                    triangles[tiTop + 1] = 3;
                     triangles[tiTop + 2] = iTop-1;
 
-                    triangles[tiBottom] = 1;
+                    triangles[tiBottom] = 2;
                     triangles[tiBottom + 1] = iBottom;
                     triangles[tiBottom + 2] = iBottom-1;
                 }
@@ -120,38 +120,34 @@ namespace Micosmo.SensorToolkit
                 var tiLeft = baseTriangleIndices + arcTriangleIndices + sideTriangleIndices*2 + y*3;
                 var tiRight = tiLeft + sideTriangleIndices;
                 if (y == 0) {
-                    triangles[tiLeft] = 3;
-                    triangles[tiLeft + 1] = 0;
+                    triangles[tiLeft] = 0;
+                    triangles[tiLeft + 1] = 1;
                     triangles[tiLeft + 2] = iLeft;
 
-                    triangles[tiRight] = 1;
-                    triangles[tiRight + 1] = 2;
+                    triangles[tiRight] = 2;
+                    triangles[tiRight + 1] = 3;
                     triangles[tiRight + 2] = iRight;
                 } else {
-                    triangles[tiLeft] = 0;
+                    triangles[tiLeft] = 1;
                     triangles[tiLeft + 1] = iLeft;
                     triangles[tiLeft + 2] = iLeft - yIncr;
 
                     triangles[tiRight] = iRight;
-                    triangles[tiRight + 1] = 1;
+                    triangles[tiRight + 1] = 2;
                     triangles[tiRight + 2] = iRight - yIncr;
                 }
             }
 
-            releaseMesh();
-            mesh = new Mesh();
+            if (mesh == null) {
+                mesh = new Mesh();
+                mesh.name = "FOVColliderPoints";
+            }
+            mesh.Clear();
             mesh.vertices = pts;
             mesh.triangles = triangles;
-            mesh.name = "FOVColliderPoints";
             mc.sharedMesh = mesh;
             mc.convex = true;
             mc.isTrigger = true;
-        }
-
-        void releaseMesh() {
-            if (mc.sharedMesh != null && mc.sharedMesh == mesh) {
-                DestroyImmediate(mc.sharedMesh, true);
-            }
         }
 
         void OnDrawGizmosSelected() {

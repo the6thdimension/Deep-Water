@@ -49,6 +49,10 @@ namespace Micosmo.SensorToolkit {
             }
         }
 
+        public void UpdateUpDirection(Vector3 up) {
+            interestMap.UpdateAxis(up);
+        }
+
         public void Dispose() {
             if (interestMap.IsCreated) {
                 interestMap.Dispose();
@@ -105,6 +109,9 @@ namespace Micosmo.SensorToolkit {
                 sharedInterestMap.Dispose();
                 sharedInterestMap = DirectionalGrid.CreateMatching(interestMap, Allocator.Persistent);
             }
+            if (sharedInterestMap.Axis != interestMap.Axis) {
+                sharedInterestMap.UpdateAxis(interestMap.Axis);
+            }
             var job = new SteerInterestJob {
                 Position = owner.transform.position,
                 Direction = owner.transform.TransformDirection(LocalForwardDirection.normalized),
@@ -125,12 +132,12 @@ namespace Micosmo.SensorToolkit {
             if (!sharedInterestItems.IsCreated) {
                 return;
             }
-            interestMap.Copy(sharedInterestMap);
+            interestMap.Copy(sharedInterestMap, true);
             sharedInterestItems.Dispose();
         }
 
         public void DrawGizmos(ISteeringSensor owner, float offset, float scale, float width) {
-            SensorGizmos.PushColor(STPrefs.SeekColour);
+            SensorGizmos.PushColor(STPrefs.InterestColour);
             interestMap.DrawGizmos(owner.transform.position, offset, scale, width);
             SensorGizmos.PopColor();
         }

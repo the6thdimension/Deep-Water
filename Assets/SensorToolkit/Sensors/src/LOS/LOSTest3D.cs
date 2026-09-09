@@ -6,7 +6,6 @@ namespace Micosmo.SensorToolkit {
 
     public class LOSTest3D : BaseLOSTest {
 
-        LOSFieldOfView fov = new LOSFieldOfView();
         List<Triangle> triangles = new List<Triangle>();
         List<Triangle> projectedTriangles = new List<Triangle>();
         ComponentCache losColliderOwnerCache;
@@ -34,9 +33,9 @@ namespace Micosmo.SensorToolkit {
         }
 
         protected override LOSRayResult TestPoint(Vector3 testPoint) {
-            var delta = testPoint - config.Origin;
+            var delta = testPoint - config.Frame.Position;
 
-            var ray = new Ray(config.Origin, delta.normalized);
+            var ray = new Ray(config.Frame.Position, delta.normalized);
             RaycastHit hitInfo;
             var result = new LOSRayResult() { OriginPoint = ray.origin, TargetPoint = testPoint, VisibilityMultiplier = 1f };
             if (Physics.Raycast(ray, out hitInfo, delta.magnitude, config.BlocksLineOfSight, queryTriggerInteraction)) {
@@ -64,7 +63,7 @@ namespace Micosmo.SensorToolkit {
             return result;
         }
 
-        protected override bool IsInsideSignal() => Config.InputSignal.Bounds.Contains(Config.Origin);
+        protected override bool IsInsideSignal() => Config.InputSignal.Bounds.Contains(Config.Frame.Position);
 
         protected override void GenerateTestPoints(List<Vector3> storeIn) {
             if (Config.PointSamplingMethod == PointSamplingMethod.Fast) {
@@ -90,18 +89,18 @@ namespace Micosmo.SensorToolkit {
             projectedTriangles.Clear();
 
             var bounds = config.InputSignal.Bounds;
-            LOSUtils.MapBoundsToTriangles(config.Origin, bounds, triangles);
+            LOSUtils.MapBoundsToTriangles(config.Frame.Position, bounds, triangles);
 
             if (config.LimitViewAngle) {
-                fov.Set(config.MaxHorizAngle * 2f, config.MaxVertAngle * 2f, config.Origin, Quaternion.LookRotation(config.Frame.Forward, config.Frame.Up));
-                fov.Clip(triangles);
+                var fov = FOVRange.Of(config.MaxHorizAngle * 2f, config.MaxVertAngle * 2f);
+                FOVCuttingPlanes.From(config.Frame, fov).Clip(triangles);
             }
             if (triangles.Count == 0) {
                 return;
             }
 
             foreach (var triangle in triangles) {
-                projectedTriangles.Add(triangle.ProjectSphere(config.Origin));
+                projectedTriangles.Add(triangle.ProjectSphere(config.Frame.Position));
             }
 
             for (int i = 0; i < config.NumberOfRays; i++) {
@@ -112,7 +111,7 @@ namespace Micosmo.SensorToolkit {
                 var randomPoint = LOSUtils.GetRandomPointInTriangles(projectedTriangles, nextSobol);
 
                 float boundsDist;
-                var ray = new Ray(config.Origin, (randomPoint - config.Origin).normalized);
+                var ray = new Ray(config.Frame.Position, (randomPoint - config.Frame.Position).normalized);
                 bounds.IntersectRay(ray, out boundsDist);
 
                 if (boundsDist == 0f) {
@@ -127,7 +126,7 @@ namespace Micosmo.SensorToolkit {
                 }
 
                 var intBoundsInPoint = ray.origin + ray.direction * boundsDist;
-                var intBoundsOutPoint = LOSUtils.RaycastBoundsOutPoint(intBoundsInPoint, (intBoundsInPoint - config.Origin).normalized, bounds);
+                var intBoundsOutPoint = LOSUtils.RaycastBoundsOutPoint(intBoundsInPoint, (intBoundsInPoint - config.Frame.Position).normalized, bounds);
 
                 var midpoint = (intBoundsOutPoint + intBoundsInPoint) / 2f;
                 var penetration = midpoint - intBoundsInPoint;
@@ -143,14 +142,13 @@ namespace Micosmo.SensorToolkit {
         protected override float GetVisibilityScale() {
             var visibilityScale = 1f;
             if (config.LimitDistance) {
-                float distance = Mathf.Sqrt((config.InputSignal.Bounds.SqrDistance(config.Origin)));
+                float distance = Mathf.Sqrt((config.InputSignal.Bounds.SqrDistance(config.Frame.Position)));
                 visibilityScale *= config.VisibilityByDistance.Evaluate(distance / config.MaxDistance);
             }
             if (config.LimitViewAngle) {
-                var horizAngle = LOSUtils.MinAngleToBounds(config.Origin, config.Frame.Forward, config.Frame.Right, config.InputSignal.Bounds);
-                var vertAngle = LOSUtils.MinAngleToBounds(config.Origin, config.Frame.Forward, config.Frame.Up, config.InputSignal.Bounds);
-                visibilityScale *= config.VisibilityByHorizAngle.Evaluate(horizAngle / config.MaxHorizAngle)
-                    * config.VisibilityByVertAngle.Evaluate(vertAngle / config.MaxVertAngle);
+                var coords = AngleUtils.ViewAnglesToBounds(config.Frame, config.InputSignal.Bounds).Abs;
+                visibilityScale *= config.VisibilityByHorizAngle.Evaluate(coords.HorizAngle / config.MaxHorizAngle)
+                    * config.VisibilityByVertAngle.Evaluate(coords.VertAngle / config.MaxVertAngle);
             }
             return visibilityScale;
         }
@@ -158,14 +156,13 @@ namespace Micosmo.SensorToolkit {
         protected override float GetRayVisibilityScale(Vector3 target) {
             var visibilityScale = 1f;
             if (config.LimitDistance) {
-                float distance = (config.Origin - target).magnitude;
+                float distance = (config.Frame.Position - target).magnitude;
                 visibilityScale *= config.VisibilityByDistance.Evaluate(distance / config.MaxDistance);
             }
             if (config.LimitViewAngle) {
-                var horizAngle = LOSUtils.AngleToPoint(config.Origin, config.Frame.Forward, config.Frame.Right, target);
-                var vertAngle = LOSUtils.AngleToPoint(config.Origin, config.Frame.Forward, config.Frame.Up, target);
-                visibilityScale *= config.VisibilityByHorizAngle.Evaluate(horizAngle / config.MaxHorizAngle)
-                    * config.VisibilityByVertAngle.Evaluate(vertAngle / config.MaxVertAngle);
+                var coords = AngleUtils.ViewAnglesToPoint(config.Frame, target).Abs;
+                visibilityScale *= config.VisibilityByHorizAngle.Evaluate(coords.HorizAngle / config.MaxHorizAngle)
+                    * config.VisibilityByVertAngle.Evaluate(coords.VertAngle / config.MaxVertAngle);
             }
             return visibilityScale;
         }

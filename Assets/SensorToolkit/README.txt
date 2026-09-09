@@ -7,6 +7,17 @@ If you have any questions, feature requests or if you have found a bug then plea
 
 
 [CHANGELOG]
+2.5.18 - Fixes some deprecation warnings in Unity 6.0 and up
+2.5.17 - Can trigger OnNoDetection from initial pulse. SensorToolkit/Settings can toggle user-comments on sensor inspectors
+2.5.16 - Adds GetNavMeshHit() to NavMeshSensor, to expose the underlying NavMeshHit struct
+2.5.15 - Fix il2cpp build failure, Quality point generation on LOSSensor, and a couple of other small bugs.
+2.5.14 - Fix for domain reload optimization. LOSSensor allows > 180 horizontal angle.
+2.5.13 - Fix boxcast shape on RaySensor2D, add setters for OnClear and OnObstruction events on raycasting sensors.
+2.5.12 - Fix CollectionModifiedException when a detection event handler causes the sensor to update its list of detections.
+2.5.11 - Fix 'Specific GameObject' issue in new versions of playmaker. Remove deprecation warnings in Unity 2023. 'GetDetectedComponents' allocates a list of storeIn is supplied null.
+2.5.10 - Fixes an issue on the NavMeshSensor where area ids are not all consecutive.
+2.5.9 - SteeringSensor has configurable Up-Direction in circular mode. 'Test' button stays visible after testing sensor in editor. Tag filter runs before signal processors. Tweak some default gizmo colours.
+2.5.8 - Update GC2 integration
 2.5.7 - Fix for UserSignals displaying incorrectly in the inspector.
 2.5.6 - Fix for error when changing pulse interval in response to a detection event.
 2.5.5 - Fix GC2 integration for latest version

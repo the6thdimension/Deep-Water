@@ -47,6 +47,11 @@ namespace Micosmo.SensorToolkit {
             }
         }
 
+        public void UpdateUpDirection(Vector3 up) {
+            rawDecisionMap.UpdateAxis(up);
+            decisionMap.UpdateAxis(up);
+        }
+        
         public void Dispose() {
             if (rawDecisionMap.IsCreated) {
                 rawDecisionMap.Dispose();
@@ -71,6 +76,9 @@ namespace Micosmo.SensorToolkit {
                 }
                 sharedDecisionMap = DirectionalGrid.CreateMatching(rawDecisionMap, Allocator.Persistent);
             }
+            if (sharedDecisionMap.Axis != decisionMap.Axis) {
+                sharedDecisionMap.UpdateAxis(decisionMap.Axis);
+            }
             var job = new SteerDecisionJob {
                 InterestMap = interestContext.SharedInterestMap,
                 DangerMap = dangerContext.SharedDangerMap,
@@ -90,9 +98,9 @@ namespace Micosmo.SensorToolkit {
         }
         
         public void ManagedFinish() {
-            rawDecisionMap.Copy(sharedDecisionMap);
+            rawDecisionMap.Copy(sharedDecisionMap, true);
             if (!Application.isPlaying) {
-                decisionMap.Copy(sharedDecisionMap);
+                decisionMap.Copy(sharedDecisionMap, true);
             }
         }
 
@@ -101,7 +109,7 @@ namespace Micosmo.SensorToolkit {
         }
 
         public void DrawGizmos(ISteeringSensor owner, float offset, float scale, float width) {
-            SensorGizmos.PushColor(Color.green);
+            SensorGizmos.PushColor(STPrefs.DecisionColour);
             decisionMap.DrawGizmos(owner.transform.position, offset, scale, width);
             SensorGizmos.PopColor();
         }

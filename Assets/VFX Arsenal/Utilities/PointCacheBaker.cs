@@ -22,6 +22,13 @@ public class PointCacheBaker : MonoBehaviour
     void Awake ()
     {
         vfx = GetComponent<VisualEffect> ();
+        // Prefab templates have no target until they are configured in a scene.
+        if (!MeshToAttach)
+        {
+            if (Application.isPlaying)
+                Debug.LogWarning ("Assign MeshToAttach to initialize the point cache.", this);
+            return;
+        }
         if (MeshToAttach.GetComponentInChildren<SkinnedMeshRenderer> ()) { }
         else
         {

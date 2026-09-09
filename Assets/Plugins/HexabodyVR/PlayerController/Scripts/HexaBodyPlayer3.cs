@@ -333,7 +333,6 @@ namespace HexabodyVR.PlayerController
             LocoCollider.material = _previousLocoMaterial;
         }
 
-        [SerializeField]
         // Update is called once per frame
         void Update()
         {

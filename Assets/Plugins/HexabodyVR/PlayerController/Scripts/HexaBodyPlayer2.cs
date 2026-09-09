@@ -242,7 +242,6 @@ namespace HexabodyVR.PlayerController
             CameraScale.localScale = new Vector3(_scale, _scale, _scale);
         }
 
-        [SerializeField]
         // Update is called once per frame
         void Update()
         {

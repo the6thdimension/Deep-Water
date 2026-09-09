@@ -170,13 +170,36 @@ namespace GuidedFury.Examples
             }
         }
 
-        /// <summary>Constant-velocity kinematic mover — used for scenario targets that need motion.</summary>
+        /// <summary>
+        /// Constant-velocity kinematic mover — used for scenario targets that need motion.
+        /// Simulates on FixedUpdate (deterministic — the missile's guidance samples this
+        /// transform during its own FixedUpdate) and interpolates the rendered pose in
+        /// Update, same pattern as MissileBehaviour, so the target doesn't stutter at low
+        /// time scales. The negative execution order guarantees our FixedUpdate restores
+        /// the exact sim position before any missile's FixedUpdate reads it.
+        /// </summary>
+        [DefaultExecutionOrder(-50)]
         private sealed class ConstantVelocityMover : MonoBehaviour
         {
             public Vector3 WorldVelocity;
+
+            private Vector3 prevSimPos, currSimPos;
+            private bool seeded;
+
             private void FixedUpdate()
             {
-                transform.position += WorldVelocity * Time.fixedDeltaTime;
+                if (!seeded) { prevSimPos = currSimPos = transform.position; seeded = true; }
+                prevSimPos = currSimPos;
+                currSimPos += WorldVelocity * Time.fixedDeltaTime;
+                transform.position = currSimPos; // exact sim pose for fixed-phase consumers
+            }
+
+            private void Update()
+            {
+                if (!seeded) return;
+                float step = Time.fixedDeltaTime;
+                float alpha = step > 0f ? Mathf.Clamp01((Time.time - Time.fixedTime) / step) : 1f;
+                transform.position = Vector3.Lerp(prevSimPos, currSimPos, alpha);
             }
         }
     }

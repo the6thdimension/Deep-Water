@@ -355,9 +355,9 @@ MonoBehaviour:
   maxLifetimeS: 60
   fuzeProximityRadiusM: 10
   fuzeArmDelayS: 1
-  explosionPrefabAerial: {fileID: 7120203488101564333, guid: 656a2bda73d2e9d4ab729223b005a3a2,
+  explosionPrefabAerial: {fileID: 9070521256639635380, guid: c0624063707f9a34e8e2343d5493f75b,
     type: 3}
-  explosionPrefabGround: {fileID: 660093508044062648, guid: 79c6f63eb7243604f8ee3b420ac98952,
+  explosionPrefabGround: {fileID: 1929451392436837686, guid: c12f61617a57bf74d9095008ef6cc9c4,
     type: 3}
   aerialAltitudeThresholdM: 5
   explosionLifetimeS: 6
@@ -367,5 +367,8 @@ MonoBehaviour:
   launchSfxVolume: 1
   flightSfxVolume: 0.7
   explosionSfxVolume: 1
+  blastRadiusM: 25
+  blastImpulseNs: 20000
+  blastUpwardsModifier: 1.5
   flightSfxSpatialBlend: 1
   flightSfxMaxDistanceM: 800

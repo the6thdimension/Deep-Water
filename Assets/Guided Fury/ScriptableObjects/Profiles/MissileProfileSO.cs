@@ -205,6 +205,20 @@ namespace GuidedFury.ScriptableObjects.Profiles
         [Tooltip("Volume of the explosion SFX.")]
         public float explosionSfxVolume = 1f;
 
+        [Header("Detonation — Physical Blast")]
+        [Tooltip("Radius of the physical blast in meters. Non-kinematic Rigidbodies inside get " +
+                 "an outward impulse with linear distance falloff (Unity AddExplosionForce). " +
+                 "0 disables the physical blast entirely.")]
+        public float blastRadiusM = 0f;
+
+        [Tooltip("Impulse applied to a rigidbody at the blast center, in N*s (ForceMode.Impulse). " +
+                 "A 1500 kg vehicle 0 m from a 20000 N*s blast picks up ~13 m/s.")]
+        public float blastImpulseNs = 20000f;
+
+        [Tooltip("AddExplosionForce upwards modifier, meters. Shifts the effective blast origin " +
+                 "downward so objects get tossed up as well as away - more cinematic knockback.")]
+        public float blastUpwardsModifier = 1.5f;
+
         [Tooltip("3D spatial blend for the in-flight loop. 1 = fully 3D (positional); 0 = 2D (always center).")]
         [Range(0f, 1f)]
         public float flightSfxSpatialBlend = 1f;

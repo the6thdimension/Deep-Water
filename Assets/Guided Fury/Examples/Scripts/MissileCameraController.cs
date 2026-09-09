@@ -71,6 +71,10 @@ namespace GuidedFury.Examples
                 {
                     chasedMissile = first;
                     mode = Mode.Chase;
+                    // Drop any SmoothDamp velocity carried over from a previous chase or the
+                    // overview glide -- a stale 1000+ m/s velocity slingshots the camera on
+                    // the first frames of a new chase.
+                    velocitySmoothing = Vector3.zero;
                 }
             }
 
@@ -79,7 +83,10 @@ namespace GuidedFury.Examples
                 mode = mode == Mode.Chase ? Mode.Overview : Mode.Chase;
 
             if (Input.GetKeyDown(cycleKey) && mode == Mode.Chase)
+            {
                 chasedMissile = NextActiveMissile(chasedMissile);
+                velocitySmoothing = Vector3.zero;
+            }
 
             // Drop a missile that's gone terminal — pick another or fall back to overview.
             if (chasedMissile != null && !IsActive(chasedMissile))
@@ -90,13 +97,30 @@ namespace GuidedFury.Examples
         {
             if (mode == Mode.Chase && chasedMissile != null)
             {
-                Vector3 targetPos = chasedMissile.transform.TransformPoint(chaseOffset);
+                // Feed-forward the missile's velocity: SmoothDamp tracking a moving target
+                // settles at roughly (velocity x smoothTime) of steady-state lag. At Mach 4
+                // that is ~200 m -- the missile shrinks to a subpixel dot and appears to
+                // vanish. Aiming at where the missile WILL be in smoothTime cancels the lag
+                // while keeping the smoothing for direction changes.
+                Vector3 missileVel = chasedMissile.GetState().Velocity;
+                // Rotate the offset by the missile's orientation but do NOT TransformPoint it:
+                // TransformPoint multiplies by lossyScale, and vendor prefabs are routinely
+                // authored at wild scales (ESSM Shell root is (65, 65, 100) -- a 15 m offset
+                // became a 1.5 km one and the camera orbited the stratosphere). Offsets around
+                // foreign prefabs must be scale-independent.
+                Vector3 targetPos = chasedMissile.transform.position
+                                  + chasedMissile.transform.rotation * chaseOffset
+                                  + missileVel * smoothTime;
                 Vector3 lookPoint = chasedMissile.transform.position
                                   + chasedMissile.transform.forward * lookAheadM;
 
                 transform.position = Vector3.SmoothDamp(
                     transform.position, targetPos, ref velocitySmoothing, smoothTime);
-                Quaternion targetRot = Quaternion.LookRotation(lookPoint - transform.position, Vector3.up);
+
+                // AP9: never pass Vector3.up as the reference while tracking a free-flying
+                // body -- a vertical (VLS) boost makes forward parallel to up and the camera
+                // roll-flips every frame. Carry our current up instead.
+                Quaternion targetRot = StableLookRotation(lookPoint - transform.position, transform.rotation);
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, 1f - Mathf.Exp(-12f * Time.deltaTime));
             }
             else
@@ -156,6 +180,25 @@ namespace GuidedFury.Examples
                 if (IsActive(cachedMissiles[probe])) return cachedMissiles[probe];
             }
             return null;
+        }
+
+        /// <summary>
+        /// LookRotation with a stable up-vector (mirror of the internal
+        /// PointMass3DofL1Integrator.StableLookRotation -- not visible across the asmdef
+        /// boundary). Carries the current orientation's local up so the camera doesn't
+        /// roll-flip when the look direction passes through vertical. See METHODOLOGY AP9.
+        /// </summary>
+        private static Quaternion StableLookRotation(Vector3 forward, Quaternion current)
+        {
+            if (forward.sqrMagnitude < 1e-6f) return current;
+            Vector3 up = current * Vector3.up;
+            if (Mathf.Abs(Vector3.Dot(forward.normalized, up)) > 0.9995f)
+            {
+                up = current * Vector3.right;
+                if (Mathf.Abs(Vector3.Dot(forward.normalized, up)) > 0.9995f)
+                    up = Vector3.up;
+            }
+            return Quaternion.LookRotation(forward, up);
         }
 
         private static bool IsActive(MissileBehaviour b)

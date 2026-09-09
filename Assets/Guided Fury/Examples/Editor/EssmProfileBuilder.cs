@@ -163,7 +163,31 @@ namespace GuidedFury.Examples.Editor
             p.maxLifetimeS         = 60f;          // long enough to fly out to 50 km
             p.fuzeProximityRadiusM = 10f;          // 39 kg blast-frag warhead; lethal radius ~10 m
             p.fuzeArmDelayS        = 1.0f;         // safe-and-arm delay clears the launcher
-        }
+        
+            // -- Detonation VFX ------------------------------------------------
+            // Defaults picked from packs already in the project. These are plain
+            // Inspector fields on the SO -- swap them on the asset any time; the
+            // behaviour falls back to whichever one is wired if the other is null.
+            // NOTE: re-running this builder resets them to these defaults (Pat4).
+            p.explosionPrefabAerial = AssetDatabase.LoadAssetAtPath<GameObject>(
+                "Assets/DAVFX/Realistic 6D Lighting Aerial Explosions/HDRP/Prefabs/Air Explosion 1.prefab");
+            p.explosionPrefabGround = AssetDatabase.LoadAssetAtPath<GameObject>(
+                "Assets/_VFX/HD Explosion/Prefabs/HD_Naval_Explosion.prefab");
+            if (p.explosionPrefabAerial == null)
+                Debug.LogWarning("[EssmProfileBuilder] Aerial explosion prefab not found -- detonations will use the ground FX (or none).");
+            if (p.explosionPrefabGround == null)
+                Debug.LogWarning("[EssmProfileBuilder] Ground explosion prefab not found -- detonations will use the aerial FX (or none).");
+            p.explosionLifetimeS = 6f;
+            p.aerialAltitudeThresholdM = 5f;
+
+            // -- Physical blast ------------------------------------------------
+            // ESSM carries a 39 kg blast-fragmentation warhead. 25 m is a plausible
+            // severe-effects radius for knockback purposes (lethal fragment radius is
+            // larger, but we model the *shove*, not the frag pattern).
+            p.blastRadiusM         = 25f;
+            p.blastImpulseNs       = 20000f;
+            p.blastUpwardsModifier = 1.5f;
+}
 
         // ===========================================================================
         // Curve builders — hand-authored Mach-dependent aero

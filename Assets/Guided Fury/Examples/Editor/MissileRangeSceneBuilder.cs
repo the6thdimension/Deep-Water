@@ -143,7 +143,7 @@ namespace GuidedFury.Examples.Editor
                 var cam = camGo.GetComponent<Camera>();
                 if (cam != null)
                 {
-                    cam.farClipPlane = 10000f;  // see all the way to the 5 km marker
+                    cam.farClipPlane = 30000f;  // ESSM-class ranges: keep terrain and missile in view well past the 5 km marker
                     cam.nearClipPlane = 0.3f;
                 }
             }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using GuidedFury.Core.Aero;
 using GuidedFury.Core.Atmosphere;
@@ -26,7 +27,9 @@ namespace GuidedFury.Core.Missile
     /// - Hold simulation state. That lives in `entity.State`.
     /// - Do physics math. That lives in the integrator.
     /// - Produce guidance commands. That lives in the guidance law.
-    /// - Use Update(). All simulation work is on FixedUpdate.
+    /// - Simulate in Update(). All simulation work is on FixedUpdate; Update only
+    ///   interpolates the *rendered* transform between the last two fixed states so the
+    ///   missile moves smoothly at any frame rate or time scale (see Update()).
     /// - Use Time.deltaTime. Only Time.fixedDeltaTime is read (and only passed to Step).
     /// - Use reflection or component scans for behavior (AP1, AP3).
     /// </summary>
@@ -86,6 +89,19 @@ namespace GuidedFury.Core.Missile
         private Vector3 lastHitPoint;
         private bool    hasHitPoint;
 
+        [Header("Rendering")]
+        [Tooltip("Interpolate the rendered transform between the last two FixedUpdate states. " +
+                 "The simulation still steps only in FixedUpdate (deterministic, P2/P6); this is " +
+                 "purely visual. Without it the missile teleports once per fixed step, which reads " +
+                 "as stutter whenever frames outpace fixed steps - most obviously at low time scales " +
+                 "(0.1x = one fixed step per 200 ms of real time). Costs one fixed step of visual latency.")]
+        [SerializeField] private bool interpolateVisuals = true;
+
+        // Pose pair for visual interpolation: the sim pose from the last two fixed steps.
+        // Update() blends between them; FixedUpdate() shifts them along.
+        private Vector3 prevSimPos, currSimPos;
+        private Quaternion prevSimRot = Quaternion.identity, currSimRot = Quaternion.identity;
+
         // Shared buffer for the OverlapSphere call. Re-used across all missiles in the scene
         // so we don't allocate every FixedUpdate. 16 is plenty — fuze radii are small and
         // the test range is sparse.
@@ -111,7 +127,14 @@ namespace GuidedFury.Core.Missile
             entity.Step(Time.fixedDeltaTime);
 
             // Mirror state back to the Unity transform for rendering and downstream consumers.
-            transform.SetPositionAndRotation(entity.State.Position, entity.State.Orientation);
+            // Update() re-writes the transform with an interpolated pose before rendering;
+            // this write keeps FixedUpdate-time consumers (other scripts' FixedUpdates,
+            // physics queries against our colliders) seeing the exact sim pose.
+            prevSimPos = currSimPos;
+            prevSimRot = currSimRot;
+            currSimPos = entity.State.Position;
+            currSimRot = entity.State.Orientation;
+            transform.SetPositionAndRotation(currSimPos, currSimRot);
 
             // Proximity fuze check. Skipped while the missile is in a terminal state.
             if (entity.State.Phase != MissilePhase.Detonated && entity.State.Phase != MissilePhase.Failed)
@@ -119,6 +142,21 @@ namespace GuidedFury.Core.Missile
 
             if (entity.State.Phase == MissilePhase.Detonated || entity.State.Phase == MissilePhase.Failed)
                 OnTerminalState();
+        }
+
+        private void Update()
+        {
+            // Visual smoothing only - no simulation here (P2). Renders the pose interpolated
+            // between the previous and current fixed steps. alpha is how far the render clock
+            // has advanced into the current fixed step; at 0.1x time scale a fixed step spans
+            // ~200 ms of real time, so without this the missile visibly teleports step to step.
+            if (!launched || entity == null || !interpolateVisuals) return;
+
+            float step = Time.fixedDeltaTime;
+            float alpha = step > 0f ? Mathf.Clamp01((Time.time - Time.fixedTime) / step) : 1f;
+            transform.SetPositionAndRotation(
+                Vector3.Lerp(prevSimPos, currSimPos, alpha),
+                Quaternion.Slerp(prevSimRot, currSimRot, alpha));
         }
 
         // -- Public API -----------------------------------------------------------
@@ -199,6 +237,11 @@ namespace GuidedFury.Core.Missile
             entity.Launch(worldPosition, worldOrientation);
             launched = true;
 
+            // Seed the interpolation pair at the launch pose - a pooled/reused missile would
+            // otherwise blend its first visible frames from wherever it previously detonated.
+            prevSimPos = currSimPos = worldPosition;
+            prevSimRot = currSimRot = worldOrientation;
+
             // Reset per-flight hit cache in case this GameObject is being re-launched (pooling).
             hasHitPoint = false;
             lastHitPoint = worldPosition;
@@ -227,10 +270,15 @@ namespace GuidedFury.Core.Missile
                 if (rb != null)
                 {
                     bool wasActive = !rb.isKinematic || rb.useGravity;
+                    // Zero velocities BEFORE flipping kinematic — PhysX warns (and ignores the
+                    // write) when velocity is set on an already-kinematic body.
+                    if (!rb.isKinematic)
+                    {
+                        rb.linearVelocity = Vector3.zero;
+                        rb.angularVelocity = Vector3.zero;
+                    }
                     rb.isKinematic = true;
                     rb.useGravity = false;
-                    rb.linearVelocity = Vector3.zero;
-                    rb.angularVelocity = Vector3.zero;
                     if (wasActive)
                         Debug.Log($"[GuidedFury] {name}: neutralized Rigidbody (set kinematic, gravity off). Vendor prefab compatibility.");
                 }
@@ -261,6 +309,29 @@ namespace GuidedFury.Core.Missile
                             "It was competing with MissileBehaviour for motion control. " +
                             "Either strip the script from your prefab, or set 'Disable Foreign Scripts On Launch' = false on the MissileBehaviour to keep it.");
                     }
+                }
+
+                // Vendor prefabs can carry a whole embedded rig, not just scripts. An enabled
+                // Camera anywhere under the missile becomes a fullscreen view that hijacks the
+                // display on spawn and dies with the missile (seen with ESSM Shell's baked
+                // "Missile Cam", far clip 1000 -> the range "disappears" mid-flight). An extra
+                // AudioListener draws "2 audio listeners" warnings every frame. Disable both
+                // anywhere in our hierarchy; same opt-out as foreign scripts.
+                foreach (var cam in GetComponentsInChildren<Camera>(includeInactive: true))
+                {
+                    if (cam.enabled)
+                    {
+                        cam.enabled = false;
+                        Debug.LogWarning(
+                            $"[GuidedFury] {name}: disabled embedded Camera '{cam.gameObject.name}' on launch. " +
+                            "It was rendering over the scene cameras. Strip it from the prefab, or set " +
+                            "'Disable Foreign Scripts On Launch' = false to keep it.");
+                    }
+                }
+                foreach (var listener in GetComponentsInChildren<AudioListener>(includeInactive: true))
+                {
+                    if (listener.enabled)
+                        listener.enabled = false;
                 }
             }
         }
@@ -384,6 +455,7 @@ namespace GuidedFury.Core.Missile
             Vector3 fxPos = hasHitPoint ? lastHitPoint : transform.position;
 
             SpawnExplosionEffects(fxPos);
+            ApplyBlastImpulse(fxPos);
             StopFlightAudio();
 
             // Phase 2 cleanup: disable. Pooling and effects come later.
@@ -402,6 +474,42 @@ namespace GuidedFury.Core.Missile
         /// spawned prefab is auto-destroyed after `explosionLifetimeS` so trails and lights
         /// don't accumulate in the scene over the course of a long run.
         /// </summary>
+        // Shared, allocation-free scratch buffers for the blast overlap query. Static is
+        // fine: ApplyBlastImpulse runs on the main thread only, and the buffers are fully
+        // re-filled/cleared on every call.
+        private static readonly Collider[] BlastOverlapBuffer = new Collider[256];
+        private static readonly HashSet<Rigidbody> BlastSeenBodies = new HashSet<Rigidbody>();
+
+        /// <summary>
+        /// Physical blast: applies an outward impulse to every non-kinematic Rigidbody within
+        /// the profile's blast radius, with Unity's built-in linear distance falloff
+        /// (AddExplosionForce) and an upwards modifier for a cinematic toss. Disabled when
+        /// blastRadiusM is 0. All tuning lives on the MissileProfileSO.
+        /// </summary>
+        private void ApplyBlastImpulse(Vector3 worldPos)
+        {
+            if (profile == null || profile.blastRadiusM <= 0f || profile.blastImpulseNs <= 0f)
+                return;
+
+            int count = Physics.OverlapSphereNonAlloc(worldPos, profile.blastRadiusM, BlastOverlapBuffer);
+            if (count >= BlastOverlapBuffer.Length)
+                Debug.LogWarning($"[GuidedFury] {name}: blast overlap filled its {BlastOverlapBuffer.Length}-collider buffer; " +
+                                 "some rigidbodies may not receive the impulse. Consider a smaller blastRadiusM.");
+
+            BlastSeenBodies.Clear();
+            for (int i = 0; i < count; i++)
+            {
+                Rigidbody rb = BlastOverlapBuffer[i].attachedRigidbody;
+                if (rb == null || rb.isKinematic) continue;
+                if (rb.transform.root == transform.root) continue;      // never punt ourselves
+                if (!BlastSeenBodies.Add(rb)) continue;                 // one impulse per body, not per collider
+
+                rb.AddExplosionForce(profile.blastImpulseNs, worldPos, profile.blastRadiusM,
+                                     profile.blastUpwardsModifier, ForceMode.Impulse);
+            }
+            BlastSeenBodies.Clear();
+        }
+
         private void SpawnExplosionEffects(Vector3 worldPos)
         {
             if (profile == null) return;

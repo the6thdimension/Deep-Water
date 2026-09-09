@@ -16,5 +16,14 @@ namespace GuidedFury.Core.Seekers
         public float FovDeg;
         public float MaxRangeM;
         public float AcquisitionTimeS;
+
+        /// <summary>
+        /// Track-memory ("coast") duration after geometric break-lock, seconds. While
+        /// coasting, the seeker keeps reporting a dead-reckoned track and reacquisition is
+        /// seamless (no dwell penalty). 0 = legacy behavior: drop lock instantly.
+        /// Models a real tracker's memory mode; prevents guidance blackouts during brief
+        /// off-boresight excursions and the terminal flyby LOS swing.
+        /// </summary>
+        public float CoastTimeS;
     }
 }

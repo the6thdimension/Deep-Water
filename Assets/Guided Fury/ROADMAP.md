@@ -73,4 +73,54 @@ end of the appropriate stream as you learn them.
 
 ---
 
+## Known issues / tracked follow-ups (2026-09-08 session)
+
+Filed during the terminal-guidance investigation; each is real, none is urgent enough
+to block the current streams. Pick up opportunistically or when a stream touches the area.
+
+- [x] **~~Vertical-launch pitch-over~~ DONE (2026-09-08).** `BlendedPursuitProNav`
+  (closing-ratio-weighted pursuit->ProNav) + `seekerMidcourseDatalink`. VLS closes to 20 m
+  (was 3.1 km ballistic). Air battery unregressed. New law is selectable per profile.
+- [ ] **Gravity-bias PN + minimum-range floor (surface-attack mode).** Below-horizon
+  ground targets remain out of the ESSM's air-defense envelope (the blended law improved
+  ground600 to 9.3 m but that is coincidental geometry, not a designed capability). A true
+  land-attack profile wants a g-bias term + trajectory shaping + min-range gate. The
+  regression test pins ground misses at <= 30 m meanwhile.
+- [ ] **Crossing-target near-miss band.** Pure PN + body-fixed 30-degree cone closes
+  crossing shots to 12-16 m (fuze 10 m). Blast (25 m) covers it, but APN (target-accel
+  augmentation) or a gimbaled seeker would close the gap. Ties into Stream A L5.
+- [ ] **Two pre-existing EditMode test failures (predate 2026-09-08, verified via stash
+  bisect):** `L3_AoaProducesLift_PitchedBodyPullsToward` (lift pulls velocity DOWN — sign
+  or frame bug in the L3 lift path) and `EndToEnd_L2WithConeSeekerAndProNav_AcquiresAndCloses`
+  (closes 1213 m vs required 802 m). Both look like Phase-6 collateral in L3/L2 paths.
+- [ ] **Proximity fuze fires on ANY collider** (`CheckProximityFuze` has no target/ground
+  filtering — the "detonated 150 m past" symptom was the fuze catching the ground plane).
+  Phase 3+ item already noted in code; add closing-velocity gate + layer filtering.
+- [ ] **Two fullscreen cameras stacked in MissileRange** (TurretCab chase cam depth 0
+  renders over Main Camera depth -1; both render full HDRP frames every frame). Decide:
+  PIP inset for the turret cam, or disable Main Camera render when chase is active.
+- [ ] **Two active AudioListeners** in MissileRange (Main Camera + TurretCab camera).
+- [ ] **Strip `BurkeMissile` + embedded "Missile Cam" from the ESSM Shell prefab.**
+  NeutralizeForeignComponents disables them per-launch (with a warning each shot);
+  removing them from the prefab silences the log and saves the per-launch scan.
+- [ ] **GuidedFury_TestRunner auto-launches on play** (`autoLaunchOnStart = true` in the
+  scene) — fires a missile at t+0.5 s every time play starts. Fine for a test range,
+  surprising for demos; consider defaulting off now that the control panel exists.
+- [ ] **`scripting_class_is_subclass_of called with NULL` assert** on every editor
+  session (would crash a build per Unity's own message). Bisect which package/asset
+  triggers it after the 6000.4 upgrade.
+- [ ] **Blast impulse vs light props.** 20 000 N-s throws 100 kg debris at ~120 m/s
+  (cinematic but cartoonish). If it bothers, add a per-body mass-cap or scale impulse
+  by target mass class on the profile.
+- [ ] **HDRP top-down/orthographic hand-rendered captures come out black.** A manually
+  created Camera.Render() to a RenderTexture does not pick up HDRP exposure/volume, so
+  overhead range renders are unusable. Use in-game play-mode cameras for screenshots, or
+  set up a proper HDRP camera + exposure override for a map view.
+- [ ] **Range polish backlog:** ship-hulk targets need a HittableBox sizing pass for the
+  fuze; naval water is a flat unlit plane (no shader); mesa-gantry A2G geometry not yet
+  play-verified end-to-end (pure-sim only); airborne-testbed wing-pylon muzzle assumes
+  level flight (fine on the racetrack straights, off in the turns).
+- [ ] **Untracked vendor packs** (DAVFX, RH Aviator, RH Radar, RH Shared, _VFX, DeepWater
+  Input scripts) sit uncommitted in the working tree — decide commit vs .gitignore.
+
 ## Skip / fail log

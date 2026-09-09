@@ -47,6 +47,10 @@ namespace GuidedFury.Core.Guidance
         /// <summary>Proportional Navigation. The workhorse intercept law. Honors target motion via LOS rate.</summary>
         ProportionalNavigation   = 2,
 
+        /// <summary>Pursuit→ProNav blend weighted by closing ratio. Vertical-launch pitch-over +
+        /// midcourse shaping that fades into terminal PN. See <see cref="BlendedPursuitProNav"/>.</summary>
+        PursuitThenProNav        = 3,
+
         // Augmented ProNav, lead pursuit, command guidance, terrain-following, etc. will arrive
         // as later phases need them. Adding values is non-breaking; removing is not.
     }

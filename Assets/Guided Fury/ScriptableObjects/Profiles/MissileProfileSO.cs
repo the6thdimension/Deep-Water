@@ -148,6 +148,18 @@ namespace GuidedFury.ScriptableObjects.Profiles
         [Tooltip("Dwell time required for seeker to declare lock once target is in FOV and range. Seconds.")]
         public float seekerAcquisitionTimeS = 0.25f;
 
+        [Tooltip("Track memory ('coast') after break-lock, seconds. The seeker keeps reporting a " +
+                 "dead-reckoned track for this long when the target leaves the FOV cone, and " +
+                 "reacquires without a dwell penalty. Carries guidance through the terminal LOS " +
+                 "swing where a body-fixed seeker always breaks lock. 0 = drop lock instantly.")]
+        public float seekerCoastTimeS = 0f;
+
+        [Tooltip("Midcourse datalink: while the seeker has no lock, guidance flies on the truth " +
+                 "track (launcher-fed command guidance / TVM midcourse), handing over to the seeker " +
+                 "on acquisition. Required for vertical launch and any shot where the target starts " +
+                 "outside the seeker cone. Off = seeker-only (missile flies ballistic until lock).")]
+        public bool seekerMidcourseDatalink = false;
+
         [Header("Guidance")]
         [Tooltip("Which guidance law to instantiate at launch. None = ballistic; ProNav = workhorse intercept.")]
         public GuidanceLawKind guidanceLaw = GuidanceLawKind.ProportionalNavigation;
@@ -262,6 +274,8 @@ namespace GuidedFury.ScriptableObjects.Profiles
                 SeekerFovDeg           = seekerFovDeg,
                 SeekerMaxRangeM        = seekerMaxRangeM,
                 SeekerAcquisitionTimeS = seekerAcquisitionTimeS,
+                SeekerCoastTimeS       = seekerCoastTimeS,
+                SeekerMidcourseDatalink = seekerMidcourseDatalink,
                 GuidanceLaw          = guidanceLaw,
                 NavigationGain       = navigationGain,
                 MaxLifetimeS         = maxLifetimeS,

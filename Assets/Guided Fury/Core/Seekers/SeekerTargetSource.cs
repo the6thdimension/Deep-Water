@@ -20,11 +20,18 @@ namespace GuidedFury.Core.Seekers
     {
         private readonly ISeeker seeker;
         private readonly ITargetSource truthSource;
+        private readonly bool midcourseDatalink;
 
-        public SeekerTargetSource(ISeeker seeker, ITargetSource truthSource)
+        public SeekerTargetSource(ISeeker seeker, ITargetSource truthSource, bool midcourseDatalink = false)
         {
             this.seeker = seeker ?? throw new System.ArgumentNullException(nameof(seeker));
             this.truthSource = truthSource; // null is allowed → seeker will simply never lock
+            // Midcourse datalink: while the seeker has NO lock, guidance flies on the truth
+            // track (modeling launcher-fed command guidance / TVM midcourse updates); once
+            // the seeker acquires, its own observation takes over (terminal homing). This is
+            // what lets a vertically-launched round tip over toward a target 90 degrees off
+            // boresight instead of climbing ballistically forever. Opt-in per profile.
+            this.midcourseDatalink = midcourseDatalink;
         }
 
         /// <summary>True iff the underlying seeker currently has lock.</summary>
@@ -42,7 +49,10 @@ namespace GuidedFury.Core.Seekers
 
         public TargetTrack Sample()
         {
-            return seeker.GetObservation();
+            TargetTrack observation = seeker.GetObservation();
+            if (!observation.HasTrack && midcourseDatalink && truthSource != null)
+                return truthSource.Sample(); // datalink midcourse until the seeker acquires
+            return observation;
         }
     }
 }

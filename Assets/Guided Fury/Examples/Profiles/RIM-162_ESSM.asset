@@ -132,52 +132,61 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 8
-      inSlope: 0.71428573
-      outSlope: 0.71428573
+      value: 16
+      inSlope: 1.4285715
+      outSlope: 1.4285715
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
       outWeight: 0.33333334
     - serializedVersion: 3
       time: 0.7
-      value: 8.5
-      inSlope: 1.6071429
-      outSlope: 1.6071429
+      value: 17
+      inSlope: 3.2142859
+      outSlope: 3.2142859
       tangentMode: 0
       weightedMode: 0
       inWeight: 0.33333334
       outWeight: 0.33333334
     - serializedVersion: 3
       time: 0.9
-      value: 9
-      inSlope: -3.750001
-      outSlope: -3.750001
+      value: 18
+      inSlope: -7.500002
+      outSlope: -7.500002
       tangentMode: 0
       weightedMode: 0
       inWeight: 0.33333334
       outWeight: 0.33333334
     - serializedVersion: 3
       time: 1.05
-      value: 7.5
-      inSlope: -6.0526323
-      outSlope: -6.0526323
+      value: 15
+      inSlope: -11.578949
+      outSlope: -11.578949
       tangentMode: 0
       weightedMode: 0
       inWeight: 0.33333334
       outWeight: 0.33333334
     - serializedVersion: 3
       time: 2
-      value: 5.5
-      inSlope: -1.5526315
-      outSlope: -1.5526315
+      value: 12
+      inSlope: -2.3289473
+      outSlope: -2.3289473
       tangentMode: 0
       weightedMode: 0
       inWeight: 0.33333334
       outWeight: 0.33333334
     - serializedVersion: 3
       time: 3
-      value: 4.5
+      value: 10.5
+      inSlope: -1.25
+      outSlope: -1.25
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 4
+      value: 9.5
       inSlope: -0.75
       outSlope: -0.75
       tangentMode: 0
@@ -185,17 +194,8 @@ MonoBehaviour:
       inWeight: 0.33333334
       outWeight: 0.33333334
     - serializedVersion: 3
-      time: 4
-      value: 4
-      inSlope: -0.5
-      outSlope: -0.5
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
       time: 5
-      value: 3.5
+      value: 9
       inSlope: -0.5
       outSlope: -0.5
       tangentMode: 0
@@ -350,7 +350,9 @@ MonoBehaviour:
   seekerFovDeg: 30
   seekerMaxRangeM: 50000
   seekerAcquisitionTimeS: 0.3
-  guidanceLaw: 2
+  seekerCoastTimeS: 1
+  seekerMidcourseDatalink: 1
+  guidanceLaw: 3
   navigationGain: 3.5
   maxLifetimeS: 60
   fuzeProximityRadiusM: 10

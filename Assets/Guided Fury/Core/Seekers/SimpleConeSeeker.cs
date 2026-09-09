@@ -32,6 +32,7 @@ namespace GuidedFury.Core.Seekers
     {
         private readonly SeekerProfile profile;
         private float dwellTimeS;
+        private float coastRemainingS;
         private TargetTrack observation;
         private bool locked;
 
@@ -85,12 +86,26 @@ namespace GuidedFury.Core.Seekers
                     locked = true;
                     // Pass the truth observation through verbatim — Phase 3 has no noise model.
                     observation = truthTarget;
+                    coastRemainingS = profile.CoastTimeS; // refresh track memory
                 }
+            }
+            else if (locked && coastRemainingS > 0f)
+            {
+                // Coast: geometric conditions failed but the tracker holds a memory track
+                // for CoastTimeS, dead-reckoned from the last real observation. Guidance
+                // keeps receiving a usable (slightly aging) track instead of going blind —
+                // this is what carries the missile through the terminal LOS swing, where a
+                // body-fixed cone ALWAYS loses the target in the last tens of meters.
+                // Dwell is intentionally not reset, so reacquisition inside the coast
+                // window is seamless.
+                coastRemainingS -= dt;
+                observation.Position += observation.Velocity * dt;
+                if (coastRemainingS <= 0f)
+                    ResetLock();
             }
             else
             {
-                // Conditions failed — reset dwell and drop lock immediately. Phase 4+ adds
-                // hysteresis / coast for realistic break-lock behaviour.
+                // Conditions failed with no coast budget — drop lock, require full re-dwell.
                 ResetLock();
             }
         }
@@ -103,6 +118,7 @@ namespace GuidedFury.Core.Seekers
         private void ResetLock()
         {
             dwellTimeS = 0f;
+            coastRemainingS = 0f;
             locked = false;
             observation = TargetTrack.None;
         }

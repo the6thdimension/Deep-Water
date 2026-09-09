@@ -70,6 +70,8 @@ namespace GuidedFury.Core.Missile
         public float SeekerFovDeg;          // full cone angle of the seeker boresight (typical IR AAM: 4..20°)
         public float SeekerMaxRangeM;       // maximum acquisition range
         public float SeekerAcquisitionTimeS; // dwell time required to declare lock once geometric conditions are met
+        public float SeekerCoastTimeS;      // track-memory duration after break-lock (0 = drop instantly)
+        public bool  SeekerMidcourseDatalink; // fly on truth (command guidance) until the seeker acquires
 
         // -- Guidance ---------------------------------------------------------
         public GuidanceLawKind GuidanceLaw; // which IGuidanceLaw the entity instantiates at Launch
@@ -116,6 +118,8 @@ namespace GuidedFury.Core.Missile
                 SeekerFovDeg           = 30f,
                 SeekerMaxRangeM        = 5000f,
                 SeekerAcquisitionTimeS = 0.25f,
+                SeekerCoastTimeS       = 0f,
+                SeekerMidcourseDatalink = false,
                 GuidanceLaw          = GuidanceLawKind.ProportionalNavigation,
                 NavigationGain       = 3f,
                 MaxLifetimeS         = 30f,

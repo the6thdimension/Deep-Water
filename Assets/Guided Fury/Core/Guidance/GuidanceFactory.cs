@@ -20,6 +20,7 @@ namespace GuidedFury.Core.Guidance
                 case GuidanceLawKind.None:                   return NullGuidanceLaw.Instance;
                 case GuidanceLawKind.Pursuit:                return PursuitGuidance.Instance;
                 case GuidanceLawKind.ProportionalNavigation: return ProportionalNavigation.Instance;
+                case GuidanceLawKind.PursuitThenProNav:      return BlendedPursuitProNav.Instance;
                 default:
                     throw new System.ArgumentOutOfRangeException(
                         nameof(kind), kind, "Unknown GuidanceLawKind");

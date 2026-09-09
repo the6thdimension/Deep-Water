@@ -439,12 +439,13 @@ namespace GuidedFury.Core.Missile
                 FovDeg           = profile.SeekerFovDeg,
                 MaxRangeM        = profile.SeekerMaxRangeM,
                 AcquisitionTimeS = profile.SeekerAcquisitionTimeS,
+                CoastTimeS       = profile.SeekerCoastTimeS,
             };
             ISeeker seeker = SeekerFactory.Create(profile.SeekerKind, seekerProfile);
             if (seeker == null)
                 return truth; // factory returned no seeker (kind = None or unsupported)
 
-            return new SeekerTargetSource(seeker, truth);
+            return new SeekerTargetSource(seeker, truth, profile.SeekerMidcourseDatalink);
         }
 
         private void OnTerminalState()
@@ -474,64 +475,16 @@ namespace GuidedFury.Core.Missile
         /// spawned prefab is auto-destroyed after `explosionLifetimeS` so trails and lights
         /// don't accumulate in the scene over the course of a long run.
         /// </summary>
-        // Shared, allocation-free scratch buffers for the blast overlap query. Static is
-        // fine: ApplyBlastImpulse runs on the main thread only, and the buffers are fully
-        // re-filled/cleared on every call.
-        private static readonly Collider[] BlastOverlapBuffer = new Collider[256];
-        private static readonly HashSet<Rigidbody> BlastSeenBodies = new HashSet<Rigidbody>();
-
         /// <summary>
-        /// Physical blast: applies an outward impulse to every non-kinematic Rigidbody within
-        /// the profile's blast radius, with Unity's built-in linear distance falloff
-        /// (AddExplosionForce) and an upwards modifier for a cinematic toss. Disabled when
-        /// blastRadiusM is 0. All tuning lives on the MissileProfileSO.
+        /// Physical blast on detonation — delegated to <see cref="DetonationEffects"/> so
+        /// non-missile ordnance (demolition charges, bombs) shares the exact mechanism.
+        /// All tuning lives on the MissileProfileSO; blastRadiusM = 0 disables.
         /// </summary>
         private void ApplyBlastImpulse(Vector3 worldPos)
-        {
-            if (profile == null || profile.blastRadiusM <= 0f || profile.blastImpulseNs <= 0f)
-                return;
-
-            int count = Physics.OverlapSphereNonAlloc(worldPos, profile.blastRadiusM, BlastOverlapBuffer);
-            if (count >= BlastOverlapBuffer.Length)
-                Debug.LogWarning($"[GuidedFury] {name}: blast overlap filled its {BlastOverlapBuffer.Length}-collider buffer; " +
-                                 "some rigidbodies may not receive the impulse. Consider a smaller blastRadiusM.");
-
-            BlastSeenBodies.Clear();
-            for (int i = 0; i < count; i++)
-            {
-                Rigidbody rb = BlastOverlapBuffer[i].attachedRigidbody;
-                if (rb == null || rb.isKinematic) continue;
-                if (rb.transform.root == transform.root) continue;      // never punt ourselves
-                if (!BlastSeenBodies.Add(rb)) continue;                 // one impulse per body, not per collider
-
-                rb.AddExplosionForce(profile.blastImpulseNs, worldPos, profile.blastRadiusM,
-                                     profile.blastUpwardsModifier, ForceMode.Impulse);
-            }
-            BlastSeenBodies.Clear();
-        }
+            => DetonationEffects.ApplyBlastImpulse(profile, worldPos, transform.root, name);
 
         private void SpawnExplosionEffects(Vector3 worldPos)
-        {
-            if (profile == null) return;
-
-            bool aerial = worldPos.y > profile.aerialAltitudeThresholdM;
-            GameObject prefab = aerial ? profile.explosionPrefabAerial : profile.explosionPrefabGround;
-            // Fall back to the *other* prefab if only one is wired — better some VFX than none.
-            if (prefab == null)
-                prefab = aerial ? profile.explosionPrefabGround : profile.explosionPrefabAerial;
-
-            if (prefab != null)
-            {
-                var fx = Instantiate(prefab, worldPos, Quaternion.identity);
-                if (profile.explosionLifetimeS > 0f)
-                    Destroy(fx, profile.explosionLifetimeS);
-            }
-
-            if (profile.explosionSfx != null)
-            {
-                AudioSource.PlayClipAtPoint(profile.explosionSfx, worldPos, profile.explosionSfxVolume);
-            }
-        }
+            => DetonationEffects.SpawnExplosionVisuals(profile, worldPos);
 
         /// <summary>
         /// Play the launch one-shot and start the in-flight loop. The loop's AudioSource is

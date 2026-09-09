@@ -130,6 +130,11 @@ namespace GuidedFury.Examples.Editor
             // launcher, test runner, and camera built above. Skipped if the .inputactions
             // asset is missing (so the scene still builds without DeepWater.Input present).
             BuildFlightStickInput();
+
+            // Weapons-range sectors (terrain, ground/aerial/naval targets, VLS, demolition
+            // pad, mesa gantry, airborne testbed). Also invokable standalone via
+            // "Guided Fury > Build Weapons Range Sectors (additive)".
+            WeaponsRangeSectorBuilder.BuildSectors(profile);
         }
 
         private static void ConfigureCameraAndLight()

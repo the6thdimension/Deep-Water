@@ -154,9 +154,11 @@ namespace GuidedFury.Examples.Editor
             p.seekerFovDeg          = 30f;
             p.seekerMaxRangeM       = 50000f;     // ~50 km published max range
             p.seekerAcquisitionTimeS = 0.3f;
+            p.seekerCoastTimeS       = 1.0f;      // track memory through the terminal LOS swing
+            p.seekerMidcourseDatalink = true;     // ESSM is SARH with midcourse datalink (TVM); enables VLS tip-over
 
             // -- Guidance ------------------------------------------------------
-            p.guidanceLaw    = GuidanceLawKind.ProportionalNavigation;
+            p.guidanceLaw = GuidanceLawKind.PursuitThenProNav; // pitch-over capable: pursuit off-course, PN terminal
             p.navigationGain = 3.5f;              // standard PN gain for SARH systems
 
             // -- Lifetime + Fuzing --------------------------------------------
@@ -219,15 +221,23 @@ namespace GuidedFury.Examples.Editor
         /// </summary>
         private static AnimationCurve BuildClAlphaCurve()
         {
+            // Effective normal-force slope for the WHOLE airframe (body + strakes + tail),
+            // referenced to body cross-section area, per radian. The previous values
+            // (8 -> 3.5) were body-alone slender-body theory, which caps the airframe at
+            // ~9 g at Mach 1.5 -- a 50 g-class SAM could not physically make its rated
+            // maneuvers and overflew short-range targets (diagnosed 2026-09-08: 44 m miss
+            // on a stationary ground target at 600 m with guidance saturated). Real
+            // tail-controlled missiles get 2-3x body-alone normal force from lifting
+            // surfaces; these values give ~50 g at Mach 3 at ~20 deg trim AoA.
             var c = new AnimationCurve(
-                new Keyframe(0f,   8.0f),
-                new Keyframe(0.7f, 8.5f),
-                new Keyframe(0.9f, 9.0f),
-                new Keyframe(1.05f, 7.5f),
-                new Keyframe(2.0f, 5.5f),
-                new Keyframe(3.0f, 4.5f),
-                new Keyframe(4.0f, 4.0f),
-                new Keyframe(5.0f, 3.5f));
+                new Keyframe(0f,   16.0f),
+                new Keyframe(0.7f, 17.0f),
+                new Keyframe(0.9f, 18.0f),
+                new Keyframe(1.05f, 15.0f),
+                new Keyframe(2.0f, 12.0f),
+                new Keyframe(3.0f, 10.5f),
+                new Keyframe(4.0f, 9.5f),
+                new Keyframe(5.0f, 9.0f));
             SmoothAll(c);
             return c;
         }

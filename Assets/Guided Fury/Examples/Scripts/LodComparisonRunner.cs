@@ -41,6 +41,7 @@ namespace GuidedFury.Examples
         [SerializeField] private bool includeL1 = true;
         [SerializeField] private bool includeL2 = true;
         [SerializeField] private bool includeL3 = true;
+        [SerializeField] private bool includeL4 = false;
 
         [Header("Auto-Launch")]
         [Tooltip("If true, fires the salvo automatically on Start after launchDelay. Disable to only fire from a control panel.")]
@@ -49,11 +50,8 @@ namespace GuidedFury.Examples
         /// <summary>Public entry point for the control panel — fires the salvo immediately, ignoring launchDelay.</summary>
         public void FireSalvoNow() => FireSalvo();
 
-        // Distinct colors per LOD — keep these stable so a player learns the mapping.
-        private static readonly Color L0Color = new Color(0.9f, 0.9f, 0.2f); // yellow
-        private static readonly Color L1Color = new Color(0.2f, 0.9f, 0.3f); // green
-        private static readonly Color L2Color = new Color(0.3f, 0.6f, 1.0f); // blue
-        private static readonly Color L3Color = new Color(0.95f, 0.3f, 0.6f); // magenta
+        // Colors come from the shared LodTrailColors palette so HUD, runner, and stats all
+        // agree on which color = which LOD.
 
         private void Start()
         {
@@ -71,7 +69,7 @@ namespace GuidedFury.Examples
             // Build the list of LODs to fire. The lateral offsets are evenly distributed
             // around the launch point so the salvo is symmetric regardless of which LODs
             // are enabled.
-            int included = (includeL0 ? 1 : 0) + (includeL1 ? 1 : 0) + (includeL2 ? 1 : 0) + (includeL3 ? 1 : 0);
+            int included = (includeL0 ? 1 : 0) + (includeL1 ? 1 : 0) + (includeL2 ? 1 : 0) + (includeL3 ? 1 : 0) + (includeL4 ? 1 : 0);
             if (included == 0)
             {
                 Debug.LogWarning("[GuidedFury LodComparison] No LODs enabled.");
@@ -81,10 +79,11 @@ namespace GuidedFury.Examples
             int slot = 0;
             float centerOffset = (included - 1) * 0.5f * spacingM;
 
-            if (includeL0) FireOne(MissileLod.L0_Kinematic,     L0Color, slot++, centerOffset);
-            if (includeL1) FireOne(MissileLod.L1_PointMass3Dof, L1Color, slot++, centerOffset);
-            if (includeL2) FireOne(MissileLod.L2_RateLimited3Dof, L2Color, slot++, centerOffset);
-            if (includeL3) FireOne(MissileLod.L3_PseudoRb6Dof,  L3Color, slot++, centerOffset);
+            if (includeL0) FireOne(MissileLod.L0_Kinematic,       LodTrailColors.L0, slot++, centerOffset);
+            if (includeL1) FireOne(MissileLod.L1_PointMass3Dof,   LodTrailColors.L1, slot++, centerOffset);
+            if (includeL2) FireOne(MissileLod.L2_RateLimited3Dof, LodTrailColors.L2, slot++, centerOffset);
+            if (includeL3) FireOne(MissileLod.L3_PseudoRb6Dof,    LodTrailColors.L3, slot++, centerOffset);
+            if (includeL4) FireOne(MissileLod.L4_FullAero6Dof,    LodTrailColors.L4, slot++, centerOffset);
 
             Debug.Log($"[GuidedFury LodComparison] Fired {included} missiles, one per enabled LOD.");
         }

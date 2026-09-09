@@ -51,6 +51,10 @@ namespace GuidedFury.Core.State
         public float      TimeOfFlight;      // seconds since Launch
         public MissilePhase Phase;
 
+        // Control surfaces (L4+ only; L0..L3 ignore but propagate cleanly).
+        public float PitchDeflectionRad;     // current actual deflection of pitch surface; rate-limited toward command
+        public float YawDeflectionRad;       // current actual deflection of yaw surface; rate-limited toward command
+
         /// <summary>
         /// Convenience: build an initial state at rest, ready to be initialized by the
         /// integrator's Initialize() call with profile data.

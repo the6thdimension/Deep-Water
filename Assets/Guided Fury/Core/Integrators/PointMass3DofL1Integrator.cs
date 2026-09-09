@@ -118,8 +118,14 @@ namespace GuidedFury.Core.Integrators
 
             // -- Orientation tracks velocity ---------------------------------
             // L1 has no rotational dynamics — orientation snaps to point along motion.
+            // **Stability fix:** never pass `Vector3.up` directly as the second arg —
+            // when velocity climbs vertically the two vectors go parallel and
+            // LookRotation snaps to an arbitrary orientation, frame to frame, which
+            // looks like the missile tumbling/rolling mid-flight. Carry the previous
+            // up vector forward (so successive frames are continuous), and only fall
+            // back to a perpendicular axis if it's also nearly parallel.
             if (state.Velocity.sqrMagnitude > 1e-6f)
-                state.Orientation = Quaternion.LookRotation(state.Velocity.normalized, Vector3.up);
+                state.Orientation = StableLookRotation(state.Velocity.normalized, state.Orientation);
 
             // -- Mass burn (linear during boost) ------------------------------
             if (boosting && profile.BoostDurationS > 1e-6f)
@@ -135,6 +141,26 @@ namespace GuidedFury.Core.Integrators
             // -- Lifetime guard -----------------------------------------------
             if (state.TimeOfFlight >= profile.MaxLifetimeS)
                 state.Phase = MissilePhase.Failed;
+        }
+
+        /// <summary>
+        /// LookRotation with a stable up-vector. Uses the current orientation's local up
+        /// as the reference, so successive frames don't snap as `forward` approaches
+        /// vertical. If the carried up is itself parallel to forward (rare — only happens
+        /// when the missile has slewed 90°+ within a frame), falls back to the carried
+        /// right axis. Final fallback to world up is for the pathological all-axes-parallel
+        /// case (only reachable if `current` is corrupt).
+        /// </summary>
+        internal static Quaternion StableLookRotation(Vector3 forward, Quaternion current)
+        {
+            Vector3 up = current * Vector3.up;
+            if (Mathf.Abs(Vector3.Dot(forward, up)) > 0.9995f)
+            {
+                up = current * Vector3.right;
+                if (Mathf.Abs(Vector3.Dot(forward, up)) > 0.9995f)
+                    up = Vector3.up;
+            }
+            return Quaternion.LookRotation(forward, up);
         }
     }
 }

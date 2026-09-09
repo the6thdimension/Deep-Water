@@ -1,6 +1,9 @@
 using UnityEngine;
+using GuidedFury.Core.Aero;
+using GuidedFury.Core.Autopilot;
 using GuidedFury.Core.Guidance;
 using GuidedFury.Core.Missile;
+using GuidedFury.Core.Propulsion;
 using GuidedFury.Core.Seekers;
 
 namespace GuidedFury.ScriptableObjects.Profiles
@@ -47,12 +50,21 @@ namespace GuidedFury.ScriptableObjects.Profiles
         [Tooltip("Total propellant carried at launch. Kilograms.")]
         public float propellantMassKg = 50f;
 
-        [Header("Propulsion (Boost-only Phase 1)")]
+        [Header("Propulsion")]
         [Tooltip("Boost motor thrust. Newtons. Used by L1+ — L0 ignores and uses CruiseSpeed instead.")]
         public float boostThrustN = 30000f;
 
         [Tooltip("Boost motor burn duration. Seconds.")]
         public float boostDurationS = 3f;
+
+        [Tooltip("ConstantBoost = single boost stage (L0..L3 default). BoostSustain = adds a lower-thrust sustain stage after boost (typical AAM motor profile).")]
+        public ThrustModelKind thrustModel = ThrustModelKind.ConstantBoost;
+
+        [Tooltip("Sustain motor thrust. Lower than boost. Only used when thrustModel = BoostSustain.")]
+        public float sustainThrustN = 0f;
+
+        [Tooltip("Sustain stage duration. Only used when thrustModel = BoostSustain.")]
+        public float sustainDurationS = 0f;
 
         [Header("L0 Kinematic Tier")]
         [Tooltip("Cruise speed used by L0 (and as a floor by L1+). Meters/second.")]
@@ -94,6 +106,35 @@ namespace GuidedFury.ScriptableObjects.Profiles
         [Tooltip("Inner-loop rate-controller gain. Higher = more aggressive attitude tracking of guidance commands. Too high = oscillation.")]
         public float autopilotGain = 4f;
 
+        [Header("L4 Full Aero (Tabulated)")]
+        [Tooltip("Aero model kind. Simple = scalar (L3-equivalent fallback). Tabulated = use the curves below; Mach-aware.")]
+        public AeroModelKind aeroModel = AeroModelKind.Simple;
+
+        [Tooltip("Reference length for moment arm calculations. Typical missile body length in meters.")]
+        public float lengthM = 3f;
+
+        [Tooltip("Drag coefficient Cd as a function of Mach number. Authored: ~0.3 subsonic, spiking to ~0.6 around M=1, easing back to ~0.4 supersonic.")]
+        public AnimationCurve cdVsMach = AnimationCurve.Linear(0f, 0.3f, 5f, 0.3f);
+
+        [Tooltip("Lift slope Cl_α (per radian) as a function of Mach. Typically peaks subsonic, drops past M≈1.5.")]
+        public AnimationCurve clAlphaVsMach = AnimationCurve.Linear(0f, 8f, 5f, 5f);
+
+        [Tooltip("Pitch stability Cm_α (per radian) as a function of Mach. NEGATIVE for a stable airframe (body returns toward velocity).")]
+        public AnimationCurve cmAlphaVsMach = AnimationCurve.Linear(0f, -2f, 5f, -1.5f);
+
+        [Tooltip("Control surface effectiveness Cm_δ (per radian) as a function of Mach. Typically negative (positive δ produces nose-down moment). Magnitude drops at high Mach.")]
+        public AnimationCurve cmDeltaVsMach = AnimationCurve.Linear(0f, -2f, 5f, -1f);
+
+        [Header("L4 Autopilot + Control Surfaces")]
+        [Tooltip("SimpleRate (L3-style direct torque) or SurfaceDeflection (L4 with fins driving aero moment via Cm_δ).")]
+        public AutopilotKind autopilot = AutopilotKind.SimpleRate;
+
+        [Tooltip("Max fin deflection. Typical AAM ±20°.")]
+        public float maxControlDeflectionDeg = 20f;
+
+        [Tooltip("Max fin deflection rate. Typical 200..600°/s. Inner-loop saturation; integrator rate-limits the actual surface.")]
+        public float maxControlRateDegPerSec = 400f;
+
         [Header("Seeker")]
         [Tooltip("Which seeker the missile carries. None = guidance reads truth directly (Phase 1/2 behavior).")]
         public SeekerKind seekerKind = SeekerKind.None;
@@ -125,6 +166,52 @@ namespace GuidedFury.ScriptableObjects.Profiles
                  + "preventing detonation on the launch rail / launcher / nearby geometry.")]
         public float fuzeArmDelayS = 0.5f;
 
+        [Header("Detonation Effects")]
+        [Tooltip("Prefab spawned at the impact point when the target is AERIAL (above " +
+                 "aerialAltitudeThresholdM). Typically an air-burst FX. Leave null to skip.")]
+        public GameObject explosionPrefabAerial;
+
+        [Tooltip("Prefab spawned at the impact point when the target is GROUND/SURFACE (at or " +
+                 "below aerialAltitudeThresholdM). Typically a dirt+fireball FX. Leave null to skip.")]
+        public GameObject explosionPrefabGround;
+
+        [Tooltip("World-Y above this is considered an AERIAL detonation; at or below is GROUND. " +
+                 "Meters. Tune for your scene's ground height (default 5 m suits a flat range at y=0).")]
+        public float aerialAltitudeThresholdM = 5f;
+
+        [Tooltip("How long to keep the spawned explosion alive before destroying it. Seconds. " +
+                 "Set well past the visible burst so trails fade naturally. <=0 keeps it forever (relies on the prefab self-destructing).")]
+        public float explosionLifetimeS = 6f;
+
+        [Header("Audio (optional)")]
+        [Tooltip("One-shot clip played at the muzzle the moment the missile launches.")]
+        public AudioClip launchSfx;
+
+        [Tooltip("Looping clip played from the missile while it's in flight (rocket motor / whoosh).")]
+        public AudioClip flightSfx;
+
+        [Tooltip("One-shot clip played at the impact point when the warhead detonates.")]
+        public AudioClip explosionSfx;
+
+        [Range(0f, 1f)]
+        [Tooltip("Volume of the launch SFX.")]
+        public float launchSfxVolume = 1f;
+
+        [Range(0f, 1f)]
+        [Tooltip("Volume of the looped in-flight SFX. Keep moderate so it doesn't drown the scene.")]
+        public float flightSfxVolume = 0.7f;
+
+        [Range(0f, 1f)]
+        [Tooltip("Volume of the explosion SFX.")]
+        public float explosionSfxVolume = 1f;
+
+        [Tooltip("3D spatial blend for the in-flight loop. 1 = fully 3D (positional); 0 = 2D (always center).")]
+        [Range(0f, 1f)]
+        public float flightSfxSpatialBlend = 1f;
+
+        [Tooltip("Max audible distance for the in-flight loop. Beyond this the AudioSource is silent.")]
+        public float flightSfxMaxDistanceM = 800f;
+
         /// <summary>
         /// Produce an unmanaged runtime copy of this profile. Called once per missile at
         /// launch; the returned struct travels with the entity for its lifetime.
@@ -137,6 +224,9 @@ namespace GuidedFury.ScriptableObjects.Profiles
                 PropellantMassKg     = propellantMassKg,
                 BoostThrustN         = boostThrustN,
                 BoostDurationS       = boostDurationS,
+                ThrustModel          = thrustModel,
+                SustainThrustN       = sustainThrustN,
+                SustainDurationS     = sustainDurationS,
                 CruiseSpeedMps       = cruiseSpeedMps,
                 L0UseGravity         = l0UseGravity,
                 DragCoefficient      = dragCoefficient,
@@ -149,6 +239,11 @@ namespace GuidedFury.ScriptableObjects.Profiles
                 StallAoaDeg            = stallAoaDeg,
                 WeatherVaneCoefficient = weatherVaneCoefficient,
                 AutopilotGain          = autopilotGain,
+                AeroModel              = aeroModel,
+                LengthM                = lengthM,
+                Autopilot              = autopilot,
+                MaxControlDeflectionDeg = maxControlDeflectionDeg,
+                MaxControlRateDegPerSec = maxControlRateDegPerSec,
                 SeekerKind             = seekerKind,
                 SeekerFovDeg           = seekerFovDeg,
                 SeekerMaxRangeM        = seekerMaxRangeM,

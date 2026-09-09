@@ -35,10 +35,15 @@ namespace GuidedFury.Examples
         [SerializeField] private Transform target;
 
         [Header("Launch")]
-        [Tooltip("World position to launch from.")]
+        [Tooltip("Optional: muzzle transform of an articulated launcher (LauncherRig.Muzzle). " +
+                 "If set, missile spawns at this transform's position with its rotation — overrides launchPosition/launchDirection. " +
+                 "Connect this and the missile fires wherever the launcher is currently aimed.")]
+        [SerializeField] private Transform muzzleTransform;
+
+        [Tooltip("World position to launch from (used only when muzzleTransform is null).")]
         [SerializeField] private Vector3 launchPosition = Vector3.zero;
 
-        [Tooltip("World-space direction the missile points at launch.")]
+        [Tooltip("World-space direction the missile points at launch (used only when muzzleTransform is null).")]
         [SerializeField] private Vector3 launchDirection = new Vector3(0f, 0.2f, 1f);
 
         [Tooltip("Delay before launch, in seconds.")]
@@ -78,6 +83,7 @@ namespace GuidedFury.Examples
         /// ignoring launchDelay. Safe to call repeatedly.
         /// </summary>
         public void FireOnce() => SpawnAndLaunch();
+        public void SetTarget(Transform selectedTarget) => target = selectedTarget;
 
         private void SpawnAndLaunch()
         {
@@ -99,17 +105,31 @@ namespace GuidedFury.Examples
             var behaviour = go.GetComponent<MissileBehaviour>() ?? go.AddComponent<MissileBehaviour>();
             behaviour.Configure(profile, lod, target);
 
-            Vector3 dir = launchDirection.sqrMagnitude > 1e-6f
-                ? launchDirection.normalized
-                : Vector3.forward;
-            Quaternion rotation = Quaternion.LookRotation(dir, Vector3.up);
+            // If a muzzle transform is wired up (articulated launcher), spawn from it.
+            // Otherwise fall back to the fixed launchPosition / launchDirection fields.
+            Vector3 spawnPos;
+            Quaternion rotation;
+            if (muzzleTransform != null)
+            {
+                spawnPos = muzzleTransform.position;
+                rotation = muzzleTransform.rotation;
+            }
+            else
+            {
+                Vector3 dir = launchDirection.sqrMagnitude > 1e-6f
+                    ? launchDirection.normalized
+                    : Vector3.forward;
+                rotation = Quaternion.LookRotation(dir, Vector3.up);
+                spawnPos = launchPosition;
+            }
 
-            behaviour.transform.SetPositionAndRotation(launchPosition, rotation);
-            behaviour.Launch(launchPosition, rotation);
+            behaviour.transform.SetPositionAndRotation(spawnPos, rotation);
+            behaviour.Launch(spawnPos, rotation);
 
             string targetInfo = target != null ? $"homing on '{target.name}'" : "no target (ballistic)";
+            string source = muzzleTransform != null ? $"muzzle '{muzzleTransform.name}'" : "fixed launchPosition/Direction";
             Debug.Log($"[GuidedFury TestRunner] Launched '{profile.displayName}' at {lod}, {targetInfo}, " +
-                      $"from {launchPosition} heading {dir:F2}.");
+                      $"from {spawnPos:F2} via {source}.");
         }
 
         private GameObject BuildPrimitiveStandIn()

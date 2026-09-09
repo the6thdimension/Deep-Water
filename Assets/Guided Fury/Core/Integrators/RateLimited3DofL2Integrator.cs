@@ -122,8 +122,11 @@ namespace GuidedFury.Core.Integrators
             state.Position += state.Velocity * dt;
 
             // -- Orientation tracks velocity (no rotation dynamics yet — L3) --
+            // Use the L1 stability helper — see PointMass3DofL1Integrator.StableLookRotation
+            // for why passing Vector3.up directly causes a tumbling/flipping bug near vertical.
             if (state.Velocity.sqrMagnitude > 1e-6f)
-                state.Orientation = Quaternion.LookRotation(state.Velocity.normalized, Vector3.up);
+                state.Orientation = PointMass3DofL1Integrator.StableLookRotation(
+                    state.Velocity.normalized, state.Orientation);
 
             // -- Mass burn ----------------------------------------------------
             if (boosting && profile.BoostDurationS > 1e-6f)

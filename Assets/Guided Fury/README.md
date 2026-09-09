@@ -17,7 +17,9 @@ This is also the first system in the project built to current standards under th
 | L4 | Full 6DOF | + aero coefficient tables, autopilot, atmosphere coupling | Hero missile, AAR replay |
 | L5 | HWIL fidelity | + seeker dynamics, INS drift, fuze detector models | R&D, seeker tuning |
 
-**Current implementation: L0, L1, L2, L3 (Phase 4).** Full rigid-body orientation with body-axis thrust, angle-of-attack lift, weather-vane stability, and an inline rate autopilot. Guidance (Pursuit / ProNav), cone-seeker acquisition, g-limit / turn-rate limit. L4+ ships in subsequent phases.
+**Current implementation: L0–L4.** L4 adds Mach-aware tabulated aero coefficients (Cd / Cl_α / Cm_α / Cm_δ as AnimationCurves on the SO), control-surface deflection dynamics with rate limits, two-loop autopilot (outer accel→rate, inner rate→fin deflection), pluggable thrust model (constant-boost or boost-sustain). `IAutopilot`, `IAeroModel`, and `IThrustModel` are now orthogonal subsystems — pluggable per missile. L5 (HWIL) still pending.
+
+**First authored missile: RIM-162 ESSM.** Real-world reference data baked into a full L4 profile via `Guided Fury → Authored Missiles → Build RIM-162 ESSM Profile`. 280 kg / 3.66 m / Mach 4+ / 50 km range / 50 g pull. Mk 134 single-stage boost (6 s), tabulated aero with transonic Cd spike at M=1.05, SurfaceDeflection autopilot, ProNav guidance, cone seeker (50 km), 10 m proximity fuze with 1 s arm delay. Asset path: `Assets/Guided Fury/Examples/Profiles/RIM-162_ESSM.asset`. Re-running the menu command refreshes authored defaults.
 
 ## Architecture
 
@@ -88,7 +90,10 @@ The scene the command creates:
 - **LodComparisonLauncher** at +15 m on X, with `LodComparisonRunner` configured to fire one missile per LOD (L0–L3) in a color-coded salvo. **Disabled by default** — enable in the Inspector to fire the 4-missile comparison instead of (or alongside) the single launcher.
 - **HUD overlay** on the Main Camera: a top-left panel listing every active missile with name, LOD, phase, time-of-flight, speed, range-to-target, and lock state.
 - **Camera controller** on the Main Camera. Starts in Overview mode; auto-chases the first missile that launches. `F` toggles Chase / Overview; `Space` cycles to the next active missile when chasing.
-- **Control panel** (top-right): on-demand fire buttons for every launcher in the scene, time scale slider with 0.1× / 0.5× / 1× / 2× / 5× presets, pause/resume, and "reload scene" — all without leaving Play mode.
+- **Control panel** (top-right): on-demand fire buttons for every launcher in the scene, time scale slider with 0.1× / 0.5× / 1× / 2× / 5× presets, pause/resume, and "reload scene" — all without leaving Play mode. Scenario picker row (Stationary / Head-On / Crossing / Tail-chase) spawns a target with appropriate motion and rebinds every runner's target to it.
+- **LOD comparison stats overlay** (bottom-left): per-missile telemetry tracker. For every launched missile, shows time-of-flight, peak speed, closest-approach (miss distance), fuel remaining at outcome, and a HIT / DET / FAIL / active label. LOD column tinted with the shared trail palette so HUD ↔ world ↔ stats agree on which color = which LOD.
+- **SalvoLauncher** (disabled by default): same-LOD salvo runner. Fires N missiles staggered at a target. Enables real salvo geometry exercise (lead/trail spacing, target reaction).
+- **LodComparisonLauncher** (disabled by default): fires one missile per LOD simultaneously, color-coded, at the same target. Quickest way to see how the LODs differ visually and behaviorally on identical conditions.
 
 The command also creates `Assets/Guided Fury/Examples/Profiles/Range_Default.asset` if it doesn't already exist. ProNav, gain 3, 22 kN boost for 3 s, 0.5 s safe-and-arm delay, 8 m proximity fuze.
 

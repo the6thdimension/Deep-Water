@@ -1,4 +1,7 @@
+using GuidedFury.Core.Aero;
+using GuidedFury.Core.Autopilot;
 using GuidedFury.Core.Guidance;
+using GuidedFury.Core.Propulsion;
 using GuidedFury.Core.Seekers;
 
 namespace GuidedFury.Core.Missile
@@ -25,9 +28,15 @@ namespace GuidedFury.Core.Missile
         public float DryMassKg;          // airframe + warhead + electronics, propellant-free
         public float PropellantMassKg;   // total propellant carried at launch
 
-        // -- Propulsion (boost-only motor model for Phase 2) ------------------
+        // -- Propulsion -------------------------------------------------------
         public float BoostThrustN;       // newtons, constant during boost
-        public float BoostDurationS;     // seconds, motor burns then quits
+        public float BoostDurationS;     // seconds; boost stage duration
+
+        // L4+: optional sustain stage (boost-sustain motors — most tactical AAMs).
+        // Ignored when ThrustModel == ConstantBoost.
+        public ThrustModelKind ThrustModel; // ConstantBoost or BoostSustain
+        public float SustainThrustN;        // newtons, constant during sustain
+        public float SustainDurationS;      // seconds; sustain stage duration
 
         // -- L0 kinematic tier ------------------------------------------------
         public float CruiseSpeedMps;     // L0 constant-speed cruise (and floor for L1+)
@@ -48,6 +57,13 @@ namespace GuidedFury.Core.Missile
         public float StallAoaDeg;            // angle of attack at which lift coefficient peaks; lift collapses past this
         public float WeatherVaneCoefficient; // passive aero restoring moment magnitude per (rad of AoA × dynamic pressure × area)
         public float AutopilotGain;          // gain on the inner-loop rate controller — higher = more aggressive tracking
+
+        // -- L4 full-aero tier ------------------------------------------------
+        public AeroModelKind AeroModel;       // Simple = scalar (L3-equivalent); Tabulated = Mach-aware curves authored on the SO
+        public float LengthM;                 // reference length for moment arm calcs (typical missile body length)
+        public AutopilotKind Autopilot;       // SimpleRate (L3-style direct torque) or SurfaceDeflection (L4 with fins)
+        public float MaxControlDeflectionDeg; // max fin deflection (typical ±20°); inner loop saturates at this
+        public float MaxControlRateDegPerSec; // max fin deflection rate (typical 200..600 deg/s); integrator rate-limits the actual surface
 
         // -- Seeker (Phase 3) -------------------------------------------------
         public SeekerKind SeekerKind;       // None = no seeker (use raw truth target); ConeSeeker etc.
@@ -76,6 +92,9 @@ namespace GuidedFury.Core.Missile
                 PropellantMassKg     = 50f,
                 BoostThrustN         = 30000f,
                 BoostDurationS       = 3f,
+                ThrustModel          = ThrustModelKind.ConstantBoost,
+                SustainThrustN       = 0f,
+                SustainDurationS     = 0f,
                 CruiseSpeedMps       = 250f,
                 L0UseGravity         = false,
                 DragCoefficient      = 0.3f,
@@ -88,6 +107,11 @@ namespace GuidedFury.Core.Missile
                 StallAoaDeg            = 18f,
                 WeatherVaneCoefficient = 5f,
                 AutopilotGain          = 4f,
+                AeroModel              = AeroModelKind.Simple,
+                LengthM                = 3f,    // ~3m typical AAM body
+                Autopilot              = AutopilotKind.SimpleRate,
+                MaxControlDeflectionDeg = 20f,
+                MaxControlRateDegPerSec = 400f,
                 SeekerKind             = SeekerKind.None,
                 SeekerFovDeg           = 30f,
                 SeekerMaxRangeM        = 5000f,

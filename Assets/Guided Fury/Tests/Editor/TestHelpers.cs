@@ -50,6 +50,12 @@ namespace GuidedFury.Tests
                 case MissileLod.L3_PseudoRb6Dof:
                     integrator = new PseudoRb6DofL3Integrator();
                     break;
+                case MissileLod.L4_FullAero6Dof:
+                    integrator = new FullAero6DofL4Integrator(
+                        GuidedFury.Core.Aero.SimpleAeroModel.Instance,
+                        GuidedFury.Core.Autopilot.AutopilotFactory.Create(profile.Autopilot),
+                        GuidedFury.Core.Propulsion.ThrustModelFactory.Create(profile.ThrustModel));
+                    break;
                 default:
                     throw new System.NotImplementedException($"Tests don't support LOD {lod} yet");
             }

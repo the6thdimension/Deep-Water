@@ -34,6 +34,8 @@ namespace GuidedFury.Examples
 
         private GuidedFury_TestRunner[] cachedRunners;
         private LodComparisonRunner[] cachedComparisons;
+        private SalvoRunner[] cachedSalvos;
+        private EngagementScenarios cachedScenarios;
         private float lastScan;
         private const float ScanIntervalS = 0.5f;
 
@@ -49,6 +51,10 @@ namespace GuidedFury.Examples
             {
                 cachedRunners     = FindObjectsByType<GuidedFury_TestRunner>(FindObjectsSortMode.None);
                 cachedComparisons = FindObjectsByType<LodComparisonRunner>(FindObjectsSortMode.None);
+                cachedSalvos      = FindObjectsByType<SalvoRunner>(FindObjectsSortMode.None);
+                // Only one scenario picker is meaningful per scene — take the first.
+                var scenariosAll = FindObjectsByType<EngagementScenarios>(FindObjectsSortMode.None);
+                cachedScenarios = scenariosAll != null && scenariosAll.Length > 0 ? scenariosAll[0] : null;
                 lastScan = Time.unscaledTime;
             }
 
@@ -80,7 +86,10 @@ namespace GuidedFury.Examples
             float y = marginFromTopRight.y;
 
             // Compute height based on the number of runners present.
-            int runnerCount = (cachedRunners?.Length ?? 0) + (cachedComparisons?.Length ?? 0);
+            int runnerCount = (cachedRunners?.Length ?? 0)
+                            + (cachedComparisons?.Length ?? 0)
+                            + (cachedSalvos?.Length ?? 0);
+            bool hasScenarios = cachedScenarios != null;
             float height = 22f                                           // header
                          + 22f                                           // launch section header
                          + Mathf.Max(1, runnerCount) * 26f               // one row per runner (or "no runners" row)
@@ -90,6 +99,7 @@ namespace GuidedFury.Examples
                          + 28f                                           // preset buttons
                          + 8f                                            // spacer
                          + 28f                                           // pause / reload row
+                         + (hasScenarios ? 60f : 0f)                     // scenarios section if present
                          + 16f;                                          // padding
 
             var rect = new Rect(x, y, width, height);
@@ -130,6 +140,23 @@ namespace GuidedFury.Examples
             if (GUILayout.Button("Reload [R]")) ReloadScene();
             GUILayout.EndHorizontal();
 
+            // -- Scenarios (if an EngagementScenarios component is present) ---
+            if (cachedScenarios != null)
+            {
+                GUILayout.Space(6f);
+                GUILayout.Label($"Scenario: {cachedScenarios.CurrentScenario}", buttonStyle);
+                GUILayout.BeginHorizontal();
+                if (GUILayout.Button("Stationary"))
+                    cachedScenarios.SpawnScenario(EngagementScenarios.Scenario.Stationary);
+                if (GUILayout.Button("Head-On"))
+                    cachedScenarios.SpawnScenario(EngagementScenarios.Scenario.HeadOn);
+                if (GUILayout.Button("Cross"))
+                    cachedScenarios.SpawnScenario(EngagementScenarios.Scenario.Crossing);
+                if (GUILayout.Button("Tail"))
+                    cachedScenarios.SpawnScenario(EngagementScenarios.Scenario.TailChase);
+                GUILayout.EndHorizontal();
+            }
+
             GUILayout.EndArea();
         }
 
@@ -153,8 +180,18 @@ namespace GuidedFury.Examples
                 {
                     if (cachedComparisons[i] == null) continue;
                     any = true;
-                    if (GUILayout.Button($"Salvo: {cachedComparisons[i].gameObject.name} [K]"))
+                    if (GUILayout.Button($"LOD Cmp: {cachedComparisons[i].gameObject.name} [K]"))
                         cachedComparisons[i].FireSalvoNow();
+                }
+            }
+            if (cachedSalvos != null)
+            {
+                for (int i = 0; i < cachedSalvos.Length; i++)
+                {
+                    if (cachedSalvos[i] == null) continue;
+                    any = true;
+                    if (GUILayout.Button($"Salvo: {cachedSalvos[i].gameObject.name}"))
+                        cachedSalvos[i].FireNow();
                 }
             }
 

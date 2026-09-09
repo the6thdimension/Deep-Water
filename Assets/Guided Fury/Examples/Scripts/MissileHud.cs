@@ -88,10 +88,16 @@ namespace GuidedFury.Examples
             string rangeStr = range >= 0f ? FormatLength(range) : "—";
             string lockStr = b.IsSeekerLocked ? "<color=#88FF88>LOCK</color>" : "—";
 
+            // Color the LOD tag with the shared trail palette so HUD ↔ world ↔ stats panel
+            // all use the same color for a given LOD. (The rest of the row stays neutral —
+            // tinting the whole row makes the headline columns hard to read.)
+            var lod = b.Entity?.Integrator?.Lod ?? Core.Integrators.MissileLod.L0_Kinematic;
+            string lodColored = $"<color={LodTrailColors.HexFor(lod)}>{LodShort(b)}</color>";
+
             string row = string.Format(
-                "{0,-8} {1,-4} {2,-9} {3,5:0.0}s {4,7:0} m/s {5,7} {6}",
+                "{0,-8} {1} {2,-9} {3,5:0.0}s {4,7:0} m/s {5,7} {6}",
                 Truncate(b.name, 8),
-                LodShort(b),
+                lodColored,
                 PhaseShort(s.Phase),
                 s.TimeOfFlight,
                 speed,

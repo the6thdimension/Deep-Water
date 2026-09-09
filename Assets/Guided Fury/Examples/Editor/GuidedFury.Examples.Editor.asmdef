@@ -2,7 +2,9 @@
     "name": "GuidedFury.Examples.Editor",
     "rootNamespace": "GuidedFury.Examples.Editor",
     "references": [
-        "GuidedFury"
+        "GuidedFury",
+        "DeepWater.Input",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [
         "Editor"

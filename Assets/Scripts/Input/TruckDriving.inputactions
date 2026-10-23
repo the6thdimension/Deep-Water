@@ -1,0 +1,66 @@
+{
+  "name": "TruckDriving",
+  "maps": [
+    {
+      "actions": [
+        {
+          "name": "Steer",
+          "id": "1ebaf2a6-4853-4cba-88cb-d6b3cff5e4d6",
+          "expectedControlType": "Axis",
+          "type": "Value"
+        },
+        {
+          "name": "Accelerate",
+          "id": "a48083fd-cc51-49e5-9ab8-bf20acbc03e4",
+          "expectedControlType": "Axis",
+          "type": "Value"
+        },
+        {
+          "name": "BrakeReverse",
+          "id": "6a46b4c6-a239-4192-8d97-557e57b424fa",
+          "expectedControlType": "Axis",
+          "type": "Value"
+        },
+        {
+          "name": "Handbrake",
+          "id": "d29a5a27-cf36-4fe4-a2f8-05c6148a8db6",
+          "expectedControlType": "Button",
+          "type": "Button"
+        }
+      ],
+      "name": "Drive",
+      "id": "e5beef04-8071-4dc1-abd6-5b6b8599d3c4",
+      "bindings": [
+        {
+          "action": "Steer",
+          "isPartOfComposite": false,
+          "id": "6f8a4720-06aa-458b-82a6-9b9ca97f5d63",
+          "isComposite": false,
+          "path": "<XInputController>/leftStick/x"
+        },
+        {
+          "action": "Accelerate",
+          "isPartOfComposite": false,
+          "id": "6e46b4a1-7fa6-433d-8cd8-79aada9e08b3",
+          "isComposite": false,
+          "path": "<XInputController>/rightTrigger"
+        },
+        {
+          "action": "BrakeReverse",
+          "isPartOfComposite": false,
+          "id": "38d2c921-63b7-4c38-89b9-749a164b25f0",
+          "isComposite": false,
+          "path": "<XInputController>/leftTrigger"
+        },
+        {
+          "action": "Handbrake",
+          "isPartOfComposite": false,
+          "id": "636783fe-8a06-468f-bc7f-341840bd71df",
+          "isComposite": false,
+          "path": "<XInputController>/buttonSouth"
+        }
+      ]
+    }
+  ],
+  "controlSchemes": []
+}

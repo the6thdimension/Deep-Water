@@ -1,0 +1,21 @@
+{
+    "name": "DeepWater.Sea.Editor",
+    "rootNamespace": "DeepWater.Sea.Editor",
+    "references": [
+        "DeepWater.Sea",
+        "Unity.Burst",
+        "Unity.Mathematics",
+        "Unity.Collections"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,74 @@
+{
+    "name": "VelocityOne",
+    "maps": [
+        {
+            "name": "Flight",
+            "id": "a1b2c3d4-0001-0000-0000-000000000001",
+            "actions": [
+                { "name": "Pitch",              "type": "Value", "id": "a1b2c3d4-0001-0001-0000-000000000001", "expectedControlType": "Axis", "processors": "Normalize(min=-1,max=1)", "interactions": "", "initialStateCheck": true },
+                { "name": "Roll",               "type": "Value", "id": "a1b2c3d4-0001-0001-0000-000000000002", "expectedControlType": "Axis", "processors": "Normalize(min=-1,max=1)", "interactions": "", "initialStateCheck": true },
+                { "name": "Yaw",                "type": "Value", "id": "a1b2c3d4-0001-0001-0000-000000000003", "expectedControlType": "Axis", "processors": "Normalize(min=-1,max=1)", "interactions": "", "initialStateCheck": true },
+                { "name": "ThrottleMain",       "type": "Value", "id": "a1b2c3d4-0001-0001-0000-000000000004", "expectedControlType": "Axis", "processors": "Normalize(min=-1,max=1,zero=-1)", "interactions": "", "initialStateCheck": true },
+                { "name": "ThrottleSecondary",  "type": "Value", "id": "a1b2c3d4-0001-0001-0000-000000000005", "expectedControlType": "Axis", "processors": "Normalize(min=-1,max=1,zero=-1)", "interactions": "", "initialStateCheck": true },
+                { "name": "Hat",                "type": "Value", "id": "a1b2c3d4-0001-0001-0000-000000000006", "expectedControlType": "Vector2", "processors": "", "interactions": "", "initialStateCheck": true },
+
+                { "name": "Trigger",            "type": "Button", "id": "a1b2c3d4-0001-0002-0000-000000000001", "expectedControlType": "Button", "processors": "", "interactions": "" },
+                { "name": "FireMissile",        "type": "Button", "id": "a1b2c3d4-0001-0002-0000-000000000002", "expectedControlType": "Button", "processors": "", "interactions": "" },
+                { "name": "FireSalvo",          "type": "Button", "id": "a1b2c3d4-0001-0002-0000-000000000003", "expectedControlType": "Button", "processors": "", "interactions": "" },
+                { "name": "NextCameraTarget",   "type": "Button", "id": "a1b2c3d4-0001-0002-0000-000000000004", "expectedControlType": "Button", "processors": "", "interactions": "" },
+                { "name": "CameraToggle",       "type": "Button", "id": "a1b2c3d4-0001-0002-0000-000000000005", "expectedControlType": "Button", "processors": "", "interactions": "" },
+                { "name": "Pause",              "type": "Button", "id": "a1b2c3d4-0001-0002-0000-000000000006", "expectedControlType": "Button", "processors": "", "interactions": "" }
+            ],
+            "bindings": [
+                { "name": "", "id": "b0000000-0000-0000-0000-000000000001", "path": "<Joystick>/stick/y",   "interactions": "", "processors": "Invert", "groups": "Joystick", "action": "Pitch",  "isComposite": false, "isPartOfComposite": false },
+                { "name": "", "id": "b0000000-0000-0000-0000-000000000002", "path": "<Joystick>/stick/x",   "interactions": "", "processors": "",       "groups": "Joystick", "action": "Roll",   "isComposite": false, "isPartOfComposite": false },
+                { "name": "", "id": "b0000000-0000-0000-0000-000000000003", "path": "<Joystick>/z",         "interactions": "", "processors": "",       "groups": "Joystick", "action": "Yaw",    "isComposite": false, "isPartOfComposite": false },
+                { "name": "", "id": "b0000000-0000-0000-0000-000000000004", "path": "<Joystick>/rz",        "interactions": "", "processors": "",       "groups": "Joystick", "action": "ThrottleMain", "isComposite": false, "isPartOfComposite": false },
+                { "name": "", "id": "b0000000-0000-0000-0000-000000000005", "path": "<Joystick>/slider",    "interactions": "", "processors": "",       "groups": "Joystick", "action": "ThrottleSecondary", "isComposite": false, "isPartOfComposite": false },
+                { "name": "", "id": "b0000000-0000-0000-0000-000000000006", "path": "<Joystick>/hat",       "interactions": "", "processors": "",       "groups": "Joystick", "action": "Hat",    "isComposite": false, "isPartOfComposite": false },
+
+                { "name": "", "id": "b0000000-0000-0000-0000-000000000010", "path": "<Joystick>/trigger", "interactions": "", "processors": "", "groups": "Joystick", "action": "Trigger",          "isComposite": false, "isPartOfComposite": false },
+                { "name": "", "id": "b0000000-0000-0000-0000-000000000011", "path": "<Joystick>/trigger", "interactions": "Press", "processors": "", "groups": "Joystick", "action": "FireMissile", "isComposite": false, "isPartOfComposite": false },
+                { "name": "", "id": "b0000000-0000-0000-0000-000000000012", "path": "<Joystick>/button2",   "interactions": "Press", "processors": "", "groups": "Joystick", "action": "FireSalvo",   "isComposite": false, "isPartOfComposite": false },
+                { "name": "", "id": "b0000000-0000-0000-0000-000000000013", "path": "<Joystick>/button3",   "interactions": "Press", "processors": "", "groups": "Joystick", "action": "NextCameraTarget", "isComposite": false, "isPartOfComposite": false },
+                { "name": "", "id": "b0000000-0000-0000-0000-000000000014", "path": "<Joystick>/button4",   "interactions": "Press", "processors": "", "groups": "Joystick", "action": "CameraToggle",     "isComposite": false, "isPartOfComposite": false },
+                { "name": "", "id": "b0000000-0000-0000-0000-000000000015", "path": "<Joystick>/button10",  "interactions": "Press", "processors": "", "groups": "Joystick", "action": "Pause",            "isComposite": false, "isPartOfComposite": false },
+
+                { "name": "Keyboard Fallback Pitch", "id": "b0000000-0000-0000-0000-000000000020", "path": "1DAxis(negative=-1,positive=1)", "interactions": "", "processors": "", "groups": "Keyboard", "action": "Pitch", "isComposite": true, "isPartOfComposite": false },
+                { "name": "negative", "id": "b0000000-0000-0000-0000-000000000021", "path": "<Keyboard>/s", "interactions": "", "processors": "", "groups": "Keyboard", "action": "Pitch", "isComposite": false, "isPartOfComposite": true },
+                { "name": "positive", "id": "b0000000-0000-0000-0000-000000000022", "path": "<Keyboard>/w", "interactions": "", "processors": "", "groups": "Keyboard", "action": "Pitch", "isComposite": false, "isPartOfComposite": true },
+
+                { "name": "Keyboard Fallback Roll", "id": "b0000000-0000-0000-0000-000000000030", "path": "1DAxis(negative=-1,positive=1)", "interactions": "", "processors": "", "groups": "Keyboard", "action": "Roll", "isComposite": true, "isPartOfComposite": false },
+                { "name": "negative", "id": "b0000000-0000-0000-0000-000000000031", "path": "<Keyboard>/a", "interactions": "", "processors": "", "groups": "Keyboard", "action": "Roll", "isComposite": false, "isPartOfComposite": true },
+                { "name": "positive", "id": "b0000000-0000-0000-0000-000000000032", "path": "<Keyboard>/d", "interactions": "", "processors": "", "groups": "Keyboard", "action": "Roll", "isComposite": false, "isPartOfComposite": true },
+
+                { "name": "Keyboard Fallback Yaw", "id": "b0000000-0000-0000-0000-000000000040", "path": "1DAxis(negative=-1,positive=1)", "interactions": "", "processors": "", "groups": "Keyboard", "action": "Yaw", "isComposite": true, "isPartOfComposite": false },
+                { "name": "negative", "id": "b0000000-0000-0000-0000-000000000041", "path": "<Keyboard>/q", "interactions": "", "processors": "", "groups": "Keyboard", "action": "Yaw", "isComposite": false, "isPartOfComposite": true },
+                { "name": "positive", "id": "b0000000-0000-0000-0000-000000000042", "path": "<Keyboard>/e", "interactions": "", "processors": "", "groups": "Keyboard", "action": "Yaw", "isComposite": false, "isPartOfComposite": true },
+
+
+                { "name": "", "id": "b0000000-0000-0000-0000-000000000060", "path": "<Keyboard>/space",      "interactions": "Press", "processors": "", "groups": "Keyboard", "action": "FireMissile",      "isComposite": false, "isPartOfComposite": false },
+                { "name": "", "id": "b0000000-0000-0000-0000-000000000061", "path": "<Keyboard>/leftShift",  "interactions": "Press", "processors": "", "groups": "Keyboard", "action": "FireSalvo",        "isComposite": false, "isPartOfComposite": false },
+                { "name": "", "id": "b0000000-0000-0000-0000-000000000062", "path": "<Keyboard>/tab",        "interactions": "Press", "processors": "", "groups": "Keyboard", "action": "NextCameraTarget", "isComposite": false, "isPartOfComposite": false },
+                { "name": "", "id": "b0000000-0000-0000-0000-000000000063", "path": "<Keyboard>/f",          "interactions": "Press", "processors": "", "groups": "Keyboard", "action": "CameraToggle",     "isComposite": false, "isPartOfComposite": false },
+                { "name": "", "id": "b0000000-0000-0000-0000-000000000064", "path": "<Keyboard>/p",          "interactions": "Press", "processors": "", "groups": "Keyboard", "action": "Pause",            "isComposite": false, "isPartOfComposite": false }
+            ]
+        }
+    ],
+    "controlSchemes": [
+        {
+            "name": "Joystick",
+            "bindingGroup": "Joystick",
+            "devices": [
+                { "devicePath": "<Joystick>", "isOptional": false, "isOR": false }
+            ]
+        },
+        {
+            "name": "Keyboard",
+            "bindingGroup": "Keyboard",
+            "devices": [
+                { "devicePath": "<Keyboard>", "isOptional": false, "isOR": false }
+            ]
+        }
+    ]
+}

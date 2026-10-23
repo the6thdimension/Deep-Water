@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27cdf2c69d7439f428759cfd3da27ce7, type: 3}
+  m_Name: Swell_5_Moderaterough
+  m_EditorClassIdentifier: DeepWater.Sea::DeepWater.Sea.ScriptableObjects.SwellProfileSO
+  douglasDegree: 5
+  douglasTerm: Moderate rough
+  lengthClass: long
+  heightClass: moderate
+  swell:
+    significantHeightM: 3
+    peakPeriodS: 13.861686
+    jonswapGamma: 3.3
+    spreadingS: 75
+    choppiness: 1
+    componentCount: 16
+    seed: 2005
+  provenance: "Douglas swell 5 \u2014 Moderate rough (long length, moderate height)
+    [DSS]\nHs 3 m and wavelength 300 m: AUTHORED representative values inside the
+    class\nTp 13.9 s: deep-water dispersion T = \u221A(2\u03C0 L / g)\n\u03B3 3.3:
+    AUTHORED (standard JONSWAP value; swell is narrow-banded)\nSpreading s 75: [GODA]\nComponents
+    16, seed 2005: AUTHORED."

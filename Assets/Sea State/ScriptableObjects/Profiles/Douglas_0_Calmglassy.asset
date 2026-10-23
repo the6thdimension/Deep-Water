@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3120f9d9c257081448b3109486cda082, type: 3}
+  m_Name: Douglas_0_Calmglassy
+  m_EditorClassIdentifier: DeepWater.Sea::DeepWater.Sea.ScriptableObjects.SeaStateProfileSO
+  douglasDegree: 0
+  douglasTerm: Calm (glassy)
+  windSea:
+    significantHeightM: 0
+    peakPeriodS: 0
+    jonswapGamma: 1
+    spreadingS: 10
+    choppiness: 1
+    componentCount: 0
+    seed: 1000
+  windSpeedKnots: 0
+  whitecapFraction: 0
+  provenance: "Douglas wind sea 0 \u2014 Calm (glassy)\nHs 0 m: WMO: no waves\nTp
+    0.0 s: [PM] fully developed, Tp = 2\u03C0 U/(0.877 g) with U = \u221A(Hs g /
+    0.21)\n\u03B3 1.00: [DNV] rule at Tp/\u221AHs = 0.00\nWind 0 kt: AUTHORED from
+    [NOAA] Beaufort 0 (< 1 kt) (reference height to confirm in ANEP-11)\nWhitecaps
+    0.0 %: [MO80] W = 3.84e-6 U^3.41 at U = 0.0 m/s\nSpreading s 10: [GODA] wind
+    waves. Choppiness 1: first-order Lagrangian model.\nComponents 0, seed 1000:
+    AUTHORED."

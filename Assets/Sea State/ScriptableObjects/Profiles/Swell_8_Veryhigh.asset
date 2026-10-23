@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27cdf2c69d7439f428759cfd3da27ce7, type: 3}
+  m_Name: Swell_8_Veryhigh
+  m_EditorClassIdentifier: DeepWater.Sea::DeepWater.Sea.ScriptableObjects.SwellProfileSO
+  douglasDegree: 8
+  douglasTerm: Very high
+  lengthClass: long
+  heightClass: high
+  swell:
+    significantHeightM: 5
+    peakPeriodS: 13.861686
+    jonswapGamma: 3.3
+    spreadingS: 75
+    choppiness: 1
+    componentCount: 16
+    seed: 2008
+  provenance: "Douglas swell 8 \u2014 Very high (long length, high height) [DSS]\nHs
+    5 m and wavelength 300 m: AUTHORED representative values inside the class\nTp
+    13.9 s: deep-water dispersion T = \u221A(2\u03C0 L / g)\n\u03B3 3.3: AUTHORED
+    (standard JONSWAP value; swell is narrow-banded)\nSpreading s 75: [GODA]\nComponents
+    16, seed 2008: AUTHORED."

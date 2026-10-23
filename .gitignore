@@ -38,3 +38,10 @@ tools/ci/logs/
 id_rsa*
 id_ed25519*
 *.pem
+
+# Paid Asset Store pack (DAVFX): licence forbids redistribution - import it locally on each machine
+/Assets/DAVFX/
+/Assets/DAVFX.meta
+
+# Claude scheduled-task runtime lock
+.claude/scheduled_tasks.lock

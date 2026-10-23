@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3120f9d9c257081448b3109486cda082, type: 3}
+  m_Name: Douglas_9_Phenomenal
+  m_EditorClassIdentifier: DeepWater.Sea::DeepWater.Sea.ScriptableObjects.SeaStateProfileSO
+  douglasDegree: 9
+  douglasTerm: Phenomenal
+  windSea:
+    significantHeightM: 16
+    peakPeriodS: 19.966232
+    jonswapGamma: 1.0097555
+    spreadingS: 10
+    choppiness: 1
+    componentCount: 48
+    seed: 1009
+  windSpeedKnots: 70
+  whitecapFraction: 0.77943504
+  provenance: "Douglas wind sea 9 \u2014 Phenomenal\nHs 16 m: AUTHORED: [WMO] gives
+    only > 14 m\nTp 20.0 s: [PM] fully developed, Tp = 2\u03C0 U/(0.877 g) with U
+    = \u221A(Hs g / 0.21)\n\u03B3 1.01: [DNV] rule at Tp/\u221AHs = 4.99\nWind 70
+    kt: AUTHORED: [NATO] gives only > 63 kt; [NOAA] Beaufort 12 \u2265 64 kt (reference
+    height to confirm in ANEP-11)\nWhitecaps 77.9 %: [MO80] W = 3.84e-6 U^3.41 at
+    U = 36.0 m/s \u2014 EXTRAPOLATED far beyond typical observations\nSpreading s
+    10: [GODA] wind waves. Choppiness 1: first-order Lagrangian model.\nComponents
+    48, seed 1009: AUTHORED."

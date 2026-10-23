@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3120f9d9c257081448b3109486cda082, type: 3}
+  m_Name: Douglas_3_Slight
+  m_EditorClassIdentifier: DeepWater.Sea::DeepWater.Sea.ScriptableObjects.SeaStateProfileSO
+  douglasDegree: 3
+  douglasTerm: Slight
+  windSea:
+    significantHeightM: 0.875
+    peakPeriodS: 4.6691747
+    jonswapGamma: 1.009756
+    spreadingS: 10
+    choppiness: 1
+    componentCount: 48
+    seed: 1003
+  windSpeedKnots: 13.5
+  whitecapFraction: 0.002847303
+  provenance: "Douglas wind sea 3 \u2014 Slight\nHs 0.875 m: [WMO] 0.5\u20131.25
+    m band mean\nTp 4.7 s: [PM] fully developed, Tp = 2\u03C0 U/(0.877 g) with U
+    = \u221A(Hs g / 0.21)\n\u03B3 1.01: [DNV] rule at Tp/\u221AHs = 4.99\nWind 13.5
+    kt: [NATO] 11\u201316 kt mean (reference height to confirm in ANEP-11)\nWhitecaps
+    0.3 %: [MO80] W = 3.84e-6 U^3.41 at U = 6.9 m/s\nSpreading s 10: [GODA] wind
+    waves. Choppiness 1: first-order Lagrangian model.\nComponents 48, seed 1003:
+    AUTHORED."

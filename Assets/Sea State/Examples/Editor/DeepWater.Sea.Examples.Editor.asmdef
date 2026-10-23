@@ -1,0 +1,23 @@
+{
+    "name": "DeepWater.Sea.Examples.Editor",
+    "rootNamespace": "DeepWater.Sea.Examples.Editor",
+    "references": [
+        "DeepWater.Sea",
+        "DeepWater.Sea.Hdrp",
+        "DeepWater.Sea.Editor",
+        "Unity.Mathematics",
+        "Unity.RenderPipelines.Core.Runtime",
+        "Unity.RenderPipelines.HighDefinition.Runtime"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

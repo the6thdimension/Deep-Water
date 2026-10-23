@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed4b645601f3e244baced04c2251e490, type: 3}
+  m_Name: SeaStateLibrary
+  m_EditorClassIdentifier: DeepWater.Sea::DeepWater.Sea.ScriptableObjects.SeaStateLibrarySO
+  seaStates:
+  - {fileID: 11400000, guid: 4255c19210bff014da012380f164756e, type: 2}
+  - {fileID: 11400000, guid: 8fb65ef067bfa094aa2d6754e6a10ff4, type: 2}
+  - {fileID: 11400000, guid: e7cc41c6a0a352a419b6a5477508b5c6, type: 2}
+  - {fileID: 11400000, guid: e273d4132e64e8a499bc0b0bc30155fa, type: 2}
+  - {fileID: 11400000, guid: fea711b2593d90d4b92fa209537395de, type: 2}
+  - {fileID: 11400000, guid: 8daa9dd9b49ab5e41819c47d21992771, type: 2}
+  - {fileID: 11400000, guid: 04795225977eece4db1eb55ff2747a60, type: 2}
+  - {fileID: 11400000, guid: f0379ab825a444b41a8cb9c104de8335, type: 2}
+  - {fileID: 11400000, guid: 9d44d6e8167e8754d828434676c5876f, type: 2}
+  - {fileID: 11400000, guid: 304ed9e4101a4b447a856e7b3691f86a, type: 2}
+  swells:
+  - {fileID: 11400000, guid: 2cbaf807ac6196a4587a2300bdef10c3, type: 2}
+  - {fileID: 11400000, guid: e9c84e2e1625d9248bd7dea8231bf69a, type: 2}
+  - {fileID: 11400000, guid: 9180b307f1029da479e28de613f1da79, type: 2}
+  - {fileID: 11400000, guid: acec81d1fd499254bb14723b51cfae96, type: 2}
+  - {fileID: 11400000, guid: 4015b61e7ec95e149bb49f43ced53868, type: 2}
+  - {fileID: 11400000, guid: 8c44f4a75fc35464eb047fe8449a0aa1, type: 2}
+  - {fileID: 11400000, guid: 33d08f1de898ff446b16639d74b69458, type: 2}
+  - {fileID: 11400000, guid: 4d2629ab9aef73842be0ceb59b61e6c5, type: 2}
+  - {fileID: 11400000, guid: 8dd36b0ff4cc3f540818a70ab83dc4cf, type: 2}
+  - {fileID: 11400000, guid: 04e809add4108034d8c811afacd09b7e, type: 2}
+  minResolvedWavelengthM: 10
+  inverseIterations: 4
+  foamCalibrationGrid: 64
+  transitionSeconds: 8
+  waterDensityKgM3: 1025

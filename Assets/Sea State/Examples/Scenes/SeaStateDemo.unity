@@ -465,6 +465,7 @@ MonoBehaviour:
   look: {fileID: 11400000, guid: 637f4a40e89ee19498dcda697e9e63e0, type: 2}
   waveDecalMaterial: {fileID: 2100000, guid: 6c208309d93662845b4875d413cd4f24, type: 2}
   followTarget: {fileID: 0}
+  foamCompute: {fileID: 7200000, guid: 30b59ddae9e01494f831929a6b9cdcc7, type: 3}
 --- !u!114 &506607366
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1049,6 +1050,7 @@ MonoBehaviour:
   - {fileID: 1827952951}
   - {fileID: 668894098}
   visible: 1
+  refreshHz: 4
 --- !u!4 &1122337785
 Transform:
   m_ObjectHideFlags: 0

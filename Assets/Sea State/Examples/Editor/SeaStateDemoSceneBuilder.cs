@@ -28,6 +28,7 @@ namespace DeepWater.Sea.Examples.Editor
         const string MaterialFolder = Root + "/Examples/Materials";
         const string DecalShaderPath = Root + "/Modules/Hdrp/Shaders/SeaWaveDecal.shadergraph";
         const string DecalMaterialPath = Root + "/Modules/Hdrp/Materials/SeaWaveDecal.mat";
+        const string FoamComputePath = Root + "/Modules/Hdrp/Shaders/SeaFoam.compute";
         const string OceanPrefabPath = "Assets/_ENVIRONMENT/Ocean System.prefab";
         const string SunPrefabPath = "Assets/_ENVIRONMENT/Sun.prefab";
         const string SkyPrefabPath = "Assets/_ENVIRONMENT/Sky and Fog Volume.prefab";
@@ -86,6 +87,7 @@ namespace DeepWater.Sea.Examples.Editor
             SetField(renderer, "director", director);
             SetField(renderer, "look", look);
             SetField(renderer, "waveDecalMaterial", decalMaterial);
+            SetField(renderer, "foamCompute", AssetDatabase.LoadAssetAtPath<ComputeShader>(FoamComputePath));
 
             var buoyancy = seaGo.AddComponent<BuoyancySystem>();
             SetField(buoyancy, "sea", director);

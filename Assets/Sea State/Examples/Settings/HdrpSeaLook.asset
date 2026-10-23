@@ -16,8 +16,124 @@ MonoBehaviour:
   nearFieldResolution: 512
   handoverStart: 0.6
   handoverEnd: 0.95
+  energyPreservingHandover: 1
   compensateDeformationBlur: 1
   maxBlurCompensation: 1.5
+  farFieldCalibration:
+    windKmh:
+    - 10
+    - 15
+    - 20
+    - 25
+    - 35
+    - 45
+    - 60
+    - 75
+    - 95
+    - 110
+    - 130
+    - 160
+    - 200
+    - 250
+    repetitionM:
+    - 250
+    - 400
+    - 600
+    - 900
+    - 1300
+    - 1900
+    hsM:
+    - 0.10585477
+    - 0.09243108
+    - 0.08880397
+    - 0.08522215
+    - 0.082196936
+    - 0.07820423
+    - 0.31604537
+    - 0.27500924
+    - 0.2548323
+    - 0.24156201
+    - 0.24014156
+    - 0.2375209
+    - 0.64123094
+    - 0.58806145
+    - 0.54298747
+    - 0.5003241
+    - 0.48832056
+    - 0.4793978
+    - 1.0134106
+    - 0.99546176
+    - 0.9465866
+    - 0.8849119
+    - 0.83999664
+    - 0.8113788
+    - 1.8868841
+    - 1.9451483
+    - 1.9025651
+    - 1.8075486
+    - 1.8005234
+    - 1.6839789
+    - 2.7650328
+    - 2.9278362
+    - 3.046279
+    - 2.9667068
+    - 2.6795704
+    - 2.6189547
+    - 4.854801
+    - 4.8332925
+    - 4.7819357
+    - 4.957761
+    - 4.673661
+    - 4.387265
+    - 6.46386
+    - 7.6324234
+    - 7.334608
+    - 7.033568
+    - 7.0643916
+    - 6.6407332
+    - 7.726967
+    - 9.915137
+    - 11.719777
+    - 12.020728
+    - 10.663807
+    - 11.203717
+    - 8.011603
+    - 11.768774
+    - 14.896933
+    - 16.037138
+    - 15.546836
+    - 15.452011
+    - 8.4105425
+    - 12.214755
+    - 16.882282
+    - 20.283838
+    - 21.822128
+    - 20.66964
+    - 8.364509
+    - 13.040689
+    - 18.642607
+    - 24.183392
+    - 30.345627
+    - 35.398705
+    - 8.310928
+    - 13.088889
+    - 19.10311
+    - 29.949497
+    - 39.89401
+    - 47.458004
+    - 8.415112
+    - 13.282696
+    - 20.184076
+    - 27.415983
+    - 40.054745
+    - 55.00823
+    chaos: 0.85
+    provenance: "Measured 2026-10-23 12:28 by SeaFarFieldTools.CalibrateFarField:
+      HDRP 17.4 CPU water search (deformation excluded), 12 instants 0.5 s apart
+      \xD7 300 points per cell, radial 717\u20131382 m; band multipliers 1, chaos
+      0.85; ripples alone read 0.000 m (the CPU search does not evaluate ripples).
+      Per-instant spread median 7 % of Hs."
+  useFarFieldCalibration: 1
   farBand0Multiplier: 1
   farBand1Multiplier: 1
   repetitionPerPeakWavelength: 3
@@ -26,6 +142,7 @@ MonoBehaviour:
   ripplesChaos: 0.8
   surfaceFoamGain: 4
   deepFoamGain: 1
+  hdrpFoamChannelWorkaround: 1
   farFoamByWhitecapFraction:
     serializedVersion: 2
     m_Curve:
@@ -77,5 +194,68 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  residualFoam: 1
+  residualLifetimeS: 60
+  residualProductionPerS: 0.07
+  residualCap: 0.8
+  windDriftFraction: 0.03
+  windrowSpacingM: 18
+  windrowConvergenceFraction: 0.012
+  windrowStrengthByWindMs:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 10.8
+      value: 0.15
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 13.9
+      value: 0.5
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 17.2
+      value: 0.85
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 20.8
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  windrowSpacingVariation: 0.35
+  windrowStrengthVariation: 0.5
+  windrowMeanderM: 2.5
+  windrowMeanderWavelengthM: 90
+  residualMaxStepS: 0.1
   crestBoundPerHs: 1.5
   hdrpReadbackForVerification: 0

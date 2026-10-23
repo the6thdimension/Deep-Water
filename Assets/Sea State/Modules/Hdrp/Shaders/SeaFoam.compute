@@ -1,0 +1,87 @@
+// Deep Water — Sea State: residual foam integrator (wind streaks).
+//
+// GPU twin of DeepWater.Sea.Core.ResidualFoamMath / ResidualFoamStepJob. The grid drifts with
+// the water (ResidualFoamGrid), so one step in its frame is:
+//   F ← shift(F) − dt/h · Σ_faces (upwind flux of the windrow flow) ;  F ← F · e^(−dt/T) + P · b · dt
+// Whole-texel shift, conservative flux form, decay, and production from the same breaking
+// indicator as the whitecaps. If you change one, change the other — the CPU twin is what this
+// kernel is verified against.
+
+#pragma kernel DWSeaFoamIntegrate
+
+#include "SeaWaves.hlsl"
+
+Texture2D<float>   _DWSeaFoamPrev;
+RWTexture2D<float> _DWSeaFoamNext;
+
+float4 _DWSeaFoamGrid;         // xy = grid centre (world XZ, m); z = grid size (m)
+int2   _DWSeaFoamShift;        // texel i of this step reads texel i + shift of the previous field
+float4 _DWSeaFoamStep;         // x = dt (s); y = lifetime (s); z = production per s; w = cap
+float4 _DWSeaFoamFlow;         // xy = downwind unit vector; z = drift (m/s, carried by the grid); w = windrow convergence (m/s)
+float4 _DWSeaFoamWindrow;      // x = spacing (m); y = meander (m); z = meander wavelength (m); w = along-wind offset (m)
+float4 _DWSeaFoamWindrow2;     // x = spacing variation (fraction); y = strength variation (fraction)
+int    _DWSeaFoamResolution;
+
+#define DW_TWO_PI 6.28318530718
+
+float DWWindrowCoordinate(float2 x)
+{
+    float2 d = _DWSeaFoamFlow.xy;
+    float along = dot(x, d) - _DWSeaFoamWindrow.w;
+    float across = d.x * x.y - d.y * x.x;
+    float warpScale = 2.7 * _DWSeaFoamWindrow.x;
+    float warp = _DWSeaFoamWindrow2.x * warpScale / DW_TWO_PI
+                 * sin(DW_TWO_PI * across / warpScale + 0.9 * sin(DW_TWO_PI * along / (2.0 * _DWSeaFoamWindrow.z)));
+    return across + warp + _DWSeaFoamWindrow.y * sin(DW_TWO_PI * along / _DWSeaFoamWindrow.z
+                                                     + 1.3 * sin(DW_TWO_PI * across / (2.3 * _DWSeaFoamWindrow.x)));
+}
+
+float2 DWConvergenceVelocity(float2 x)
+{
+    float2 d = _DWSeaFoamFlow.xy;
+    float2 n = float2(-d.y, d.x);
+    float along = dot(x, d) - _DWSeaFoamWindrow.w;
+    float across = d.x * x.y - d.y * x.x;
+    float gate = 1.0 - _DWSeaFoamWindrow2.y * 0.5
+                 * (1.0 + sin(DW_TWO_PI * along / (_DWSeaFoamWindrow.z * (2.0 / 3.0)) + 2.1 * sin(DW_TWO_PI * across / (1.9 * _DWSeaFoamWindrow.x))));
+    float s = DWWindrowCoordinate(x);
+    return -_DWSeaFoamFlow.w * gate * sin(DW_TWO_PI * s / _DWSeaFoamWindrow.x) * n;
+}
+
+float DWLoadShifted(int2 i, int n)
+{
+    int2 p = i + _DWSeaFoamShift;
+    return (p.x >= 0 && p.y >= 0 && p.x < n && p.y < n) ? _DWSeaFoamPrev[p] : 0.0;
+}
+
+[numthreads(8, 8, 1)]
+void DWSeaFoamIntegrate(uint3 id : SV_DispatchThreadID)
+{
+    int n = _DWSeaFoamResolution;
+    if (id.x >= (uint)n || id.y >= (uint)n) return;
+
+    int2 c = int2(id.xy);
+    float size = _DWSeaFoamGrid.z;
+    float h = size / n;
+    float2 x = _DWSeaFoamGrid.xy + ((float2(id.xy) + 0.5) / n - 0.5) * size;
+    float dt = _DWSeaFoamStep.x;
+
+    float fC = DWLoadShifted(c, n);
+    float fE = DWLoadShifted(c + int2(1, 0), n), fW = DWLoadShifted(c - int2(1, 0), n);
+    float fN = DWLoadShifted(c + int2(0, 1), n), fS = DWLoadShifted(c - int2(0, 1), n);
+    float uE = DWConvergenceVelocity(x + float2(0.5 * h, 0.0)).x;
+    float uW = DWConvergenceVelocity(x - float2(0.5 * h, 0.0)).x;
+    float uN = DWConvergenceVelocity(x + float2(0.0, 0.5 * h)).y;
+    float uS = DWConvergenceVelocity(x - float2(0.0, 0.5 * h)).y;
+    // Upwind fluxes through the four faces (positive = toward +X / +Z).
+    float flE = uE > 0.0 ? uE * fC : uE * fE;
+    float flW = uW > 0.0 ? uW * fW : uW * fC;
+    float flN = uN > 0.0 ? uN * fC : uN * fN;
+    float flS = uS > 0.0 ? uS * fS : uS * fC;
+
+    float f = fC - dt / h * (flE - flW + flN - flS);
+    f *= exp(-dt / _DWSeaFoamStep.y);
+    if (_DWSeaComponentCount > 0)
+        f += _DWSeaFoamStep.z * DWSeaBreaking(DWSeaJacobian(x)) * dt;
+    _DWSeaFoamNext[id.xy] = min(f, _DWSeaFoamStep.w);
+}

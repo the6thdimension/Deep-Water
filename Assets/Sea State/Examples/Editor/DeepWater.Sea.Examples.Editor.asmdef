@@ -6,6 +6,7 @@
         "DeepWater.Sea.Hdrp",
         "DeepWater.Sea.Editor",
         "Unity.Mathematics",
+        "Unity.Collections",
         "Unity.RenderPipelines.Core.Runtime",
         "Unity.RenderPipelines.HighDefinition.Runtime"
     ],

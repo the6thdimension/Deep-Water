@@ -1,8 +1,10 @@
+using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using Unity.Profiling;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
 using DeepWater.Sea.Core;
@@ -38,13 +40,32 @@ namespace DeepWater.Sea.Modules.Hdrp
         [SerializeField] Material waveDecalMaterial;
         [Tooltip("What the near field follows. Empty = Camera.main.")]
         [SerializeField] Transform followTarget;
+        [Tooltip("SeaFoam.compute — integrates the residual foam (streaks along the wind). Empty = whitecaps only.")]
+        [SerializeField] ComputeShader foamCompute;
 
         static readonly int s_ComponentsId = Shader.PropertyToID("_DWSeaComponents");
         static readonly int s_CountId = Shader.PropertyToID("_DWSeaComponentCount");
         static readonly int s_RegionId = Shader.PropertyToID("_DWSeaRegion");
         static readonly int s_FadeId = Shader.PropertyToID("_DWSeaFade");
         static readonly int s_FoamId = Shader.PropertyToID("_DWSeaFoam");
+        static readonly int s_FoamResidualId = Shader.PropertyToID("_DWSeaFoamResidual");
+        static readonly int s_FoamResidualDisplayId = Shader.PropertyToID("_DWSeaFoamResidualDisplay");
+        static readonly int s_FoamPrevId = Shader.PropertyToID("_DWSeaFoamPrev");
+        static readonly int s_FoamNextId = Shader.PropertyToID("_DWSeaFoamNext");
+        static readonly int s_FoamGridId = Shader.PropertyToID("_DWSeaFoamGrid");
+        static readonly int s_FoamShiftId = Shader.PropertyToID("_DWSeaFoamShift");
+        static readonly int s_FoamStepId = Shader.PropertyToID("_DWSeaFoamStep");
+        static readonly int s_FoamFlowId = Shader.PropertyToID("_DWSeaFoamFlow");
+        static readonly int s_FoamWindrowId = Shader.PropertyToID("_DWSeaFoamWindrow");
+        static readonly int s_FoamWindrow2Id = Shader.PropertyToID("_DWSeaFoamWindrow2");
+        static readonly int s_FoamResolutionId = Shader.PropertyToID("_DWSeaFoamResolution");
         static readonly ProfilerMarker s_UploadMarker = new ProfilerMarker("DeepWater.Sea.Render.Upload");
+        static readonly ProfilerMarker s_FoamMarker = new ProfilerMarker("DeepWater.Sea.Render.ResidualFoam");
+
+        /// <summary>GPU sample around the residual-foam dispatch (Profiler GPU module, <c>Recorder</c>).</summary>
+        public const string ResidualFoamGpuSample = "DeepWater.Sea.ResidualFoam";
+        // A ProfilingSampler collects GPU time; a plain CommandBuffer.BeginSample(string) does not.
+        static readonly ProfilingSampler s_FoamGpuSampler = new ProfilingSampler(ResidualFoamGpuSample);
 
         const int MaskResolution = 256;
 
@@ -56,11 +77,41 @@ namespace DeepWater.Sea.Modules.Hdrp
         Texture2D _mask;
         bool _ready;
 
+        // Residual foam: two R32F fields over the near-field region, ping-ponged by the compute pass.
+        RenderTexture _foamA, _foamB;
+        bool _foamFlip, _foamHasPrevious;
+        int _foamKernel;
+        CommandBuffer _foamCmd;
+        ResidualFoamGrid _foamGrid;
+        readonly int[] _shiftArgs = new int[2];
+        double _foamPrevTimeS;
+        double _foamAlongOffsetM;
+        List<ResidualFoamStepRecord> _foamRecord;
+        int _foamRecordLimit;
+
         /// <summary>Components drawn last frame (doubles during a sea-state cross-fade).</summary>
         public int DrawnComponentCount { get; private set; }
 
+        /// <summary>True when the distant sea is solved from a measured calibration (Hs matched).</summary>
+        public bool FarFieldCalibrated { get; private set; }
+        /// <summary>Wind handed to HDRP's FFT bands, km/h (may exceed the sea-state wind to reach Hs).</summary>
+        public float FarFieldWindKmh { get; private set; }
+        /// <summary>Band multiplier handed to HDRP's FFT bands.</summary>
+        public float FarFieldMultiplier { get; private set; }
+
+        /// <summary>True when the residual-foam integrator runs (look enables it and the compute shader is assigned).</summary>
+        public bool ResidualFoamActive => _foamA != null;
+        /// <summary>The residual foam field drawn this frame (R32F over the near-field region; UV x = world X, y = world Z).</summary>
+        public RenderTexture ResidualFoamTexture => _foamFlip ? _foamB : _foamA;
+        /// <summary>Inputs of the latest residual-foam step.</summary>
+        public ResidualFoamParams LastResidualFoamParams { get; private set; }
+        /// <summary>Centre (world XZ) of the residual foam grid — it drifts with the water, within a texel of the near field.</summary>
+        public float2 ResidualFoamCentre => _foamGrid.CentreWorld;
+
         /// <summary>Near-field decal texel size, m.</summary>
         public float NearFieldTexelM => look != null ? look.nearFieldSizeM / (int)look.nearFieldResolution : 0f;
+        /// <summary>Centre (world XZ) of the near-field region drawn this frame — also HDRP's decal and foam region.</summary>
+        public float2 NearFieldCentre { get; private set; }
 
         void OnEnable()
         {
@@ -101,6 +152,8 @@ namespace DeepWater.Sea.Modules.Hdrp
             BuildMask();
             CreateNearField();
             ConfigureSurface();
+            Shader.SetGlobalVector(s_FoamResidualDisplayId, Vector4.zero);
+            if (look.residualFoam) CreateResidualFoam();
 
             director.ConditionsChanged += ApplyConditions;
             if (director.IsReady) ApplyConditions(director.Conditions);
@@ -115,6 +168,7 @@ namespace DeepWater.Sea.Modules.Hdrp
 
             _componentBuffer?.Release();
             _componentBuffer = null;
+            ReleaseResidualFoam();
             if (_frame.IsCreated) _frame.Dispose();
             if (_anchor != null) Destroy(_anchor.gameObject);
             if (_decal != null) Destroy(_decal.gameObject);
@@ -134,6 +188,7 @@ namespace DeepWater.Sea.Modules.Hdrp
             using (s_UploadMarker.Auto())
             {
                 float2 centre = SnappedCentre();
+                NearFieldCentre = centre;
                 Vector3 p = new Vector3(centre.x, transform.position.y, centre.y);
                 _anchor.position = p;
                 _decal.transform.position = p;
@@ -160,12 +215,197 @@ namespace DeepWater.Sea.Modules.Hdrp
                 Shader.SetGlobalBuffer(s_ComponentsId, _componentBuffer);
                 Shader.SetGlobalInt(s_CountId, n);
                 Shader.SetGlobalVector(s_RegionId, new Vector4(centre.x, centre.y, look.nearFieldSizeM, 1f / bound));
-                Shader.SetGlobalVector(s_FadeId, new Vector4(look.handoverStart, look.handoverEnd, 0f, 0f));
+                Shader.SetGlobalVector(s_FadeId, new Vector4(look.handoverStart, look.handoverEnd,
+                    look.energyPreservingHandover ? 1f : 0f, 0f));
                 Shader.SetGlobalVector(s_FoamId, new Vector4(director.Simulation.LastBake.FoamJacobianThreshold,
-                    look.surfaceFoamGain, look.deepFoamGain, 0f));
+                    look.surfaceFoamGain, look.deepFoamGain, look.hdrpFoamChannelWorkaround ? 1f : 0f));
                 DrawnComponentCount = n;
             }
+
+            if (_foamA != null) StepResidualFoam(SnappedCentre(), DrawnComponentCount);
         }
+
+        void CreateResidualFoam()
+        {
+            if (foamCompute == null)
+            {
+                Debug.LogWarning($"[HdrpSeaRenderer] '{name}': residual foam is on in the look but no SeaFoam compute shader is assigned; whitecaps only.", this);
+                return;
+            }
+            if (!SystemInfo.supportsComputeShaders)
+            {
+                Debug.LogWarning("[HdrpSeaRenderer] Compute shaders are not supported here; residual foam (wind streaks) is off.", this);
+                return;
+            }
+            _foamKernel = foamCompute.FindKernel("DWSeaFoamIntegrate");
+            int res = (int)look.nearFieldResolution;
+            _foamA = NewFoamTexture(res, "Sea Residual Foam A");
+            _foamB = NewFoamTexture(res, "Sea Residual Foam B");
+            _foamCmd = new CommandBuffer { name = "Deep Water Residual Foam" };
+            ClearResidualFoam();
+        }
+
+        static RenderTexture NewFoamTexture(int res, string label)
+        {
+            var rt = new RenderTexture(res, res, 0, GraphicsFormat.R32_SFloat)
+            {
+                name = label,
+                enableRandomWrite = true,
+                filterMode = FilterMode.Bilinear,
+                wrapMode = TextureWrapMode.Clamp,
+                hideFlags = HideFlags.DontSave,
+            };
+            rt.Create();
+            return rt;
+        }
+
+        void ReleaseResidualFoam()
+        {
+            Shader.SetGlobalVector(s_FoamResidualDisplayId, Vector4.zero);
+            if (_foamA != null) { _foamA.Release(); Destroy(_foamA); _foamA = null; }
+            if (_foamB != null) { _foamB.Release(); Destroy(_foamB); _foamB = null; }
+            _foamCmd?.Release();
+            _foamCmd = null;
+            _foamRecord = null;
+        }
+
+        /// <summary>Zero both residual foam fields; the next step starts from clear water.</summary>
+        public void ClearResidualFoam()
+        {
+            if (_foamA == null) return;
+            _foamCmd.Clear();
+            _foamCmd.SetRenderTarget(_foamA);
+            _foamCmd.ClearRenderTarget(false, true, Color.clear);
+            _foamCmd.SetRenderTarget(_foamB);
+            _foamCmd.ClearRenderTarget(false, true, Color.clear);
+            Graphics.ExecuteCommandBuffer(_foamCmd);
+            _foamCmd.Clear();
+            _foamHasPrevious = false;
+        }
+
+        /// <summary>
+        /// One residual-foam step on the GPU (SeaFoam.compute, twin of ResidualFoamStepJob) on the
+        /// render clock. The decal then feeds the field into HDRP's foam buffer at the rate that
+        /// holds that buffer at the residual level.
+        /// </summary>
+        void StepResidualFoam(float2 centre, int componentCount)
+        {
+            // A full verification recording freezes the field until it has been read back.
+            if (_foamRecord != null && _foamRecord.Count >= _foamRecordLimit) return;
+
+            using (s_FoamMarker.Auto())
+            {
+                double t = director.RenderTimeS;
+                float dt = _foamHasPrevious ? (float)math.clamp(t - _foamPrevTimeS, 0.0, look.residualMaxStepS) : 0f;
+                ResidualFoamParams p = ResidualFoamParamsFor(director.Conditions, director.Simulation.LastBake.FoamJacobianThreshold, dt);
+                RenderTexture prev = _foamFlip ? _foamB : _foamA, next = _foamFlip ? _foamA : _foamB;
+                int res = (int)look.nearFieldResolution;
+
+                // The grid drifts with the water and re-centres on the near field in whole texels.
+                if (!_foamHasPrevious) _foamGrid = ResidualFoamGrid.At(centre, res, look.nearFieldSizeM);
+                int2 shift = _foamGrid.Advance(p.DriftMs * dt * p.Downwind, centre);
+                float2 gridCentre = _foamGrid.CentreWorld;
+
+                CommandBuffer cmd = _foamCmd;
+                cmd.Clear();
+                s_FoamGpuSampler.Begin(cmd);
+                cmd.SetComputeBufferParam(foamCompute, _foamKernel, s_ComponentsId, _componentBuffer);
+                cmd.SetComputeIntParam(foamCompute, s_CountId, componentCount);
+                cmd.SetComputeIntParam(foamCompute, s_FoamResolutionId, res);
+                cmd.SetComputeVectorParam(foamCompute, s_FoamGridId, new Vector4(gridCentre.x, gridCentre.y, look.nearFieldSizeM, 0f));
+                _shiftArgs[0] = shift.x;
+                _shiftArgs[1] = shift.y;
+                cmd.SetComputeIntParams(foamCompute, s_FoamShiftId, _shiftArgs);
+                cmd.SetComputeVectorParam(foamCompute, s_FoamId, new Vector4(p.JacobianThreshold, p.BreakingGain, 0f, 0f));
+                cmd.SetComputeVectorParam(foamCompute, s_FoamStepId, new Vector4(dt, p.LifetimeS, p.ProductionPerS, p.Cap));
+                cmd.SetComputeVectorParam(foamCompute, s_FoamFlowId, new Vector4(p.Downwind.x, p.Downwind.y, p.DriftMs, p.ConvergenceMs));
+                cmd.SetComputeVectorParam(foamCompute, s_FoamWindrowId, new Vector4(p.SpacingM, p.MeanderM, p.MeanderWavelengthM, p.AlongOffsetM));
+                cmd.SetComputeVectorParam(foamCompute, s_FoamWindrow2Id, new Vector4(p.SpacingVariation, p.StrengthVariation, 0f, 0f));
+                cmd.SetComputeTextureParam(foamCompute, _foamKernel, s_FoamPrevId, prev);
+                cmd.SetComputeTextureParam(foamCompute, _foamKernel, s_FoamNextId, next);
+                int groups = (res + 7) / 8;
+                cmd.DispatchCompute(foamCompute, _foamKernel, groups, groups, 1);
+                s_FoamGpuSampler.End(cmd);
+                Graphics.ExecuteCommandBuffer(cmd);
+                cmd.Clear();
+
+                _foamFlip = !_foamFlip;
+                float2 toFoamUv = (centre - gridCentre) / look.nearFieldSizeM;
+                Shader.SetGlobalTexture(s_FoamResidualId, next);
+                Shader.SetGlobalVector(s_FoamResidualDisplayId, new Vector4(1f / HdrpFoamLifetimeS(), toFoamUv.x, toFoamUv.y, 0f));
+
+                _foamRecord?.Add(new ResidualFoamStepRecord
+                {
+                    Params = p,
+                    DtS = dt,
+                    Centre = gridCentre,
+                    Shift = shift,
+                    Components = _frame.GetSubArray(0, componentCount).ToArray(),
+                });
+                LastResidualFoamParams = p;
+                _foamPrevTimeS = t;
+                _foamHasPrevious = true;
+            }
+        }
+
+        /// <summary>Residual-foam inputs for this step: the sea conditions mapped through the look.</summary>
+        ResidualFoamParams ResidualFoamParamsFor(in SeaConditions c, float jacobianThreshold, float dt)
+        {
+            float wind = c.WindSpeedMs;
+            float travel = SeaUnits.TravelDirectionRad(c.WindFromDeg);
+            float drift = look.windDriftFraction * wind;
+            float strength = math.saturate(look.windrowStrengthByWindMs.Evaluate(wind));
+
+            // The windrow pattern drifts with the surface; integrated (not drift × t) so a change of
+            // sea state does not make it jump. Wrapped to 2× the meander wavelength, which every
+            // along-wind period of the pattern divides (ResidualFoamParams.MeanderWavelengthM).
+            double lambda = 2.0 * look.windrowMeanderWavelengthM;
+            _foamAlongOffsetM += drift * dt;
+            _foamAlongOffsetM -= math.floor(_foamAlongOffsetM / lambda) * lambda;
+
+            return new ResidualFoamParams
+            {
+                Downwind = new float2(math.cos(travel), math.sin(travel)),
+                DriftMs = drift,
+                ConvergenceMs = look.windrowConvergenceFraction * wind * strength,
+                SpacingM = look.windrowSpacingM,
+                MeanderM = look.windrowMeanderM,
+                MeanderWavelengthM = look.windrowMeanderWavelengthM,
+                SpacingVariation = look.windrowSpacingVariation,
+                StrengthVariation = look.windrowStrengthVariation,
+                AlongOffsetM = (float)_foamAlongOffsetM,
+                LifetimeS = look.residualLifetimeS,
+                ProductionPerS = look.residualProductionPerS,
+                Cap = look.residualCap,
+                JacobianThreshold = jacobianThreshold,
+                BreakingGain = look.surfaceFoamGain,
+            };
+        }
+
+        /// <summary>
+        /// Lifetime of HDRP's own foam buffer, s: it decays by exp(−dt · 0.5 / lerp(0.05, 1, persistence))
+        /// per frame (HDRenderPipeline.WaterSystem.cs; WaterDecal.shader, FoamAttenuation pass).
+        /// </summary>
+        float HdrpFoamLifetimeS() => 2f * math.lerp(0.05f, 1f, math.saturate(_surface.foamPersistenceMultiplier));
+
+        /// <summary>
+        /// Record the next <paramref name="steps"/> residual-foam steps (inputs and wave frame) from a
+        /// cleared field, then freeze the field until <see cref="EndResidualFoamRecording"/> — so a
+        /// verification tool can read the GPU field back and replay the same steps on the CPU twin.
+        /// </summary>
+        public void BeginResidualFoamRecording(int steps)
+        {
+            if (_foamA == null) return;
+            ClearResidualFoam();
+            _foamRecord = new List<ResidualFoamStepRecord>(steps);
+            _foamRecordLimit = steps;
+        }
+
+        /// <summary>Steps recorded so far (null when not recording).</summary>
+        public IReadOnlyList<ResidualFoamStepRecord> ResidualFoamRecord => _foamRecord;
+
+        /// <summary>Stop recording and resume integration.</summary>
+        public void EndResidualFoamRecording() => _foamRecord = null;
 
         /// <summary>
         /// Inverse of HDRP's deformation blur for one plane wave. HDRP filters the deformation
@@ -239,12 +479,32 @@ namespace DeepWater.Sea.Modules.Hdrp
             float dominantTp = math.max(c.WindSeaTpS, c.SwellHsM > 0f ? c.SwellTpS : 0f);
             float peakWavelength = (float)WaveSpectrum.DeepWaterWavelength(dominantTp, math.max(director.Gravity, 0.01f));
 
-            _surface.largeWindSpeed = math.clamp(windKmh, 0f, 250f);
+            float repetition = math.clamp(look.repetitionPerPeakWavelength * peakWavelength, 250f, 5000f);
+            float farWindKmh = windKmh, band0 = look.farBand0Multiplier, band1 = look.farBand1Multiplier;
+            FarFieldCalibration cal = look.farFieldCalibration;
+            FarFieldCalibrated = look.useFarFieldCalibration && cal != null && cal.IsValid;
+            if (FarFieldCalibrated)
+            {
+                if (!cal.Solve(c.SignificantWaveHeightM, repetition, windKmh, out farWindKmh, out float m))
+                    Debug.LogWarning($"[HdrpSeaRenderer] Far field cannot reach Hs {c.SignificantWaveHeightM:0.0} m within the calibrated winds; using the strongest.", this);
+                band0 = band1 = m;
+                if (!Mathf.Approximately(cal.chaos, look.farChaos))
+                    Debug.LogWarning($"[HdrpSeaRenderer] Far-field calibration was measured at chaos {cal.chaos:0.##}, look uses {look.farChaos:0.##}; recalibrate.", this);
+            }
+            else if (c.SignificantWaveHeightM > 0f && look.useFarFieldCalibration)
+            {
+                Debug.LogWarning("[HdrpSeaRenderer] No far-field calibration: HDRP's distant sea uses the sea-state wind as-is and its Hs is not matched. " +
+                                 "Run Deep Water → Sea State → Calibrate Far Field (play mode).", this);
+            }
+            FarFieldWindKmh = farWindKmh;
+            FarFieldMultiplier = band0;
+
+            _surface.largeWindSpeed = math.clamp(farWindKmh, 0f, 250f);
             _surface.largeOrientationValue = travelDeg;
             _surface.largeChaos = look.farChaos;
-            _surface.largeBand0Multiplier = c.SignificantWaveHeightM > 0f ? look.farBand0Multiplier : 0f;
-            _surface.largeBand1Multiplier = c.SignificantWaveHeightM > 0f ? look.farBand1Multiplier : 0f;
-            _surface.repetitionSize = math.clamp(look.repetitionPerPeakWavelength * peakWavelength, 250f, 5000f);
+            _surface.largeBand0Multiplier = c.SignificantWaveHeightM > 0f ? band0 : 0f;
+            _surface.largeBand1Multiplier = c.SignificantWaveHeightM > 0f ? band1 : 0f;
+            _surface.repetitionSize = repetition;
             _surface.ripplesWindSpeed = math.clamp(windKmh * look.ripplesWindScale, 0f, 15f);
             _surface.ripplesChaos = look.ripplesChaos;
             _surface.simulationFoamAmount = math.saturate(look.farFoamByWhitecapFraction.Evaluate(c.WhitecapFraction));
@@ -253,8 +513,10 @@ namespace DeepWater.Sea.Modules.Hdrp
 
         void BuildMask()
         {
-            // R, G: weight of HDRP's swell bands 0 and 1 = 1 − near-field weight (same smoothstep
-            // as SeaWaves.hlsl). B: ripples, always on. Clamped, so outside the region it is 1.
+            // R, G: amplitude of HDRP's swell bands 0 and 1. The near field (SeaWaves.hlsl) scales its
+            // waves by √w and the bands get √(1 − w): the two fields are independent, so variance —
+            // and Hs — stays constant through the handover instead of dipping to 71 % mid-band.
+            // B: ripples, always on. Clamped, so outside the region it is 1.
             _mask = new Texture2D(MaskResolution, MaskResolution, TextureFormat.RGBA32, false, true)
             {
                 name = "Sea Near Field Mask",
@@ -270,7 +532,8 @@ namespace DeepWater.Sea.Modules.Hdrp
                 float2 c = math.abs(uv - 0.5f) * 2f;
                 float r = math.max(c.x, c.y);
                 float near = 1f - math.smoothstep(look.handoverStart, look.handoverEnd, r);
-                byte far = (byte)math.round(255f * (1f - near));
+                float farAmplitude = look.energyPreservingHandover ? math.sqrt(1f - near) : 1f - near;
+                byte far = (byte)math.round(255f * farAmplitude);
                 pixels[y * MaskResolution + x] = new Color32(far, far, 255, 255);
             }
             _mask.SetPixels32(pixels);

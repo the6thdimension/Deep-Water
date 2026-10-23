@@ -1,4 +1,6 @@
+using Unity.Mathematics;
 using UnityEngine;
+using DeepWater.Sea.Core;
 
 namespace DeepWater.Sea.ScriptableObjects
 {
@@ -37,5 +39,46 @@ namespace DeepWater.Sea.ScriptableObjects
 
         public SwellProfileSO GetSwell(int degree)
             => swells != null && degree >= 0 && degree < swells.Length ? swells[degree] : null;
+
+        /// <summary>
+        /// The one place a (sea, swell, scenario) choice becomes bake input and published
+        /// conditions — shared by the director, the tests and the benchmark so they can never
+        /// disagree about what "Douglas 7 + swell 4" means. Missing profiles yield an absent
+        /// system (check <see cref="GetSea"/> / <see cref="GetSwell"/> to report them).
+        /// </summary>
+        public SeaBakeInput BuildBakeInput(int douglasSea, int douglasSwell, float windFromDeg, float swellFromDeg,
+            uint scenarioSeed, float gravity, out SeaConditions conditions)
+        {
+            SeaStateProfileSO sea = GetSea(douglasSea);
+            SwellProfileSO swell = GetSwell(douglasSwell);
+
+            var input = new SeaBakeInput
+            {
+                WindSea = sea != null ? sea.windSea.ToSpec(SeaUnits.TravelDirectionRad(windFromDeg), scenarioSeed) : default,
+                Swell = swell != null ? swell.swell.ToSpec(SeaUnits.TravelDirectionRad(swellFromDeg), scenarioSeed) : default,
+                MinWavelengthM = minResolvedWavelengthM,
+                Gravity = gravity,
+                WhitecapFraction = sea != null ? sea.whitecapFraction : 0f,
+                FoamCalibrationGrid = foamCalibrationGrid,
+            };
+
+            float windHs = input.WindSea.ComponentCount > 0 ? input.WindSea.SignificantHeightM : 0f;
+            float swellHs = input.Swell.ComponentCount > 0 ? input.Swell.SignificantHeightM : 0f;
+            conditions = new SeaConditions
+            {
+                DouglasSea = douglasSea,
+                DouglasSwell = douglasSwell,
+                WindSeaHsM = sea != null ? sea.windSea.significantHeightM : 0f,
+                WindSeaTpS = sea != null ? sea.windSea.peakPeriodS : 0f,
+                SwellHsM = swell != null ? swell.swell.significantHeightM : 0f,
+                SwellTpS = swell != null ? swell.swell.peakPeriodS : 0f,
+                SignificantWaveHeightM = math.sqrt(windHs * windHs + swellHs * swellHs),
+                WindSpeedMs = sea != null ? sea.WindSpeedMs : 0f,
+                WindFromDeg = windFromDeg,
+                SwellFromDeg = swellFromDeg,
+                WhitecapFraction = input.WhitecapFraction,
+            };
+            return input;
+        }
     }
 }

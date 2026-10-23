@@ -26,8 +26,10 @@ namespace DeepWater.Sea.Core
         NativeArray<WaveComponent> _current;
         NativeArray<WaveComponent> _previous;
         NativeArray<SeaFrameComponent> _physicsFrame;
+        NativeArray<SeaComponentGroup> _physicsGroups;
+        NativeArray<SeaComponentGroup> _unusedGroups;
         NativeArray<int> _countScratch;
-        int _currentCount, _previousCount, _physicsFrameCount;
+        int _currentCount, _previousCount, _physicsFrameCount, _physicsGroupCount;
 
         double _transitionStartS;
         double _transitionDurationS;
@@ -51,6 +53,14 @@ namespace DeepWater.Sea.Core
         /// <summary>Components active right now (doubles while a cross-fade is running).</summary>
         public int ActiveComponentCount => _physicsFrameCount;
 
+        /// <summary>
+        /// The current fixed step's wave field in the packed SIMD layout, for jobs that evaluate
+        /// the sea themselves (e.g. batched buoyancy). Read-only; valid until the next
+        /// <see cref="Step"/> or <see cref="Apply"/>.
+        /// </summary>
+        public NativeArray<SeaComponentGroup> PhysicsGroups => _physicsGroups;
+        public int PhysicsGroupCount => _physicsGroupCount;
+
         public SeaSimulation(float seaLevel, int inverseIterations, double startTimeS = 0.0)
         {
             SeaLevel = seaLevel;
@@ -59,7 +69,9 @@ namespace DeepWater.Sea.Core
             _current = new NativeArray<WaveComponent>(MaxComponentsPerState, Allocator.Persistent);
             _previous = new NativeArray<WaveComponent>(MaxComponentsPerState, Allocator.Persistent);
             _physicsFrame = new NativeArray<SeaFrameComponent>(2 * MaxComponentsPerState, Allocator.Persistent);
-            _countScratch = new NativeArray<int>(1, Allocator.Persistent);
+            _physicsGroups = new NativeArray<SeaComponentGroup>(SeaComponentGroup.GroupCount(2 * MaxComponentsPerState), Allocator.Persistent);
+            _unusedGroups = new NativeArray<SeaComponentGroup>(1, Allocator.Persistent);
+            _countScratch = new NativeArray<int>(2, Allocator.Persistent);
         }
 
         /// <summary>
@@ -123,6 +135,10 @@ namespace DeepWater.Sea.Core
         /// written. <paramref name="output"/> must hold 2 × <see cref="MaxComponentsPerState"/>.
         /// </summary>
         public int BuildFrame(double timeS, NativeArray<SeaFrameComponent> output)
+            => BuildFrame(timeS, output, false, _unusedGroups, out _);
+
+        int BuildFrame(double timeS, NativeArray<SeaFrameComponent> output, bool packed,
+            NativeArray<SeaComponentGroup> groups, out int groupCount)
         {
             double w = TransitionWeight(timeS);
             new SeaFrameBuildJob
@@ -135,8 +151,11 @@ namespace DeepWater.Sea.Core
                 PreviousScale = (float)math.sqrt(1.0 - w),
                 TimeS = timeS,
                 Output = output,
+                WritePacked = packed,
+                Packed = groups,
                 OutputCount = _countScratch,
             }.Run();
+            groupCount = _countScratch[1];
             return _countScratch[0];
         }
 
@@ -149,13 +168,13 @@ namespace DeepWater.Sea.Core
             {
                 new SeaQueryJob
                 {
-                    Components = _physicsFrame,
-                    ComponentCount = _physicsFrameCount,
+                    Groups = _physicsGroups,
+                    GroupCount = _physicsGroupCount,
                     SeaLevel = SeaLevel,
                     InverseIterations = InverseIterations,
                     Positions = worldPositions,
                     Results = results,
-                }.Schedule(worldPositions.Length, 16).Complete();
+                }.Schedule(worldPositions.Length, 32).Complete();
             }
         }
 
@@ -168,8 +187,8 @@ namespace DeepWater.Sea.Core
                 positions[0] = worldPosition;
                 new SeaQueryJob
                 {
-                    Components = _physicsFrame,
-                    ComponentCount = _physicsFrameCount,
+                    Groups = _physicsGroups,
+                    GroupCount = _physicsGroupCount,
                     SeaLevel = SeaLevel,
                     InverseIterations = InverseIterations,
                     Positions = positions,
@@ -189,11 +208,13 @@ namespace DeepWater.Sea.Core
             if (_current.IsCreated) _current.Dispose();
             if (_previous.IsCreated) _previous.Dispose();
             if (_physicsFrame.IsCreated) _physicsFrame.Dispose();
+            if (_physicsGroups.IsCreated) _physicsGroups.Dispose();
+            if (_unusedGroups.IsCreated) _unusedGroups.Dispose();
             if (_countScratch.IsCreated) _countScratch.Dispose();
         }
 
         void RebuildPhysicsFrame()
-            => _physicsFrameCount = BuildFrame(_clock.TimeS, _physicsFrame);
+            => _physicsFrameCount = BuildFrame(_clock.TimeS, _physicsFrame, true, _physicsGroups, out _physicsGroupCount);
 
         double TransitionWeight(double timeS)
         {

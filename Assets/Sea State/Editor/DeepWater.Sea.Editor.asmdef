@@ -3,6 +3,7 @@
     "rootNamespace": "DeepWater.Sea.Editor",
     "references": [
         "DeepWater.Sea",
+        "Unity.Burst",
         "Unity.Mathematics",
         "Unity.Collections"
     ],

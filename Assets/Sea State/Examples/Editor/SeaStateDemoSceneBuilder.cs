@@ -87,11 +87,14 @@ namespace DeepWater.Sea.Examples.Editor
             SetField(renderer, "look", look);
             SetField(renderer, "waveDecalMaterial", decalMaterial);
 
+            var buoyancy = seaGo.AddComponent<BuoyancySystem>();
+            SetField(buoyancy, "sea", director);
+
             // Hulls.
             Directory.CreateDirectory(HullFolder);
             var bodies = new BuoyantBody[Hulls.Length];
             for (int i = 0; i < Hulls.Length; i++)
-                bodies[i] = BuildHull(Hulls[i], director, i == Hulls.Length - 1 ? buoyMaterial : hullMaterial);
+                bodies[i] = BuildHull(Hulls[i], buoyancy, i == Hulls.Length - 1 ? buoyMaterial : hullMaterial);
 
             // Camera.
             var camGo = new GameObject("Main Camera") { tag = "MainCamera" };
@@ -121,7 +124,7 @@ namespace DeepWater.Sea.Examples.Editor
         }
 
         static BuoyantBody BuildHull((string name, float l, float b, float h, float draft, int nx, int nz, Vector3 pos, float headingDeg) spec,
-            SeaStateDirector director, Material material)
+            BuoyancySystem buoyancy, Material material)
         {
             string assetName = spec.name.Split(' ')[0] + "_" + spec.l.ToString("0") + "m";
             var hull = LoadOrCreate<BuoyancyHullSO>($"{HullFolder}/{assetName}.asset");
@@ -154,7 +157,7 @@ namespace DeepWater.Sea.Examples.Editor
 
             body.mass = hull.massKg;
             var buoyant = go.AddComponent<BuoyantBody>();
-            SetField(buoyant, "sea", director);
+            SetField(buoyant, "system", buoyancy);
             SetField(buoyant, "hull", hull);
             return buoyant;
         }

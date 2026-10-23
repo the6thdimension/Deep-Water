@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using Unity.Collections;
+using Unity.Jobs;
 using Unity.Mathematics;
 using DeepWater.Sea.Core;
 
@@ -176,7 +177,7 @@ namespace DeepWater.Sea.Tests
             try
             {
                 var report = SeaBaker.Bake(input, comps);
-                Assert.Greater(report.FoamJacobianThreshold, FoamCalibrationJob.NoFoamThreshold);
+                Assert.Greater(report.FoamJacobianThreshold, FoamCalibration.NoFoamThreshold);
 
                 // Independent check on a different grid and time: coverage ≈ target.
                 var frame = new NativeArray<SeaFrameComponent>(report.Count, Allocator.TempJob);
@@ -199,6 +200,51 @@ namespace DeepWater.Sea.Tests
                 finally { frame.Dispose(); }
             }
             finally { comps.Dispose(); }
+        }
+
+        [Test]
+        public void PackedKernel_MatchesReference()
+        {
+            // The SIMD kernel is an optimisation, not a new model: it must agree with the
+            // reference layout (which the GPU decal also uses) to float rounding.
+            using (var sim = new SeaSimulation(0f, 4))
+            {
+                sim.Apply(SeaTestFixtures.Douglas6WithSwell(), default, 0f);
+                for (int i = 0; i < 321; i++) sim.Step(0.02);
+
+                const int n = 500;
+                var frame = new NativeArray<SeaFrameComponent>(2 * SeaSimulation.MaxComponentsPerState, Allocator.TempJob);
+                var positions = new NativeArray<float3>(n, Allocator.TempJob);
+                var packed = new NativeArray<SeaSample>(n, Allocator.TempJob);
+                var reference = new NativeArray<SeaSample>(n, Allocator.TempJob);
+                try
+                {
+                    int count = sim.BuildFrame(sim.SimulationTimeS, frame);
+                    var rng = new Random(5u);
+                    for (int i = 0; i < n; i++) positions[i] = new float3(rng.NextFloat(-2000f, 2000f), 0f, rng.NextFloat(-2000f, 2000f));
+
+                    sim.Query(positions, packed);
+                    new SeaQueryReferenceJob
+                    {
+                        Components = frame, ComponentCount = count, SeaLevel = 0f, InverseIterations = 4,
+                        Positions = positions, Results = reference,
+                    }.Run(n);
+
+                    float worstH = 0f, worstV = 0f, worstJ = 0f, worstCos = 1f;
+                    for (int i = 0; i < n; i++)
+                    {
+                        worstH = math.max(worstH, math.abs(packed[i].SurfaceHeight - reference[i].SurfaceHeight));
+                        worstV = math.max(worstV, math.length(packed[i].Velocity - reference[i].Velocity));
+                        worstJ = math.max(worstJ, math.abs(packed[i].Jacobian - reference[i].Jacobian));
+                        worstCos = math.min(worstCos, math.dot(packed[i].Normal, reference[i].Normal));
+                    }
+                    Assert.Less(worstH, 1e-3f, $"height {worstH} m");
+                    Assert.Less(worstV, 1e-3f, $"velocity {worstV} m/s");
+                    Assert.Less(worstJ, 1e-4f, $"Jacobian {worstJ}");
+                    Assert.Greater(worstCos, 0.999999f, $"normal cos {worstCos}");
+                }
+                finally { reference.Dispose(); packed.Dispose(); positions.Dispose(); frame.Dispose(); }
+            }
         }
 
         static float[] RunAndSample(SeaBakeInput input, double dt, int steps)

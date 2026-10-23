@@ -13,7 +13,7 @@
 struct DWSeaComponent
 {
     float4 a;   // x, y = direction (world X, Z); z = wavenumber k; w = amplitude
-    float4 b;   // x = Q·amplitude; y = wrapped phase (φ − ω t); z = ω; w = unused
+    float4 b;   // x = Q·amplitude; y = wrapped phase (φ − ω t); z = ω; w = render gain (blur pre-compensation)
 };
 
 StructuredBuffer<DWSeaComponent> _DWSeaComponents;
@@ -47,8 +47,10 @@ void DWSeaWaveDecal_float(float2 UV,
         float s, co;
         sincos(theta, s, co);
 
-        h += c.a.w * co;
-        dxz -= c.b.x * s * c.a.xy;
+        // Displacement carries the render gain (undoes HDRP's deformation blur for this wave);
+        // the Jacobian uses true amplitudes so whitecap coverage stays calibrated.
+        h += c.b.w * c.a.w * co;
+        dxz -= c.b.w * c.b.x * s * c.a.xy;
 
         float qak = c.b.x * c.a.z * co;
         dxdx += qak * c.a.x * c.a.x;

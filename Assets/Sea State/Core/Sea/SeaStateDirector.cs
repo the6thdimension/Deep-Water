@@ -152,33 +152,8 @@ namespace DeepWater.Sea.Core
             if (swell == null && douglasSwell != 0)
                 Debug.LogError($"[SeaStateDirector] Library has no profile for Douglas swell {douglasSwell}; swell omitted.", this);
 
-            var input = new SeaBakeInput
-            {
-                WindSea = sea != null ? sea.windSea.ToSpec(SeaUnits.TravelDirectionRad(windFromDeg), scenarioSeed) : default,
-                Swell = swell != null ? swell.swell.ToSpec(SeaUnits.TravelDirectionRad(swellFromDeg), scenarioSeed) : default,
-                MinWavelengthM = library.minResolvedWavelengthM,
-                Gravity = _gravity,
-                WhitecapFraction = sea != null ? sea.whitecapFraction : 0f,
-                FoamCalibrationGrid = library.foamCalibrationGrid,
-            };
-
-            float windHs = input.WindSea.ComponentCount > 0 ? input.WindSea.SignificantHeightM : 0f;
-            float swellHs = input.Swell.ComponentCount > 0 ? input.Swell.SignificantHeightM : 0f;
-            var conditions = new SeaConditions
-            {
-                DouglasSea = douglasSea,
-                DouglasSwell = douglasSwell,
-                WindSeaHsM = sea != null ? sea.windSea.significantHeightM : 0f,
-                WindSeaTpS = sea != null ? sea.windSea.peakPeriodS : 0f,
-                SwellHsM = swell != null ? swell.swell.significantHeightM : 0f,
-                SwellTpS = swell != null ? swell.swell.peakPeriodS : 0f,
-                SignificantWaveHeightM = math.sqrt(windHs * windHs + swellHs * swellHs),
-                WindSpeedMs = sea != null ? sea.WindSpeedMs : 0f,
-                WindFromDeg = windFromDeg,
-                SwellFromDeg = swellFromDeg,
-                WhitecapFraction = input.WhitecapFraction,
-            };
-
+            SeaBakeInput input = library.BuildBakeInput(douglasSea, douglasSwell, windFromDeg, swellFromDeg,
+                scenarioSeed, _gravity, out SeaConditions conditions);
             SeaBakeReport report = _simulation.Apply(input, conditions, transitionSeconds);
 
             Debug.Log($"[SeaStateDirector] Douglas sea {douglasSea} ({(sea != null ? sea.douglasTerm : "missing")}) + swell {douglasSwell}: " +

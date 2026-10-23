@@ -113,7 +113,7 @@ namespace DeepWater.Sea.Core
             return new SeaFrameComponent
             {
                 A = new float4(w.Direction.x, w.Direction.y, w.Wavenumber, amp),
-                B = new float4(w.Choppiness * amp, (float)phase, w.Omega, 0f),
+                B = new float4(w.Choppiness * amp, (float)phase, w.Omega, 1f),
             };
         }
     }

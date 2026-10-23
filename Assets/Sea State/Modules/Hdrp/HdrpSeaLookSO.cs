@@ -23,6 +23,12 @@ namespace DeepWater.Sea.Modules.Hdrp
         [Tooltip("Where the handover completes. Keep below 1: HDRP zeroes decal deformation at the region edge.")]
         [Range(0f, 1f)] public float handoverEnd = 0.95f;
 
+        [Tooltip("Pre-boost each drawn wave by the inverse of HDRP's 3×3 deformation blur at its wavenumber, " +
+                 "so the blurred surface matches the physics surface. Rendering only; physics is untouched.")]
+        public bool compensateDeformationBlur = true;
+        [Tooltip("Upper limit on the per-wave compensation gain (guards waves near the texel Nyquist limit).")]
+        [Range(1f, 2f)] public float maxBlurCompensation = 1.5f;
+
         [Header("Far field (HDRP FFT, statistically matched)")]
         [Range(0f, 1f)] public float farBand0Multiplier = 1f;
         [Range(0f, 1f)] public float farBand1Multiplier = 1f;

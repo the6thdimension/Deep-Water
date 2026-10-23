@@ -140,9 +140,18 @@ namespace DeepWater.Sea.Modules.Hdrp
                 _surface.waterMaskOffset = new Vector2(centre.x, centre.y);
 
                 int n = director.Simulation.BuildFrame(director.RenderTimeS, _frame);
+                float texel = NearFieldTexelM;
                 float bound = 0f;
                 for (int i = 0; i < n; i++)
-                    bound += math.max(math.abs(_frame[i].A.w), math.abs(_frame[i].B.x));
+                {
+                    SeaFrameComponent c = _frame[i];
+                    if (look.compensateDeformationBlur)
+                    {
+                        c.B.w = DeformationBlurCompensation(c.A.z * c.A.x * texel, c.A.z * c.A.y * texel, look.maxBlurCompensation);
+                        _frame[i] = c;
+                    }
+                    bound += c.B.w * math.max(math.abs(c.A.w), math.abs(c.B.x));
+                }
                 if (bound <= 0f) bound = 1f;
 
                 _decal.amplitude = bound;
@@ -156,6 +165,20 @@ namespace DeepWater.Sea.Modules.Hdrp
                     look.surfaceFoamGain, look.deepFoamGain, 0f));
                 DrawnComponentCount = n;
             }
+        }
+
+        /// <summary>
+        /// Inverse of HDRP's deformation blur for one plane wave. HDRP filters the deformation
+        /// region with a 3×3 kernel w = exp(−r²/0.8²) (WaterDeformation.compute, FilterDeformation),
+        /// which is separable; per axis a wave advancing θ radians per texel keeps
+        /// H(θ) = (1 + 2a cos θ) / (1 + 2a), a = exp(−1/0.64). Gain = 1 / (H(θx) H(θz)), capped.
+        /// </summary>
+        public static float DeformationBlurCompensation(float thetaX, float thetaZ, float maxGain)
+        {
+            const float A = 0.20961139f;   // exp(-1 / 0.64)
+            float hx = (1f + 2f * A * math.cos(thetaX)) / (1f + 2f * A);
+            float hz = (1f + 2f * A * math.cos(thetaZ)) / (1f + 2f * A);
+            return math.min(1f / math.max(hx * hz, 1e-3f), maxGain);
         }
 
         // Snap to whole texels so the decal grid does not crawl under a moving camera.

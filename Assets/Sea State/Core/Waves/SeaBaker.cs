@@ -29,7 +29,7 @@ namespace DeepWater.Sea.Core
         public float AmplitudeSum;
         /// <summary>Σ Qᵢ aᵢ: an exact upper bound on |horizontal displacement|.</summary>
         public float HorizontalAmplitudeSum;
-        /// <summary>Jacobian below which the surface is whitecap (see <see cref="FoamCalibrationJob"/>).</summary>
+        /// <summary>Jacobian below which the surface is whitecap (see <see cref="FoamThresholdJob"/>).</summary>
         public float FoamJacobianThreshold;
         /// <summary>Fraction of sampled surface that folds (J &lt; 0) — over-steep crests.</summary>
         public float FoldedFraction;
@@ -50,8 +50,8 @@ namespace DeepWater.Sea.Core
 
     /// <summary>
     /// Turns a <see cref="SeaBakeInput"/> into wave components: the wind sea first, then the
-    /// swell, then the whitecap calibration. Synchronous and Burst-compiled throughout, so a
-    /// bake is reproducible bit for bit.
+    /// swell, then the whitecap calibration (parallel over the sampling grid). Burst-compiled
+    /// throughout and completed before returning, so a bake is reproducible bit for bit.
     /// </summary>
     public static class SeaBaker
     {
@@ -101,31 +101,71 @@ namespace DeepWater.Sea.Core
                         report.HorizontalAmplitudeSum += output[i].Amplitude * output[i].Choppiness;
                     }
 
-                    // Calibrate over four dominant wavelengths and one dominant period.
-                    float dominantTp = math.max(
-                        report.WindSeaCount > 0 ? input.WindSea.PeakPeriodS : 0f,
-                        report.SwellCount > 0 ? input.Swell.PeakPeriodS : 0f);
-                    float extent = 4f * (float)WaveSpectrum.DeepWaterWavelength(dominantTp, input.Gravity);
-
-                    new FoamCalibrationJob
-                    {
-                        Components = output,
-                        ComponentCount = report.Count,
-                        WhitecapFraction = input.WhitecapFraction,
-                        ExtentM = math.max(extent, 1f),
-                        Grid = input.FoamCalibrationGrid,
-                        TimeSamples = 4,
-                        PeriodS = dominantTp,
-                        Result = scratch,
-                    }.Run();
-                    report.FoamJacobianThreshold = scratch[0];
-                    report.FoldedFraction = scratch[1];
+                    CalibrateFoam(input, output, ref report);
                 }
                 finally
                 {
                     scratch.Dispose();
                 }
                 return report;
+            }
+        }
+
+        // Whitecaps: sample the Jacobian over four dominant wavelengths and one dominant
+        // period, then pick the threshold that leaves the target fraction below it.
+        static void CalibrateFoam(in SeaBakeInput input, NativeArray<WaveComponent> components, ref SeaBakeReport report)
+        {
+            report.FoamJacobianThreshold = FoamCalibration.NoFoamThreshold;
+            report.FoldedFraction = 0f;
+            int count = report.Count;
+            int grid = input.FoamCalibrationGrid;
+            if (count <= 0 || grid <= 0) return;
+
+            float dominantTp = math.max(
+                report.WindSeaCount > 0 ? input.WindSea.PeakPeriodS : 0f,
+                report.SwellCount > 0 ? input.Swell.PeakPeriodS : 0f);
+            float extent = math.max(4f * (float)WaveSpectrum.DeepWaterWavelength(dominantTp, input.Gravity), 1f);
+
+            int times = FoamCalibration.TimeSamples;
+            int groupsPerFrame = SeaComponentGroup.GroupCount(count);
+            var frame = new NativeArray<SeaFrameComponent>(count, Allocator.TempJob);
+            var groups = new NativeArray<SeaComponentGroup>(groupsPerFrame * times, Allocator.TempJob);
+            var jacobians = new NativeArray<float>(grid * grid * times, Allocator.TempJob);
+            var result = new NativeArray<float>(2, Allocator.TempJob);
+            try
+            {
+                for (int t = 0; t < times; t++)
+                {
+                    double time = dominantTp * t / times;
+                    for (int i = 0; i < count; i++) frame[i] = SeaFieldMath.Prepare(components[i], time, 1f);
+                    SeaFieldPacked.Pack(frame, count, groups.GetSubArray(t * groupsPerFrame, groupsPerFrame));
+                }
+
+                new FoamJacobianSampleJob
+                {
+                    Groups = groups,
+                    GroupsPerFrame = groupsPerFrame,
+                    Grid = grid,
+                    Spacing = extent / grid,
+                    Jacobians = jacobians,
+                }.Schedule(jacobians.Length, 64).Complete();
+
+                new FoamThresholdJob
+                {
+                    Jacobians = jacobians,
+                    WhitecapFraction = input.WhitecapFraction,
+                    Result = result,
+                }.Run();
+
+                report.FoamJacobianThreshold = result[0];
+                report.FoldedFraction = result[1];
+            }
+            finally
+            {
+                result.Dispose();
+                jacobians.Dispose();
+                groups.Dispose();
+                frame.Dispose();
             }
         }
     }

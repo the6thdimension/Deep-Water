@@ -16,6 +16,8 @@ MonoBehaviour:
   nearFieldResolution: 512
   handoverStart: 0.6
   handoverEnd: 0.95
+  compensateDeformationBlur: 1
+  maxBlurCompensation: 1.5
   farBand0Multiplier: 1
   farBand1Multiplier: 1
   repetitionPerPeakWavelength: 3

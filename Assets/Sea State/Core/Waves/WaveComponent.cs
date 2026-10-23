@@ -35,7 +35,10 @@ namespace DeepWater.Sea.Core
     {
         /// <summary>x, y = direction; z = wavenumber k; w = scaled amplitude a.</summary>
         public float4 A;
-        /// <summary>x = Q·a (horizontal amplitude); y = wrapped phase (φ − ω t); z = ω; w = unused.</summary>
+        /// <summary>
+        /// x = Q·a (horizontal amplitude); y = wrapped phase (φ − ω t); z = ω;
+        /// w = render gain (GPU only: pre-compensates HDRP's deformation blur; 1 = none, ignored by physics).
+        /// </summary>
         public float4 B;
     }
 

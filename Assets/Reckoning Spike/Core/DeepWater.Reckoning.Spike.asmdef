@@ -1,0 +1,21 @@
+{
+    "name": "DeepWater.Reckoning.Spike",
+    "rootNamespace": "DeepWater.Reckoning.Spike",
+    "references": [
+        "DeepWater.Sea",
+        "Unity.Mathematics",
+        "Unity.Collections",
+        "Unity.Burst",
+        "Unity.Entities",
+        "Unity.Physics"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

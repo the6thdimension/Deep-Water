@@ -300,5 +300,33 @@ namespace DeepWater.Sea.Tests
                 Assert.Greater(onLines / total, 0.6, "foam gathered within ±spacing/8 of the lines (uniform would be 25 %)");
             }
         }
+
+        [Test]
+        public void Deposit_AddsAGaussianOfItsLevel_ThenTheCapHolds()
+        {
+            var field = new NativeArray<float>(N * N, Allocator.Temp);
+            try
+            {
+                float2 centre = float2.zero;
+                // A 10 m deposit of level 0.4 at a texel centre: peak 0.4, mass Level x 2 pi sigma^2 (sigma = 5 m), less the cut tail.
+                var d = new FoamDeposit { Centre = ResidualFoamMath.TexelWorld(N / 2, N / 2, N, centre, SizeM), RadiusM = 10f, Level = 0.4f };
+                ResidualFoamMath.ApplyDeposits(field, N, centre, SizeM, 0.8f, new[] { d }, 1);
+                double mass = 0; float peak = 0f;
+                for (int k = 0; k < field.Length; k++) { mass += field[k] * TexelM * TexelM; peak = math.max(peak, field[k]); }
+                double expected = 0.4 * 2.0 * math.PI * 25.0 * (1.0 - math.exp(-0.5 * 9.0));   // Gaussian mass inside 3 sigma
+                Assert.AreEqual(0.4f, peak, 1e-5f, "the peak is the level");
+                Assert.AreEqual(expected, mass, expected * 0.02, "mass is the Gaussian's (texel sum, within 2 %)");
+                Assert.AreEqual(0f, field[(N / 2) * N + N / 2 + 8], "nothing beyond 1.5 x the radius (16 m out)");
+
+                ResidualFoamMath.ApplyDeposits(field, N, centre, SizeM, 0.8f, new[] { d, d, d }, 3);
+                Assert.AreEqual(0.8f, field[(N / 2) * N + N / 2], 1e-6f, "deposits stack, and the cap still holds");
+
+                var outside = new FoamDeposit { Centre = new float2(10 * SizeM, 0f), RadiusM = 10f, Level = 0.4f };
+                var before = field.ToArray();
+                ResidualFoamMath.ApplyDeposits(field, N, centre, SizeM, 0.8f, new[] { outside }, 1);
+                CollectionAssert.AreEqual(before, field.ToArray(), "a deposit outside the grid changes nothing");
+            }
+            finally { field.Dispose(); }
+        }
     }
 }

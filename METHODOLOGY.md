@@ -198,6 +198,11 @@ These are the fixed points around which the methodology orbits. Every principle 
   - *Why it fails:* A green suite says nothing about branches no test enters. Each value of a kind enum is a branch, and the one nobody spawned is the one that is wrong.
   - *Do instead:* Give every kind a scenario can spawn a test that spawns it and follows it through its whole life (appear, act, leave or die). Measure each distance in the plane the rule means: "flown out of the area" is ground range. Reference test: `RangeL0Tests.Raid_AircraftAtAltitude_FlyTheirPass_InsteadOfVanishingAtLaunch`.
 
+- **AP20. Trusting an effect built for another render pipeline because the engine says its shader is supported.** Dropping a vendor particle prefab into an HDRP scene because `Shader.isSupported` is true and the asset store page shows it burning.
+  - *Where seen:* General Quarters slice 6, 2026-10-24. `HD_Naval_Explosion` uses the built-in pipeline's "Particles/Standard Unlit". HDRP reports it as supported and draws it as untextured grey quads. The VFX Arsenal flames rendered, but at a size and brightness made for a close camera, not a ship at 2 km under HDRP exposure. The same explosion still sits in a Guided Fury ground detonation.
+  - *Why it fails:* "Supported" means it compiles, not that HDRP gives it the passes, the exposure and the fog it expects. Effects are authored for a scale and an exposure as much as a pipeline.
+  - *Do instead:* Probe every candidate effect in the target scene, at the target distance, under the scene's exposure, and look at a screenshot before adopting it. If it fails, build it on a shader written for the pipeline (a ForwardOnly pass, display-relative colour, the pipeline's fog). Reference impl: `Assets/General Quarters/Modules/Presentation/Shaders/GQ_Particle.shader`, `Editor/CombatEffectsBuilder.cs`.
+
 ## Candidates (under evaluation)
 
 *Ideas that might become Principles. Not yet load-bearing. Promote when grounded in a real case.*
@@ -240,6 +245,12 @@ These are the fixed points around which the methodology orbits. Every principle 
   - *Exercised:* slice 5 made TEWA build its sentence only when it logs one. It had been formatting it on every 10 Hz evaluation of every standing proposal, part of the core's 0.64 KB/frame of garbage on the range. The saturation run's Fix was `2AF5C040E4AC6B5E` before and after.
 - **C21. A camera that draws part of the screen leaves the rest unpainted.** With a viewport rect, HDRP clears and draws only inside it. Pixels outside keep whatever an earlier frame left, so a dismissed dialog can still show through a gap between panels. The UI must paint every pixel outside the rect.
   - *Exercised:* the range's TAO seat (`taoCameraViewport`, the `.gq-backdrop` elements in `RangeScreen.uss`). The first build showed the closed debrief's text between the scope and the camera window.
+- **C22. The core says where; presentation decides how.** A deterministic core writes what happened, where, with what and from where into its log, and none of that goes into its fingerprint. Presentation reads the log behind a cursor and never writes back. Prove it twice: the fingerprint is unchanged with the new data, and an on/off A/B of the whole presentation layer shows only its own cost.
+  - *Exercised:* General Quarters slice 6. `EngagementEvent.Point / Weapon / Source`, `Modules/Presentation/CombatPresentation.cs`. The saturation Fix stayed `2AF5C040E4AC6B5E`; presentation on vs off costs about 0.2 ms of main thread, 0.03 ms of it in `GQ.Presentation`.
+- **C23. A fast emitter's trail is a ribbon, not puffs.** Particles laid by distance read as a dotted line once the emitter outruns them (an ESSM at 700 m/s), and a dense enough stream costs thousands of particles per missile. A `TrailRenderer` ribbon that widens and fades over its life costs one mesh and reads as smoke at any range.
+  - *Exercised:* `CombatEffectsBuilder.Trail`, checked from the missile camera in play mode.
+- **C24. A regenerated asset keeps its GUID by being overwritten in place.** A builder that deletes and recreates a scene or asset gives it a new GUID each run, which breaks build settings and every reference to it, and shows as a churned `.meta` in every commit. Copy over the existing file and reimport it.
+  - *Exercised:* `RangeSceneBuilder` (slice 6): `GQ_Range.unity` keeps GUID `281e3cf048c5db14188104849f24eb4e` across rebuilds.
 - **C5. Replaced legacy code goes to `Assets/_Archive/`, never deleted outright until cutover is proven.** Original folder name + `_legacy` suffix; original `.meta` preserved so GUIDs survive. Lets you reference old behavior during rebuild and gives a clean rollback path. Promote after one full cutover proves the workflow.
 
 ---
@@ -307,3 +318,4 @@ These are the fixed points around which the methodology orbits. Every principle 
   - **New entries:** AP19, C19, C20, C21.
   - **Results:** 67/67 GQ tests, 48/48 sea tests.
   - **Results:** 46/46 GQ tests, 48/48 sea tests.
+- **2026-10-24** — General Quarters slice 6 (presentation). Added AP20 (an effect built for another pipeline, trusted because its shader is "supported"), C22 (the core says where, presentation decides how; fingerprint and on/off A/B), C23 (a fast emitter's trail is a ribbon), C24 (a regenerated asset keeps its GUID by being overwritten in place).

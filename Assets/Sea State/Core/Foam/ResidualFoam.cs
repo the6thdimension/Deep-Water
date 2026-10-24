@@ -42,6 +42,22 @@ namespace DeepWater.Sea.Core
     }
 
     /// <summary>
+    /// Foam put into the water from outside the sea model (a splash, a shell or missile hitting the water, a ship's wake),
+    /// added once, in the next step, after the integration: up to <see cref="Level"/> at <see cref="Centre"/>, falling off as
+    /// a Gaussian with σ = <see cref="RadiusM"/> / 2 and cut off beyond 1.5 × the radius. It then drifts, gathers and decays
+    /// with the rest of the residual foam, and the field's cap still holds. The foam it adds is
+    /// Level × 2πσ² (texel-summed), less whatever the cap clips.
+    /// </summary>
+    public struct FoamDeposit
+    {
+        /// <summary>World XZ, m.</summary>
+        public float2 Centre;
+        public float RadiusM;
+        /// <summary>Foam level added at the centre (the field's units; the look's cap bounds the result).</summary>
+        public float Level;
+    }
+
+    /// <summary>
     /// Where the residual foam grid sits. The grid drifts with the surface water: drift is carried
     /// as a sub-texel <see cref="Fraction"/> plus whole-texel moves of the grid, never by
     /// resampling the field, so drift neither smears nor loses foam. Following the camera only
@@ -165,6 +181,33 @@ namespace DeepWater.Sea.Core
         /// <summary>World XZ of texel (i, j) of a grid of <paramref name="n"/> texels over <paramref name="sizeM"/> centred at <paramref name="centre"/>.</summary>
         public static float2 TexelWorld(int i, int j, int n, float2 centre, float sizeM)
             => centre + ((new float2(i, j) + 0.5f) / n - 0.5f) * sizeM;
+
+        /// <summary>The foam a deposit adds at world XZ <paramref name="x"/>: a Gaussian of σ = radius / 2, zero beyond 1.5 × the radius.</summary>
+        public static float DepositLevel(in FoamDeposit d, float2 x)
+        {
+            float r2 = math.lengthsq(x - d.Centre);
+            float radius = math.max(d.RadiusM, 1e-3f);
+            if (r2 > 2.25f * radius * radius) return 0f;
+            float sigma = 0.5f * radius;
+            return d.Level * math.exp(-0.5f * r2 / (sigma * sigma));
+        }
+
+        /// <summary>
+        /// Add <paramref name="count"/> deposits to a field of <paramref name="n"/>² texels over <paramref name="sizeM"/> centred at
+        /// <paramref name="centre"/>, then clamp each touched texel to <paramref name="cap"/>. The CPU twin of the
+        /// DWSeaFoamDeposit kernel, run after <see cref="ResidualFoamStepJob"/> with the step's centre and cap.
+        /// </summary>
+        public static void ApplyDeposits(NativeArray<float> field, int n, float2 centre, float sizeM, float cap, FoamDeposit[] deposits, int count)
+        {
+            for (int j = 0; j < n; j++)
+            for (int i = 0; i < n; i++)
+            {
+                float2 x = TexelWorld(i, j, n, centre, sizeM);
+                float add = 0f;
+                for (int k = 0; k < count; k++) add += DepositLevel(deposits[k], x);
+                if (add > 0f) field[j * n + i] = math.min(field[j * n + i] + add, cap);
+            }
+        }
     }
 
     /// <summary>

@@ -70,6 +70,10 @@ namespace DeepWater.GeneralQuarters.Modules.Combat
 
         /// <summary>Raised once when the raid has launched everything and nothing is still flying.</summary>
         public event Action<ShipCombat> RaidResolved;
+        /// <summary>Raised when a raid starts (general quarters is sounded).</summary>
+        public event Action<ShipCombat> RaidStarted;
+        /// <summary>Raised when a fresh run replaces the combat system (its log starts again from nothing).</summary>
+        public event Action<ShipCombat> RunStarted;
 
         /// <summary>Give an order (from a seat, or the scenario). It takes effect on the next fixed step.</summary>
         public void Issue(in Order order)
@@ -90,6 +94,7 @@ namespace DeepWater.GeneralQuarters.Modules.Combat
             Combat.Log.Add(Combat.Tick, EventKind.Note, "Range", $"raid '{scenario.displayName}' started: {scenario.threats.Length} threats",
                 root: RootKind.Scenario);
             Debug.Log($"[GQ] Raid '{scenario.displayName}' started at tick {RaidStartTick}: {scenario.threats.Length} threats.", this);
+            RaidStarted?.Invoke(this);
         }
 
         /// <summary>
@@ -117,6 +122,7 @@ namespace DeepWater.GeneralQuarters.Modules.Combat
             float knots = Run == 1 ? _drive.StartSpeedKn : Mathf.Round(m.SurgeMs / KnToMs);
             float course = Mathf.Round(ReadOwn().HeadingDeg) % 360f;
             Combat.Issue(Order.Helm(OrderIssuer.Scenario, course, knots));
+            RunStarted?.Invoke(this);
         }
 
         void Awake()

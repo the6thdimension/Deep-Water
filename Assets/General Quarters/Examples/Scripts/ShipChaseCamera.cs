@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace DeepWater.GeneralQuarters.Examples
 {
@@ -20,11 +21,15 @@ namespace DeepWater.GeneralQuarters.Examples
         [SerializeField] float yawOffsetDeg = 150f;
         [SerializeField] float minDistanceM = 40f, maxDistanceM = 2500f;
         [SerializeField] float pivotHeightM = 8f;
+        [Tooltip("A volume whose profile turns motion blur off; switched on for a few frames after each cut to a new target, so the cut doesn't smear.")]
+        [SerializeField] Volume cutVolume;
+        [SerializeField] int cutFrames = 3;
 
         bool _chase = true;
         float _worldYawDeg;
         Transform _ship;
         float _shipDistanceM, _shipPivotM;
+        int _cutFramesLeft;
 
         public bool Chase => _chase;
         /// <summary>What the camera is on now: the ship, or what it is watching.</summary>
@@ -50,6 +55,7 @@ namespace DeepWater.GeneralQuarters.Examples
             target = other;
             distanceM = distance;
             pivotHeightM = 0f;
+            Cut();
         }
 
         /// <summary>Back on the ship, at the distance it had before it watched anything else.</summary>
@@ -59,10 +65,20 @@ namespace DeepWater.GeneralQuarters.Examples
             target = _ship;
             distanceM = _shipDistanceM > 0f ? _shipDistanceM : distanceM;
             pivotHeightM = _shipDistanceM > 0f ? _shipPivotM : pivotHeightM;
+            Cut();
+        }
+
+        /// <summary>The camera jumps: motion blur would smear the whole frame by the jump, so it is off for a few frames.</summary>
+        void Cut()
+        {
+            if (cutVolume == null) return;
+            _cutFramesLeft = Mathf.Max(1, cutFrames);
+            cutVolume.weight = 1f;
         }
 
         void LateUpdate()
         {
+            if (cutVolume != null && _cutFramesLeft > 0 && --_cutFramesLeft == 0) cutVolume.weight = 0f;
             if (target == null) return;
             float dt = Time.unscaledDeltaTime;
             float heading = HeadingDeg(target);

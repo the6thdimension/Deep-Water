@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 using DeepWater.GeneralQuarters.Core.Simulation;
 
 namespace DeepWater.GeneralQuarters.Core.Log
@@ -55,6 +56,16 @@ namespace DeepWater.GeneralQuarters.Core.Log
         /// <summary>The Order's sequence number when <see cref="Root"/> is Order.</summary>
         public int OrderSequence;
         public ChanceRoot Chance;
+        /// <summary>
+        /// Where it happened (world, m) when <see cref="HasPoint"/>: the launch cell, a burst's aim point, a detonation,
+        /// a hit. Inquiry can say where; presentation puts its effects there. The core never reads it back.
+        /// </summary>
+        public Vector3 Point;
+        public bool HasPoint;
+        /// <summary>The weapon concerned; None for events that are not a weapon's.</summary>
+        public WeaponClass Weapon;
+        /// <summary>The gun mount (its index in the loadout) or VLS group that fired, the ShipSystem taken offline, or −1.</summary>
+        public int Source;
 
         public override string ToString() => $"[{Id}] t{Tick} {Kind}: {Text}";
     }
@@ -77,8 +88,20 @@ namespace DeepWater.GeneralQuarters.Core.Log
             {
                 Id = id, Tick = tick, Kind = kind, Rule = rule, Text = text, TrackId = trackId,
                 CauseA = causeA, CauseB = causeB, CauseC = causeC, Root = root, OrderSequence = orderSequence, Chance = chance,
+                Source = -1,
             });
             return id;
+        }
+
+        /// <summary>Say where event <paramref name="id"/> happened, with which weapon, from which mount or group.</summary>
+        public void Locate(int id, Vector3 point, WeaponClass weapon = WeaponClass.None, int source = -1)
+        {
+            EngagementEvent e = _events[id];
+            e.Point = point;
+            e.HasPoint = true;
+            e.Weapon = weapon;
+            e.Source = source;
+            _events[id] = e;
         }
 
         public int Count(EventKind kind)

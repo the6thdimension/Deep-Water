@@ -8,6 +8,7 @@
 // kernel is verified against.
 
 #pragma kernel DWSeaFoamIntegrate
+#pragma kernel DWSeaFoamDeposit
 
 #include "SeaWaves.hlsl"
 
@@ -21,6 +22,9 @@ float4 _DWSeaFoamFlow;         // xy = downwind unit vector; z = drift (m/s, car
 float4 _DWSeaFoamWindrow;      // x = spacing (m); y = meander (m); z = meander wavelength (m); w = along-wind offset (m)
 float4 _DWSeaFoamWindrow2;     // x = spacing variation (fraction); y = strength variation (fraction)
 int    _DWSeaFoamResolution;
+// Foam put in from outside (splashes, wakes); twin: ResidualFoamMath.ApplyDeposits.
+StructuredBuffer<float4> _DWSeaFoamDeposits;   // x = centre X, y = centre Z (world, m), z = radius (m), w = level
+int    _DWSeaFoamDepositCount;
 
 #define DW_TWO_PI 6.28318530718
 
@@ -84,4 +88,26 @@ void DWSeaFoamIntegrate(uint3 id : SV_DispatchThreadID)
     if (_DWSeaComponentCount > 0)
         f += _DWSeaFoamStep.z * DWSeaBreaking(DWSeaJacobian(x)) * dt;
     _DWSeaFoamNext[id.xy] = min(f, _DWSeaFoamStep.w);
+}
+
+// Added once after the step: a Gaussian of sigma = radius / 2 per deposit, cut off beyond 1.5 x the radius, then the cap.
+[numthreads(8, 8, 1)]
+void DWSeaFoamDeposit(uint3 id : SV_DispatchThreadID)
+{
+    int n = _DWSeaFoamResolution;
+    if (id.x >= (uint)n || id.y >= (uint)n) return;
+    float size = _DWSeaFoamGrid.z;
+    float2 x = _DWSeaFoamGrid.xy + ((float2(id.xy) + 0.5) / n - 0.5) * size;
+    float add = 0.0;
+    for (int k = 0; k < _DWSeaFoamDepositCount; k++)
+    {
+        float4 d = _DWSeaFoamDeposits[k];
+        float2 r = x - d.xy;
+        float r2 = dot(r, r);
+        float radius = max(d.z, 1e-3);
+        if (r2 > 2.25 * radius * radius) continue;
+        float sigma = 0.5 * radius;
+        add += d.w * exp(-0.5 * r2 / (sigma * sigma));
+    }
+    if (add > 0.0) _DWSeaFoamNext[id.xy] = min(_DWSeaFoamNext[id.xy] + add, _DWSeaFoamStep.w);
 }

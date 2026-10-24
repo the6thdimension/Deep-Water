@@ -5,7 +5,8 @@
         "DeepWater.GeneralQuarters",
         "Unity.InputSystem",
         "GuidedFury",
-        "Unity.AppUI"
+        "Unity.AppUI",
+        "Unity.RenderPipelines.Core.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -131,7 +131,11 @@ namespace DeepWater.GeneralQuarters.Core
             //    and resolves its bursts.
             Vls.StepInFlight(_ctx);
             for (int i = 0; i < _guns.Length; i++)
+            {
+                _ctx.Mount = i;
                 if (!DamageControl.OutOfAction || _guns[i].Profile.SelfDefence) _guns[i].Step(_ctx, _directed);
+            }
+            _ctx.Mount = -1;
             PruneDirected();
 
             // 7. Damage control

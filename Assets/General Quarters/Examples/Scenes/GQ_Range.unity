@@ -119,6 +119,77 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &312742088
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 312742089}
+  - component: {fileID: 312742091}
+  - component: {fileID: 312742090}
+  m_Layer: 0
+  m_Name: Range Screen
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &312742089
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 312742088}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 864422338}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &312742090
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 312742088}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1a7aa68419c18c48b4972c75ffd66ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: DeepWater.GeneralQuarters.Examples::DeepWater.GeneralQuarters.Examples.RangeScreen
+  director: {fileID: 864422333}
+  refreshHz: 15
+--- !u!114 &312742091
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 312742088}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
+  m_PanelSettings: {fileID: 11400000, guid: 4825696dc9769c647ad27a1807758cb4, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: fc907779f6783494eba10a527449af0f,
+    type: 3}
+  m_SortingOrder: 0
+  m_Position: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}
 --- !u!1 &506607362
 GameObject:
   m_ObjectHideFlags: 0
@@ -369,127 +440,122 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &922415056
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 2079039183047107412, guid: 5a08bafcc00a86f488c9c01b980c0e73,
-        type: 3}
-      propertyPath: m_Name
-      value: DDG-51 (General Quarters)
-      objectReference: {fileID: 0}
-    - target: {fileID: 2486370992176255280, guid: 5a08bafcc00a86f488c9c01b980c0e73,
-        type: 3}
-      propertyPath: startSpeedKn
-      value: 12
-      objectReference: {fileID: 0}
-    - target: {fileID: 6572509283330152693, guid: 5a08bafcc00a86f488c9c01b980c0e73,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6572509283330152693, guid: 5a08bafcc00a86f488c9c01b980c0e73,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6572509283330152693, guid: 5a08bafcc00a86f488c9c01b980c0e73,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6572509283330152693, guid: 5a08bafcc00a86f488c9c01b980c0e73,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6572509283330152693, guid: 5a08bafcc00a86f488c9c01b980c0e73,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6572509283330152693, guid: 5a08bafcc00a86f488c9c01b980c0e73,
-        type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6572509283330152693, guid: 5a08bafcc00a86f488c9c01b980c0e73,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6572509283330152693, guid: 5a08bafcc00a86f488c9c01b980c0e73,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6572509283330152693, guid: 5a08bafcc00a86f488c9c01b980c0e73,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6572509283330152693, guid: 5a08bafcc00a86f488c9c01b980c0e73,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8542260059399734295, guid: 5a08bafcc00a86f488c9c01b980c0e73,
-        type: 3}
-      propertyPath: system
-      value: 
-      objectReference: {fileID: 506607363}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 2079039183047107412, guid: 5a08bafcc00a86f488c9c01b980c0e73,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 922415060}
-  m_SourcePrefab: {fileID: 100100000, guid: 5a08bafcc00a86f488c9c01b980c0e73, type: 3}
---- !u!4 &922415057 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 6572509283330152693, guid: 5a08bafcc00a86f488c9c01b980c0e73,
-    type: 3}
-  m_PrefabInstance: {fileID: 922415056}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &922415058 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 2486370992176255280, guid: 5a08bafcc00a86f488c9c01b980c0e73,
-    type: 3}
-  m_PrefabInstance: {fileID: 922415056}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 922415059}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fa3cbf0d28891d04b9d8eed99907a487, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: DeepWater.GeneralQuarters::DeepWater.GeneralQuarters.Modules.Propulsion.ShipDrive
---- !u!1 &922415059 stripped
+--- !u!1 &864422332
 GameObject:
-  m_CorrespondingSourceObject: {fileID: 2079039183047107412, guid: 5a08bafcc00a86f488c9c01b980c0e73,
-    type: 3}
-  m_PrefabInstance: {fileID: 922415056}
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &922415060
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 864422338}
+  - component: {fileID: 864422337}
+  - component: {fileID: 864422336}
+  - component: {fileID: 864422335}
+  - component: {fileID: 864422334}
+  - component: {fileID: 864422333}
+  m_Layer: 0
+  m_Name: General Quarters Range
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &864422333
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 922415059}
+  m_GameObject: {fileID: 864422332}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1b87e3301e12ff447add9aa39af66a33, type: 3}
+  m_Script: {fileID: 11500000, guid: 74e39313b4fa9b048869f0b3da9c966c, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: DeepWater.GeneralQuarters::DeepWater.GeneralQuarters.Modules.Combat.ShipCombat
-  loadout: {fileID: 11400000, guid: 6fa78c546100b4e46958590d385fa391, type: 2}
-  aiCaptainProfile: {fileID: 11400000, guid: 107fe622b10eb6b4fa79b608f7e66479, type: 2}
-  aiCaptainLevel: 0
+  m_EditorClassIdentifier: DeepWater.GeneralQuarters.Examples::DeepWater.GeneralQuarters.Examples.RangeDirector
+  range: {fileID: 11400000, guid: cf457b1b7b5df314ab733cb05c58ebc2, type: 2}
+  combat: {fileID: 1392554498}
+  conn: {fileID: 864422336}
+  input: {fileID: 864422335}
+  proxies: {fileID: 2065960842}
+  chaseCamera: {fileID: 1120851125}
+  viewCamera: {fileID: 1120851123}
+  startSeat: 0
+--- !u!114 &864422334
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 864422332}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a818f224eccf11d40b14b345d7f65a18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: DeepWater.GeneralQuarters::DeepWater.GeneralQuarters.Modules.Presentation.CombatPresentation
+  combat: {fileID: 1392554498}
+  presentation: {fileID: 11400000, guid: f2d4ee83812a9cd43a4f182aa73561e1, type: 2}
+  sea: {fileID: 506607365}
+  listener: {fileID: 1120851124}
+  effectsOn: 1
+--- !u!114 &864422335
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 864422332}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3f012b2f55afed4daff997aba6d2782, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: DeepWater.GeneralQuarters.Examples::DeepWater.GeneralQuarters.Examples.RangeInput
+  actions: {fileID: 0}
+--- !u!114 &864422336
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 864422332}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8936335ad599ca946bb260dddee131a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: DeepWater.GeneralQuarters.Examples::DeepWater.GeneralQuarters.Examples.ConnController
+  ship: {fileID: 1392554496}
+  helmProfile: {fileID: 11400000, guid: 0c68766ec410c844ca81aa6836070cd3, type: 2}
+  combat: {fileID: 1392554498}
+--- !u!114 &864422337
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 864422332}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad9979b7e725304459e188e06f72a5ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: DeepWater.GeneralQuarters.Examples::DeepWater.GeneralQuarters.Examples.ConnInput
+  actions: {fileID: 0}
+--- !u!4 &864422338
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 864422332}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2065960843}
+  - {fileID: 312742089}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1120851119
 GameObject:
   m_ObjectHideFlags: 0
@@ -503,6 +569,7 @@ GameObject:
   - component: {fileID: 1120851122}
   - component: {fileID: 1120851121}
   - component: {fileID: 1120851125}
+  - component: {fileID: 1120851126}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -735,112 +802,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b22cdd7bd9330824e956ea1d95168659, type: 3}
   m_Name: 
   m_EditorClassIdentifier: DeepWater.GeneralQuarters.Examples::DeepWater.GeneralQuarters.Examples.ShipChaseCamera
-  target: {fileID: 922415057}
-  controls: {fileID: 1197620481}
+  target: {fileID: 1392554495}
+  controls: {fileID: 864422337}
   distanceM: 240
   pitchDeg: 11
   yawOffsetDeg: 150
   minDistanceM: 40
   maxDistanceM: 2500
   pivotHeightM: 8
---- !u!1 &1197620477
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1197620482}
-  - component: {fileID: 1197620481}
-  - component: {fileID: 1197620480}
-  - component: {fileID: 1197620479}
-  - component: {fileID: 1197620478}
-  m_Layer: 0
-  m_Name: General Quarters Range
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1197620478
+  cutVolume: {fileID: 1120851126}
+  cutFrames: 3
+--- !u!114 &1120851126
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1197620477}
+  m_GameObject: {fileID: 1120851119}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 74e39313b4fa9b048869f0b3da9c966c, type: 3}
+  m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: DeepWater.GeneralQuarters.Examples::DeepWater.GeneralQuarters.Examples.RangeDirector
-  range: {fileID: 11400000, guid: cf457b1b7b5df314ab733cb05c58ebc2, type: 2}
-  combat: {fileID: 922415060}
-  conn: {fileID: 1197620480}
-  input: {fileID: 1197620479}
-  proxies: {fileID: 1791766530}
-  chaseCamera: {fileID: 1120851125}
-  viewCamera: {fileID: 1120851123}
-  startSeat: 0
---- !u!114 &1197620479
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1197620477}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e3f012b2f55afed4daff997aba6d2782, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: DeepWater.GeneralQuarters.Examples::DeepWater.GeneralQuarters.Examples.RangeInput
-  actions: {fileID: 0}
---- !u!114 &1197620480
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1197620477}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8936335ad599ca946bb260dddee131a3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: DeepWater.GeneralQuarters.Examples::DeepWater.GeneralQuarters.Examples.ConnController
-  ship: {fileID: 922415058}
-  helmProfile: {fileID: 11400000, guid: 0c68766ec410c844ca81aa6836070cd3, type: 2}
-  combat: {fileID: 922415060}
---- !u!114 &1197620481
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1197620477}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ad9979b7e725304459e188e06f72a5ac, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: DeepWater.GeneralQuarters.Examples::DeepWater.GeneralQuarters.Examples.ConnInput
-  actions: {fileID: 0}
---- !u!4 &1197620482
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1197620477}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1791766531}
-  - {fileID: 1710067808}
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_EditorClassIdentifier: Unity.RenderPipelines.Core.Runtime::UnityEngine.Rendering.Volume
+  m_IsGlobal: 1
+  priority: 100
+  blendDistance: 0
+  weight: 0
+  sharedProfile: {fileID: 11400000, guid: a6fb8c60922af8f4081035c0448cea9f, type: 2}
 --- !u!1001 &1337808072
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -954,78 +942,128 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 700cc0704ceabd9409f44f969a5ade21, type: 3}
---- !u!1 &1710067807
-GameObject:
+--- !u!1001 &1392554494
+PrefabInstance:
   m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1710067808}
-  - component: {fileID: 1710067810}
-  - component: {fileID: 1710067809}
-  m_Layer: 0
-  m_Name: Range Screen
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1710067808
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1710067807}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1197620482}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1710067809
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1710067807}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f1a7aa68419c18c48b4972c75ffd66ae, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: DeepWater.GeneralQuarters.Examples::DeepWater.GeneralQuarters.Examples.RangeScreen
-  director: {fileID: 1197620478}
-  refreshHz: 15
---- !u!114 &1710067810
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1710067807}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
-  m_PanelSettings: {fileID: 11400000, guid: 4825696dc9769c647ad27a1807758cb4, type: 2}
-  m_ParentUI: {fileID: 0}
-  sourceAsset: {fileID: 9197481963319205126, guid: fc907779f6783494eba10a527449af0f,
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2079039183047107412, guid: 5a08bafcc00a86f488c9c01b980c0e73,
+        type: 3}
+      propertyPath: m_Name
+      value: DDG-51 (General Quarters)
+      objectReference: {fileID: 0}
+    - target: {fileID: 2486370992176255280, guid: 5a08bafcc00a86f488c9c01b980c0e73,
+        type: 3}
+      propertyPath: startSpeedKn
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 6572509283330152693, guid: 5a08bafcc00a86f488c9c01b980c0e73,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6572509283330152693, guid: 5a08bafcc00a86f488c9c01b980c0e73,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6572509283330152693, guid: 5a08bafcc00a86f488c9c01b980c0e73,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6572509283330152693, guid: 5a08bafcc00a86f488c9c01b980c0e73,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6572509283330152693, guid: 5a08bafcc00a86f488c9c01b980c0e73,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6572509283330152693, guid: 5a08bafcc00a86f488c9c01b980c0e73,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6572509283330152693, guid: 5a08bafcc00a86f488c9c01b980c0e73,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6572509283330152693, guid: 5a08bafcc00a86f488c9c01b980c0e73,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6572509283330152693, guid: 5a08bafcc00a86f488c9c01b980c0e73,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6572509283330152693, guid: 5a08bafcc00a86f488c9c01b980c0e73,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8542260059399734295, guid: 5a08bafcc00a86f488c9c01b980c0e73,
+        type: 3}
+      propertyPath: system
+      value: 
+      objectReference: {fileID: 506607363}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2079039183047107412, guid: 5a08bafcc00a86f488c9c01b980c0e73,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1392554498}
+  m_SourcePrefab: {fileID: 100100000, guid: 5a08bafcc00a86f488c9c01b980c0e73, type: 3}
+--- !u!4 &1392554495 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6572509283330152693, guid: 5a08bafcc00a86f488c9c01b980c0e73,
     type: 3}
-  m_SortingOrder: 0
-  m_Position: 0
-  m_WorldSpaceSizeMode: 1
-  m_WorldSpaceWidth: 1920
-  m_WorldSpaceHeight: 1080
-  m_PivotReferenceSize: 0
-  m_Pivot: 0
-  m_WorldSpaceCollider: {fileID: 0}
---- !u!1 &1791766529
+  m_PrefabInstance: {fileID: 1392554494}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1392554496 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2486370992176255280, guid: 5a08bafcc00a86f488c9c01b980c0e73,
+    type: 3}
+  m_PrefabInstance: {fileID: 1392554494}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1392554497}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fa3cbf0d28891d04b9d8eed99907a487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: DeepWater.GeneralQuarters::DeepWater.GeneralQuarters.Modules.Propulsion.ShipDrive
+--- !u!1 &1392554497 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2079039183047107412, guid: 5a08bafcc00a86f488c9c01b980c0e73,
+    type: 3}
+  m_PrefabInstance: {fileID: 1392554494}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1392554498
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1392554497}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b87e3301e12ff447add9aa39af66a33, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: DeepWater.GeneralQuarters::DeepWater.GeneralQuarters.Modules.Combat.ShipCombat
+  loadout: {fileID: 11400000, guid: 6fa78c546100b4e46958590d385fa391, type: 2}
+  aiCaptainProfile: {fileID: 11400000, guid: 107fe622b10eb6b4fa79b608f7e66479, type: 2}
+  aiCaptainLevel: 0
+--- !u!1 &2065960841
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1033,8 +1071,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1791766531}
-  - component: {fileID: 1791766530}
+  - component: {fileID: 2065960843}
+  - component: {fileID: 2065960842}
   m_Layer: 0
   m_Name: Stand-ins
   m_TagString: Untagged
@@ -1042,19 +1080,20 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1791766530
+--- !u!114 &2065960842
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1791766529}
+  m_GameObject: {fileID: 2065960841}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: be0e42e16748604429df4b14effa9008, type: 3}
   m_Name: 
   m_EditorClassIdentifier: DeepWater.GeneralQuarters.Examples::DeepWater.GeneralQuarters.Examples.RangeProxies
-  combat: {fileID: 922415060}
+  combat: {fileID: 1392554498}
+  presentation: {fileID: 864422334}
   missileModel: {fileID: 919132149155446097, guid: a66a1ec16923c8a4099722d290e19693,
     type: 3}
   threatMissileModel: {fileID: 919132149155446097, guid: a66a1ec16923c8a4099722d290e19693,
@@ -1067,20 +1106,20 @@ MonoBehaviour:
   missileModelEuler: {x: 0, y: 90, z: 0}
   threatModelEuler: {x: 0, y: 90, z: 0}
   aircraftModelEuler: {x: 0, y: 0, z: 0}
---- !u!4 &1791766531
+--- !u!4 &2065960843
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1791766529}
+  m_GameObject: {fileID: 2065960841}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1197620482}
+  m_Father: {fileID: 864422338}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &2078524109
 PrefabInstance:
@@ -1158,5 +1197,5 @@ SceneRoots:
   - {fileID: 2078524109}
   - {fileID: 506607367}
   - {fileID: 1120851124}
-  - {fileID: 922415056}
-  - {fileID: 1197620482}
+  - {fileID: 1392554494}
+  - {fileID: 864422338}

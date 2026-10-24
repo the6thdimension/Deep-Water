@@ -3,7 +3,8 @@
     "rootNamespace": "DeepWater.GeneralQuarters",
     "references": [
         "GuidedFury",
-        "DeepWater.Sea"
+        "DeepWater.Sea",
+        "DeepWater.Sea.Hdrp"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

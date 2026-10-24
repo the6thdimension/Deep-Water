@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22983b117b170bc4ea686cabacc2dc16, type: 3}
+  m_Name: DDG51_GQ_Helm
+  m_EditorClassIdentifier: DeepWater.GeneralQuarters::DeepWater.GeneralQuarters.ScriptableObjects.HelmProfileSO
+  profile:
+    AheadBellKn:
+    - 0
+    - 5
+    - 10
+    - 15
+    - 20
+    - 31
+    AsternBellFraction:
+    - 0.33333334
+    - 0.6666667
+    - 0.85
+    - 1
+    CourseKp: 2
+    CourseKd: 20
+    CourseKi: 0
+    CourseMaxRudderDeg: 20
+    SpeedKp: 0.05
+    SpeedKi: 0.001
+    RouteRudderDeg: 15
+    LookAheadShipLengths: 2
+    ShipLengthM: 141
+  provenance: 'Bells: USN convention (1/3, 2/3, standard, full = 4/3 standard, flank
+    = maximum); standard 15 kn AUTHORED; flank = the Engine Room''s top speed.
+
+    Astern
+    bells: 1/3, 2/3, 0.85, 1.0 of maximum astern revolutions (AUTHORED).
+
+    Course
+    hold: Kp 2, Kd 20 deg/(deg/s), at most 20 deg of rudder (AUTHORED, tuned on this
+    hull: a 90 deg course change settles to 1 deg without overshoot in 183 / 109
+    / 82 s at 10 / 20 / 30 kn).
+
+    Speed hold: steady-revolution feed-forward plus
+    Kp 0.05 rev/s per kn, Ki 0.001 (AUTHORED).
+
+    Routes: plan turns at 15 deg
+    (USN standard rudder), line-of-sight look-ahead 2 ship lengths (AUTHORED).'

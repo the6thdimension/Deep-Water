@@ -15,7 +15,7 @@ MonoBehaviour:
   buoyancy: {fileID: 11400000, guid: ec63140c9617cf34e9732fd1ec930171, type: 2}
   massKg: 8716750
   centerOfMassM: {x: -0, y: 0.6792, z: 0.8117}
-  gyradiusM: {x: 35.25, y: 36.66, z: 6.74}
+  gyradiusM: {x: 35.25, y: 35.25, z: 6.56}
   displacementT: 8716.7
   designDraftM: 6.523
   kbM: 3.916
@@ -64,8 +64,9 @@ MonoBehaviour:
     8717 t at the drawn waterline, draft 6.52 m, KB 3.92 m, BM 4.79 m, waterline
     141 \xD7 17.7 m.\nBuoyancy: 2183 columns on a 25 x 1.5 m grid (AUTHORED resolution);
     on their own they displace 8744 t with BM 4.85 m.\nGM 1.50 m: AUTHORED: ~11 s
-    natural roll by the IMO formula; DDG-51 KG/GM is not public.\nGyradii: AUTHORED
-    fractions of waterline beam/length (typical ship values): {\"roll_of_beam\":
-    0.38, \"pitch_of_length\": 0.25, \"yaw_of_length\": 0.26}.\nCompartments: AUTHORED
-    bulkhead stations every 12 m; the real DDG-51 bulkhead plan is not public.\nBuoyancy
-    damping: heave ratio 0.2, Cd 0.5 (AUTHORED, Sea State defaults)."
+    natural roll by the IMO formula; DDG-51 KG/GM is not public.\nGyradii: fractions
+    of waterline beam/length {\"roll_of_beam\": 0.37, \"pitch_of_length\": 0.25,
+    \"yaw_of_length\": 0.25}; roll and yaw from the SIMMAN 2008 DTMB 5415 table (ixx/B
+    0.37, izz/Lpp 0.25), pitch AUTHORED.\nCompartments: AUTHORED bulkhead stations
+    every 12 m; the real DDG-51 bulkhead plan is not public.\nBuoyancy damping: heave
+    ratio 0.2, Cd 0.5 (AUTHORED, Sea State defaults), heave axis only."

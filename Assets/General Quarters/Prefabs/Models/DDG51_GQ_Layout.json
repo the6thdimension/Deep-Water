@@ -23,11 +23,11 @@
    0.8117
   ],
   "gyradius_m": {
-   "roll": 6.74,
+   "roll": 6.56,
    "pitch": 35.25,
-   "yaw": 36.66
+   "yaw": 35.25
   },
-  "gyradius_note": "AUTHORED fractions of waterline beam/length (typical ship values): {\"roll_of_beam\": 0.38, \"pitch_of_length\": 0.25, \"yaw_of_length\": 0.26}"
+  "gyradius_note": "fractions of waterline beam/length {\"roll_of_beam\": 0.37, \"pitch_of_length\": 0.25, \"yaw_of_length\": 0.25}; roll and yaw from the SIMMAN 2008 DTMB 5415 table (ixx/B 0.37, izz/Lpp 0.25), pitch AUTHORED"
  },
  "hydrostatics_note": "MEASURED from the hull shell on a 61 x 0.5 m column grid (15976 columns, converged)",
  "probes": {

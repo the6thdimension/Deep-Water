@@ -75,7 +75,7 @@ namespace DeepWater.Sea.Core
             float3 arm = apply - pose.WorldCenterOfMass;
             float3 pointVelocity = pose.LinearVelocity + math.cross(pose.AngularVelocity, arm);
             float3 force = BuoyancyModel.ProbeForce(probe, Damping[body], WaterDensity, Gravity,
-                surfaceY, world, pointVelocity, waterVelocity);
+                surfaceY, world, pointVelocity, waterVelocity, pose.Rotation);
 
             Output[i] = new BuoyancyProbeOutput
             {

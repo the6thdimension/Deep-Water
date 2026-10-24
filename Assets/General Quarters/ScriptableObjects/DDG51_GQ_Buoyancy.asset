@@ -6568,3 +6568,4 @@ MonoBehaviour:
   heaveDampingRatio: 0.2
   designDraftM: 6.523
   quadraticDragCd: 0.5
+  dragAxisScale: {x: 0, y: 1, z: 0}

@@ -108,8 +108,8 @@ Every Order carries the issuer (Captain, TAO, AI captain, Scenario) and the tick
 | Element | L0 (honest, simple) | L1 | L2 | L3+ |
 |---|---|---|---|---|
 | **Hull** | Blender-authored hull on Sea State probes; compound colliders; PhysX motion | Compartments feed buoyancy: flooding changes list and trim | Reckoning ship motion (added mass, variant B) | — |
-| **Engine Room** | Two shafts, thrust curve, twin rudders with lift and stall, speed-power resistance | Plant: 4 × LM2500, controllable-pitch props, fuel | Casualties from damage; plant states | — |
-| **Helm** | Manual helm, course and speed hold, waypoint routes; truth position | GPS/INS drift, fixes | Radar navigation | Collision avoidance, station keeping |
+| **Engine Room** | MMG standard method (G22): hull derivatives of DTMB 5415, two shafts with the MARIN thrust curve, twin rudders with lift and stall, resistance from the ITTC campaign; calibrated to USS Barry's handling figures (G24) | Plant: 4 × LM2500, controllable-pitch props, fuel; 4-DOF roll terms | Casualties from damage; plant states | — |
+| **Helm** | Manual helm, telegraph bells, course and speed hold, waypoint routes with wheel-over; truth position | GPS/INS drift, fixes | Radar navigation | Collision avoidance, station keeping |
 | **Radar (SPY-1D)** | Detects every target within instrumented range and above the radar horizon, on its Watch; no noise | Radar equation with RCS in dBsm, Pd/Pfa, sea clutter from Sea State | Beam and energy scheduling, track quality | Multipath, ducting |
 | **Illuminators (SPG-62 ×3)** | Not modelled; missiles home on track truth | Three terminal-illumination channels: engagements wait for a free illuminator | Slew and scheduling | — |
 | **Tracks** | Perfect correlation: one track per target, truth state | Noisy measurements, α-β/Kalman filter, track quality | Multi-sensor fusion (ESM later) | — |
@@ -147,6 +147,10 @@ All entries are SIX's picks of 2026-10-23, in round order. Leaning is Claude's r
 | G18 | Presentation | **Full presentation now** (Phase 1) | Existing packs, honest | Locked |
 | G19 | AI captain | **Named rules now, ML-Agents later** | Named rules | Locked |
 | G20 | Phase 1 | **L0 engagement on the range** | Same | Locked |
+| G21 | Sea State probe drag on a propelled ship (2026-10-24, slice 4) | **Per-axis scale in the hull's frame** (x sway, y heave, z surge); the DDG keeps heave only | Vertical-only switch | Locked |
+| G22 | Engine Room L0 hull forces | **MMG standard method** (Yasukawa & Yoshimura 2015), twin screw and twin rudder | Linear derivatives (Clarke) | Locked |
+| G23 | Speed orders | **Bells and knots:** telegraph bells for the conn; the autopilot holds knots | Knots only | Locked |
+| G24 | Calibration data | **DTMB 5415 public data**, calibrated to the USNI 1994 USS Barry figures; every number's source in the profile's provenance | Same | Locked |
 
 Inherited from Reckoning: R2 (everything deterministic eventually), R15 (Watches), R35 (variant B, Proposed), R36 (banned-API guard, Proposed). General Quarters applies R36 to its core now, as a source-scan test.
 

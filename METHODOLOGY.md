@@ -183,6 +183,16 @@ These are the fixed points around which the methodology orbits. Every principle 
   - *Why it fails:* Reference and simulation share the discretisation error, so every comparison between them reads zero. The error lives in an off-design state (heel), where no reference exists.
   - *Do instead:* Measure on a sampling shown to be converged (two resolutions agree; here 41 × 1 m and 61 × 0.5 m within 0.02 % on displacement and 0.2 % on BM). Simulate on a coarser grid chosen from the convergence table for its cost. Gate the coarse grid against the converged numbers in a test, in the off-design state. Reference impl: `ArtSource/General Quarters/author_ddg51_gq.py` (`HYDRO_*` vs `PROBES_*`) and `HullL0Tests.Heeled5Degrees_RightingMomentGivesTheLayoutGM`. At 25 × 1.5 m (2 183 columns), GM at 5° is 1.510 against 1.500 m, and PhysX free roll is 11.18 s against 11.14 s damped theory (11.04 s undamped, ζ 0.13 from the decay).
 
+- **AP17. A damping term sized for one degree of freedom, applied to all of them.** A crude drag or damping law tuned for one motion (heave, roll) applied isotropically, so it also acts on motions it was never sized for.
+  - *Where seen:* Sea State probe drag, found 2026-10-24 when General Quarters put engines on the DDG. Each probe's drag acted on the full relative velocity, using the probe's horizontal area. On the DDG hull at 30 kn that is 85 MN against 3.4 MN of thrust, so she could never pass about 9 kn. Nobody noticed, because the demo hulls never move.
+  - *Why it fails:* Every test that exercises the motion it was sized for passes. The other degrees of freedom sit at zero in every scene until something finally drives them.
+  - *Do instead:* Give a damping law per-axis scales in the body's frame and default them to the old behaviour. A body whose own model owns an axis switches the generic one off there. Pin it with a test in a rotated, heeled pose. Reference impl: `BuoyancyHullSO.dragAxisScale`, `BuoyancyModel.ProbeForce`, test `PerAxisDrag_ActsInTheHullFrame`.
+
+- **AP18. Setting the net force at the centre of mass and forgetting the moment of what it stands for.** A body is driven by computing its acceleration elsewhere (here from MMG equations with added mass) and applying F = m·a at the centre of mass. The moments are then added only for the named forces (hull, rudders), not for the rest of the force they sum to (here the added-mass reaction).
+  - *Where seen:* General Quarters `ShipDrive`, 2026-10-24. The roll moment took only the hull and rudder sway forces at their depths. Hard over at flank in PhysX, the ship lurched 7° inward, then swung 17.5° outward. With the full hydrodynamic sway force (m·a_y: the rudders' share at their depth, the rest at the hull's centre of pressure), it is 2.9° inward and 13.1° outward. The steady heel was right either way (7.4° vs 7.2°), so only a transient showed it.
+  - *Why it fails:* A force applied at the centre of mass carries no moment. Whatever part of the real force distribution it silently stands for loses its moment, and the error lives only in transients.
+  - *Do instead:* Write the moment balance from the total force, then split that total by where each part really acts. Check a step input in the engine, not only steady states. Reference impl: `Modules/Propulsion/ShipDrive.cs`.
+
 ## Candidates (under evaluation)
 
 *Ideas that might become Principles. Not yet load-bearing. Promote when grounded in a real case.*
@@ -207,6 +217,13 @@ These are the fixed points around which the methodology orbits. Every principle 
   - *Exercised:* `Assets/General Quarters/Core/Fidelity/FidelityLadder.cs`, the factories in `Cic/` and `Magazine/`, and `GuidedFuryBridge` (missile L4 without aero tables flies at L3 and says so). Tests: `Ladder_FallsBackToTheHighestBuiltLevel_AndSaysSo`.
 - **C15. Resolve fast intercepts by closest approach over the step, not distance at the step's end.** At 1 300 m/s closing, a 20 ms step moves the gap 26 m, wider than a 10 m fuze, so an end-of-step check can step straight past a hit. Solve the minimum distance of the relative motion within the step.
   - *Exercised:* `Assets/General Quarters/Core/Magazine/Intercept.cs`. Test `Intercept_CatchesAPassBetweenTicks`: ends 13 m off, the pass at 2 m. The L0 raid's ESSM kills detonated 2.5–7.7 m from their targets.
+- **C16. Calibrate one number per public figure, and name the figures you did not fit.** When public data cannot set every coefficient, choose the fewest free numbers, fit each to one figure, and keep the remaining figures as validation. Say in the asset and in each test which is which: CALIBRATED tests guard against regressions, VALIDATION tests are evidence. Record a residual you cannot close as a known gap; do not tune it away with an unphysical number.
+  - *Exercised:* `Editor/Ddg51EngineRoomData.cs`, `Tests/Editor/EngineRoomL0Tests.cs`.
+    - **Calibrated:** 4 numbers (appendage factor, γ_R, ℓ'_R, astern thrust) against 3 figures (top speed, turn diameters, stop time).
+    - **Validated (7):** 18 kn rpm, stop distance, acceleration, zig-zag, IMO criteria, steady heel, plus the transient heel, which fails and is recorded as an L1 gap.
+    - **Roll damping:** fitting it to Barry's peak heel would have needed ζ ≈ 0.5, so it was left AUTHORED at 0.1.
+- **C17. Calibrate in a fast mirror; ship in the engine; prove they agree.** Parameter sweeps through Unity cost a recompile and a domain reload each. A dependency-free mirror of the same equations runs hundreds of manoeuvres a minute. The engine code then re-derives what it can (fits, the appendage factor) from the same sources, and the tests must reproduce the mirror's numbers.
+  - *Exercised:* `Calibration~/mmg_calibration.py` and `EngineRoomL0Tests` agree on every figure (199 rpm, TD 388 / 1,083 / 1,026 m, stop 60.4 s / 382 m, zig-zag 5.5° / 5.4°). The folder ends in `~`, so Unity ignores it.
 - **C5. Replaced legacy code goes to `Assets/_Archive/`, never deleted outright until cutover is proven.** Original folder name + `_legacy` suffix; original `.meta` preserved so GUIDs survive. Lets you reference old behavior during rebuild and gives a clean rollback path. Promote after one full cutover proves the workflow.
 
 ---
@@ -261,3 +278,10 @@ These are the fixed points around which the methodology orbits. Every principle 
   - **Floating:** Sea State floats the ship on 2 183 columns, at 0.30 ms per fixed step in the demo sea.
   - **New entry:** AP16 (measuring a discretised model with itself). The first, self-measured grid hid a 7.6 % GM loss at heel.
   - **Results:** 27/27 GQ tests, 46/46 sea tests.
+- **2026-10-24** — General Quarters slice 4: the Engine Room and the Helm at L0.
+  - **Model:** the MMG standard method, twin screw and twin rudder, on DTMB 5415 public data (the research hull of the DDG-51 preliminary design). Calibrated to the handling figures of USS Barry's CO (USNI 1994): 4 numbers for 3 figures, 7 validations.
+  - **Sea State:** probe drag gains per-axis scales (AP17); the DDG keeps heave only.
+  - **ShipDrive:** applies the MMG accelerations to PhysX as F = m·a_G and τ = I·ṙ, so added mass counts. Its roll moment had to include the added-mass reaction (AP18).
+  - **Known gap:** the transient heel after hard over at flank is 13.1° against Barry's 8–10° (L1: 4-DOF terms, roll added inertia, Ikeda damping).
+  - **New entries:** AP17, AP18, C16, C17.
+  - **Results:** 46/46 GQ tests, 48/48 sea tests.

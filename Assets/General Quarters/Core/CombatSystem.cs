@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using DeepWater.GeneralQuarters.Core.Cic;
 using DeepWater.GeneralQuarters.Core.DamageControl;
 using DeepWater.GeneralQuarters.Core.Fidelity;
+using DeepWater.GeneralQuarters.Core.Helm;
 using DeepWater.GeneralQuarters.Core.Log;
 using DeepWater.GeneralQuarters.Core.Magazine;
 using DeepWater.GeneralQuarters.Core.Orders;
@@ -50,8 +51,8 @@ namespace DeepWater.GeneralQuarters.Core
         public ulong Fix { get; private set; } = CombatFix.Offset;
         /// <summary>What each element asked for and what it got.</summary>
         public IReadOnlyList<FidelityResolution> Fidelity => _fidelity;
-        /// <summary>The last helm order applied, for the Helm element (slice 4) to act on.</summary>
-        public Order? LastHelmOrder { get; private set; }
+        /// <summary>What the conn has ordered, as standing state; the Helm element steers by it.</summary>
+        public HelmCommand Helm { get; private set; } = HelmCommand.Stopped(0f);
 
         public CombatSystem(CombatLoadout loadout)
         {
@@ -157,7 +158,12 @@ namespace DeepWater.GeneralQuarters.Core
             {
                 case OrderKind.Roe: Doctrine.SetRoe(o.Roe, ev); break;
                 case OrderKind.Doctrine: Doctrine.SetMode(o.Weapon, o.Mode, ev); break;
-                case OrderKind.Helm: LastHelmOrder = o; break;
+                case OrderKind.Helm:
+                case OrderKind.Bell:
+                case OrderKind.Rudder:
+                case OrderKind.Route:
+                    Helm = HelmCommand.Apply(Helm, o);
+                    break;
                 case OrderKind.CeaseFire:
                     int ceaseTrack = o.TrackId;
                     _directed.RemoveAll(d => ceaseTrack < 0 || d.TrackId == ceaseTrack);

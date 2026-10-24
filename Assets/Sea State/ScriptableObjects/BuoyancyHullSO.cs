@@ -43,6 +43,9 @@ namespace DeepWater.Sea.ScriptableObjects
         [Min(0.01f)] public float designDraftM = 1f;
         [Tooltip("Quadratic drag coefficient Cd on the relative water velocity.")]
         [Min(0f)] public float quadraticDragCd = 0.5f;
+        [Tooltip("Probe drag per axis of the hull's frame: x sway, y heave, z surge (1 = full). A ship " +
+                 "whose propulsion model supplies its own resistance and turning forces sets x and z to 0.")]
+        public Vector3 dragAxisScale = Vector3.one;
 
         /// <summary>
         /// Linear damping speed c (m/s) giving damping ratio ζ for a wall-sided hull at the design
@@ -52,6 +55,8 @@ namespace DeepWater.Sea.ScriptableObjects
         {
             LinearMs = 2f * heaveDampingRatio * math.sqrt(gravity * designDraftM),
             QuadraticCd = quadraticDragCd,
+            PerAxis = dragAxisScale != Vector3.one,
+            AxisScale = dragAxisScale,
         };
 
         /// <summary>

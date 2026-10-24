@@ -20,6 +20,13 @@ namespace DeepWater.Sea.Core
         public float LinearMs;
         /// <summary>Quadratic drag coefficient Cd: F = −½ ρ A f Cd |v_rel| v_rel.</summary>
         public float QuadraticCd;
+        /// <summary>
+        /// When set, drag sees the relative velocity in the hull's frame scaled per axis by
+        /// <see cref="AxisScale"/>. Off (the default) is isotropic drag, the original behaviour.
+        /// </summary>
+        public bool PerAxis;
+        /// <summary>Drag scale per hull axis: x sway, y heave, z surge. Used only with <see cref="PerAxis"/>.</summary>
+        public float3 AxisScale;
     }
 
     /// <summary>
@@ -61,11 +68,17 @@ namespace DeepWater.Sea.Core
         }
 
         /// <summary>
-        /// Total hydrodynamic force on one probe (world frame, up = +Y).
+        /// Total hydrodynamic force on one probe (world frame, up = +Y). <paramref name="bodyRotation"/>
+        /// is the hull's orientation; only per-axis drag uses it.
+        ///
+        /// Why per-axis drag exists: probe drag is a crude damping, sized for heave and roll. Applied
+        /// to surge and sway it is enormous: on the DDG-51 hull at 30 kn it is 85 MN against 3.4 MN of
+        /// thrust. A ship with its own manoeuvring model (resistance, sway and yaw forces) keeps the
+        /// probes' heave damping and sets surge and sway to 0.
         /// </summary>
         public static float3 ProbeForce(in BuoyancyProbe probe, in BuoyancyDamping damping,
             float waterDensity, float gravity, float surfaceY, float3 probeWorld,
-            float3 pointVelocity, float3 waterVelocity)
+            float3 pointVelocity, float3 waterVelocity, quaternion bodyRotation)
         {
             float submerged = SubmergedHeight(surfaceY, probeWorld.y, probe.HeightM);
             if (submerged <= 0f) return float3.zero;
@@ -74,6 +87,11 @@ namespace DeepWater.Sea.Core
             float3 buoyancy = new float3(0f, waterDensity * gravity * probe.AreaM2 * submerged, 0f);
 
             float3 vRel = pointVelocity - waterVelocity;
+            if (damping.PerAxis)
+            {
+                float3 hull = math.mul(math.conjugate(bodyRotation), vRel) * damping.AxisScale;
+                vRel = math.mul(bodyRotation, hull);
+            }
             float speed = math.length(vRel);
             float3 drag = -waterDensity * probe.AreaM2 * fraction *
                           (damping.LinearMs + 0.5f * damping.QuadraticCd * speed) * vRel;

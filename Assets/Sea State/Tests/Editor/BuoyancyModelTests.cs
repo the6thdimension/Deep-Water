@@ -20,21 +20,21 @@ namespace DeepWater.Sea.Tests
         [Test]
         public void DryProbe_HasNoForce()
         {
-            var f = BuoyancyModel.ProbeForce(Probe, NoDamping, Rho, G, 0f, new float3(0f, 2f, 0f), float3.zero, float3.zero);
+            var f = BuoyancyModel.ProbeForce(Probe, NoDamping, Rho, G, 0f, new float3(0f, 2f, 0f), float3.zero, float3.zero, quaternion.identity);
             Assert.AreEqual(float3.zero, f);
         }
 
         [Test]
         public void FullySubmergedProbe_DisplacesItsVolume()
         {
-            var f = BuoyancyModel.ProbeForce(Probe, NoDamping, Rho, G, 0f, new float3(0f, -5f, 0f), float3.zero, float3.zero);
+            var f = BuoyancyModel.ProbeForce(Probe, NoDamping, Rho, G, 0f, new float3(0f, -5f, 0f), float3.zero, float3.zero, quaternion.identity);
             Assert.AreEqual(Rho * G * 2f * 1f, f.y, 1e-2f);
         }
 
         [Test]
         public void HalfSubmergedProbe_GivesHalfTheForce()
         {
-            var f = BuoyancyModel.ProbeForce(Probe, NoDamping, Rho, G, 0f, new float3(0f, 0f, 0f), float3.zero, float3.zero);
+            var f = BuoyancyModel.ProbeForce(Probe, NoDamping, Rho, G, 0f, new float3(0f, 0f, 0f), float3.zero, float3.zero, quaternion.identity);
             Assert.AreEqual(Rho * G * 2f * 0.5f, f.y, 1e-2f);
         }
 
@@ -61,14 +61,38 @@ namespace DeepWater.Sea.Tests
         public void Drag_OpposesMotionRelativeToTheWater()
         {
             var damping = new BuoyancyDamping { LinearMs = 1f, QuadraticCd = 1f };
-            var still = BuoyancyModel.ProbeForce(Probe, damping, Rho, G, 0f, float3.zero, new float3(1f, 0f, 0f), new float3(1f, 0f, 0f));
-            var moving = BuoyancyModel.ProbeForce(Probe, damping, Rho, G, 0f, float3.zero, new float3(2f, 0f, 0f), new float3(1f, 0f, 0f));
+            var still = BuoyancyModel.ProbeForce(Probe, damping, Rho, G, 0f, float3.zero, new float3(1f, 0f, 0f), new float3(1f, 0f, 0f), quaternion.identity);
+            var moving = BuoyancyModel.ProbeForce(Probe, damping, Rho, G, 0f, float3.zero, new float3(2f, 0f, 0f), new float3(1f, 0f, 0f), quaternion.identity);
             Assert.AreEqual(0f, still.x, 1e-4f, "moving with the water: no drag");
             Assert.Less(moving.x, 0f, "faster than the water: drag pushes back");
         }
 
         [Test]
-        public void BatchedJob_EqualsPerProbeForcesAtTheirPoints()
+        public void PerAxisDrag_ActsInTheHullFrame()
+        {
+            // A ship with its own manoeuvring model keeps heave drag only (x sway, z surge off). Yawed 30°
+            // and rolled 10°, motion along the hull's forward axis meets no probe drag; motion along its
+            // up axis meets the full drag, along that axis.
+            var damping = new BuoyancyDamping { LinearMs = 1f, QuadraticCd = 0.5f, PerAxis = true, AxisScale = new float3(0f, 1f, 0f) };
+            quaternion rot = math.mul(quaternion.RotateY(math.radians(30f)), quaternion.RotateZ(math.radians(10f)));
+            float3 forward = math.mul(rot, new float3(0f, 0f, 1f));
+            float3 up = math.mul(rot, new float3(0f, 1f, 0f));
+            float3 deep = new float3(0f, -5f, 0f);   // fully submerged, so buoyancy is a known vertical term
+            float3 buoyancy = new float3(0f, Rho * G * Probe.AreaM2 * Probe.HeightM, 0f);
+
+            float3 surging = BuoyancyModel.ProbeForce(Probe, damping, Rho, G, 0f, deep, 3f * forward, float3.zero, rot);
+            float3 heaving = BuoyancyModel.ProbeForce(Probe, damping, Rho, G, 0f, deep, 3f * up, float3.zero, rot);
+            var isotropic = new BuoyancyDamping { LinearMs = 1f, QuadraticCd = 0.5f };
+            float3 heavingIso = BuoyancyModel.ProbeForce(Probe, isotropic, Rho, G, 0f, deep, 3f * up, float3.zero, rot);
+
+            Assert.Less(math.length(surging - buoyancy), 1e-3f, "surge along the hull meets no probe drag");
+            Assert.Less(math.length((heaving - buoyancy) - (heavingIso - buoyancy)), 1e-3f, "heave drag is unchanged");
+            Assert.Greater(math.length(heaving - buoyancy), 1f, "and it is not zero");
+        }
+
+        [TestCase(false)]
+        [TestCase(true)]   // per-axis drag in the hull frame goes through the same path
+        public void BatchedJob_EqualsPerProbeForcesAtTheirPoints(bool perAxis)
         {
             // ΣF and Σ r×F from the batched job must equal applying each probe force at its probe.
             using (var sim = new SeaSimulation(0f, 4))
@@ -84,7 +108,7 @@ namespace DeepWater.Sea.Tests
                     AngularVelocity = new float3(0.01f, 0.02f, -0.03f),
                     WorldCenterOfMass = new float3(3f, -0.6f, 7.1f),
                 };
-                var damping = new BuoyancyDamping { LinearMs = 1.2f, QuadraticCd = 0.5f };
+                var damping = new BuoyancyDamping { LinearMs = 1.2f, QuadraticCd = 0.5f, PerAxis = perAxis, AxisScale = new float3(0.3f, 1f, 0f) };
 
                 const int n = 12;
                 var probes = new NativeArray<BuoyancyProbe>(n, Allocator.TempJob);
@@ -119,7 +143,7 @@ namespace DeepWater.Sea.Tests
                         float submerged = BuoyancyModel.SubmergedHeight(s.SurfaceHeight, world.y, probes[i].HeightM);
                         float3 arm = BuoyancyModel.SubmergedCentroid(world, up, submerged, probes[i].HeightM) - pose.WorldCenterOfMass;
                         float3 pv = pose.LinearVelocity + math.cross(pose.AngularVelocity, arm);
-                        float3 fi = BuoyancyModel.ProbeForce(probes[i], damping, Rho, G, s.SurfaceHeight, world, pv, s.Velocity);
+                        float3 fi = BuoyancyModel.ProbeForce(probes[i], damping, Rho, G, s.SurfaceHeight, world, pv, s.Velocity, pose.Rotation);
                         f += fi;
                         t += math.cross(arm, fi);
                     }
@@ -378,7 +402,7 @@ namespace DeepWater.Sea.Tests
             const float dt = 0.02f;
             for (int i = 0; i < 3000; i++)
             {
-                float3 f = BuoyancyModel.ProbeForce(Probe, damping, Rho, G, 0f, new float3(0f, y, 0f), new float3(0f, v, 0f), float3.zero);
+                float3 f = BuoyancyModel.ProbeForce(Probe, damping, Rho, G, 0f, new float3(0f, y, 0f), new float3(0f, v, 0f), float3.zero, quaternion.identity);
                 v += (f.y / mass - G) * dt;
                 y += v * dt;
             }

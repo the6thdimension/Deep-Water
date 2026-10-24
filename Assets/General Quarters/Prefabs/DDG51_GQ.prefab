@@ -1353,6 +1353,7 @@ GameObject:
   - component: {fileID: 1591462070013017415}
   - component: {fileID: 8542260059399734295}
   - component: {fileID: 4982615780624468801}
+  - component: {fileID: 2486370992176255280}
   m_Layer: 0
   m_Name: DDG51_GQ
   m_TagString: Untagged
@@ -1434,6 +1435,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: DeepWater.GeneralQuarters::DeepWater.GeneralQuarters.Modules.Hull.ShipHull
   profile: {fileID: 11400000, guid: 2448c0967a30b1a489e96e306928b257, type: 2}
+--- !u!114 &2486370992176255280
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2079039183047107412}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fa3cbf0d28891d04b9d8eed99907a487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: DeepWater.GeneralQuarters::DeepWater.GeneralQuarters.Modules.Propulsion.ShipDrive
+  engineRoomProfile: {fileID: 11400000, guid: f7efb16491d1c7c4eaad75b9649fbcd4, type: 2}
+  helmProfile: {fileID: 11400000, guid: 0c68766ec410c844ca81aa6836070cd3, type: 2}
+  engineRoomLevel: 0
+  helmLevel: 0
+  startSpeedKn: 0
 --- !u!1 &2090881568990349725
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,0 +1,326 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63b92acab067cc844b7093124dcdd611, type: 3}
+  m_Name: DDG51_GQ_EngineRoom
+  m_EditorClassIdentifier: DeepWater.GeneralQuarters::DeepWater.GeneralQuarters.ScriptableObjects.EngineRoomProfileSO
+  profile:
+    Hull:
+      LppM: 141
+      BeamM: 17.74
+      DraftM: 6.523
+      MassKg: 8716750
+      XgM: 0.8117
+      IzzKgM2: 1.0831107e+10
+      MxNd: 0.0052460823
+      MyNd: 0.1111
+      JzNd: 0.0096
+      ResistanceSpeedMs:
+      - 0.257222
+      - 0.514444
+      - 0.771666
+      - 1.028888
+      - 1.2861099
+      - 1.543332
+      - 1.800554
+      - 2.057776
+      - 2.314998
+      - 2.5722198
+      - 2.829442
+      - 3.086664
+      - 3.343886
+      - 3.601108
+      - 3.85833
+      - 4.115552
+      - 4.372774
+      - 4.629996
+      - 4.887218
+      - 5.1444397
+      - 5.401662
+      - 5.658884
+      - 5.9161057
+      - 6.173328
+      - 6.43055
+      - 6.687772
+      - 6.944994
+      - 7.202216
+      - 7.459438
+      - 7.71666
+      - 7.9738817
+      - 8.231104
+      - 8.488326
+      - 8.745548
+      - 9.002769
+      - 9.259992
+      - 9.517214
+      - 9.774436
+      - 10.031658
+      - 10.288879
+      - 10.546102
+      - 10.803324
+      - 11.060546
+      - 11.317768
+      - 11.57499
+      - 11.8322115
+      - 12.089434
+      - 12.346656
+      - 12.603878
+      - 12.8611
+      - 13.118321
+      - 13.375544
+      - 13.632766
+      - 13.889988
+      - 14.14721
+      - 14.404432
+      - 14.6616535
+      - 14.918876
+      - 15.176098
+      - 15.43332
+      - 15.690542
+      - 15.947763
+      - 16.204987
+      - 16.462208
+      - 16.719429
+      - 16.976652
+      - 17.233873
+      - 17.491096
+      ResistanceN:
+      - 413.29352
+      - 1485.7046
+      - 3148.3762
+      - 5369.8047
+      - 8129.5186
+      - 11412.509
+      - 15207.001
+      - 19503.365
+      - 24293.496
+      - 29570.393
+      - 35327.94
+      - 41560.69
+      - 48263.754
+      - 55432.72
+      - 63545.934
+      - 72821.734
+      - 82845.37
+      - 93639.91
+      - 105228.64
+      - 117635
+      - 130882.625
+      - 144995.34
+      - 159997.03
+      - 175911.78
+      - 192763.67
+      - 210577
+      - 229376.14
+      - 249185.42
+      - 270029.4
+      - 291932.75
+      - 314919.88
+      - 339015.72
+      - 364244.94
+      - 390632.5
+      - 418202.84
+      - 446981.3
+      - 476992.78
+      - 508262.12
+      - 540814.5
+      - 574674.75
+      - 619096.94
+      - 682158.5
+      - 749125.5
+      - 820111.56
+      - 895230.6
+      - 974596.2
+      - 1058322.9
+      - 1146524.2
+      - 1239314.1
+      - 1336806.9
+      - 1439115.9
+      - 1546356.2
+      - 1658640.9
+      - 1776084.1
+      - 1898800.5
+      - 2026903.6
+      - 2160507.2
+      - 2299726
+      - 2444674.8
+      - 2595466.8
+      - 2752216
+      - 2915036.8
+      - 3084044.2
+      - 3259351
+      - 3441071.8
+      - 3629323.2
+      - 3824215.5
+      - 4025866
+      Derivatives:
+      - Froude: 0.138
+        Xvv: -0.0301
+        Xvr: 0.0819
+        Xrr: -0.0078
+        Xvvvv: 0
+        Yv: -0.2637
+        Yr: 0.103552066
+        Yvvv: -1.6256
+        Yvvr: -1.5172
+        Yvrr: -0.8682
+        Yrrr: -0.037
+        Nv: -0.1396
+        Nr: -0.0382
+        Nvvv: -0.3426
+        Nvvr: -0.722
+        Nvrr: -0.1989
+        Nrrr: -0.0211
+      - Froude: 0.28
+        Xvv: -0.1528
+        Xvr: 0.0819
+        Xrr: -0.0282
+        Xvvvv: 0
+        Yv: -0.2961
+        Yr: 0.08265206
+        Yvvv: -1.9456
+        Yvvr: -1.5172
+        Yvrr: -0.8682
+        Yrrr: -0.0452
+        Nv: -0.1667
+        Nr: -0.0458
+        Nvvv: -0.4355
+        Nvvr: -0.722
+        Nvrr: -0.1989
+        Nrrr: -0.0505
+      - Froude: 0.41
+        Xvv: -0.1544
+        Xvr: 0.0819
+        Xrr: -0.0385
+        Xvvvv: 0
+        Yv: -0.2963
+        Yr: 0.07635206
+        Yvvv: -3.7914
+        Yvvr: -1.5172
+        Yvrr: -0.8682
+        Yrrr: -0.071
+        Nv: -0.1717
+        Nr: -0.0456
+        Nvvv: -1.2591
+        Nvvr: -0.722
+        Nvrr: -0.1989
+        Nrrr: -0.0821
+    Port:
+      DiameterM: 6.15
+      K0: 0.40836066
+      K1: -0.28705516
+      K2: -0.1596189
+      Q0: 0.052165166
+      Q1: -0.025630051
+      Q2: -0.026431862
+      WakeStraight: 0.031
+      ThrustDeduction: 0.095
+      XpNd: -0.431
+      C1: 2
+      C2Positive: 1.6
+      C2Negative: 1.1
+      YpM: -4.65
+      AsternThrustFraction: 0.5
+    Starboard:
+      DiameterM: 6.15
+      K0: 0.40836066
+      K1: -0.28705516
+      K2: -0.1596189
+      Q0: 0.052165166
+      Q1: -0.025630051
+      Q2: -0.026431862
+      WakeStraight: 0.031
+      ThrustDeduction: 0.095
+      XpNd: -0.431
+      C1: 2
+      C2Positive: 1.6
+      C2Negative: 1.1
+      YpM: 4.65
+      AsternThrustFraction: 0.5
+    PortRudder:
+      AreaM2: 15.4
+      SpanM: 4.58
+      FAlpha: 2.3115883
+      Epsilon: 1
+      Kappa: 0.5
+      GammaRPositive: 0.9
+      GammaRNegative: 0.9
+      LrNd: -0.9
+      Tr: 0.3
+      Ah: 0.25
+      XhNd: -0.45
+      XrNd: -0.47
+      YrM: -4.75
+      StallAngleDeg: 35
+      PostStallFraction: 0.7
+      DepthM: 4.5
+    StarboardRudder:
+      AreaM2: 15.4
+      SpanM: 4.58
+      FAlpha: 2.3115883
+      Epsilon: 1
+      Kappa: 0.5
+      GammaRPositive: 0.9
+      GammaRNegative: 0.9
+      LrNd: -0.9
+      Tr: 0.3
+      Ah: 0.25
+      XhNd: -0.45
+      XrNd: -0.47
+      YrM: 4.75
+      StallAngleDeg: 35
+      PostStallFraction: 0.7
+      DepthM: 4.5
+    MaxShaftRps: 3.3198774
+    MinShaftRps: -2.489908
+    ShaftRateRpsPerS: 0.1
+    MaxRudderDeg: 35
+    RudderRateDegPerS: 9
+  hullSwayDepthM: 3.2615
+  rollLiftDampingRatio: 0.1
+  rollDampingReferenceSpeedMs: 15.947763
+  provenance: "DDG-51 Engine Room L0: MMG standard method (Yasukawa & Yoshimura 2015),
+    twin screw, twin rudder.\r\nHULL: L 141.0 m, B 17.74 m, d 6.52 m, 8717 t, x_G
+    0.81 m, k_zz 35.25 m: the Blender layout (slice 3).\r\nDERIVATIVES: DTMB 5415
+    bare hull, IIHR PMM (Yoon 2009, Iowa PhD thesis, Tables 6-2/6-3) at Fn 0.138
+    / 0.280 / 0.410, interpolated by speed.\r\n  N'r at Fn 0.28/0.41 from Table 6-12
+    (Table 6-3 repeats Y'r there, a typo). Cross terms Fn 0.28 IIHR (low confidence,
+    12-152 % facility scatter).\r\n  Y'r: published -0.0485 makes the bare hull directionally
+    unstable and turns at a third of Barry's diameters; read as containing the\r\n 
+    centripetal mass term, so hydrodynamic Y'r = published + m' (0.1312). CALIBRATED
+    choice between two readings of one table.\r\nADDED MASS: m'y 0.1111, J'z 0.0096
+    (three-facility means, Yoon 2009 Tables 6-11..14). m'x = 0.04 m': AUTHORED (not
+    found for 5415).\r\nRESISTANCE: ITTC 27th campaign C_T at Fn 0.10/0.28/0.41 (3.975/4.211/6.499e-3),
+    ITTC-57 with k = 0.15 to full scale (S 2949 m\xB2),\r\n  C_R linear in Fn between
+    points. x 1.443 appendage/condition factor: CALIBRATED so 100,000 shp (fact file,
+    2 % shafting loss) makes 31 kn (AUTHORED within '30+ kn').\r\nPROPELLERS: MARIN
+    4058 (SIMMAN 2008): D 6.15 m, P/D 0.87; K_T, K_Q quadratic fits of MARIN's polynomials
+    over J 0-0.85: K_T 0.4084 -0.2871 -0.1596.\r\n  The real ship has 17 ft controllable-reversible-pitch
+    screws (USNI 1994); at L0 the 5415 propeller at fixed pitch stands in.\r\n  w_P0
+    0.031, t_P 0.095: SECONDARY (Kim 2018 'quoted', source not given). x'_P -0.431,
+    y_P 4.65 m: DERIVED from the MARIN arrangement drawing.\r\n  C1 2.0, C2 1.6/1.1:
+    AUTHORED (the standard method's KVLCC2 values; none for 5415).\r\n  Max 199 rpm
+    = steady 31 kn; astern max 75 % of that (AUTHORED). Astern K_T = 0.5 x K0: CALIBRATED
+    to stop from ahead full in about 1 min (USNI 1994).\r\n  Shaft rate 6 rpm/s:
+    AUTHORED (USNI 1994: all stop to ahead flank in under 90 s; it also stands in
+    for pitch reversal).\r\nRUDDERS: 2 spade rudders, 15.4 m\xB2 each (SIMMAN 2008),
+    span 4.58 m (DERIVED from the MARIN drawing), aspect 1.36, f_alpha 2.31 (Fujii).\r\n 
+    x'_R -0.47, y_R 4.75 m: DERIVED from the drawing. Rate 9 deg/s (5415 design value,
+    SIMMAN). Max 35 deg (USNI 1994 'full rudder').\r\n  gamma_R 0.9, l'_R -0.9: CALIBRATED,
+    least squares on Barry's turn diameters (500 yd at 10 kn / 35 deg, 1,000 yd at
+    15 kn / 15 deg, 1,200 yd at 30 kn / 15 deg).\r\n  t_R 0.3, a_H 0.25, x'_H -0.45,
+    epsilon 1.0, kappa 0.5, stall 35 deg with 70 % post-stall, centre of pressure
+    4.5 m deep: AUTHORED (not found for 5415).\r\nLIMITS: 3-DOF manoeuvring (heel
+    applied from the sway forces' depth); no wind, current or shallow water; 5415
+    is 7 % beamier than this hull.\r\nROLL: hull sway force at half draught, rudders
+    at their depth (with the sway added-mass reaction); extra lift damping 0.1 of
+    critical at flank, scaling with speed (AUTHORED; the probes damp about 0.08 at
+    rest, measured in PhysX).\n"

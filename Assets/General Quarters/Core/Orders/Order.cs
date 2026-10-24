@@ -16,6 +16,30 @@ namespace DeepWater.GeneralQuarters.Core.Orders
         CeaseFire = 2,
         Doctrine = 3,
         Roe = 4,
+        /// <summary>An engine order telegraph bell: overrides speed hold until the next Helm order.</summary>
+        Bell = 5,
+        /// <summary>A rudder angle by hand: overrides course hold until the next Helm or Route order.</summary>
+        Rudder = 6,
+        /// <summary>Follow a route the Helm holds, at the order's speed.</summary>
+        Route = 7,
+    }
+
+    /// <summary>
+    /// Engine order telegraph bells, USN style. Ahead bells are fractions of standard speed (⅓, ⅔, standard,
+    /// full = 4/3 standard, flank = maximum); the Helm profile says what each one means in knots.
+    /// </summary>
+    public enum EngineBell : sbyte
+    {
+        BackEmergency = -4,
+        BackFull = -3,
+        BackTwoThirds = -2,
+        BackOneThird = -1,
+        Stop = 0,
+        AheadOneThird = 1,
+        AheadTwoThirds = 2,
+        AheadStandard = 3,
+        AheadFull = 4,
+        AheadFlank = 5,
     }
 
     /// <summary>
@@ -32,9 +56,13 @@ namespace DeepWater.GeneralQuarters.Core.Orders
         /// <summary>Position in the order log (stamped by the log); the root id Inquiry links to.</summary>
         public int Sequence;
 
-        // Helm
+        // Helm / Bell / Rudder / Route
         public float CourseDeg;
         public float SpeedKn;
+        public EngineBell Bell;
+        /// <summary>Rudder angle, degrees; positive turns the bow to starboard.</summary>
+        public float RudderDeg;
+        public int RouteId;
 
         // Engage / CeaseFire
         /// <summary>The track to engage or cease firing on; -1 means all tracks (cease fire only).</summary>
@@ -49,6 +77,15 @@ namespace DeepWater.GeneralQuarters.Core.Orders
 
         public static Order Helm(OrderIssuer issuer, float courseDeg, float speedKn) =>
             new Order { Kind = OrderKind.Helm, Issuer = issuer, CourseDeg = courseDeg, SpeedKn = speedKn, TrackId = -1 };
+
+        public static Order EngineOrder(OrderIssuer issuer, EngineBell bell) =>
+            new Order { Kind = OrderKind.Bell, Issuer = issuer, Bell = bell, TrackId = -1 };
+
+        public static Order Rudder(OrderIssuer issuer, float rudderDeg) =>
+            new Order { Kind = OrderKind.Rudder, Issuer = issuer, RudderDeg = rudderDeg, TrackId = -1 };
+
+        public static Order FollowRoute(OrderIssuer issuer, int routeId, float speedKn) =>
+            new Order { Kind = OrderKind.Route, Issuer = issuer, RouteId = routeId, SpeedKn = speedKn, TrackId = -1 };
 
         public static Order Engage(OrderIssuer issuer, int trackId, WeaponClass weapon, int rounds = 0) =>
             new Order { Kind = OrderKind.Engage, Issuer = issuer, TrackId = trackId, Weapon = weapon, Rounds = rounds };
@@ -68,6 +105,9 @@ namespace DeepWater.GeneralQuarters.Core.Orders
             OrderKind.Engage => System.FormattableString.Invariant($"#{Sequence} t{Tick} {Issuer}: engage track {TrackId} with {Weapon}"),
             OrderKind.CeaseFire => System.FormattableString.Invariant($"#{Sequence} t{Tick} {Issuer}: cease fire {(TrackId < 0 ? "all" : "track " + TrackId)}"),
             OrderKind.Doctrine => System.FormattableString.Invariant($"#{Sequence} t{Tick} {Issuer}: {Weapon} doctrine {Mode}"),
+            OrderKind.Bell => System.FormattableString.Invariant($"#{Sequence} t{Tick} {Issuer}: all engines {Bell}"),
+            OrderKind.Rudder => System.FormattableString.Invariant($"#{Sequence} t{Tick} {Issuer}: rudder {RudderDeg:0}°"),
+            OrderKind.Route => System.FormattableString.Invariant($"#{Sequence} t{Tick} {Issuer}: follow route {RouteId} at {SpeedKn:0} kn"),
             _ => System.FormattableString.Invariant($"#{Sequence} t{Tick} {Issuer}: ROE {Roe}"),
         };
     }

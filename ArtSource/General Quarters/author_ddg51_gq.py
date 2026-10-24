@@ -39,7 +39,9 @@ RHO = 1025.0
 PROBES_ACROSS, PROBE_LENGTH_M = 25, 1.5
 HYDRO_ACROSS, HYDRO_LENGTH_M = 61, 0.5
 GM_TARGET_M = 1.5   # AUTHORED: a ~11 s natural roll by the IMO formula; DDG-51's actual KG/GM is not public
-GYRADIUS_FRACTIONS = {"roll_of_beam": 0.38, "pitch_of_length": 0.25, "yaw_of_length": 0.26}   # AUTHORED: typical ship values
+# Radii of gyration as fractions of waterline beam / length. Roll and yaw: the SIMMAN 2008 table for DTMB 5415, the
+# public research hull of the DDG-51 preliminary design (ixx/B 0.37, izz/Lpp 0.25). Pitch: AUTHORED, no public source.
+GYRADIUS_FRACTIONS = {"roll_of_beam": 0.37, "pitch_of_length": 0.25, "yaw_of_length": 0.25}
 
 report = {"notes": []}
 
@@ -427,7 +429,8 @@ layout = {
         "gm_m": GM_TARGET_M, "gm_note": "AUTHORED: ~11 s natural roll by the IMO formula; DDG-51 KG/GM is not public",
         "kg_m": round(kg, 3), "centre_of_mass": unity(com_world),
         "gyradius_m": {"roll": round(k_roll, 2), "pitch": round(k_pitch, 2), "yaw": round(k_yaw, 2)},
-        "gyradius_note": "AUTHORED fractions of waterline beam/length (typical ship values): " + json.dumps(GYRADIUS_FRACTIONS),
+        "gyradius_note": "fractions of waterline beam/length " + json.dumps(GYRADIUS_FRACTIONS) +
+                         "; roll and yaw from the SIMMAN 2008 DTMB 5415 table (ixx/B 0.37, izz/Lpp 0.25), pitch AUTHORED",
     },
     "hydrostatics_note": f"MEASURED from the hull shell on a {HYDRO_ACROSS} x {HYDRO_LENGTH_M} m column grid ({len(hull_columns)} columns, converged)",
     "probes": {"grid": f"{PROBES_ACROSS} x {PROBE_LENGTH_M} m", "area_m2": round(area, 4),

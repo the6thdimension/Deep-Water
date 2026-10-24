@@ -6,6 +6,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using DeepWater.GeneralQuarters.Modules.Hull;
+using DeepWater.GeneralQuarters.Modules.Propulsion;
 using DeepWater.GeneralQuarters.ScriptableObjects;
 using DeepWater.Sea.Modules.Buoyancy;
 using DeepWater.Sea.ScriptableObjects;
@@ -25,6 +26,8 @@ namespace DeepWater.GeneralQuarters.Editor
         public const string LayoutJson = ModelDir + "/DDG51_GQ_Layout.json";
         public const string BuoyancyAsset = "Assets/General Quarters/ScriptableObjects/DDG51_GQ_Buoyancy.asset";
         public const string HullAsset = "Assets/General Quarters/ScriptableObjects/DDG51_GQ_Hull.asset";
+        public const string EngineRoomAsset = "Assets/General Quarters/ScriptableObjects/DDG51_GQ_EngineRoom.asset";
+        public const string HelmAsset = "Assets/General Quarters/ScriptableObjects/DDG51_GQ_Helm.asset";
         public const string PrefabPath = "Assets/General Quarters/Prefabs/DDG51_GQ.prefab";
         /// <summary>The original model import, whose materials (HDRP/Lit, textured) the new model reuses.</summary>
         public const string OriginalModel ="Assets/_SCENES/Rocket/Navy Assets/11-low-poly-us-navy-ddg-51-uss-arleigh-burke/source/DDG51/DDG51.blend";
@@ -42,7 +45,18 @@ namespace DeepWater.GeneralQuarters.Editor
             int remapped = RemapMaterials();
             BuoyancyHullSO buoyancy = BuildBuoyancy(layout);
             ShipHullProfileSO hull = BuildHullProfile(layout, buoyancy);
-            string prefab = BuildPrefab(hull, buoyancy);
+            EngineRoomProfileSO room = LoadOrCreate<EngineRoomProfileSO>(EngineRoomAsset);
+            room.profile = Ddg51EngineRoomData.EngineRoom(layout, out room.provenance);
+            room.hullSwayDepthM = 0.5f * layout.hydrostatics.draft_m;
+            room.rollLiftDampingRatio = Ddg51EngineRoomData.RollLiftDampingRatio;
+            room.rollDampingReferenceSpeedMs = Ddg51EngineRoomData.TopSpeedKn * 0.514444f;
+            room.provenance += $"ROLL: hull sway force at half draught, rudders at their depth (with the sway added-mass reaction); extra lift damping " +
+                               $"{Ddg51EngineRoomData.RollLiftDampingRatio} of critical at flank, scaling with speed (AUTHORED; the probes damp about 0.08 at rest, measured in PhysX).\n";
+            EditorUtility.SetDirty(room);
+            HelmProfileSO helm = LoadOrCreate<HelmProfileSO>(HelmAsset);
+            helm.profile = Ddg51EngineRoomData.Helm(layout, out helm.provenance);
+            EditorUtility.SetDirty(helm);
+            string prefab = BuildPrefab(hull, buoyancy, room, helm);
             AssetDatabase.SaveAssets();
             return $"[GQ] DDG-51 hull built: {buoyancy.probes.Length} buoyancy columns, {layout.hydrostatics.displacement_t:0} t, " +
                    $"GM {hull.metacentricHeightM:0.00} m, roll period {hull.NaturalRollPeriodS():0.0} s (undamped); " +
@@ -90,6 +104,8 @@ namespace DeepWater.GeneralQuarters.Editor
             so.designDraftM = layout.hydrostatics.draft_m;
             so.heaveDampingRatio = HeaveDampingRatio;
             so.quadraticDragCd = QuadraticDragCd;
+            // Heave only: the Engine Room's MMG model supplies surge, sway and yaw (probe drag there is 85 MN at 30 kn).
+            so.dragAxisScale = new Vector3(0f, 1f, 0f);
             EditorUtility.SetDirty(so);
             return so;
         }
@@ -120,12 +136,12 @@ namespace DeepWater.GeneralQuarters.Editor
                 $"GM {h.gm_m:0.00} m: {h.gm_note}.\n" +
                 $"Gyradii: {h.gyradius_note}.\n" +
                 $"Compartments: {layout.compartments_note}.\n" +
-                $"Buoyancy damping: heave ratio {HeaveDampingRatio}, Cd {QuadraticDragCd} (AUTHORED, Sea State defaults).";
+                $"Buoyancy damping: heave ratio {HeaveDampingRatio}, Cd {QuadraticDragCd} (AUTHORED, Sea State defaults), heave axis only.";
             EditorUtility.SetDirty(so);
             return so;
         }
 
-        static string BuildPrefab(ShipHullProfileSO hull, BuoyancyHullSO buoyancy)
+        static string BuildPrefab(ShipHullProfileSO hull, BuoyancyHullSO buoyancy, EngineRoomProfileSO room, HelmProfileSO helm)
         {
             Scene preview = EditorSceneManager.NewPreviewScene();
             try
@@ -142,6 +158,9 @@ namespace DeepWater.GeneralQuarters.Editor
                 SetField(buoyant, "hull", buoyancy);
                 var shipHull = root.AddComponent<ShipHull>();
                 SetField(shipHull, "profile", hull);
+                var drive = root.AddComponent<ShipDrive>();
+                SetField(drive, "engineRoomProfile", room);
+                SetField(drive, "helmProfile", helm);
 
                 // Visual: unpack the model so the elevating parts can sit under their training parts.
                 var visual = (GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(VisualFbx), preview);

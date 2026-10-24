@@ -10,7 +10,9 @@
 - Every performance claim carries its A/B number (`unity-perf-ab`).
 - Hull changes pass `hull-stability-check`.
 
-Branch: `feat/general-quarters`. It was merged into `main` on 2026-10-24 (4f8149b), and Sea State's `feat/environment-ocean` was pruned once merged. Keep the branch in step with `main` (CLAUDE.md, Branches). HEAD stays wherever the shared checkout is; commits go in through `commit-to-branch`. Nothing is pushed without SIX's word.
+Branch: `feat/general-quarters`, kept in step with `main` (CLAUDE.md, Branches). HEAD stays wherever the shared checkout is; commits go in through `commit-to-branch`.
+- **Git (SIX, 2026-10-24):** Claude manages git without asking. Verified work is committed, pushed and brought up to `main`, and every branch is kept level; `Guided-Fury` takes it through a PR.
+- **Never pushed:** the archive branch, DAVFX and the MCP unlock script. There are no force pushes.
 
 ---
 

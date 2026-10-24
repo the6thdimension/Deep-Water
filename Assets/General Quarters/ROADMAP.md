@@ -267,4 +267,10 @@ SIX's picks (2026-10-24): G34–G41. Guns L1 first.
 - **2026-10-24** — Slice 6 done: presentation, with the decisions in BLUEPRINT G30–G33. The Phase 1 gate's presentation half is met in play mode (sound seen playing, not yet heard). Q2 answered: Sea State gained `DepositFoam`.
 
 ## Skip / fail log
+- **2026-10-24 (Stream B, after slice B1): the Mk 45 jerked back and forth between shots** (SIX, on the range).
+  - **Cause:** the firing table flew each shot only to 100 m below the muzzle. At long range, the elevation just under the right one hit that floor before reaching the target's distance, so the solver lost its bracket and said "out of reach". That happened on alternate ticks. Each time, the mount dropped its target, turned toward rest, and took the target back.
+  - **Measured on the Standard raid:** 48 drops, 120 target changes, 86 train reversals.
+  - **Fix:** fly to 3,000 m below, and bracket with the floor if it is ever reached. Now 2 drops (at the end of each wave), 10 changes (each a kill) and 2 reversals; in play mode, 0 drops and 1 reversal over 91 s.
+  - **Regression tests:** a sea-skimmer at every range out to 22 km must be solvable, and `Mk45_StaysOnItsTarget_UntilItIsGone`.
+  - **The lesson is METHODOLOGY AP21.**
 - **2026-10-24 (slice 5):** the raid's aircraft vanished on their first step: slant range against the launch range (METHODOLOGY AP19). It was in slice 2's `ScriptedRaid`, found on the range, fixed, and a regression test added.

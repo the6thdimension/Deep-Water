@@ -202,6 +202,15 @@ These are the fixed points around which the methodology orbits. Every principle 
   - *Why it fails:* A green suite says nothing about branches no test enters. Each value of a kind enum is a branch, and the one nobody spawned is the one that is wrong.
   - *Do instead:* Give every kind a scenario can spawn a test that spawns it and follows it through its whole life (appear, act, leave or die). Measure each distance in the plane the rule means: "flown out of the area" is ground range. Reference test: `RangeL0Tests.Raid_AircraftAtAltitude_FlyTheirPass_InsteadOfVanishingAtLaunch`.
 
+- **AP21. A table lookup that says "no answer" when its bracket falls off the table.** A solver that brackets between neighbouring rows of a precomputed table, and reports failure when one neighbour has no entry at the query point, even though the answer lies between them.
+  - *Where seen:* General Quarters guns L1, found by SIX on the range on 2026-10-24 as a Mk 45 that "jerked back and forth between shots". The firing table flew each shot only to 100 m below the muzzle. At 14–20 km, the elevation just under the solution ended short of the target's range, so `TrySolve` returned false on alternate ticks. The mount dropped its target, turned toward rest, and took the target back: 48 times in one raid, with 86 train reversals.
+  - *Why it fails:* The table's coverage is a discretisation artefact, not a fact about the gun. A false "out of reach" turns into behaviour: here a decision flickered at 50 Hz, and the motion showed it. Unit tests at a handful of points missed it because the gap only opens at some ranges.
+  - *Do instead:*
+    - Make the table cover the whole query domain with margin (shots flown to 3 km below), and bracket against the table's bound when a neighbour is missing.
+    - Sweep the query domain densely in a test (every 25 m out to 22 km), not at a few points.
+    - When something on screen jitters, log the decision per tick (here the mount's target id) before touching the motion.
+  - *Reference impl:* `Core/Ballistics/FiringTable.TrySolve`, `GunsL1Tests.FireControl_SolutionPassesThroughTheAimPoint_AndRefusesWhatIsOutOfReach`, `Mk45_StaysOnItsTarget_UntilItIsGone`.
+
 - **AP20. Trusting an effect built for another render pipeline because the engine says its shader is supported.** Dropping a vendor particle prefab into an HDRP scene because `Shader.isSupported` is true and the asset store page shows it burning.
   - *Where seen:* General Quarters slice 6, 2026-10-24. `HD_Naval_Explosion` uses the built-in pipeline's "Particles/Standard Unlit". HDRP reports it as supported and draws it as untextured grey quads. The VFX Arsenal flames rendered, but at a size and brightness made for a close camera, not a ship at 2 km under HDRP exposure. The same explosion still sits in a Guided Fury ground detonation.
   - *Why it fails:* "Supported" means it compiles, not that HDRP gives it the passes, the exposure and the fog it expects. Effects are authored for a scale and an exposure as much as a pipeline.
@@ -337,3 +346,4 @@ These are the fixed points around which the methodology orbits. Every principle 
 - **2026-10-24** — General Quarters slice 6 (presentation). Added AP20 (an effect built for another pipeline, trusted because its shader is "supported"), C22 (the core says where, presentation decides how; fingerprint and on/off A/B), C23 (a fast emitter's trail is a ribbon), C24 (a regenerated asset keeps its GUID by being overwritten in place).
 - **2026-10-24** — General Quarters slice 7 (phase review; Phase 1 complete). Promoted C5 to P8 (the `_Archive` convention, third use). Added C25 (archive behind a supersession checklist).
 - **2026-10-24** — General Quarters Stream B slice B1 (guns L1). Added C26 (standard drag curve plus one calibrated form factor; distance from 1 is a finding), C27 (fire control looks up firing tables), C28 (a hit model prints its sum), C29 (a golden pins a fidelity level).
+- **2026-10-24** — Added AP21 (a table lookup that says "no answer" when its bracket falls off the table): the Mk 45 jitter SIX reported after guns L1.

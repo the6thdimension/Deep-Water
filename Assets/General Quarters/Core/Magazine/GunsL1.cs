@@ -85,6 +85,8 @@ namespace DeepWater.GeneralQuarters.Core.Magazine
         public FidelityLevel Level => FidelityLevel.L1;
         public float TrainDeg => _trainDeg;
         public float ElevationDeg => _elevationDeg;
+        /// <summary>The track the mount is laying on this tick, or −1 when it has none.</summary>
+        public int TargetTrackId { get; private set; } = -1;
 
         public bool TryGetLay(out float trainDeg, out float elevationDeg)
         {
@@ -103,9 +105,11 @@ namespace DeepWater.GeneralQuarters.Core.Magazine
 
             if (!TryPickTarget(ctx, directed, out Track track, out int cause, out int directedIndex, out float range))
             {
+                TargetTrackId = -1;
                 Slew(0f, 0f, b, dt);   // nothing to shoot: back to rest
                 return;
             }
+            TargetTrackId = track.Id;
             Slew(_solTrainDeg, _solElevationDeg, b, dt);
             bool laid = Mathf.Abs(_trainDeg - _solTrainDeg) <= b.LayToleranceDeg && Mathf.Abs(_elevationDeg - _solElevationDeg) <= b.LayToleranceDeg;
             if (!laid || ctx.Tick < _readyTick || Rounds < _profile.BurstRounds) return;

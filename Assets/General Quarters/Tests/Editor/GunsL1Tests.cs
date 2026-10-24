@@ -136,6 +136,11 @@ namespace DeepWater.GeneralQuarters.Tests
                 Assert.AreEqual(flown, tof, 0.05f, "and the table's time of flight is the shot's");
             }
             Assert.IsFalse(t.TrySolve(30000f, 0f, out _, out _), "beyond the greatest range");
+
+            // A sea-skimmer just under the muzzle, at every range out to the gun's reach: the solution never flickers.
+            // (With a shallow floor the elevation under the solution ended short at long range and lost its bracket.)
+            for (float x = 1000f; x <= 22_000f; x += 25f)
+                Assert.IsTrue(t.TrySolve(x, -2.7f, out _, out _), $"a target 2.7 m below the muzzle at {x} m is in reach");
             Assert.IsFalse(t.TrySolve(2000f, 20000f, out _, out _), "above the highest shot");
         }
 
@@ -265,6 +270,51 @@ namespace DeepWater.GeneralQuarters.Tests
                 if (raid.Resolved && cs.Vls.InFlight.Count == 0) break;
             }
             return (cs.Fix, raid, cs, coreTicks * 1000.0 / System.Diagnostics.Stopwatch.Frequency / steps);
+        }
+
+        [Test]
+        public void Mk45_StaysOnItsTarget_UntilItIsGone()
+        {
+            // The Standard raid with the real loadout: the Mk 45 may change target when one is killed, but it must not drop
+            // a target and pick it up again moments later (the jitter SIX saw, 2026-10-24: 48 drops, 86 train reversals).
+            var cs = new CombatSystem(AssetDatabase.LoadAssetAtPath<ShipLoadoutSO>(Ddg51CombatData.LoadoutAsset).Bake());
+            var ai = new Core.Captain.AiCaptainL0(AssetDatabase.LoadAssetAtPath<AiCaptainProfileSO>(Ddg51CombatData.AiCaptainAsset).Bake());
+            var raid = new ScriptedRaid(AssetDatabase.LoadAssetAtPath<RaidScenarioSO>(Ddg51CombatData.RaidDir + "/Raid_Standard.asset").StartingAt(0), Own);
+            var truth = new List<TruthTarget>();
+            var hits = new List<ShipHit>();
+            var kills = new List<KillReport>();
+            var mk45 = (GunMountL1)cs.Guns.First(g => g.Profile.Name == "Mk 45");
+            int last = -1, lost = -1, regains = 0, switches = 0, reversals = 0;
+            long lostTick = 0;
+            float lastTrain = 0f, lastDelta = 0f;
+            for (int i = 0; i < 9000 && !(raid.Resolved && cs.Vls.InFlight.Count == 0); i++)
+            {
+                ai.Step(cs, Own, Core.Captain.Seat.Tao);
+                hits.Clear();
+                raid.Step(cs.Tick, cs.TickSeconds, Own, truth, hits);
+                kills.Clear();
+                cs.Step(Own, truth, hits, kills);
+                raid.ApplyKills(kills);
+
+                int now = mk45.TargetTrackId;
+                if (now != last)
+                {
+                    if (now >= 0 && now == lost && cs.Tick - lostTick < 100) regains++;
+                    if (last >= 0) { lost = last; lostTick = cs.Tick; }
+                    if (last >= 0 && now >= 0) switches++;
+                    last = now;
+                }
+                float d = mk45.TrainDeg - lastTrain;
+                if (Mathf.Abs(d) > 1e-3f)
+                {
+                    if (lastDelta != 0f && Mathf.Sign(d) != Mathf.Sign(lastDelta)) reversals++;
+                    lastDelta = d;
+                }
+                lastTrain = mk45.TrainDeg;
+            }
+            Debug.Log($"[GQ] Mk 45 through the Standard raid: {switches} target changes, {regains} drop-and-regains, {reversals} train reversals");
+            Assert.AreEqual(0, regains, "a target is never dropped and taken up again within 2 s");
+            Assert.LessOrEqual(reversals, switches + 2, "the mount only turns back when it changes target");
         }
 
         [Test]

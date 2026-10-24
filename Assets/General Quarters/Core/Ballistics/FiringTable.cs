@@ -30,7 +30,10 @@ namespace DeepWater.GeneralQuarters.Core.Ballistics
         public const float IntegrationStepS = 0.02f;
         public const float SampleStepS = 0.1f;
         const float MaxFlightS = 150f;
-        const float FloorM = -100f;
+        // Shots are flown well below the muzzle so that, at any range a target near the sea can be at, the elevation just
+        // under the solution still reaches that range: with a shallow floor (−100 m) it ended short at long range, the
+        // solver lost its bracket and reported "out of reach" on alternate ticks (the Mk 45 jitter, 2026-10-24).
+        const float FloorM = -3000f;
 
         public readonly ProjectileData Projectile;
         public readonly float ElevationMinDeg, ElevationMaxDeg, ElevationStepDeg;
@@ -170,10 +173,17 @@ namespace DeepWater.GeneralQuarters.Core.Ballistics
                 {
                     if (!havePrev)
                     {
-                        if (k > 0 || yk - y > 1f) return false;   // the lowest elevation already passes over it
-                        elevationDeg = ElevationMinDeg;
-                        timeOfFlightS = tk;
-                        return true;
+                        if (k == 0)
+                        {
+                            if (yk - y > 1f) return false;   // the lowest elevation already passes over it
+                            elevationDeg = ElevationMinDeg;
+                            timeOfFlightS = tk;
+                            return true;
+                        }
+                        // The elevation below fell past the floor before reaching x, so its height there is below the
+                        // floor: bracket with the floor. Only reachable for points far below the muzzle.
+                        prevY = FloorM;
+                        prevT = tk;
                     }
                     float f = (y - prevY) / Mathf.Max(1e-6f, yk - prevY);
                     elevationDeg = ElevationMinDeg + (k - 1 + f) * ElevationStepDeg;

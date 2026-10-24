@@ -37,6 +37,17 @@ namespace DeepWater.Sea.Tests
             };
         }
 
+        /// <summary>Flat calm: no waves at all (hydrostatics only).</summary>
+        public static SeaBakeInput Calm() => new SeaBakeInput
+        {
+            WindSea = default,
+            Swell = default,
+            MinWavelengthM = 10f,
+            Gravity = Gravity,
+            WhitecapFraction = 0f,
+            FoamCalibrationGrid = 32,
+        };
+
         /// <summary>Douglas 5 (Rough, Hs 3.25 m) wind sea, no swell.</summary>
         public static SeaBakeInput Douglas5(float minWavelengthM = 10f) => new SeaBakeInput
         {

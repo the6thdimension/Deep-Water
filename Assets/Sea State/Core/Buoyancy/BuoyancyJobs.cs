@@ -36,8 +36,9 @@ namespace DeepWater.Sea.Core
     /// <summary>
     /// Every probe of every floating body in one parallel job: find the water surface above
     /// the probe (packed SIMD kernel), then buoyancy + drag against the water particle
-    /// velocity, then the torque about the body's centre of mass. Applying ΣF and Σ r×F per
-    /// body is physically identical to applying each F at its probe.
+    /// velocity, then the torque about the body's centre of mass. Each force acts at the
+    /// centroid of its column's submerged part (<see cref="BuoyancyModel.SubmergedCentroid"/>);
+    /// applying ΣF and Σ r×F per body is physically identical to applying each F there.
     /// </summary>
     [BurstCompile(FloatMode = FloatMode.Deterministic, CompileSynchronously = true)]
     public struct BuoyancyProbeJob : IJobParallelFor
@@ -67,7 +68,11 @@ namespace DeepWater.Sea.Core
             SeaFieldPacked.Evaluate(Groups, GroupCount, x0, out float height, out float3 waterVelocity, out _, out _);
             float surfaceY = SeaLevel + height;
 
-            float3 arm = world - pose.WorldCenterOfMass;
+            float submerged = BuoyancyModel.SubmergedHeight(surfaceY, world.y, probe.HeightM);
+            float3 up = math.mul(pose.Rotation, new float3(0f, 1f, 0f));
+            float3 apply = BuoyancyModel.SubmergedCentroid(world, up, submerged, probe.HeightM);
+
+            float3 arm = apply - pose.WorldCenterOfMass;
             float3 pointVelocity = pose.LinearVelocity + math.cross(pose.AngularVelocity, arm);
             float3 force = BuoyancyModel.ProbeForce(probe, Damping[body], WaterDensity, Gravity,
                 surfaceY, world, pointVelocity, waterVelocity);
@@ -76,7 +81,7 @@ namespace DeepWater.Sea.Core
             {
                 Force = force,
                 Torque = math.cross(arm, force),
-                SubmergedVolume = probe.AreaM2 * BuoyancyModel.SubmergedHeight(surfaceY, world.y, probe.HeightM),
+                SubmergedVolume = probe.AreaM2 * submerged,
                 Volume = probe.AreaM2 * probe.HeightM,
             };
         }

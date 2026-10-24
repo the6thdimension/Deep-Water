@@ -34,13 +34,20 @@ namespace DeepWater.Sea.Examples.Editor
         const string SkyPrefabPath = "Assets/_ENVIRONMENT/Sky and Fog Volume.prefab";
         const float SeawaterDensity = 1025f;
 
-        // name, length, beam, height, design draft, probes across, probes along, position, heading.
-        static readonly (string name, float l, float b, float h, float draft, int nx, int nz, Vector3 pos, float headingDeg)[] Hulls =
+        // Buoy ballast (AUTHORED): centre of mass 0.3 m above the keel (0.7 m below the box centre).
+        // As a uniform cube at 0.8 m draft it has GM = KB + BM − KG = 0.40 + 0.42 − 1.00 = −0.18 m:
+        // unstable upright, and a real one floats edge-up. Ballasted: GM = 0.52 m (0.41 m with its
+        // 2 × 2 probe waterplane). The box hulls keep Unity's centre of mass (their box centre).
+        const float BuoyBallastCenterOfMassY = -0.7f;
+
+        // name, length, beam, height, design draft, probes across, probes along, position, heading,
+        // centre-of-mass height in the body frame (null: derived from the collider).
+        static readonly (string name, float l, float b, float h, float draft, int nx, int nz, Vector3 pos, float headingDeg, float? comY)[] Hulls =
         {
-            ("Box Hull 154 m (destroyer length)", 154f, 20f, 12f, 6.3f, 5, 16, new Vector3(0f, 0f, 0f), 0f),
-            ("Box Hull 40 m (patrol craft)",       40f,  8f,  4f, 1.8f, 4, 10, new Vector3(-130f, 0f, 70f), 30f),
-            ("Box Hull 11 m (RHIB)",               11f, 3.5f, 1.4f, 0.45f, 3, 6, new Vector3(60f, 0f, -90f), 300f),
-            ("Buoy 2 m",                            2f,  2f,  2f, 0.8f, 2, 2, new Vector3(90f, 0f, 40f), 0f),
+            ("Box Hull 154 m (destroyer length)", 154f, 20f, 12f, 6.3f, 5, 16, new Vector3(0f, 0f, 0f), 0f, null),
+            ("Box Hull 40 m (patrol craft)",       40f,  8f,  4f, 1.8f, 4, 10, new Vector3(-130f, 0f, 70f), 30f, null),
+            ("Box Hull 11 m (RHIB)",               11f, 3.5f, 1.4f, 0.45f, 3, 6, new Vector3(60f, 0f, -90f), 300f, null),
+            ("Buoy 2 m",                            2f,  2f,  2f, 0.8f, 2, 2, new Vector3(90f, 0f, 40f), 0f, BuoyBallastCenterOfMassY),
         };
 
         [MenuItem("Deep Water/Sea State/Build Demo Scene")]
@@ -125,13 +132,15 @@ namespace DeepWater.Sea.Examples.Editor
             Debug.Log($"[SeaStateDemoSceneBuilder] Built {ScenePath}: sea + {Hulls.Length} hulls + camera + selector.");
         }
 
-        static BuoyantBody BuildHull((string name, float l, float b, float h, float draft, int nx, int nz, Vector3 pos, float headingDeg) spec,
+        static BuoyantBody BuildHull((string name, float l, float b, float h, float draft, int nx, int nz, Vector3 pos, float headingDeg, float? comY) spec,
             BuoyancySystem buoyancy, Material material)
         {
             string assetName = spec.name.Split(' ')[0] + "_" + spec.l.ToString("0") + "m";
             var hull = LoadOrCreate<BuoyancyHullSO>($"{HullFolder}/{assetName}.asset");
             hull.FillBoxGrid(spec.l, spec.b, spec.h, spec.nx, spec.nz);
             hull.massKg = SeawaterDensity * spec.l * spec.b * spec.draft;   // Archimedes at the design draft
+            hull.overrideCenterOfMass = spec.comY.HasValue;
+            hull.centerOfMassM = new Vector3(0f, spec.comY ?? 0f, 0f);
             hull.designDraftM = spec.draft;
             hull.heaveDampingRatio = 0.2f;
             hull.quadraticDragCd = 0.5f;

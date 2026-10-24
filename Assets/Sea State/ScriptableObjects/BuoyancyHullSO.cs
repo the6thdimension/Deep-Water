@@ -29,6 +29,12 @@ namespace DeepWater.Sea.ScriptableObjects
         [Header("Mass")]
         [Tooltip("Rigidbody mass, kg. For a box hull: seawater density × waterplane area × design draft.")]
         [Min(1f)] public float massKg = 1000f;
+        [Tooltip("Use the centre of mass below instead of the one Unity derives from the colliders " +
+                 "(uniform density). Turn on for ballasted or loaded hulls.")]
+        public bool overrideCenterOfMass;
+        [Tooltip("Centre of mass in the body's local frame, m. A box hull's centre is (0, 0, 0); " +
+                 "negative y is lower (ballast). Roll stability: GM = KB + BM − KG.")]
+        public Vector3 centerOfMassM;
 
         [Header("Damping")]
         [Tooltip("Heave damping as a fraction of critical damping (ζ). Typical ships 0.1–0.3.")]
@@ -47,6 +53,17 @@ namespace DeepWater.Sea.ScriptableObjects
             LinearMs = 2f * heaveDampingRatio * math.sqrt(gravity * designDraftM),
             QuadraticCd = quadraticDragCd,
         };
+
+        /// <summary>
+        /// Mass, and the centre of mass when this hull overrides it, onto a Rigidbody. Without
+        /// the override the Rigidbody keeps whatever centre of mass it has (Unity's automatic
+        /// one, or one set by hand). The inertia tensor stays Unity's (from the colliders).
+        /// </summary>
+        public void ApplyMassProperties(Rigidbody body)
+        {
+            body.mass = massKg;
+            if (overrideCenterOfMass) body.centerOfMass = centerOfMassM;
+        }
 
         public BuoyancyProbe BakeProbe(int index) => new BuoyancyProbe
         {

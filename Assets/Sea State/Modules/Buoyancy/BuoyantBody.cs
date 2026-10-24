@@ -16,7 +16,7 @@ namespace DeepWater.Sea.Modules.Buoyancy
     {
         [SerializeField] BuoyancySystem system;
         [SerializeField] BuoyancyHullSO hull;
-        [Tooltip("Set the Rigidbody's mass from the hull asset on enable.")]
+        [Tooltip("Set the Rigidbody's mass (and centre of mass, if the hull asset overrides it) from the hull asset on enable.")]
         [SerializeField] bool applyHullMass = true;
 
         /// <summary>Fraction of the hull's probe volume under water after the last step, 0–1.</summary>
@@ -44,7 +44,7 @@ namespace DeepWater.Sea.Modules.Buoyancy
                 enabled = false;
                 return;
             }
-            if (applyHullMass) Body.mass = hull.massKg;
+            if (applyHullMass) hull.ApplyMassProperties(Body);
             system.Register(this);
         }
 

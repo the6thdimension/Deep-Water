@@ -26,6 +26,8 @@ MonoBehaviour:
     areaM2: 1
     heightM: 2
   massKg: 3280
+  overrideCenterOfMass: 1
+  centerOfMassM: {x: 0, y: -0.7, z: 0}
   heaveDampingRatio: 0.2
   designDraftM: 0.8
   quadraticDragCd: 0.5

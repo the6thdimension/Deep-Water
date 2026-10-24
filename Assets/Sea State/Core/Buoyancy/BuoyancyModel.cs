@@ -26,7 +26,8 @@ namespace DeepWater.Sea.Core
     /// Per-probe buoyancy and drag — pure functions, no Unity types (P6, testable).
     ///
     /// **Model and its limits.** Each probe is a vertical column; buoyancy is Archimedes on
-    /// its submerged height (ρ g A h_sub), vertical. Drag acts on the velocity of the hull
+    /// its submerged height (ρ g A h_sub), vertical, acting at the centroid of the submerged
+    /// part of the column (<see cref="SubmergedCentroid"/>). Drag acts on the velocity of that
     /// point relative to the water particle (so orbital motion pushes the hull). This is a
     /// probe model: no radiation or diffraction, no added mass, no strip theory — it gives
     /// believable heave/pitch/roll for any hull, not RAO-accurate seakeeping.
@@ -36,6 +37,28 @@ namespace DeepWater.Sea.Core
         /// <summary>Submerged height of a column centred at <paramref name="probeCentreY"/>, clamped to [0, height].</summary>
         public static float SubmergedHeight(float surfaceY, float probeCentreY, float heightM)
             => math.clamp(surfaceY - (probeCentreY - 0.5f * heightM), 0f, heightM);
+
+        /// <summary>
+        /// Where a column's buoyancy acts: the centroid of its submerged part, half the
+        /// submerged height up from the column's lower end, along the column's axis
+        /// (<paramref name="columnAxis"/>, the body's up). The wet part starts at whichever end
+        /// is lower in the world, so past 90° of heel (upside down) the axis is flipped.
+        ///
+        /// Why not the column centre: for a vertical force the point only matters once the hull
+        /// heels, and then it carries the whole "centre of buoyancy sits below the centre of
+        /// gravity" term of the stability height GM = KB + BM − KG. Acting at the column centre
+        /// makes KB the column's mid-height, so a box with its centre of mass there gets GM = BM:
+        /// the 154 m demo box (GM 2.44 m, BM 5.29 m) rolled √(5.29 / 2.44) ≈ 1.5× too fast.
+        ///
+        /// Limit: the probe model assumes columns nearer vertical than horizontal. Exactly on its
+        /// side (axis horizontal) the point is the column centre, and it jumps to the other end
+        /// as the hull passes 90°.
+        /// </summary>
+        public static float3 SubmergedCentroid(float3 probeWorld, float3 columnAxis, float submergedHeight, float heightM)
+        {
+            float3 upward = columnAxis * math.sign(columnAxis.y);
+            return probeWorld + upward * (0.5f * submergedHeight - 0.5f * heightM);
+        }
 
         /// <summary>
         /// Total hydrodynamic force on one probe (world frame, up = +Y).

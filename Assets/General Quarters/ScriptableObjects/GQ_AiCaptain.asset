@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 582874f4a3fa13a4d91a052a7f1d302c, type: 3}
+  m_Name: GQ_AiCaptain
+  m_EditorClassIdentifier: DeepWater.GeneralQuarters::DeepWater.GeneralQuarters.ScriptableObjects.AiCaptainProfileSO
+  profile:
+    EvaluatePeriodTicks: 25
+    RouteId: 1
+    RouteSpeedKn: 20
+    ThreatBell: 5
+    ArcHeadingStepDeg: 15
+    ArcHeadingSteps: 6
+    ArcMinGain: 1
+    ArcTurnIntervalS: 20
+    SecureAfterS: 30
+    ConfirmDelayS: 2
+  provenance: "AUTHORED (the AI captain's habits, G19): looks twice a second; patrols
+    at 20 kn (C1); rings flank on the first inbound hostile (C2); turns in 15\xB0
+    steps, up to 90\xB0 either way, when that brings at least one more (threat, mount)
+    pair into arc, at most every 20 s (C3); secures after 30 s with nothing inbound
+    (C4); as TAO, confirms a SemiAuto proposal after it has stood 2 s (T1)."

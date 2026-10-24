@@ -8,6 +8,7 @@ using DeepWater.GeneralQuarters.Core.World;
 namespace DeepWater.GeneralQuarters.Core.DamageControl
 {
     /// <summary>One damageable system and where it sits in the ship frame.</summary>
+    [System.Serializable]
     public struct SystemProfile
     {
         public ShipSystem System;
@@ -16,6 +17,7 @@ namespace DeepWater.GeneralQuarters.Core.DamageControl
     }
 
     /// <summary>Damage tuning. All AUTHORED at L0: there is no public damage table to cite.</summary>
+    [System.Serializable]
     public struct DamageProfileData
     {
         public float HullHitPoints;

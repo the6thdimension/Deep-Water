@@ -3,7 +3,9 @@
     "rootNamespace": "DeepWater.GeneralQuarters.Examples",
     "references": [
         "DeepWater.GeneralQuarters",
-        "Unity.InputSystem"
+        "Unity.InputSystem",
+        "GuidedFury",
+        "Unity.AppUI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

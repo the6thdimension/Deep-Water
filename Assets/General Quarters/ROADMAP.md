@@ -92,13 +92,48 @@ The gate: a scripted raid against the destroyer plays end to end on the Sea Stat
 - [x] **Tests:** ConnLogicTests, plus ConnBindingTests on virtual keyboard and mouse, XInput and generic HID devices. 102/102 with Sea State.
   - **Play mode:** a virtual gamepad and keyboard drove the full chain (stick rudder, release to steady, d-pad bell up, S bell down, E course change).
   - **Not tested:** physical controllers. None was plugged in.
-- [ ] **Slice 5** replaces the IMGUI panel with the real helm panel and moves the conn into the range scene.
+- [x] **Slice 5** replaces the IMGUI panel with the real helm panel and moves the conn into the range scene (2026-10-24). The stand-in menu still works in the Sea State demo.
 
-### Slice 5 — The range
-- [ ] Range scene on the Sea State sea, with the destroyer prefab (new) and the raid.
-- [ ] Tactical display (track picture, weapon assignment, doctrine and ROE controls), helm panel, orbit and chase cameras.
-- [ ] Captain / TAO seats, with the AI captain filling the empty one (named rules L0).
-- [ ] Play verification against the Phase 1 gate. Measure the budget.
+### Slice 5 — The range (done 2026-10-24: 67/67 GQ tests, 48/48 sea tests; the Phase 1 gate met in play mode, presentation aside)
+SIX's picks: G25 App UI on UI Toolkit, G26 switch seats, G27 the AI captain's route / flank / open-arcs rules, G28 debrief, time compression and a threat and missile camera.
+- [x] **Range scene:** `Examples/Scenes/GQ_Range.unity`, built by Deep Water → General Quarters → Build Range Scene from a copy of the Sea State demo. The demo's hulls, selector and review camera come out; the DDG, the range and its screen go in. Play it with Deep Water → General Quarters → Play the Range.
+- [x] **Combat in the scene:** `Modules/Combat/ShipCombat.cs` runs, on every fixed step, the AI captain, then the raid, then `CombatSystem.Step`. It applies kills to the raid and hands the conn's standing orders to `ShipDrive.Answer`. Every order, the player's or the AI's, goes into the combat system's order log.
+  - **Propulsion offline:** Damage Control L0 has no partial casualties, so propulsion offline stops the shafts and logs it.
+- [x] **Data:**
+  - `ShipLoadoutSO` with `DDG51_GQ_Loadout.asset`: Flight I/II with two CIWS and two Mk 38. Mount positions come from the Blender layout; each number's source is in the asset.
+  - Three raids (`RaidScenarioSO`): Small 4, Standard 8+2 (two waves and two strike aircraft), Saturation 24.
+  - `AiCaptainProfileSO` and `RangeProfileSO`: an 8 × 6 km patrol box, time scales, the TAO camera window.
+  - Built by `Editor/Ddg51CombatData.cs`.
+- [x] **Screens (App UI, G25):**
+  - **Captain seat (G26):** the 3D view, the helm panel (readouts, telegraph, rudder, steady, course and speed orders, order log), an inset scope (click it to go to the TAO seat), and an event ticker.
+  - **TAO seat:** a big vector track scope (NTDS-style symbols, velocity leaders, ESSM and CIWS reach, proposals and the selection marked, wheel to zoom), the camera's window, a track list sorted by time to closest approach, engage and cease fire, doctrine per weapon, magazine, systems and hull.
+  - **Both seats:** a top bar with the seat, the raid picker and General quarters, ROE, time compression, the clock and help.
+- [x] **Seats:** Tab / tap Start / button 6 switches seats. The conn's controls are read only in the Captain seat, the TAO's only in the TAO seat, and the AI takes the other one.
+  - **Input:** new "Tao" and "Range" maps in `Assets/RHMILCOM.inputactions`, each with all three control schemes. Hold Start starts the raid, a tap switches seats. Help (H) lists every binding.
+- [x] **AI captain L0 (G19, G27):** `Core/Captain/AiCaptain.cs`, named rules, each logged as a Decision event with its numbers and cause.
+  - **C1:** route at 20 kn.
+  - **C2:** flank on the first inbound hostile.
+  - **C3:** turn, at most every 20 s, to the course that puts the most (threat, mount) pairs inside the gun arcs.
+  - **C4:** secure after 30 s quiet.
+  - **T1:** confirm a SemiAuto proposal after 2 s.
+  - **TEWA support:** TEWA now lists its standing proposals (`ITewa.Proposals`).
+- [x] **Extras (G28):**
+  - **Debrief:** opens when a raid resolves, showing kills by weapon, expenditure, damage, orders and AI decisions, seed and Fix, and the measured core cost against the budget.
+  - **Time compression:** 1×, 2×, 4× (T).
+  - **Camera (C):** cycles the ship, the selected track and ESSMs in flight, and holds on a kill for 2.5 s.
+  - **Stand-ins:** ESSM and F-16 models for what is flying (slice 6 replaces them).
+- [x] **Play verification against the Phase 1 gate** (Editor, 2560 × 1440, the full scene with PhysX and Sea State):
+  - **Saturation, Captain seat, AI as TAO:** 24 killed, 0 hits (ESSM 23, Mk 45 1), all 32 ESSM spent, 150 s. Combat core per fixed step: 0.066 ms mean, 0.233 ms p99 over 7 515 steps at up to 24 threats; one 5.7 ms spike, not investigated (probably first-use JIT). Profiler markers during the busiest phase: `GQ.CombatCore` 0.080 ms per step, `GQ.CombatHost` 0.096 ms.
+  - **Headless, the same loadout, AI as TAO:** 24 killed, 0.030 ms mean, the same Fix on two runs.
+  - **Small raid, AI as TAO:** 4 of 4 killed.
+  - **First standard raid, SIX at the TAO seat:** with ESSM on SemiAuto and no confirmations, the guns alone killed 3 and 5 hit the ship. Doctrine matters.
+  - **GC** (player loop, standard raid, TAO seat): about 2 KB per frame. 1.1 KB is the screen's readout strings at 15 Hz, 0.6 KB the combat core's log sentences, 0.2 KB UI Toolkit.
+  - **Not met here:** "looks and sounds like a fight" belongs to slice 6.
+- [ ] **Known gaps** (for later slices):
+  - Both CIWS share Damage Control's one CIWS system at L0.
+  - The strike aircraft pass 6 km overhead, so TEWA L0 never ranks them a threat (closest approach over 3 km): the TAO engages them by hand.
+  - HDRP motion blur smears the frame each time the camera cuts.
+  - Not re-checked in play mode: the last two fixes (camera execution order, scope labels re-placed on layout). They are build-verified and covered by the suite.
 
 ### Slice 6 — Presentation (G18)
 - [ ] VLS hatch and plume, Mk 45 muzzle and shell splashes, CIWS tracers and bursts, missile trails.
@@ -161,5 +196,10 @@ The gate: a scripted raid against the destroyer plays end to end on the Sea Stat
     - A straight run holds its heading exactly.
     - The hard-over turn settles at 7.2° of heel, at a 207 m radius and 20.5 kn.
     - The transient heel gap is above.
+- **2026-10-24** — Slice 5 done: the range, with the decisions in BLUEPRINT G25–G29.
+  - **Built:** the combat core plays in a scene, from two seats, on App UI screens, with the AI captain in the empty seat.
+  - **Gate:** the Phase 1 gate is met in play mode at 0.066 ms mean per fixed step against the 1 ms budget, presentation aside (slice 6).
+  - **Found on the range:** the aircraft bug (skip / fail log).
 
 ## Skip / fail log
+- **2026-10-24 (slice 5):** the raid's aircraft vanished on their first step: slant range against the launch range (METHODOLOGY AP19). It was in slice 2's `ScriptedRaid`, found on the range, fixed, and a regression test added.

@@ -4,7 +4,8 @@
     "references": [
         "DeepWater.GeneralQuarters",
         "DeepWater.Sea",
-        "DeepWater.GeneralQuarters.Examples"
+        "DeepWater.GeneralQuarters.Examples",
+        "GuidedFury"
     ],
     "includePlatforms": [
         "Editor"

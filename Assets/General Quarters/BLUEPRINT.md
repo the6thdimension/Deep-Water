@@ -151,6 +151,11 @@ All entries are SIX's picks of 2026-10-23, in round order. Leaning is Claude's r
 | G22 | Engine Room L0 hull forces | **MMG standard method** (Yasukawa & Yoshimura 2015), twin screw and twin rudder | Linear derivatives (Clarke) | Locked |
 | G23 | Speed orders | **Bells and knots:** telegraph bells for the conn; the autopilot holds knots | Knots only | Locked |
 | G24 | Calibration data | **DTMB 5415 public data**, calibrated to the USNI 1994 USS Barry figures; every number's source in the profile's provenance | Same | Locked |
+| G25 | Range UI technology (2026-10-24, slice 5) | **App UI on UI Toolkit** (`com.unity.dt.app-ui` 2.2.0-pre.8, a pre-release) | Plain UI Toolkit | Locked |
+| G26 | Seats on screen | **Switch seats:** one key or button; the screen re-lays out per seat; the AI captain takes the seat left | Same | Locked |
+| G27 | The AI captain at the conn | **Route, flank, open arcs** (rules C1–C4) | Same | Locked |
+| G28 | Range extras | **Debrief, time compression, threat and missile camera** (not clickable cause chains) | — | Locked |
+| G29 | The range's starting doctrine | **ESSM SemiAuto (TEWA proposes, the TAO confirms), guns and CIWS Auto, ROE weapons tight.** Claude's call, so the TAO seat has a job; one line in the loadout asset | — | Proposed |
 
 Inherited from Reckoning: R2 (everything deterministic eventually), R15 (Watches), R35 (variant B, Proposed), R36 (banned-API guard, Proposed). General Quarters applies R36 to its core now, as a source-scan test.
 
@@ -193,7 +198,9 @@ Inherited from Reckoning: R2 (everything deterministic eventually), R15 (Watches
 | ~~Q1~~ | ~~Which DDG-51 flight is the model?~~ **Answered 2026-10-23 by the geometry: Flight I/II.** Two CIWS, Mk 141 Harpoon quads aft, Mk 32 torpedo tubes, no hangar; VLS 32 fore and 64 aft. Its textures are named DDG112 (a Flight IIA hull number); the mesh wins. The loadout follows Flight I/II | — |
 | Q2 | May Sea State gain a small API to deposit foam and splashes (for G18's splashes into the foam field)? | 1 min |
 | Q3 | The peer ship: a mirror DDG, or a different class? | 2 min |
+| Q5 | G29: keep ESSM on SemiAuto at the start of a run, or Auto (the ship defends herself, and the TAO seat only steers doctrine)? | 1 min |
 | ~~Q4~~ | ~~Merge path to `main`?~~ **Answered 2026-10-24:** SIX had everything brought up to `main` (4f8149b). `feat/general-quarters` stays the working branch, kept in step with `main`. | — |
 
 ## Change log
 - **2026-10-23** — Blueprint locked from the 20-question interview (G1–G20). Phase 1 started.
+- **2026-10-24** — Slice 5 decisions G25–G28 (SIX) and G29 (Proposed); Q5 added.

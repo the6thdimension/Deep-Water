@@ -6,6 +6,7 @@ using DeepWater.GeneralQuarters.Core.Magazine;
 namespace DeepWater.GeneralQuarters.Core
 {
     /// <summary>A doctrine setting the scenario starts with.</summary>
+    [System.Serializable]
     public struct DoctrineDefault
     {
         public WeaponClass Weapon;

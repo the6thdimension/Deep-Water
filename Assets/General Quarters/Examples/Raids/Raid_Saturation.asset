@@ -1,0 +1,236 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: caad2b65f0ecd54489d8909fc30f24c5, type: 3}
+  m_Name: Raid_Saturation
+  m_EditorClassIdentifier: DeepWater.GeneralQuarters::DeepWater.GeneralQuarters.ScriptableObjects.RaidScenarioSO
+  displayName: Saturation 24
+  threats:
+  - Kind: 2
+    Identity: 1
+    BearingDeg: 0
+    RangeM: 40000
+    AltitudeM: 5
+    SpeedMps: 290
+    LaunchTick: 0
+    RcsDbsm: -10
+    WarheadKg: 220
+  - Kind: 2
+    Identity: 1
+    BearingDeg: 15
+    RangeM: 40000
+    AltitudeM: 5
+    SpeedMps: 290
+    LaunchTick: 50
+    RcsDbsm: -10
+    WarheadKg: 220
+  - Kind: 2
+    Identity: 1
+    BearingDeg: 30
+    RangeM: 40000
+    AltitudeM: 5
+    SpeedMps: 290
+    LaunchTick: 100
+    RcsDbsm: -10
+    WarheadKg: 220
+  - Kind: 2
+    Identity: 1
+    BearingDeg: 45
+    RangeM: 40000
+    AltitudeM: 5
+    SpeedMps: 290
+    LaunchTick: 150
+    RcsDbsm: -10
+    WarheadKg: 220
+  - Kind: 2
+    Identity: 1
+    BearingDeg: 60
+    RangeM: 40000
+    AltitudeM: 5
+    SpeedMps: 290
+    LaunchTick: 200
+    RcsDbsm: -10
+    WarheadKg: 220
+  - Kind: 2
+    Identity: 1
+    BearingDeg: 75
+    RangeM: 40000
+    AltitudeM: 5
+    SpeedMps: 290
+    LaunchTick: 250
+    RcsDbsm: -10
+    WarheadKg: 220
+  - Kind: 2
+    Identity: 1
+    BearingDeg: 90
+    RangeM: 40000
+    AltitudeM: 5
+    SpeedMps: 290
+    LaunchTick: 300
+    RcsDbsm: -10
+    WarheadKg: 220
+  - Kind: 2
+    Identity: 1
+    BearingDeg: 105
+    RangeM: 40000
+    AltitudeM: 5
+    SpeedMps: 290
+    LaunchTick: 350
+    RcsDbsm: -10
+    WarheadKg: 220
+  - Kind: 2
+    Identity: 1
+    BearingDeg: 120
+    RangeM: 40000
+    AltitudeM: 5
+    SpeedMps: 290
+    LaunchTick: 400
+    RcsDbsm: -10
+    WarheadKg: 220
+  - Kind: 2
+    Identity: 1
+    BearingDeg: 135
+    RangeM: 40000
+    AltitudeM: 5
+    SpeedMps: 290
+    LaunchTick: 450
+    RcsDbsm: -10
+    WarheadKg: 220
+  - Kind: 2
+    Identity: 1
+    BearingDeg: 150
+    RangeM: 40000
+    AltitudeM: 5
+    SpeedMps: 290
+    LaunchTick: 500
+    RcsDbsm: -10
+    WarheadKg: 220
+  - Kind: 2
+    Identity: 1
+    BearingDeg: 165
+    RangeM: 40000
+    AltitudeM: 5
+    SpeedMps: 290
+    LaunchTick: 550
+    RcsDbsm: -10
+    WarheadKg: 220
+  - Kind: 2
+    Identity: 1
+    BearingDeg: 180
+    RangeM: 40000
+    AltitudeM: 5
+    SpeedMps: 290
+    LaunchTick: 600
+    RcsDbsm: -10
+    WarheadKg: 220
+  - Kind: 2
+    Identity: 1
+    BearingDeg: 195
+    RangeM: 40000
+    AltitudeM: 5
+    SpeedMps: 290
+    LaunchTick: 650
+    RcsDbsm: -10
+    WarheadKg: 220
+  - Kind: 2
+    Identity: 1
+    BearingDeg: 210
+    RangeM: 40000
+    AltitudeM: 5
+    SpeedMps: 290
+    LaunchTick: 700
+    RcsDbsm: -10
+    WarheadKg: 220
+  - Kind: 2
+    Identity: 1
+    BearingDeg: 225
+    RangeM: 40000
+    AltitudeM: 5
+    SpeedMps: 290
+    LaunchTick: 750
+    RcsDbsm: -10
+    WarheadKg: 220
+  - Kind: 2
+    Identity: 1
+    BearingDeg: 240
+    RangeM: 40000
+    AltitudeM: 5
+    SpeedMps: 290
+    LaunchTick: 800
+    RcsDbsm: -10
+    WarheadKg: 220
+  - Kind: 2
+    Identity: 1
+    BearingDeg: 255
+    RangeM: 40000
+    AltitudeM: 5
+    SpeedMps: 290
+    LaunchTick: 850
+    RcsDbsm: -10
+    WarheadKg: 220
+  - Kind: 2
+    Identity: 1
+    BearingDeg: 270
+    RangeM: 40000
+    AltitudeM: 5
+    SpeedMps: 290
+    LaunchTick: 900
+    RcsDbsm: -10
+    WarheadKg: 220
+  - Kind: 2
+    Identity: 1
+    BearingDeg: 285
+    RangeM: 40000
+    AltitudeM: 5
+    SpeedMps: 290
+    LaunchTick: 950
+    RcsDbsm: -10
+    WarheadKg: 220
+  - Kind: 2
+    Identity: 1
+    BearingDeg: 300
+    RangeM: 40000
+    AltitudeM: 5
+    SpeedMps: 290
+    LaunchTick: 1000
+    RcsDbsm: -10
+    WarheadKg: 220
+  - Kind: 2
+    Identity: 1
+    BearingDeg: 315
+    RangeM: 40000
+    AltitudeM: 5
+    SpeedMps: 290
+    LaunchTick: 1050
+    RcsDbsm: -10
+    WarheadKg: 220
+  - Kind: 2
+    Identity: 1
+    BearingDeg: 330
+    RangeM: 40000
+    AltitudeM: 5
+    SpeedMps: 290
+    LaunchTick: 1100
+    RcsDbsm: -10
+    WarheadKg: 220
+  - Kind: 2
+    Identity: 1
+    BearingDeg: 345
+    RangeM: 40000
+    AltitudeM: 5
+    SpeedMps: 290
+    LaunchTick: 1150
+    RcsDbsm: -10
+    WarheadKg: 220
+  provenance: "AUTHORED exercise raid. Sea-skimmers: Harpoon-class (220 kg warhead,
+    public), 290 m/s (AUTHORED, about Mach 0.85), 5 m, RCS \u221210 dBsm. 24 sea-skimmers
+    from every 15\xB0, 40 km, 1 s apart: the Phase 1 budget case (G16), the same
+    raid as the headless 24-threat test."

@@ -20,6 +20,8 @@ namespace DeepWater.GeneralQuarters.Core.Log
         Miss = 12,
         ShipHit = 13,
         SystemOffline = 14,
+        /// <summary>A seat-holder's decision: the AI captain applying one of its named rules.</summary>
+        Decision = 15,
     }
 
     /// <summary>Where a cause chain ends (Reckoning §4.10): an Order, the scenario, or a seeded draw.</summary>

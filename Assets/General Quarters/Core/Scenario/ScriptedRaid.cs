@@ -6,6 +6,7 @@ using DeepWater.GeneralQuarters.Core.World;
 namespace DeepWater.GeneralQuarters.Core.Scenario
 {
     /// <summary>One scripted threat: where it appears, how it flies, when it launches.</summary>
+    [System.Serializable]
     public struct RaidThreatSpec
     {
         public TargetKind Kind;
@@ -43,6 +44,8 @@ namespace DeepWater.GeneralQuarters.Core.Scenario
         readonly Vector3 _origin;
         readonly float _halfBeamM, _halfLengthM, _hitHeightM;
 
+        /// <summary>Threats in the raid, launched or not.</summary>
+        public int Threats => _threats.Length;
         public int Launched { get; private set; }
         public int Killed { get; private set; }
         public int Leaked { get; private set; }
@@ -87,7 +90,7 @@ namespace DeepWater.GeneralQuarters.Core.Scenario
                     hitsOut.Add(new ShipHit { ThreatId = t.Id, Kind = t.Spec.Kind, Point = t.Position, WarheadKg = t.Spec.WarheadKg });
                     continue;
                 }
-                if (t.Spec.Kind == TargetKind.Aircraft && Vector3.Distance(t.Position, _origin) > t.Spec.RangeM + 1f)
+                if (t.Spec.Kind == TargetKind.Aircraft && HorizontalDistance(t.Position, _origin) > t.Spec.RangeM + 1f)
                 {
                     t.Alive = false;   // flew through and out of the scenario
                     continue;
@@ -124,6 +127,10 @@ namespace DeepWater.GeneralQuarters.Core.Scenario
             t.Alive = true;
             Launched++;
         }
+
+        // Ground range: an aircraft launches RangeM out at altitude, so its slant range starts beyond RangeM. Measuring
+        // slant range removed every aircraft on its first step (found on the range, slice 5).
+        static float HorizontalDistance(Vector3 a, Vector3 b) => new Vector2(a.x - b.x, a.z - b.z).magnitude;
 
         bool HitsShip(Vector3 p, in OwnShipState own)
         {

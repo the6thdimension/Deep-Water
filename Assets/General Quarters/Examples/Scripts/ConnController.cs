@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using DeepWater.GeneralQuarters.Core.Helm;
 using DeepWater.GeneralQuarters.Core.Orders;
+using DeepWater.GeneralQuarters.Modules.Combat;
 using DeepWater.GeneralQuarters.Modules.Propulsion;
 using DeepWater.GeneralQuarters.ScriptableObjects;
 
@@ -10,13 +11,16 @@ namespace DeepWater.GeneralQuarters.Examples
     /// <summary>
     /// The conn: turns ConnInput (keyboard, gamepad, joystick) and panel clicks into Orders for one ShipDrive, and
     /// keeps a short log of what it ordered. Everything goes through <see cref="Issue"/>, so a key, a stick and
-    /// a button give the ship the same orders.
+    /// a button give the ship the same orders. On the range the orders go into the combat system's order log
+    /// (<see cref="ShipCombat"/>), and the conn reads its controls only while the player holds the Captain seat.
     /// </summary>
     [RequireComponent(typeof(ConnInput))]
     public sealed class ConnController : MonoBehaviour
     {
         [SerializeField] ShipDrive ship;
         [SerializeField] HelmProfileSO helmProfile;
+        [Tooltip("On the range: orders go through the combat system, so its order log holds them. Empty: straight to the drive.")]
+        [SerializeField] ShipCombat combat;
 
         ConnInput _input;
         ConnLogic _logic;
@@ -29,12 +33,23 @@ namespace DeepWater.GeneralQuarters.Examples
         public HelmProfileSO HelmProfile => helmProfile;
         /// <summary>The orders given, newest last (at most 8).</summary>
         public IReadOnlyList<string> RecentOrders => _log;
+        /// <summary>The conn's standing orders as the ship is answering them.</summary>
+        public HelmCommand Command => combat != null && combat.Combat != null ? combat.Combat.Helm : ship.Command;
+        /// <summary>Whether the player has the conn (the Captain seat). Without it the controls are not read.</summary>
+        public bool HasTheConn
+        {
+            get => _hasTheConn;
+            set { _hasTheConn = value; _logic = null; }   // a fresh start when the conn comes back: no stale rudder
+        }
 
-        /// <summary>Point the conn at a ship (the drive menu does this for a spawned ship).</summary>
-        public void Bind(ShipDrive drive, HelmProfileSO helm)
+        bool _hasTheConn = true;
+
+        /// <summary>Point the conn at a ship (the drive menu does this for a spawned ship; the range adds its combat system).</summary>
+        public void Bind(ShipDrive drive, HelmProfileSO helm, ShipCombat combatHost = null)
         {
             ship = drive;
             helmProfile = helm;
+            combat = combatHost;
             _logic = null;
         }
 
@@ -42,13 +57,13 @@ namespace DeepWater.GeneralQuarters.Examples
 
         void Update()
         {
-            if (ship == null || !ship.isActiveAndEnabled || ship.EngineRoom == null || !_input.Ready) return;
+            if (!_hasTheConn || ship == null || !ship.isActiveAndEnabled || ship.EngineRoom == null || !_input.Ready) return;
             if (_logic == null)
             {
                 if (helmProfile == null) { Debug.LogError("[ConnController] needs the ship's Helm profile (for the bells).", this); enabled = false; return; }
                 _logic = new ConnLogic(ship.EngineRoom.MaxRudderDeg, helmProfile.profile.AheadBellKn);
             }
-            IReadOnlyList<Order> orders = _logic.Step(_input.Frame(), ship.Command, ship.Motion.HeadingDeg, Time.unscaledDeltaTime);
+            IReadOnlyList<Order> orders = _logic.Step(_input.Frame(), Command, ship.Motion.HeadingDeg, Time.unscaledDeltaTime);
             for (int i = 0; i < orders.Count; i++) Issue(orders[i]);
         }
 
@@ -56,7 +71,7 @@ namespace DeepWater.GeneralQuarters.Examples
         public void Issue(Order order)
         {
             if (ship == null) return;
-            ship.Issue(order);
+            if (combat != null) combat.Issue(order); else ship.Issue(order);
             string line = $"{Time.time,6:0}s  {Describe(order)}";
             // Holding a course key or the rudder stick sends an order per degree; the log keeps only the latest.
             bool sameRun = _log.Count > 0 && order.Kind == _lastKind && (order.Kind == OrderKind.Course || order.Kind == OrderKind.Rudder)
@@ -71,7 +86,7 @@ namespace DeepWater.GeneralQuarters.Examples
         public void Rudder(float degrees) => Issue(Order.Rudder(OrderIssuer.Captain, degrees));
         public void SteerCourse(float degrees) => Issue(Order.SteerCourse(OrderIssuer.Captain, degrees));
         public void HoldSpeed(float knots) =>
-            Issue(Order.Helm(OrderIssuer.Captain, ship.Command.Course == CourseMode.Hold ? ship.Command.CourseDeg : Mathf.Round(ship.Motion.HeadingDeg), knots));
+            Issue(Order.Helm(OrderIssuer.Captain, Command.Course == CourseMode.Hold ? Command.CourseDeg : Mathf.Round(ship.Motion.HeadingDeg), knots));
         public void Steady() => SteerCourse(Mathf.Round(ship.Motion.HeadingDeg) % 360f);
 
         /// <summary>The order in the conn's words.</summary>

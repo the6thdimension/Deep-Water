@@ -193,6 +193,11 @@ These are the fixed points around which the methodology orbits. Every principle 
   - *Why it fails:* A force applied at the centre of mass carries no moment. Whatever part of the real force distribution it silently stands for loses its moment, and the error lives only in transients.
   - *Do instead:* Write the moment balance from the total force, then split that total by where each part really acts. Check a step input in the engine, not only steady states. Reference impl: `Modules/Propulsion/ShipDrive.cs`.
 
+- **AP19. A scenario kind that no test spawns.** A scenario type that can spawn several kinds of thing (sea-skimmers, aircraft, ships) where the tests only ever spawn one kind, so the other kinds' code paths have never run.
+  - *Where seen:* General Quarters `ScriptedRaid`, written in slice 2 and found on the range in slice 5 (2026-10-24). Every headless raid test used sea-skimmers. The aircraft path removed an aircraft once it was farther than its launch range from the raid's origin, measured as slant range. An aircraft launches at that range and 6 km up, so its slant range starts beyond the limit, and every aircraft in the first standard raid was deleted on its first step.
+  - *Why it fails:* A green suite says nothing about branches no test enters. Each value of a kind enum is a branch, and the one nobody spawned is the one that is wrong.
+  - *Do instead:* Give every kind a scenario can spawn a test that spawns it and follows it through its whole life (appear, act, leave or die). Measure each distance in the plane the rule means: "flown out of the area" is ground range. Reference test: `RangeL0Tests.Raid_AircraftAtAltitude_FlyTheirPass_InsteadOfVanishingAtLaunch`.
+
 ## Candidates (under evaluation)
 
 *Ideas that might become Principles. Not yet load-bearing. Promote when grounded in a real case.*
@@ -229,6 +234,12 @@ These are the fixed points around which the methodology orbits. Every principle 
     - **Fix:** a plain Shift modifier action, combined in the reader.
 - **C17. Calibrate in a fast mirror; ship in the engine; prove they agree.** Parameter sweeps through Unity cost a recompile and a domain reload each. A dependency-free mirror of the same equations runs hundreds of manoeuvres a minute. The engine code then re-derives what it can (fits, the appendage factor) from the same sources, and the tests must reproduce the mirror's numbers.
   - *Exercised:* `Calibration~/mmg_calibration.py` and `EngineRoomL0Tests` agree on every figure (199 rpm, TD 388 / 1,083 / 1,026 m, stop 60.4 s / 382 m, zig-zag 5.5° / 5.4°). The folder ends in `~`, so Unity ignores it.
+- **C19. A seat is an issuer, not a code path.** The player and the AI give a ship the same Orders through the same door, so a seat can change hands mid-fight and the record does not change shape. Each AI decision is a named rule written to the engagement log with its numbers and its cause, then issued as an ordinary Order. Run the AI inside the fixed tick, before the core steps, and it stays inside the determinism contract.
+  - *Exercised:* General Quarters slice 5. `Core/Captain/AiCaptain.cs` (rules C1-C4, T1), `Examples/Scripts/Range/TaoStation.cs` and `ConnController` all issue Orders through `ShipCombat.Issue`. With the AI as TAO, the headless saturation raid gives the same Fix on two runs (`Saturation_WithTheRealLoadout_ResolvesExplained_Repeats_AndStaysInBudget`), and a T1 confirmation cites the TEWA proposal it answers.
+- **C20. The Fix pins a refactor of the core.** When a core keeps a per-tick fingerprint, an optimisation or tidy-up of it must leave a seeded run's final Fix bit-identical. That is C11's fidelity pin at no extra cost.
+  - *Exercised:* slice 5 made TEWA build its sentence only when it logs one. It had been formatting it on every 10 Hz evaluation of every standing proposal, part of the core's 0.64 KB/frame of garbage on the range. The saturation run's Fix was `2AF5C040E4AC6B5E` before and after.
+- **C21. A camera that draws part of the screen leaves the rest unpainted.** With a viewport rect, HDRP clears and draws only inside it. Pixels outside keep whatever an earlier frame left, so a dismissed dialog can still show through a gap between panels. The UI must paint every pixel outside the rect.
+  - *Exercised:* the range's TAO seat (`taoCameraViewport`, the `.gq-backdrop` elements in `RangeScreen.uss`). The first build showed the closed debrief's text between the scope and the camera window.
 - **C5. Replaced legacy code goes to `Assets/_Archive/`, never deleted outright until cutover is proven.** Original folder name + `_legacy` suffix; original `.meta` preserved so GUIDs survive. Lets you reference old behavior during rebuild and gives a clean rollback path. Promote after one full cutover proves the workflow.
 
 ---
@@ -289,4 +300,10 @@ These are the fixed points around which the methodology orbits. Every principle 
   - **ShipDrive:** applies the MMG accelerations to PhysX as F = m·a_G and τ = I·ṙ, so added mass counts. Its roll moment had to include the added-mass reaction (AP18).
   - **Known gap:** the transient heel after hard over at flank is 13.1° against Barry's 8–10° (L1: 4-DOF terms, roll added inertia, Ikeda damping).
   - **New entries:** AP17, AP18, C16, C17.
+- **2026-10-24** — General Quarters slice 5: the range.
+  - **Built:** the combat core runs in a scene (`ShipCombat` on the DDG), steered and fought from two seats on an App UI screen. The AI captain takes the seat the player leaves, with named rules. The scene copies the Sea State demo.
+  - **Phase 1 gate in play mode** (Editor, full scene with PhysX and Sea State, saturation raid of 24): 24 killed, 0 hits, every kill explained. Combat core 0.066 ms mean, 0.233 ms p99 per fixed step, one 5.7 ms spike. Headless with the same loadout: 0.030 ms mean, same Fix twice.
+  - **Found on the range:** aircraft in a raid vanished at launch (AP19); the TAO screen showed stale frames around its camera window (C21).
+  - **New entries:** AP19, C19, C20, C21.
+  - **Results:** 67/67 GQ tests, 48/48 sea tests.
   - **Results:** 46/46 GQ tests, 48/48 sea tests.

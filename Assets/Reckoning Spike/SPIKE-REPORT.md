@@ -131,8 +131,15 @@ On the same box and the same integrator:
 
 **Fix:** in `BuoyancyProbeJob`, apply the force at
 `world + up · (½·submerged − ½·HeightM)`, the spike's line in `Core/SpikeHydro.cs`.
-This changes how every Sea State hull moves, including the DDG scene. It is a separate
-change for SIX to approve, not part of this spike.
+That changes how every Sea State hull moves. It is a separate change, not part of this
+spike.
+
+*Correction (2026-10-23, after the fix was made in Sea State):* an earlier version of this
+report said the fix would change the DDG scene. It does not. In DDG Engagement the DDG is a
+static transform with no Rigidbody and no Sea State components (checked in the Editor).
+Only the Sea State demo's hulls are affected. The fix also had to flip the column axis for
+an upside-down hull. The spike's line, like the first version of the fix, puts the force
+above the wet part once a hull passes 90°.
 
 ## Authored values (not measured; each needs a source before production)
 

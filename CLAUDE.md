@@ -57,6 +57,19 @@ This means every session has two outputs: the sim itself, and contributions to t
 
 **Do not modify vendor code unless explicitly asked.** Default is to wrap, extend, or compose around it. If a vendor change seems necessary, surface it and ask before editing.
 
+### Branches (set by SIX, 2026-10-24)
+
+| Branch | Role |
+|---|---|
+| `main` | Canonical. Everything finished lands here. |
+| `Guided-Fury` | **Protected.** Canonical missile work only. It changes only through a pull request: no direct pushes, force pushes or deletion, and the rule binds admins too. |
+| `Radar-Suite-Dev` | RH Radar Suite development. |
+| `feat/general-quarters` | General Quarters (the destroyer) development. |
+| `archive/guided-fury-wip-20260908` | Local only. **Never push it** (the repo is public, and it holds 2.3 GB of DAVFX vendor assets). Never delete it either: its WIP snapshot is not in `main`. |
+
+- **Keeping branches in step:** a working branch catches up with `main` before new work starts on it.
+- **Pruning:** finished feature branches are pruned once every commit is in `main`. A branch is pruned only when its tip is an ancestor of `main`, so no progress is lost.
+
 ---
 
 ## Prime Virtues (above all else)

@@ -193,7 +193,7 @@ Inherited from Reckoning: R2 (everything deterministic eventually), R15 (Watches
 | ~~Q1~~ | ~~Which DDG-51 flight is the model?~~ **Answered 2026-10-23 by the geometry: Flight I/II.** Two CIWS, Mk 141 Harpoon quads aft, Mk 32 torpedo tubes, no hangar; VLS 32 fore and 64 aft. Its textures are named DDG112 (a Flight IIA hull number); the mesh wins. The loadout follows Flight I/II | — |
 | Q2 | May Sea State gain a small API to deposit foam and splashes (for G18's splashes into the foam field)? | 1 min |
 | Q3 | The peer ship: a mirror DDG, or a different class? | 2 min |
-| Q4 | Branch: `feat/general-quarters` is cut from `feat/environment-ocean`, since it needs the Sea State buoyancy fix. Merge path to `main` later? | 1 min |
+| ~~Q4~~ | ~~Merge path to `main`?~~ **Answered 2026-10-24:** SIX had everything brought up to `main` (4f8149b). `feat/general-quarters` stays the working branch, kept in step with `main`. | — |
 
 ## Change log
 - **2026-10-23** — Blueprint locked from the 20-question interview (G1–G20). Phase 1 started.

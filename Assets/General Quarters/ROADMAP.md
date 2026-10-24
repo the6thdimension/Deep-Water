@@ -216,7 +216,9 @@ SIX's picks (2026-10-24): G34–G41. Guns L1 first.
     - determinism, and a saturation raid at L1 within the 1 ms budget;
     - the L0 golden Fix unchanged.
   - **Not at L1:** wind, Coriolis, the shell inheriting the ship's velocity (at most 2 % of muzzle velocity at 30 kn), fire-control motion prediction and track noise (L2).
-  - **Follow-up:** presentation mounts still run their own slew. They should read the core's train and elevation (`GunMountL1.TrainDeg`, `ElevationDeg`), so what you see is what fired.
+  - [x] **Follow-up done (2026-10-24):** at guns L1 the presentation mounts follow the core's lay (`IGunMount.TryGetLay`), so what you see is what fired. L0 keeps its own slew.
+    - **Test:** `PresentationTests.MountAnimator_AtGunsL1_ShowsTheCoresLay`. 135/135 with Sea State.
+    - **Play mode, Standard raid:** the Mk 45 trained to 79.4°, and the model was never more than 0.13° from the core. The CIWS and Mk 38s did not fire in that raid, so they were checked by the test only.
 - [ ] VLS L1: hatch and launch sequence timing, midcourse uplink.
 - [ ] SM-2 profile; Harpoon and Tomahawk profiles (Guided Fury Stream A items).
 

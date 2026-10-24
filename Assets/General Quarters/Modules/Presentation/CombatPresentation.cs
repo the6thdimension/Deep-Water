@@ -124,6 +124,7 @@ namespace DeepWater.GeneralQuarters.Modules.Presentation
                 _seen = c;
                 _cursor = 0;
                 ClearScene();
+                _mounts?.Bind(c.Guns);
             }
 
             IReadOnlyList<EngagementEvent> events = c.Log.Events;

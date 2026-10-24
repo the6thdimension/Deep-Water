@@ -117,6 +117,48 @@ namespace DeepWater.GeneralQuarters.Tests
         }
 
         [Test]
+        public void MountAnimator_AtGunsL1_ShowsTheCoresLay()
+        {
+            // The Mk 45 alone at guns L1, against a sea-skimmer on bearing 60°: the core trains the mount, and the model follows.
+            CombatLoadout loadout = AssetDatabase.LoadAssetAtPath<ShipLoadoutSO>(Ddg51CombatData.LoadoutAsset).Bake();
+            Assert.AreEqual(Core.Fidelity.FidelityLevel.L1, loadout.GunsLevel);
+            loadout.Guns = new[] { loadout.Guns.First(g => g.Name == "Mk 45") };
+            loadout.Vls.Loads[0].Rounds = 0;
+            loadout.Guns[0].Ballistics.LethalRadiusM = 0f;   // keep the target alive: this is about pointing, not killing
+            var cs = new CombatSystem(loadout);
+            float brg = 60f * Mathf.Deg2Rad;
+            var start = new Vector3(Mathf.Sin(brg), 0f, Mathf.Cos(brg)) * 9000f + Vector3.up * 5f;
+            var world = new List<TruthTarget> { new TruthTarget { Id = 1, Kind = TargetKind.AntiShipMissile, Identity = Identity.Hostile, Position = start, Velocity = -start.normalized * 290f, Alive = true } };
+            var kills = new List<KillReport>();
+            for (int i = 0; i < 250; i++)
+            {
+                TruthTarget t = world[0];
+                t.Position = start + t.Velocity * (i * cs.TickSeconds);
+                world[0] = t;
+                cs.Step(Own, world, new List<ShipHit>(), kills);
+            }
+            Assert.IsTrue(cs.Guns[0].TryGetLay(out float coreTrain, out float coreElevation), "guns L1 report their lay");
+            Assert.AreEqual(60f, coreTrain, 2f, "the core has trained the Mk 45 onto the threat");
+
+            var ship = new GameObject("ship");
+            try
+            {
+                var train = new GameObject("train").transform;
+                train.SetParent(ship.transform, false);
+                var elevate = new GameObject("elevate").transform;
+                elevate.SetParent(train, false);
+                var rig = new MountRig { mountName = "Mk 45", trainTransform = "train", elevateTransform = "elevate", trainRateDegS = 30f, elevateRateDegS = 20f, barrelM = 7f, holdS = 2f };
+                var animator = new MountAnimator(ship.transform, cs.Guns, new[] { rig });
+                for (int i = 0; i < 20; i++) animator.Update(i * 0.2f, 0.2f);   // long enough to catch up from rest
+                Assert.AreEqual(coreTrain, Mathf.DeltaAngle(0f, train.localEulerAngles.y), 0.01f, "the model trains to the core's train");
+                // At rest the barrel points along +Z (facing 0°); raising it turns about the axis across, so +Z tips up.
+                Vector3 barrel = elevate.localRotation * Vector3.forward;
+                Assert.AreEqual(coreElevation, Mathf.Asin(barrel.y) * Mathf.Rad2Deg, 0.01f, "and elevates to the core's elevation");
+            }
+            finally { Object.DestroyImmediate(ship); }
+        }
+
+        [Test]
         public void SynthClips_AreSeeded_Audible_AndBounded()
         {
             foreach (SynthSound s in System.Enum.GetValues(typeof(SynthSound)))

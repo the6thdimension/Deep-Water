@@ -59,6 +59,12 @@ namespace DeepWater.GeneralQuarters.Core.Magazine
         int Rounds { get; }
         void Step(EngagementContext ctx, List<DirectedEngagement> directed);
         ulong Fingerprint(ulong h);
+        /// <summary>
+        /// Where the mount points in the core, if its level models laying (L1 and up): train in degrees from its rest
+        /// facing (positive to starboard) and elevation above the horizontal. False at L0, which has no mount state.
+        /// Presentation reads it so the model shows what fired.
+        /// </summary>
+        bool TryGetLay(out float trainDeg, out float elevationDeg);
     }
 
     /// <summary>
@@ -163,6 +169,12 @@ namespace DeepWater.GeneralQuarters.Core.Magazine
         public GunMountL0(in GunMountProfileData profile) : base(profile) { }
 
         public FidelityLevel Level => FidelityLevel.L0;
+
+        public bool TryGetLay(out float trainDeg, out float elevationDeg)
+        {
+            trainDeg = elevationDeg = 0f;
+            return false;
+        }
 
         public void Step(EngagementContext ctx, List<DirectedEngagement> directed)
         {

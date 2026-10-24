@@ -1,0 +1,117 @@
+/* General Quarters range: a CIC console over the sea. App UI's dark theme supplies the controls and type; this
+   sheet lays the two seats out and gives the cards their console look. Percent positions are kept in step with the
+   TAO camera window in the range profile (taoCameraViewport). */
+
+.gq-root {
+    --gq-card: rgba(6, 12, 20, 0.84);
+    --gq-card-border: rgba(110, 160, 200, 0.28);
+    --gq-scope-bg: rgba(3, 9, 12, 0.94);
+    --gq-dim: rgba(170, 195, 215, 0.75);
+    --gq-amber: rgb(255, 184, 64);
+    --gq-hostile: rgb(255, 82, 70);
+    --gq-friend: rgb(96, 186, 255);
+}
+
+/* The panel fills the screen but paints nothing itself: the 3D view shows through. Two classes beat App UI's .appui. */
+.appui.gq-root {
+    background-color: rgba(0, 0, 0, 0);
+    position: absolute;
+    left: 0; top: 0; right: 0; bottom: 0;
+}
+
+.gq-bar {
+    position: absolute;
+    left: 0; right: 0; top: 0;
+    height: 44px;
+    flex-direction: row;
+    align-items: center;
+    padding-left: 12px; padding-right: 12px;
+    background-color: rgba(4, 9, 15, 0.9);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--gq-card-border);
+}
+
+.gq-title { margin-right: 14px; color: var(--gq-amber); -unity-font-style: bold; flex-shrink: 0; }
+.gq-group { flex-direction: row; align-items: center; margin-right: 14px; flex-shrink: 0; }
+.gq-group--end { margin-left: auto; margin-right: 0; }
+.gq-group > * { margin-right: 6px; flex-shrink: 0; }
+.gq-bar .gq-row { flex-wrap: nowrap; margin-bottom: 0; }
+.gq-bar .gq-row > * { margin-bottom: 0; }
+.gq-seat { -unity-font-style: bold; color: var(--gq-amber); }
+.gq-status { color: var(--gq-dim); width: 300px; overflow: hidden; white-space: nowrap; }
+.gq-caption { color: var(--gq-dim); margin-top: 6px; margin-bottom: 2px; }
+.gq-mono { white-space: normal; }
+.gq-row { flex-direction: row; flex-wrap: wrap; align-items: center; margin-bottom: 3px; }
+.gq-row > * { margin-right: 4px; margin-bottom: 2px; }
+.gq-wide { margin-top: 3px; margin-bottom: 4px; }
+.gq-draft-value { min-width: 64px; -unity-text-align: middle-center; -unity-font-style: bold; }
+.gq-row-label { min-width: 52px; color: var(--gq-dim); }
+.gq-on { color: var(--gq-amber); }
+
+.gq-layer { position: absolute; left: 0; top: 0; right: 0; bottom: 0; }
+
+.gq-card {
+    background-color: var(--gq-card);
+    border-width: 1px;
+    border-color: var(--gq-card-border);
+    border-radius: 4px;
+    padding: 8px 10px;
+}
+.gq-card-title { color: var(--gq-amber); margin-bottom: 4px; -unity-font-style: bold; }
+
+/* Captain seat */
+.gq-helm { position: absolute; left: 10px; top: 54px; width: 470px; }
+.gq-inset { position: absolute; right: 10px; bottom: 10px; width: 300px; height: 300px; padding: 4px; background-color: var(--gq-scope-bg); }
+.gq-camera-caption { position: absolute; right: 12px; bottom: 314px; }
+.gq-ticker { position: absolute; left: 500px; right: 330px; bottom: 10px; max-height: 128px; overflow: hidden; }
+.gq-log { white-space: normal; color: rgb(200, 215, 228); }
+
+/* TAO seat (camera window: left 64 %, top 6 %, 44 % high, as the profile's viewport rect) */
+.gq-backdrop { position: absolute; background-color: rgb(4, 8, 13); }
+.gq-backdrop--left { left: 0; top: 0; bottom: 0; width: 64%; }
+.gq-backdrop--top-right { left: 64%; right: 0; top: 0; height: 6%; }
+.gq-backdrop--bottom-right { left: 64%; right: 0; top: 50%; bottom: 0; }
+.gq-scope-main { position: absolute; left: 0.8%; top: 54px; width: 62.4%; bottom: 31%; padding: 4px; background-color: var(--gq-scope-bg); }
+.gq-camera-window {
+    position: absolute; left: 64%; right: 0; top: 6%; height: 44%;
+    border-width: 1px; border-color: var(--gq-card-border);
+}
+.gq-window-label { position: absolute; left: 6px; top: 2px; }
+.gq-tracks { position: absolute; left: 64.4%; right: 0.8%; top: 51%; bottom: 31%; }
+.gq-track-list { flex-grow: 1; }
+.gq-tao-bottom { position: absolute; left: 0.8%; right: 0.8%; bottom: 10px; height: 29%; flex-direction: row; }
+.gq-column { flex-direction: column; padding-right: 14px; margin-right: 14px; border-right-width: 1px; border-right-color: var(--gq-card-border); }
+.gq-column--engage { width: 36%; }
+.gq-column--doctrine { width: 28%; }
+.gq-column--status { flex-grow: 1; border-right-width: 0; margin-right: 0; padding-right: 0; }
+.gq-selected { white-space: normal; -unity-font-style: bold; }
+.gq-proposal { color: var(--gq-amber); white-space: normal; min-height: 16px; }
+.gq-log--tao { margin-top: 6px; max-height: 70px; overflow: hidden; }
+
+.gq-track-row { flex-direction: row; align-items: center; padding: 2px 4px; border-radius: 3px; }
+.gq-track-row:hover { background-color: rgba(120, 160, 200, 0.14); }
+.gq-track-row--selected { background-color: rgba(255, 184, 64, 0.22); }
+.gq-track-head { color: var(--gq-dim); }
+.gq-col { margin-right: 6px; }
+.gq-col--id { width: 44px; }
+.gq-col--kind { width: 110px; }
+.gq-col--num { width: 58px; -unity-text-align: middle-right; }
+.gq-col--wpn { width: 70px; }
+.gq-hostile { color: var(--gq-hostile); }
+.gq-friend { color: var(--gq-friend); }
+
+.gq-doctrine-row { flex-direction: row; align-items: center; margin-bottom: 3px; }
+.gq-doctrine-label { width: 58px; color: var(--gq-dim); }
+
+.gq-bar-track { height: 6px; background-color: rgba(255, 255, 255, 0.1); border-radius: 3px; margin-top: 2px; margin-bottom: 2px; }
+.gq-bar-fill { height: 6px; width: 100%; background-color: rgb(110, 210, 140); border-radius: 3px; }
+
+.gq-help { position: absolute; left: 20%; right: 20%; top: 12%; display: none; }
+.gq-help--shown { display: flex; }
+.gq-help-text { white-space: normal; }
+
+.gq-debrief { width: 640px; }
+.gq-debrief-line { white-space: normal; margin-bottom: 3px; }
+.gq-debrief-gate { margin-top: 8px; -unity-font-style: bold; }
+
+.gq-hidden { display: none; }

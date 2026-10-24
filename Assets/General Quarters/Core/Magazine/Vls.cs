@@ -23,6 +23,7 @@ namespace DeepWater.GeneralQuarters.Core.Magazine
     }
 
     /// <summary>A launcher group (the Mk 41 modules fore or aft).</summary>
+    [System.Serializable]
     public struct VlsGroupProfile
     {
         public string Name;

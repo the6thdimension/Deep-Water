@@ -1,0 +1,113 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: caad2b65f0ecd54489d8909fc30f24c5, type: 3}
+  m_Name: Raid_Standard
+  m_EditorClassIdentifier: DeepWater.GeneralQuarters::DeepWater.GeneralQuarters.ScriptableObjects.RaidScenarioSO
+  displayName: Standard 8+2
+  threats:
+  - Kind: 2
+    Identity: 1
+    BearingDeg: 50
+    RangeM: 40000
+    AltitudeM: 5
+    SpeedMps: 290
+    LaunchTick: 0
+    RcsDbsm: -10
+    WarheadKg: 220
+  - Kind: 2
+    Identity: 1
+    BearingDeg: 55
+    RangeM: 40000
+    AltitudeM: 5
+    SpeedMps: 290
+    LaunchTick: 150
+    RcsDbsm: -10
+    WarheadKg: 220
+  - Kind: 2
+    Identity: 1
+    BearingDeg: 65
+    RangeM: 40000
+    AltitudeM: 5
+    SpeedMps: 290
+    LaunchTick: 300
+    RcsDbsm: -10
+    WarheadKg: 220
+  - Kind: 2
+    Identity: 1
+    BearingDeg: 70
+    RangeM: 40000
+    AltitudeM: 5
+    SpeedMps: 290
+    LaunchTick: 450
+    RcsDbsm: -10
+    WarheadKg: 220
+  - Kind: 2
+    Identity: 1
+    BearingDeg: 290
+    RangeM: 40000
+    AltitudeM: 5
+    SpeedMps: 290
+    LaunchTick: 2000
+    RcsDbsm: -10
+    WarheadKg: 220
+  - Kind: 2
+    Identity: 1
+    BearingDeg: 295
+    RangeM: 40000
+    AltitudeM: 5
+    SpeedMps: 290
+    LaunchTick: 2150
+    RcsDbsm: -10
+    WarheadKg: 220
+  - Kind: 2
+    Identity: 1
+    BearingDeg: 305
+    RangeM: 40000
+    AltitudeM: 5
+    SpeedMps: 290
+    LaunchTick: 2300
+    RcsDbsm: -10
+    WarheadKg: 220
+  - Kind: 2
+    Identity: 1
+    BearingDeg: 310
+    RangeM: 40000
+    AltitudeM: 5
+    SpeedMps: 290
+    LaunchTick: 2450
+    RcsDbsm: -10
+    WarheadKg: 220
+  - Kind: 1
+    Identity: 1
+    BearingDeg: 0
+    RangeM: 80000
+    AltitudeM: 6000
+    SpeedMps: 250
+    LaunchTick: 500
+    RcsDbsm: 5
+    WarheadKg: 0
+  - Kind: 1
+    Identity: 1
+    BearingDeg: 20
+    RangeM: 80000
+    AltitudeM: 6000
+    SpeedMps: 250
+    LaunchTick: 750
+    RcsDbsm: 5
+    WarheadKg: 0
+  provenance: "AUTHORED exercise raid. Sea-skimmers: Harpoon-class (220 kg warhead,
+    public), 290 m/s (AUTHORED, about Mach 0.85), 5 m, RCS \u221210 dBsm. Two waves
+    of 4 sea-skimmers, from 050-070\xB0 then 290-310\xB0 40 s later, 3 s apart; 2
+    strike aircraft at 6 km altitude from 000\xB0 and 020\xB0, 80 km out, flying
+    a pass over the ship's starting position. They pass 6 km up, so TEWA L0 never
+    ranks them a threat (closest approach over 3 km): they are the TAO's to engage
+    by hand."

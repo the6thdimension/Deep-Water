@@ -1,0 +1,217 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e5271c38285b66d4bbc39a6c44b7139d, type: 3}
+  m_Name: DDG51_GQ_Loadout
+  m_EditorClassIdentifier: DeepWater.GeneralQuarters::DeepWater.GeneralQuarters.ScriptableObjects.ShipLoadoutSO
+  seed: 1442
+  tickSeconds: 0.02
+  radarLevel: 0
+  radar:
+    InstrumentedRangeM: 185000
+    AntennaHeightM: 20
+    SweepPeriodTicks: 25
+  tracksLevel: 0
+  tracks:
+    DropAfterTicks: 150
+  tewaLevel: 0
+  tewa:
+    EvaluatePeriodTicks: 5
+    ThreatCpaM: 3000
+    MissileBands:
+    - Weapon: 1
+      MinRangeM: 20000
+      MaxRangeM: 150000
+      AntiAir: 1
+      AntiSurface: 0
+      MaxInFlightPerTrack: 1
+    - Weapon: 2
+      MinRangeM: 1500
+      MaxRangeM: 30000
+      AntiAir: 1
+      AntiSurface: 0
+      MaxInFlightPerTrack: 1
+  vlsLevel: 0
+  vlsLaunchIntervalS: 1
+  vlsGroups:
+  - Name: fore VLS
+    OffsetShip: {x: 0, y: 7.85, z: 42.24}
+    System: 2
+  - Name: aft VLS
+    OffsetShip: {x: 0, y: 7.12, z: -38.87}
+    System: 3
+  vlsLoads:
+  - weapon: 2
+    profile: {fileID: 11400000, guid: d93ef3f68c0c6c94d87a5348fa68957f, type: 2}
+    missileLevel: 2
+    rounds: 32
+    pkSingleShot: 0.8
+  gunsLevel: 0
+  guns:
+  - Name: Mk 45
+    Weapon: 3
+    System: 4
+    OffsetShip: {x: 0, y: 8.4814, z: 49.5311}
+    FacingDeg: 0
+    ArcHalfDeg: 150
+    MinRangeM: 1000
+    MaxRangeM: 15000
+    AntiAir: 1
+    AntiSurface: 1
+    SelfDefence: 0
+    ThreatCpaM: 3000
+    RoundsPerMinute: 20
+    BurstRounds: 1
+    MuzzleVelocityMps: 808
+    MeanVelocityFraction: 0.6
+    MagazineRounds: 600
+    PkPerBurstAtMinRange: 0.03
+    PkPerBurstAtMaxRange: 0.005
+  - Name: CIWS fwd
+    Weapon: 4
+    System: 5
+    OffsetShip: {x: 0, y: 12.2554, z: 33.7904}
+    FacingDeg: 0
+    ArcHalfDeg: 150
+    MinRangeM: 300
+    MaxRangeM: 2000
+    AntiAir: 1
+    AntiSurface: 0
+    SelfDefence: 1
+    ThreatCpaM: 500
+    RoundsPerMinute: 4500
+    BurstRounds: 100
+    MuzzleVelocityMps: 1100
+    MeanVelocityFraction: 0.85
+    MagazineRounds: 1550
+    PkPerBurstAtMinRange: 0.35
+    PkPerBurstAtMaxRange: 0.08
+  - Name: CIWS aft
+    Weapon: 4
+    System: 5
+    OffsetShip: {x: 0, y: 11.4626, z: -26.223}
+    FacingDeg: 180
+    ArcHalfDeg: 150
+    MinRangeM: 300
+    MaxRangeM: 2000
+    AntiAir: 1
+    AntiSurface: 0
+    SelfDefence: 1
+    ThreatCpaM: 500
+    RoundsPerMinute: 4500
+    BurstRounds: 100
+    MuzzleVelocityMps: 1100
+    MeanVelocityFraction: 0.85
+    MagazineRounds: 1550
+    PkPerBurstAtMinRange: 0.35
+    PkPerBurstAtMaxRange: 0.08
+  - Name: Mk 38 port
+    Weapon: 5
+    System: 6
+    OffsetShip: {x: -8.7994, y: 6.3441, z: -0.3025}
+    FacingDeg: -90
+    ArcHalfDeg: 90
+    MinRangeM: 100
+    MaxRangeM: 2500
+    AntiAir: 0
+    AntiSurface: 1
+    SelfDefence: 0
+    ThreatCpaM: 3000
+    RoundsPerMinute: 180
+    BurstRounds: 10
+    MuzzleVelocityMps: 1100
+    MeanVelocityFraction: 0.8
+    MagazineRounds: 400
+    PkPerBurstAtMinRange: 0.2
+    PkPerBurstAtMaxRange: 0.05
+  - Name: Mk 38 stbd
+    Weapon: 5
+    System: 7
+    OffsetShip: {x: 8.7385, y: 6.3441, z: -0.3025}
+    FacingDeg: 90
+    ArcHalfDeg: 90
+    MinRangeM: 100
+    MaxRangeM: 2500
+    AntiAir: 0
+    AntiSurface: 1
+    SelfDefence: 0
+    ThreatCpaM: 3000
+    RoundsPerMinute: 180
+    BurstRounds: 10
+    MuzzleVelocityMps: 1100
+    MeanVelocityFraction: 0.8
+    MagazineRounds: 400
+    PkPerBurstAtMinRange: 0.2
+    PkPerBurstAtMaxRange: 0.05
+  damageLevel: 0
+  damage:
+    HullHitPoints: 1000
+    HullDamagePerWarheadKg: 1
+    SystemDamagePerWarheadKg: 1
+    SystemReachM: 25
+    Systems:
+    - System: 1
+      PositionShip: {x: 0, y: 18, z: 15}
+      HitPoints: 150
+    - System: 2
+      PositionShip: {x: 0, y: 7.85, z: 42.24}
+      HitPoints: 150
+    - System: 3
+      PositionShip: {x: 0, y: 7.12, z: -38.87}
+      HitPoints: 150
+    - System: 4
+      PositionShip: {x: 0, y: 8.4814, z: 49.5311}
+      HitPoints: 150
+    - System: 5
+      PositionShip: {x: 0, y: 11.4626, z: -26.223}
+      HitPoints: 150
+    - System: 6
+      PositionShip: {x: -8.7994, y: 6.3441, z: -0.3025}
+      HitPoints: 100
+    - System: 7
+      PositionShip: {x: 8.7385, y: 6.3441, z: -0.3025}
+      HitPoints: 100
+    - System: 8
+      PositionShip: {x: 0, y: -3, z: -20}
+      HitPoints: 150
+  defaultRoe: 1
+  defaultDoctrine:
+  - Weapon: 2
+    Mode: 1
+  - Weapon: 3
+    Mode: 2
+  - Weapon: 4
+    Mode: 2
+  - Weapon: 5
+    Mode: 2
+  provenance: "DDG-51 Flight I/II combat loadout, L0 (slice 5). Public figures are
+    marked; the rest is AUTHORED (G15).\nSEED 1442, tick 0.02 s (50 Hz, the fixed
+    timestep).\nRADAR (SPY-1D) L0: instrumented range 185 km (public: SPY-1 'over
+    100 nmi'; the exact figure is not public, AUTHORED). Array height 20 m above
+    the waterline (AUTHORED). Revisit 0.5 s (AUTHORED).\nTRACKS L0: drop after 3
+    s silent (AUTHORED).\nTEWA L0: evaluates at 10 Hz; a threat is a track closing
+    within 3 km (AUTHORED). Bands: SM-2 20-150 km (none loaded), ESSM 1.5-30 km (AUTHORED;
+    public ESSM reach is longer, but a sea-skimmer clears the radar horizon at about
+    27.6 km).\nVLS (Mk 41) L0: 32 fore and 64 aft cells (public, Flight I/II; positions
+    from the Blender layout). 32 ESSM, quad-packed (public: 4 per cell; the count
+    is AUTHORED). One launch per second per group (AUTHORED). ESSM flies at Guided
+    Fury L2; Pk 0.8 single shot (AUTHORED).\nMk 45 Mod 4: 16-20 rounds/min and 808
+    m/s (public, NAVSEA fact file); 600 rounds (AUTHORED); arc \xB1150\xB0 from the
+    bow, 1-15 km, Pk per round 0.03 falling to 0.005 (AUTHORED).\nCIWS (Phalanx)
+    \xD72, forward and aft (public: Flight I/II carries two): 4,500 rounds/min and
+    a 1,550-round drum (public, NAVSEA fact file); 300-2,000 m, 100-round bursts,
+    Pk per burst 0.35 falling to 0.08 (AUTHORED). Both are Damage Control's one CIWS
+    system at L0.\nMk 38 \xD72 (25 mm), port and starboard: about 180 rounds/min
+    (public, M242); beam arcs \xB190\xB0, 100-2,500 m, surface targets only (AUTHORED).\nDAMAGE
+    CONTROL L0: hull 1,000 hit points, 1 per kg of warhead; systems 100-150 hit points
+    within 25 m of the hit (AUTHORED: no public damage table).\nSCENARIO DEFAULTS:
+    ROE weapons tight; ESSM semi-automatic (TEWA proposes, the TAO confirms), guns
+    automatic, CIWS automatic (G14)."

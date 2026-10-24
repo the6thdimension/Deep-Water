@@ -5,6 +5,7 @@ using DeepWater.GeneralQuarters.Core.Log;
 
 namespace DeepWater.GeneralQuarters.Core.Cic
 {
+    [System.Serializable]
     public struct TrackProfileData
     {
         /// <summary>Ticks without a detection before a track is dropped.</summary>

@@ -7,6 +7,7 @@ using DeepWater.GeneralQuarters.Core.World;
 namespace DeepWater.GeneralQuarters.Core.Cic
 {
     /// <summary>Where a weapon class can engage: range band and the kinds of target it is for.</summary>
+    [System.Serializable]
     public struct WeaponBand
     {
         public WeaponClass Weapon;
@@ -23,6 +24,7 @@ namespace DeepWater.GeneralQuarters.Core.Cic
         public bool InRange(float rangeM) => rangeM >= MinRangeM && rangeM <= MaxRangeM;
     }
 
+    [System.Serializable]
     public struct TewaProfileData
     {
         /// <summary>Ticks between threat evaluations (TEWA's Watch).</summary>
@@ -82,6 +84,11 @@ namespace DeepWater.GeneralQuarters.Core.Cic
     {
         FidelityLevel Level { get; }
         int EvaluatePeriodTicks { get; }
+        /// <summary>
+        /// What TEWA proposes for SemiAuto weapons and is waiting for the TAO to confirm with an EngageOrder, as of
+        /// the last evaluation. Each one's <see cref="Assignment.CauseEvent"/> is its Proposed event.
+        /// </summary>
+        IReadOnlyList<Assignment> Proposals { get; }
 
         /// <summary>Rank threats and assign missiles where doctrine and ROE allow; log every decision.</summary>
         void Evaluate(long tick, float tickSeconds, in OwnShipState own, ITrackManager tracks, DoctrineState doctrine,
@@ -126,17 +133,25 @@ namespace DeepWater.GeneralQuarters.Core.Cic
     {
         readonly TewaProfileData _profile;
         readonly List<RankedThreat> _ranked = new List<RankedThreat>();
-        readonly HashSet<long> _proposed = new HashSet<long>();
+        // Proposed event per (track, weapon): a proposal is logged once, however many evaluations it stands.
+        readonly Dictionary<long, int> _proposedEvent = new Dictionary<long, int>();
+        readonly List<Assignment> _proposals = new List<Assignment>();
 
         public TewaL0(in TewaProfileData profile) => _profile = profile;
 
         public FidelityLevel Level => FidelityLevel.L0;
         public int EvaluatePeriodTicks => Mathf.Max(1, _profile.EvaluatePeriodTicks);
+        public IReadOnlyList<Assignment> Proposals => _proposals;
+
+        static string Sentence(in RankedThreat threat, in WeaponBand band, DoctrineMode mode, DoctrineState doctrine) =>
+            System.FormattableString.Invariant(
+                $"track {threat.Track.Id} ({threat.Track.Identity} {threat.Track.Kind}, CPA in {threat.Geometry.TimeToCpaS:0.0} s at {threat.Geometry.CpaDistanceM:0} m, range {threat.Geometry.RangeM / 1000f:0.0} km) → {band.Weapon} (band {band.MinRangeM / 1000f:0.0}–{band.MaxRangeM / 1000f:0.0} km); doctrine {mode}, ROE {doctrine.Roe}");
 
         public void Evaluate(long tick, float tickSeconds, in OwnShipState own, ITrackManager tracks, DoctrineState doctrine,
             IMissileAvailability magazine, EngagementLog log, List<Assignment> assignments)
         {
             ThreatRanking.Rank(tick, tickSeconds, own, tracks, doctrine, _profile.ThreatCpaM, false, _ranked);
+            _proposals.Clear();
             for (int i = 0; i < _ranked.Count; i++)
             {
                 RankedThreat threat = _ranked[i];
@@ -150,19 +165,21 @@ namespace DeepWater.GeneralQuarters.Core.Cic
                     DoctrineMode mode = doctrine.Mode(band.Weapon);
                     if (mode == DoctrineMode.Manual) break;
 
-                    string text = System.FormattableString.Invariant(
-                        $"track {threat.Track.Id} ({threat.Track.Identity} {threat.Track.Kind}, CPA in {threat.Geometry.TimeToCpaS:0.0} s at {threat.Geometry.CpaDistanceM:0} m, range {threat.Geometry.RangeM / 1000f:0.0} km) → {band.Weapon} (band {band.MinRangeM / 1000f:0.0}–{band.MaxRangeM / 1000f:0.0} km); doctrine {mode}, ROE {doctrine.Roe}");
-
                     if (mode == DoctrineMode.SemiAuto)
                     {
                         long key = ((long)threat.Track.Id << 8) | (byte)band.Weapon;
-                        if (_proposed.Add(key))
-                            log.Add(tick, EventKind.Proposed, "TEWA L0 (CPA rank, range bands)", "proposed: " + text,
+                        if (!_proposedEvent.TryGetValue(key, out int proposed))
+                        {
+                            // The sentence is built only when it is logged: a standing proposal is re-evaluated at 10 Hz.
+                            proposed = log.Add(tick, EventKind.Proposed, "TEWA L0 (CPA rank, range bands)", "proposed: " + Sentence(threat, band, mode, doctrine),
                                 threat.Track.Id, threat.Track.CreatedEvent, doctrine.ModeEvent(band.Weapon), causeC: doctrine.RoeEvent);
+                            _proposedEvent.Add(key, proposed);
+                        }
+                        _proposals.Add(new Assignment { TrackId = threat.Track.Id, Weapon = band.Weapon, Rounds = 1, CauseEvent = proposed });
                         break;
                     }
 
-                    int ev = log.Add(tick, EventKind.Assigned, "TEWA L0 (CPA rank, range bands)", text,
+                    int ev = log.Add(tick, EventKind.Assigned, "TEWA L0 (CPA rank, range bands)", Sentence(threat, band, mode, doctrine),
                         threat.Track.Id, threat.Track.CreatedEvent, doctrine.ModeEvent(band.Weapon), causeC: doctrine.RoeEvent);
                     assignments.Add(new Assignment { TrackId = threat.Track.Id, Weapon = band.Weapon, Rounds = 1, CauseEvent = ev });
                     break;

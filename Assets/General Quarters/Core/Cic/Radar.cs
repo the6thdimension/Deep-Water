@@ -7,6 +7,7 @@ using DeepWater.GeneralQuarters.Core.World;
 namespace DeepWater.GeneralQuarters.Core.Cic
 {
     /// <summary>Radar tuning (P1); baked from the loadout asset.</summary>
+    [System.Serializable]
     public struct RadarProfileData
     {
         /// <summary>Instrumented range, m: the farthest the radar reports anything.</summary>

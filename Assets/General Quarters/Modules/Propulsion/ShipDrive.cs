@@ -18,7 +18,9 @@ namespace DeepWater.GeneralQuarters.Modules.Propulsion
     /// teaching PhysX about it. The hydrodynamic sway forces act below the centre of gravity, so their roll
     /// moment is applied too: a turning ship heels outward.
     ///
-    /// Orders come in through <see cref="Issue"/> (the range scene will route them from the combat system).
+    /// Orders come in two ways. On the range the combat system holds the conn's standing orders and hands them over
+    /// each step through <see cref="Answer"/>, so every order is in its order log. Without a combat system (the
+    /// Drive the DDG stand-in) orders come straight in through <see cref="Issue"/>.
     /// </summary>
     [RequireComponent(typeof(Rigidbody))]
     [DisallowMultipleComponent]
@@ -43,6 +45,8 @@ namespace DeepWater.GeneralQuarters.Modules.Propulsion
         public HelmOutput LastHelm { get; private set; }
         public MmgResult LastForces { get; private set; }
         public ShipMotion Motion { get; private set; }
+        /// <summary>The speed she starts under way at, knots (0: lying stopped).</summary>
+        public float StartSpeedKn => startSpeedKn;
 
         int _sequence;
 
@@ -56,6 +60,12 @@ namespace DeepWater.GeneralQuarters.Modules.Propulsion
             stamped.Sequence = ++_sequence;
             Command = HelmCommand.Apply(Command, stamped);
         }
+
+        /// <summary>
+        /// Steer and make speed by <paramref name="command"/> from now on: the standing orders as the combat system
+        /// holds them, already stamped by its order log.
+        /// </summary>
+        public void Answer(in HelmCommand command) => Command = command;
 
         void Awake()
         {

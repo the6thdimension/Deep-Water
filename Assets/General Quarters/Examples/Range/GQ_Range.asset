@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bde46aa28145f9f4e97207b4fdc5ae73, type: 3}
+  m_Name: GQ_Range
+  m_EditorClassIdentifier: DeepWater.GeneralQuarters.Examples::DeepWater.GeneralQuarters.Examples.RangeProfileSO
+  patrolCorners:
+  - {x: 0, y: 0}
+  - {x: 0, y: 8000}
+  - {x: 6000, y: 8000}
+  - {x: 6000, y: 0}
+  patrolLaps: 6
+  raids:
+  - {fileID: 11400000, guid: 34d6e264b471176488931ee292377202, type: 2}
+  - {fileID: 11400000, guid: 998b9110f9f347e41af1eea424b4a278, type: 2}
+  - {fileID: 11400000, guid: 90aea73e837f03045a8f50d42c8913bd, type: 2}
+  timeScales:
+  - 1
+  - 2
+  - 4
+  taoCameraViewport:
+    serializedVersion: 2
+    x: 0.64
+    y: 0.5
+    width: 0.36
+    height: 0.44
+  cameraLingerS: 2.5
+  provenance: "AUTHORED: an 8 \xD7 6 km patrol box from the range origin (the DDG
+    starts there, heading 000 at 12 kn), six laps. The TAO camera window matches
+    RangeScreen.uss (.gq-camera-window)."

@@ -6,7 +6,10 @@ namespace DeepWater.GeneralQuarters.Examples
     /// A camera that follows a ship. Chase (the default) swings with her heading, from her quarter; orbit holds a
     /// fixed compass direction while she turns under it. Orbit and zoom come from <see cref="ConnInput"/>: mouse
     /// right-drag and wheel, R/F, a gamepad's right stick and triggers. The camera mode button toggles chase and orbit.
+    /// On the range it can also watch something else for a while (a track or a missile in flight, <see cref="Watch"/>),
+    /// chasing along that object's forward axis, and come back to the ship with <see cref="WatchShip"/>.
     /// </summary>
+    [DefaultExecutionOrder(1000)]   // after whatever it follows has moved this frame (the range's stand-ins move in LateUpdate)
     public sealed class ShipChaseCamera : MonoBehaviour
     {
         [SerializeField] Transform target;
@@ -20,13 +23,42 @@ namespace DeepWater.GeneralQuarters.Examples
 
         bool _chase = true;
         float _worldYawDeg;
+        Transform _ship;
+        float _shipDistanceM, _shipPivotM;
 
         public bool Chase => _chase;
+        /// <summary>What the camera is on now: the ship, or what it is watching.</summary>
+        public Transform Target => target;
+        public bool OnShip => target != null && target == _ship;
+
+        void Awake()
+        {
+            if (_ship == null) _ship = target;   // a ship wired in the scene is the one it comes home to
+        }
 
         public void Follow(Transform ship, ConnInput input)
         {
-            target = ship;
+            target = _ship = ship;
             controls = input;
+        }
+
+        /// <summary>Watch <paramref name="other"/> from <paramref name="distance"/> metres until <see cref="WatchShip"/>.</summary>
+        public void Watch(Transform other, float distance)
+        {
+            if (other == null) { WatchShip(); return; }
+            if (OnShip) { _shipDistanceM = distanceM; _shipPivotM = pivotHeightM; }
+            target = other;
+            distanceM = distance;
+            pivotHeightM = 0f;
+        }
+
+        /// <summary>Back on the ship, at the distance it had before it watched anything else.</summary>
+        public void WatchShip()
+        {
+            if (OnShip || _ship == null) return;
+            target = _ship;
+            distanceM = _shipDistanceM > 0f ? _shipDistanceM : distanceM;
+            pivotHeightM = _shipDistanceM > 0f ? _shipPivotM : pivotHeightM;
         }
 
         void LateUpdate()

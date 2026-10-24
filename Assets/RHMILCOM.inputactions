@@ -917,6 +917,632 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "Tao",
+            "id": "14190e2a-7348-4d4f-a7d0-3d8bb98bc684",
+            "actions": [
+                {
+                    "name": "PrevTrack",
+                    "type": "Button",
+                    "id": "46db9472-8ac6-414b-858e-045e91228397",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "NextTrack",
+                    "type": "Button",
+                    "id": "2b1f16f4-aad6-4d9b-ab00-f06e70778585",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "EngageEssm",
+                    "type": "Button",
+                    "id": "8052f573-71e0-4ca2-bf20-2f1617b468f6",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "EngageMk45",
+                    "type": "Button",
+                    "id": "9e657d3f-ec14-41aa-8147-fc589e958f4f",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "EngageCiws",
+                    "type": "Button",
+                    "id": "429565b2-24a8-4f3a-a73f-b2c1ed0c76a1",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "CeaseFire",
+                    "type": "Button",
+                    "id": "9427a807-e3a2-4f34-94eb-2a25ebb49721",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "CeaseFireAll",
+                    "type": "Button",
+                    "id": "44bb7482-0b04-479e-92b0-8ade0e6d62ec",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "CycleRoe",
+                    "type": "Button",
+                    "id": "b2f484a0-8da9-4c9d-832a-288fdb9c6bef",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "ScopeZoomIn",
+                    "type": "Button",
+                    "id": "92b0d058-bb8a-494d-929b-31d7df2b854b",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "ScopeZoomOut",
+                    "type": "Button",
+                    "id": "77a4ac9d-330a-4f59-ad31-0c420dfacdb5",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "8a6426d8-fa7e-4f56-83f8-daf1580c475b",
+                    "path": "<Keyboard>/q",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "PrevTrack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6df051fc-6c6d-490f-83da-59df798a631c",
+                    "path": "<Keyboard>/leftBracket",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "PrevTrack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f7bd8e6d-c776-4159-9796-1b69c08b5a6c",
+                    "path": "<Gamepad>/leftShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "PrevTrack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "05178659-518e-469e-821e-6994dd7c0e72",
+                    "path": "<Joystick>/hat/left",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Joystick",
+                    "action": "PrevTrack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d1f834b8-b909-4cd1-8e9a-a60cde199256",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "NextTrack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f44fa43d-df80-44d5-9145-e4af76211a06",
+                    "path": "<Keyboard>/rightBracket",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "NextTrack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "76b79e14-90ae-481c-815b-638322388515",
+                    "path": "<Gamepad>/rightShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "NextTrack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d2b95810-d110-45f3-bf23-e793d595c9bf",
+                    "path": "<Joystick>/hat/right",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Joystick",
+                    "action": "NextTrack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d0b156ec-5e11-4d45-b771-334da38f5a33",
+                    "path": "<Keyboard>/1",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "EngageEssm",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "792d0d9d-2168-44d9-a8f3-358468c62a4f",
+                    "path": "<Gamepad>/buttonSouth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "EngageEssm",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ce5598f1-fbd8-468b-8e22-b67d43515b24",
+                    "path": "<Joystick>/trigger",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Joystick",
+                    "action": "EngageEssm",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "59873555-d266-47fc-a546-01b43632a577",
+                    "path": "<Keyboard>/2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "EngageMk45",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "44aa2006-4a6c-4e5e-a3d5-3e103aa861f9",
+                    "path": "<Gamepad>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "EngageMk45",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a03994a2-5b29-499d-8709-d51c4cf70572",
+                    "path": "<Joystick>/button2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Joystick",
+                    "action": "EngageMk45",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a26799ce-85a3-4520-b357-c332d666bf36",
+                    "path": "<Keyboard>/3",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "EngageCiws",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2c398d44-bb6a-4c2e-bf07-7aff719a2f54",
+                    "path": "<Gamepad>/buttonNorth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "EngageCiws",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a9e77f05-48b6-43c1-88c7-3d85f1ced471",
+                    "path": "<Joystick>/button3",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Joystick",
+                    "action": "EngageCiws",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3dc007e6-a50f-4b2f-b244-d407d43fafd0",
+                    "path": "<Keyboard>/backspace",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "CeaseFire",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "61add830-4f6a-4f62-b9c2-de15741964cc",
+                    "path": "<Gamepad>/dpad/down",
+                    "interactions": "Tap(duration=0.6)",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "CeaseFire",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "09e8ae90-fa0b-4403-b361-48aad2402a64",
+                    "path": "<Joystick>/hat/down",
+                    "interactions": "Tap(duration=0.6)",
+                    "processors": "",
+                    "groups": "Joystick",
+                    "action": "CeaseFire",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9ecde0ce-7c07-441b-826b-0daa724194ea",
+                    "path": "<Keyboard>/delete",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "CeaseFireAll",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c9a79a75-0e5e-46bf-b8fc-9377abbb371f",
+                    "path": "<Gamepad>/dpad/down",
+                    "interactions": "Hold(duration=0.8)",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "CeaseFireAll",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "10ed00a2-650f-4779-980e-48a831cb3d59",
+                    "path": "<Joystick>/hat/down",
+                    "interactions": "Hold(duration=0.8)",
+                    "processors": "",
+                    "groups": "Joystick",
+                    "action": "CeaseFireAll",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8482e5a4-f3ce-4bb5-aa92-bb85e1b1dbfd",
+                    "path": "<Keyboard>/o",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "CycleRoe",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "034e7fbf-f488-447c-abcd-5d31019aaede",
+                    "path": "<Gamepad>/dpad/up",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "CycleRoe",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e9e7e1d5-576d-4a96-bfdb-104e5ad05cf4",
+                    "path": "<Joystick>/hat/up",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Joystick",
+                    "action": "CycleRoe",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "85920ba4-6d5f-487f-bd40-558476a56a91",
+                    "path": "<Keyboard>/equals",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "ScopeZoomIn",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4e88d07c-e06c-41e5-aff7-eb067100f84f",
+                    "path": "<Keyboard>/numpadPlus",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "ScopeZoomIn",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "bfc335eb-7356-4e00-a44c-d0d1f3c9377a",
+                    "path": "<Gamepad>/dpad/right",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "ScopeZoomIn",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9cc727d3-2f76-45da-8c18-fabb59f4d4f8",
+                    "path": "<Keyboard>/minus",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "ScopeZoomOut",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d2326a35-5f30-4188-8ef3-95c27ea7522b",
+                    "path": "<Keyboard>/numpadMinus",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "ScopeZoomOut",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3d54f716-e638-4ffa-813b-c496ba23fb38",
+                    "path": "<Gamepad>/dpad/left",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "ScopeZoomOut",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Range",
+            "id": "1035bc2e-3b8a-40f3-b75e-6047a5cd9677",
+            "actions": [
+                {
+                    "name": "SwitchSeat",
+                    "type": "Button",
+                    "id": "873493b3-9968-439a-a429-e04a70c5a9cd",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "StartRaid",
+                    "type": "Button",
+                    "id": "9ea08d2d-eabd-4c41-b2be-3b90b8ec6e56",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "TimeCompression",
+                    "type": "Button",
+                    "id": "0a42809f-1684-4c9b-941f-d3e768339b58",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "CameraTarget",
+                    "type": "Button",
+                    "id": "c8dc1a18-9872-4fe8-b3ea-bb531798bc5c",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "5356a1c2-6320-4844-849b-acb9dbe12ee6",
+                    "path": "<Keyboard>/tab",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "SwitchSeat",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "96a6ab79-116c-489f-8402-e47b52b27070",
+                    "path": "<Gamepad>/start",
+                    "interactions": "Tap(duration=0.6)",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "SwitchSeat",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4ad2a13a-59f6-4b61-a91c-16802f29ebd3",
+                    "path": "<Joystick>/button6",
+                    "interactions": "Tap(duration=0.6)",
+                    "processors": "",
+                    "groups": "Joystick",
+                    "action": "SwitchSeat",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "db2ae751-d3e7-48b0-b9b0-026b2d5f2907",
+                    "path": "<Keyboard>/g",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "StartRaid",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c75d3cdf-1bcf-4ee2-bfcc-4ee914ebda54",
+                    "path": "<Gamepad>/start",
+                    "interactions": "Hold(duration=1)",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "StartRaid",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "40b24b33-477d-48c3-a8ef-c60fb221b5d4",
+                    "path": "<Joystick>/button6",
+                    "interactions": "Hold(duration=1)",
+                    "processors": "",
+                    "groups": "Joystick",
+                    "action": "StartRaid",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9d9fbf42-dd04-4aa4-8072-b26e4fadf881",
+                    "path": "<Keyboard>/t",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "TimeCompression",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "78931dd2-1e62-407d-8fcb-0a692051dc4b",
+                    "path": "<Gamepad>/rightStickPress",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "TimeCompression",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "570898d6-b04f-4239-a9bf-7a46d5dc5e38",
+                    "path": "<Joystick>/button7",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Joystick",
+                    "action": "TimeCompression",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "358a0c88-3479-4a26-9e4a-200c84295c89",
+                    "path": "<Keyboard>/c",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "CameraTarget",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8cfdb9a2-cf9b-4fb4-8224-922a4a4ab99e",
+                    "path": "<Gamepad>/leftStickPress",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "CameraTarget",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d0342c1c-2f34-401f-b59b-054f01573911",
+                    "path": "<Joystick>/button8",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Joystick",
+                    "action": "CameraTarget",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": [

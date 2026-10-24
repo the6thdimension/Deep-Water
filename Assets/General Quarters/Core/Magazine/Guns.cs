@@ -9,6 +9,7 @@ using DeepWater.GeneralQuarters.Core.World;
 namespace DeepWater.GeneralQuarters.Core.Magazine
 {
     /// <summary>One gun mount's tuning (P1). Pk numbers are AUTHORED unless the loadout cites a source.</summary>
+    [System.Serializable]
     public struct GunMountProfileData
     {
         public string Name;

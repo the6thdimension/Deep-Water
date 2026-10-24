@@ -1,0 +1,107 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:appui="Unity.AppUI.UI">
+    <!-- The General Quarters range screen (App UI on UI Toolkit, G25). Two layers, one per seat (G26): the Captain's
+         helm panel over the 3D view, and the TAO's scope, track list and weapons. RangeScreen.cs fills the rows
+         (telegraph, rudder, doctrine, tracks) and keeps every readout current; the layout and look live here and in
+         RangeScreen.uss, so they can be edited in UI Builder. -->
+    <ui:Style src="RangeScreen.uss" />
+    <appui:Panel name="root" theme="dark" scale="medium" class="gq-root">
+
+        <!-- Captain seat: the 3D view stays clear; helm panel left, small scope bottom right, ticker bottom centre. -->
+        <ui:VisualElement name="captain-layer" class="gq-layer" picking-mode="Ignore">
+            <ui:VisualElement name="helm-panel" class="gq-card gq-helm" picking-mode="Position">
+                <appui:Heading text="CONN" size="XS" class="gq-card-title" />
+                <ui:VisualElement name="helm-readouts" />
+                <appui:Text text="Engine order telegraph" size="S" class="gq-caption" />
+                <ui:VisualElement name="telegraph-ahead" class="gq-row" />
+                <ui:VisualElement name="telegraph-back" class="gq-row" />
+                <appui:Text text="Rudder: held until you steady her or order a course" size="S" class="gq-caption" />
+                <ui:VisualElement name="rudder-row" class="gq-row" />
+                <appui:Button name="steady-button" title="Steady as she goes  (Space)" size="S" class="gq-wide" />
+                <ui:VisualElement name="course-row" class="gq-row" />
+                <ui:VisualElement name="speed-row" class="gq-row" />
+                <appui:Text text="Orders" size="S" class="gq-caption" />
+                <appui:Text name="helm-orders" text="" size="XS" class="gq-mono gq-log" />
+            </ui:VisualElement>
+            <appui:Text name="camera-label" text="Camera: own ship  (C)" size="XS" class="gq-caption gq-camera-caption" />
+            <ui:VisualElement name="scope-inset" class="gq-card gq-inset" picking-mode="Position" />
+            <ui:VisualElement name="ticker-captain" class="gq-card gq-ticker" picking-mode="Ignore">
+                <appui:Text name="ticker-captain-text" text="" size="XS" class="gq-mono gq-log" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- TAO seat: big scope left, the camera's window top right (left clear for the 3D view), tracks below it,
+             selected track, weapons, doctrine and the magazine along the bottom. -->
+        <ui:VisualElement name="tao-layer" class="gq-layer" picking-mode="Ignore">
+            <!-- In this seat the camera renders only into its window, so everything else must be painted: these
+                 backdrops cover the screen around the window (left of it, above it, below it). -->
+            <ui:VisualElement class="gq-backdrop gq-backdrop--left" picking-mode="Ignore" />
+            <ui:VisualElement class="gq-backdrop gq-backdrop--top-right" picking-mode="Ignore" />
+            <ui:VisualElement class="gq-backdrop gq-backdrop--bottom-right" picking-mode="Ignore" />
+            <ui:VisualElement name="scope-main" class="gq-card gq-scope-main" picking-mode="Position" />
+            <ui:VisualElement name="camera-window" class="gq-camera-window" picking-mode="Ignore">
+                <appui:Text name="camera-window-label" text="3D view" size="XS" class="gq-caption gq-window-label" />
+            </ui:VisualElement>
+            <ui:VisualElement name="tao-tracks" class="gq-card gq-tracks" picking-mode="Position">
+                <appui:Heading text="TRACKS" size="XS" class="gq-card-title" />
+                <ui:VisualElement class="gq-track-row gq-track-head">
+                    <appui:Text text="TRK" size="XS" class="gq-col gq-col--id" />
+                    <appui:Text text="ID / KIND" size="XS" class="gq-col gq-col--kind" />
+                    <appui:Text text="BRG" size="XS" class="gq-col gq-col--num" />
+                    <appui:Text text="RNG" size="XS" class="gq-col gq-col--num" />
+                    <appui:Text text="CPA" size="XS" class="gq-col gq-col--num" />
+                    <appui:Text text="WPN" size="XS" class="gq-col gq-col--wpn" />
+                </ui:VisualElement>
+                <ui:ScrollView name="track-list" class="gq-track-list" />
+            </ui:VisualElement>
+            <ui:VisualElement name="tao-bottom" class="gq-card gq-tao-bottom" picking-mode="Position">
+                <ui:VisualElement class="gq-column gq-column--engage">
+                    <appui:Heading text="ENGAGE" size="XS" class="gq-card-title" />
+                    <appui:Text name="selected-text" text="No track selected" size="S" class="gq-selected" />
+                    <appui:Text name="proposal-text" text="" size="XS" class="gq-proposal" />
+                    <ui:VisualElement name="engage-row" class="gq-row" />
+                    <ui:VisualElement name="cease-row" class="gq-row" />
+                </ui:VisualElement>
+                <ui:VisualElement class="gq-column gq-column--doctrine">
+                    <appui:Heading text="DOCTRINE" size="XS" class="gq-card-title" />
+                    <ui:VisualElement name="doctrine-rows" />
+                </ui:VisualElement>
+                <ui:VisualElement class="gq-column gq-column--status">
+                    <appui:Heading text="MAGAZINE · SYSTEMS" size="XS" class="gq-card-title" />
+                    <appui:Text name="magazine-text" text="" size="XS" class="gq-mono" />
+                    <appui:Text name="systems-text" text="" size="XS" class="gq-mono" />
+                    <appui:Text name="hull-text" text="" size="XS" class="gq-caption" />
+                    <ui:VisualElement name="hull-bar" class="gq-bar-track"><ui:VisualElement name="hull-fill" class="gq-bar-fill" /></ui:VisualElement>
+                    <appui:Text name="ticker-tao-text" text="" size="XS" class="gq-mono gq-log gq-log--tao" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- The top bar comes after the seat layers so it paints over the TAO backdrops. -->
+        <ui:VisualElement name="top-bar" class="gq-bar" picking-mode="Position">
+            <appui:Heading text="GENERAL QUARTERS" size="XS" class="gq-title" />
+            <ui:VisualElement class="gq-group">
+                <appui:Text name="seat-label" text="CAPTAIN" class="gq-seat" />
+                <appui:Button name="seat-button" title="Seat  (Tab)" size="S" quiet="true" />
+            </ui:VisualElement>
+            <ui:VisualElement class="gq-group">
+                <ui:VisualElement name="raid-picker" class="gq-row" />
+                <appui:Button name="raid-button" title="General quarters  (G)" size="S" variant="Accent" />
+                <appui:Text name="raid-status" text="" size="S" class="gq-status" />
+            </ui:VisualElement>
+            <ui:VisualElement class="gq-group">
+                <appui:Text text="ROE" size="S" class="gq-caption" />
+                <ui:VisualElement name="roe-row" class="gq-row" />
+            </ui:VisualElement>
+            <ui:VisualElement class="gq-group gq-group--end">
+                <appui:Button name="time-button" title="1×  (T)" size="S" quiet="true" />
+                <appui:Text name="clock" text="00:00" size="S" class="gq-mono" />
+                <appui:Button name="help-button" title="Help  (H)" size="S" quiet="true" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="help" class="gq-card gq-help" picking-mode="Position">
+            <appui:Heading text="CONTROLS" size="XS" class="gq-card-title" />
+            <appui:Text name="help-text" text="" size="XS" class="gq-help-text" />
+        </ui:VisualElement>
+    </appui:Panel>
+</ui:UXML>

@@ -167,6 +167,17 @@ All entries are SIX's picks of 2026-10-23, in round order. Leaning is Claude's r
 | G38 | Lead | **Ballistic lead:** iterate the time of flight against the track's constant-velocity prediction | Same | Locked |
 | G39 | Mk 45 against air | **Proximity fuze against air, point-detonating against surface targets** | Same | Locked |
 | G40 | CIWS closed loop | **Modelled:** each burst starts with an aim bias that Phalanx's spotting shrinks within the burst, carried between bursts on the same track | Same | Locked |
+| G42 | VLS L1 scope (2026-10-24, slice B2) | **Launch sequence, ship velocity, midcourse uplink, and a real vertical launch:** per-cell hatch, ignition and clear-the-cell timing; the ship's velocity added at launch; the missile climbs vertically, then pitches over within a constrained rate before it can turn toward the target (this costs a minimum range) | Sequence, uplink and ship velocity, without the vertical boost | Locked |
+| G43 | Midcourse uplink | **Channels and an update rate:** in midcourse the missile flies to a predicted intercept point that SPY-1 refreshes at an uplink rate. Only a limited number of missiles can be guided at once (AUTHORED) | Same | Locked |
+| G44 | Illuminators (pulled forward from Stream A) | **In this slice:** terminal homing needs one of three SPG-62s for its last seconds | Same | Locked |
+| G45 | SPG-62 model | **Real arcs and slew:** one forward and two aft, each with its own arc, slew and settle time. A missile entering terminal claims a free illuminator that can see the target, assigned by time to go | Same | Locked |
+| G46 | Missile fidelity in the core | **ESSM and SM-2 both at Guided Fury L4 (full aero).** The bridge bakes Guided Fury's aero tables for headless use, which is Guided Fury work | SM-2 at L2, like ESSM | Locked |
+| G47 | Budget with L4 | **Keep 1 ms (G16).** If L4 cannot meet it at saturation, missiles beyond a set number in flight run at L3, and the log and the HUD say so | Same | Locked |
+| G48 | SM-2 variants | **Both Block IIIA (RIM-66M-5) and Block IIIB** (adds an IR terminal seeker) | IIIA | Locked |
+| G49 | Block IIIB's IR seeker | **IR backup now:** if no illuminator is free, IIIB homes on IR from an AUTHORED acquisition range. **Flagged:** it eases the illuminator bottleneck and may flatter saturation results. *Mitigation:* every IR terminal is logged and counted in the debrief, and a test reports saturation with and without IIIB | IIIB flies as IIIA until EW exists | Locked (flagged) |
+| G50 | VLS load | **64 SM-2 (48 IIIA, 16 IIIB) and 32 ESSM** (8 cells quad-packed); 24 cells left for Tomahawk and VLA. AUTHORED | Same | Locked |
+| G51 | Salvo doctrine | **SM-2 in pairs (shoot-shoot), ESSM one at a time.** Shoot-look-shoot stays TEWA L1 (Stream A) | Same | Locked |
+| G52 | Where the missile work lands | **Through Guided-Fury:** a feature branch cut from `Guided-Fury` for the L4 bridge and the SM-2 profiles, a PR into `Guided-Fury`, then everything levels | Same | Locked |
 | G41 | Gun data | **The G7 standard drag curve (BRL) times one form factor per projectile, CALIBRATED to its published range;** dispersions and lethality AUTHORED where nothing is public; other published figures are VALIDATION | Same | Locked |
 
 Inherited from Reckoning: R2 (everything deterministic eventually), R15 (Watches), R35 (variant B, Proposed), R36 (banned-API guard, Proposed). General Quarters applies R36 to its core now, as a source-scan test.
@@ -219,4 +230,5 @@ Inherited from Reckoning: R2 (everything deterministic eventually), R15 (Watches
 - **2026-10-24** — Slice 6 decisions G30–G33 (SIX); Q2 answered.
 - **2026-10-24** — Q5 answered by SIX: ESSM starts a run on SemiAuto; G29 Locked.
 - **2026-10-24** — Phase 1 complete (slice 7). G13 carried out: legacy destroyer scripts archived.
+- **2026-10-24** — Stream B slice B2 decisions G42–G52 (SIX): VLS L1 with a vertical launch, uplink, SPG-62 illuminators pulled forward, ESSM and SM-2 at L4, both SM-2 blocks, IIIB with IR backup (flagged).
 - **2026-10-24** — Stream B started: decisions G34–G41 (SIX), Guns L1 first. Guns L1 built (slice B1); sources in `Calibration~/GUNS-SOURCES.md`.

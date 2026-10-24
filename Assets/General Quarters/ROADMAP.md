@@ -21,7 +21,7 @@ The gate: a scripted raid against the destroyer plays end to end on the Sea Stat
 - Every engagement is explained in the log.
 - It costs ≤ 1 ms of combat-core time per fixed step at 24 threats, and looks and sounds like a fight.
 
-### Slice 1 — Module skeleton and core contracts (done 2026-10-23: 10/10 tests)
+### Slice 1 — Module skeleton and core contracts (done 2026-10-23, 0c577de: 10/10 tests)
 - [x] Folders per P3 (`Core`, `Modules`, `ScriptableObjects`, `Prefabs`, `Examples`, `Tests`) and asmdefs (`DeepWater.GeneralQuarters`, `.Tests.Editor`).
 - [x] Orders (one flat `Order` value type: Helm, Engage, CeaseFire, Doctrine, Roe) with issuer and tick, and an append-only `OrderLog`.
 - [x] `DeterministicRng` (seeded; every draw counted, so a chance root can name its seed and draw).
@@ -31,16 +31,16 @@ The gate: a scripted raid against the destroyer plays end to end on the Sea Stat
 - [x] `CombatFix`: a per-tick FNV-1a fingerprint of the combat state.
 - [x] Tests: RNG reproducibility, Watch schedule, order log, ladder fallback, banned-API source scan of `Core/`.
 
-### Slice 2 — Combat core L0, headless
-- [ ] Truth feed: own-ship state and truth targets (id, kind, position, velocity, identity, signature).
-- [ ] Radar L0 (SPY-1D): instrumented range and radar horizon, on its Watch.
-- [ ] Tracks L0: perfect correlation, stable ids, drop on loss.
-- [ ] Doctrine / ROE / TEWA L0: rank hostile tracks by time to closest approach; range bands per weapon class; doctrine modes; every assignment logged with its reason.
-- [ ] VLS L0: cells, quad-packed ESSM, launch interval; Guided Fury `MissileEntity` built headless at the loadout's missile level; track-backed `ITargetSource`; intercept by closest approach over the step; seeded Pk draw.
-- [ ] Guns L0 (Mk 45, CIWS, Mk 38): rate of fire, magazine, arcs, time of flight, seeded Pk(range) per burst (AUTHORED, flagged).
-- [ ] Damage Control L0: hit points per system and hull; systems at zero go offline; leakers that reach the ship are hits.
-- [ ] Scripted raid L0: sea-skimmers and aircraft on set paths.
-- [ ] *Done when:* a headless raid test resolves with a cause chain for every kill, two seeded runs give identical Fix sequences, and the step stays within budget.
+### Slice 2 — Combat core L0, headless (done 2026-10-23: 21/21 tests; 8-missile raid all killed, 9 ESSM; 24-missile raid 0.043 ms/tick)
+- [x] Truth feed: own-ship state and truth targets (id, kind, position, velocity, identity, signature).
+- [x] Radar L0 (SPY-1D): instrumented range and radar horizon, on its Watch.
+- [x] Tracks L0: perfect correlation, stable ids, drop on loss.
+- [x] Doctrine / ROE / TEWA L0: rank hostile tracks by time to closest approach; range bands per weapon class; doctrine modes; every assignment logged with its reason.
+- [x] VLS L0: cells, quad-packed ESSM, launch interval; Guided Fury `MissileEntity` built headless at the loadout's missile level; track-backed `ITargetSource`; intercept by closest approach over the step; seeded Pk draw.
+- [x] Guns L0 (Mk 45, CIWS, Mk 38): rate of fire, magazine, arcs, time of flight, seeded Pk(range) per burst (AUTHORED, flagged).
+- [x] Damage Control L0: hit points per system and hull; systems at zero go offline; leakers that reach the ship are hits.
+- [x] Scripted raid L0: sea-skimmers and aircraft on set paths.
+- [x] *Done when:* a headless raid test resolves with a cause chain for every kill, two seeded runs give identical Fix sequences, and the step stays within budget.
 
 ### Slice 3 — Hull from Blender (needs Blender running with the MCP add-on)
 - [ ] Copy the DDG `.blend`; read which DDG-51 flight it is (BLUEPRINT Q1).
@@ -104,5 +104,10 @@ The gate: a scripted raid against the destroyer plays end to end on the Sea Stat
 
 ## Change log
 - **2026-10-23** — Roadmap created from the locked blueprint (G1–G20). Phase 1 started.
+- **2026-10-23** — Slice 1 (0c577de) and slice 2 done.
+  - **Built:** the combat core at L0: radar to the 4/3-earth horizon (27.6 km for a 5 m sea-skimmer from a 20 m antenna), tracks, TEWA, doctrine and ROE, the VLS with Guided Fury ESSM at L2, guns, damage, and a scripted raid.
+  - **8 sea-skimmers:** all 8 killed, 9 ESSM launched; every kill's cause chain is complete and ends in roots, with an identical Fix two runs in a row.
+  - **24 sea-skimmers:** all killed, at 0.043 ms per tick (Editor), against the 1 ms budget.
+  - **Observation, not tuned:** at missile L2, ESSM averaged about 720 m/s over 20 km. That is slower than published ESSM speeds; the cause is the missile level, not the combat core. A Guided Fury stream item.
 
 ## Skip / fail log

@@ -47,8 +47,8 @@ namespace DeepWater.GeneralQuarters.Core.Log
         public string Text;
         /// <summary>The track concerned, or -1.</summary>
         public int TrackId;
-        /// <summary>Up to two causing events (-1 when none).</summary>
-        public int CauseA, CauseB;
+        /// <summary>Up to three causing events (-1 when none).</summary>
+        public int CauseA, CauseB, CauseC;
         public RootKind Root;
         /// <summary>The Order's sequence number when <see cref="Root"/> is Order.</summary>
         public int OrderSequence;
@@ -67,13 +67,14 @@ namespace DeepWater.GeneralQuarters.Core.Log
         public IReadOnlyList<EngagementEvent> Events => _events;
 
         public int Add(long tick, EventKind kind, string rule, string text, int trackId = -1,
-            int causeA = -1, int causeB = -1, RootKind root = RootKind.None, int orderSequence = -1, ChanceRoot chance = default)
+            int causeA = -1, int causeB = -1, RootKind root = RootKind.None, int orderSequence = -1, ChanceRoot chance = default,
+            int causeC = -1)
         {
             int id = _events.Count;
             _events.Add(new EngagementEvent
             {
                 Id = id, Tick = tick, Kind = kind, Rule = rule, Text = text, TrackId = trackId,
-                CauseA = causeA, CauseB = causeB, Root = root, OrderSequence = orderSequence, Chance = chance,
+                CauseA = causeA, CauseB = causeB, CauseC = causeC, Root = root, OrderSequence = orderSequence, Chance = chance,
             });
             return id;
         }
@@ -101,6 +102,7 @@ namespace DeepWater.GeneralQuarters.Core.Log
                 if (e < 0 || e >= _events.Count || !seen.Add(e)) continue;
                 EngagementEvent ev = _events[e];
                 chain.Add(ev);
+                if (ev.CauseC >= 0) stack.Push(ev.CauseC);
                 if (ev.CauseB >= 0) stack.Push(ev.CauseB);
                 if (ev.CauseA >= 0) stack.Push(ev.CauseA);
             }
@@ -111,7 +113,7 @@ namespace DeepWater.GeneralQuarters.Core.Log
         public bool IsComplete(int id)
         {
             foreach (EngagementEvent ev in Chain(id))
-                if (ev.CauseA < 0 && ev.CauseB < 0 && ev.Root == RootKind.None) return false;
+                if (ev.CauseA < 0 && ev.CauseB < 0 && ev.CauseC < 0 && ev.Root == RootKind.None) return false;
             return true;
         }
     }

@@ -44,6 +44,24 @@ namespace DeepWater.GeneralQuarters.Core
         SurfaceShip = 3,
     }
 
+    /// <summary>
+    /// The ship's damageable systems. Damage Control takes them offline; the combat system maps each to the
+    /// element it disables (loadout: each VLS group and gun mount names its system).
+    /// </summary>
+    public enum ShipSystem : byte
+    {
+        Hull = 0,
+        Radar = 1,
+        ForeVls = 2,
+        AftVls = 3,
+        Mk45 = 4,
+        Ciws = 5,
+        Mk38Port = 6,
+        Mk38Starboard = 7,
+        Propulsion = 8,
+        Bridge = 9,
+    }
+
     /// <summary>Identification. L0 tracks inherit it from truth; identification errors are a higher Tracks level.</summary>
     public enum Identity : byte
     {

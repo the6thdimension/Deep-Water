@@ -30,9 +30,12 @@ namespace DeepWater.GeneralQuarters.Modules.Presentation
     }
 
     /// <summary>
-    /// Lays the ship model's gun mounts on what they are firing at (G33): each burst the core logs names its mount and its
-    /// aim point; the mount trains and elevates there at its rig's rates, holds while it keeps firing, then returns to
-    /// rest. Presentation only: the core's guns have no slew at L0 (Guns L1), so a mount can fire before it is on.
+    /// Lays the ship model's gun mounts (G33).
+    /// - **Guns L1 and up:** the core lays its mounts, so the model follows the core's train and elevation
+    ///   (<see cref="IGunMount.TryGetLay"/>). What you see is what fired.
+    /// - **Guns L0:** the core has no mount state. Each burst the core logs names its mount and aim point; the mount
+    ///   trains and elevates there at its rig's rates, holds while it keeps firing, then returns to rest. It can fire
+    ///   before it is on, because L0 has no slew.
     /// </summary>
     public sealed class MountAnimator
     {
@@ -48,13 +51,19 @@ namespace DeepWater.GeneralQuarters.Modules.Presentation
             public float HoldUntil = float.NegativeInfinity;
         }
 
+        // The core updates its lay once per fixed step; following it at twice the rig's rate smooths the 50 Hz steps
+        // between rendered frames and still catches up within a frame or two.
+        const float FollowRateFactor = 2f;
+
         readonly Transform _ship;
         readonly List<Mount> _byLoadoutIndex = new List<Mount>();
+        IReadOnlyList<IGunMount> _guns;
 
         /// <summary>Find each loadout mount's rig in <paramref name="ship"/>. Mounts with no rig (or missing parts) stay still.</summary>
         public MountAnimator(Transform ship, IReadOnlyList<IGunMount> guns, MountRig[] rigs)
         {
             _ship = ship;
+            _guns = guns;
             for (int i = 0; i < guns.Count; i++)
             {
                 GunMountProfileData g = guns[i].Profile;
@@ -78,6 +87,9 @@ namespace DeepWater.GeneralQuarters.Modules.Presentation
                 _byLoadoutIndex.Add(m);
             }
         }
+
+        /// <summary>Follow a new run's mounts (a fresh combat system has new mount objects, in the same loadout order).</summary>
+        public void Bind(IReadOnlyList<IGunMount> guns) => _guns = guns;
 
         /// <summary>A burst from loadout mount <paramref name="mountIndex"/> at <paramref name="aimWorld"/>.</summary>
         public void Engage(int mountIndex, Vector3 aimWorld, float now)
@@ -106,11 +118,17 @@ namespace DeepWater.GeneralQuarters.Modules.Presentation
             {
                 Mount m = _byLoadoutIndex[i];
                 if (m == null) continue;
-                float train = 0f, elevation = 0f;
-                if (now < m.HoldUntil)
+                float train = 0f, elevation = 0f, rate = 1f;
+                if (_guns != null && i < _guns.Count && _guns[i].TryGetLay(out float coreTrain, out float coreElevation))
+                {
+                    train = coreTrain;
+                    elevation = coreElevation;
+                    rate = FollowRateFactor;
+                }
+                else if (now < m.HoldUntil)
                     MountAim.Solve(_ship.InverseTransformPoint(m.Train.position), m.RestYawDeg, _ship.InverseTransformPoint(m.Aim), out train, out elevation);
-                m.Train0 = MountAim.Slew(m.Train0, train, m.Rig.trainRateDegS * dt);
-                m.Elevation0 = Mathf.MoveTowards(m.Elevation0, Mathf.Clamp(elevation, -5f, 85f), m.Rig.elevateRateDegS * dt);
+                m.Train0 = MountAim.Slew(m.Train0, train, m.Rig.trainRateDegS * rate * dt);
+                m.Elevation0 = Mathf.MoveTowards(m.Elevation0, Mathf.Clamp(elevation, -5f, 85f), m.Rig.elevateRateDegS * rate * dt);
                 m.Train.localRotation = m.TrainRest * Quaternion.Euler(0f, m.Train0, 0f);
                 if (m.Elevate != null) m.Elevate.localRotation = m.ElevateRest * Quaternion.AngleAxis(m.Elevation0, m.ElevateAxis);
             }

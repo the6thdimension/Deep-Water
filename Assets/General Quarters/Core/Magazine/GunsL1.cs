@@ -85,6 +85,13 @@ namespace DeepWater.GeneralQuarters.Core.Magazine
         public FidelityLevel Level => FidelityLevel.L1;
         public float TrainDeg => _trainDeg;
         public float ElevationDeg => _elevationDeg;
+
+        public bool TryGetLay(out float trainDeg, out float elevationDeg)
+        {
+            trainDeg = _trainDeg;
+            elevationDeg = _elevationDeg;
+            return true;
+        }
         public FiringTable Table => _table;
 
         public void Step(EngagementContext ctx, List<DirectedEngagement> directed)

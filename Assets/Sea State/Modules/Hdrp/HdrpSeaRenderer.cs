@@ -59,6 +59,8 @@ namespace DeepWater.Sea.Modules.Hdrp
         static readonly int s_FoamWindrowId = Shader.PropertyToID("_DWSeaFoamWindrow");
         static readonly int s_FoamWindrow2Id = Shader.PropertyToID("_DWSeaFoamWindrow2");
         static readonly int s_FoamResolutionId = Shader.PropertyToID("_DWSeaFoamResolution");
+        static readonly int s_FoamDepositsId = Shader.PropertyToID("_DWSeaFoamDeposits");
+        static readonly int s_FoamDepositCountId = Shader.PropertyToID("_DWSeaFoamDepositCount");
         static readonly ProfilerMarker s_UploadMarker = new ProfilerMarker("DeepWater.Sea.Render.Upload");
         static readonly ProfilerMarker s_FoamMarker = new ProfilerMarker("DeepWater.Sea.Render.ResidualFoam");
 
@@ -80,7 +82,13 @@ namespace DeepWater.Sea.Modules.Hdrp
         // Residual foam: two R32F fields over the near-field region, ping-ponged by the compute pass.
         RenderTexture _foamA, _foamB;
         bool _foamFlip, _foamHasPrevious;
-        int _foamKernel;
+        int _foamKernel, _foamDepositKernel;
+        // Foam deposits queued since the last step (DepositFoam); at most MaxFoamDepositsPerStep, the rest dropped and counted.
+        public const int MaxFoamDepositsPerStep = 128;
+        readonly FoamDeposit[] _deposits = new FoamDeposit[MaxFoamDepositsPerStep];
+        readonly Vector4[] _depositData = new Vector4[MaxFoamDepositsPerStep];
+        int _depositCount;
+        ComputeBuffer _depositBuffer;
         CommandBuffer _foamCmd;
         ResidualFoamGrid _foamGrid;
         readonly int[] _shiftArgs = new int[2];
@@ -103,6 +111,22 @@ namespace DeepWater.Sea.Modules.Hdrp
         public bool ResidualFoamActive => _foamA != null;
         /// <summary>The residual foam field drawn this frame (R32F over the near-field region; UV x = world X, y = world Z).</summary>
         public RenderTexture ResidualFoamTexture => _foamFlip ? _foamB : _foamA;
+        /// <summary>Foam deposits dropped because more than <see cref="MaxFoamDepositsPerStep"/> came in before one step.</summary>
+        public int DroppedFoamDeposits { get; private set; }
+
+        /// <summary>
+        /// Put foam into the water at <paramref name="worldPosition"/> (a splash, an impact, a wake): up to
+        /// <paramref name="level"/> at the centre, a Gaussian of sigma = <paramref name="radiusM"/> / 2, added after the next
+        /// residual-foam step. It then drifts and fades like the sea's own foam. Outside the near-field region it does
+        /// nothing; with residual foam off it is ignored. Presentation only: the sea's physics never reads foam.
+        /// </summary>
+        public void DepositFoam(Vector3 worldPosition, float radiusM, float level)
+        {
+            if (_foamA == null || radiusM <= 0f || level <= 0f) return;
+            if (_depositCount >= MaxFoamDepositsPerStep) { DroppedFoamDeposits++; return; }
+            _deposits[_depositCount++] = new FoamDeposit { Centre = new float2(worldPosition.x, worldPosition.z), RadiusM = radiusM, Level = level };
+        }
+
         /// <summary>Inputs of the latest residual-foam step.</summary>
         public ResidualFoamParams LastResidualFoamParams { get; private set; }
         /// <summary>Centre (world XZ) of the residual foam grid — it drifts with the water, within a texel of the near field.</summary>
@@ -238,6 +262,8 @@ namespace DeepWater.Sea.Modules.Hdrp
                 return;
             }
             _foamKernel = foamCompute.FindKernel("DWSeaFoamIntegrate");
+            _foamDepositKernel = foamCompute.FindKernel("DWSeaFoamDeposit");
+            _depositBuffer = new ComputeBuffer(MaxFoamDepositsPerStep, 16);
             int res = (int)look.nearFieldResolution;
             _foamA = NewFoamTexture(res, "Sea Residual Foam A");
             _foamB = NewFoamTexture(res, "Sea Residual Foam B");
@@ -266,6 +292,9 @@ namespace DeepWater.Sea.Modules.Hdrp
             if (_foamB != null) { _foamB.Release(); Destroy(_foamB); _foamB = null; }
             _foamCmd?.Release();
             _foamCmd = null;
+            _depositBuffer?.Release();
+            _depositBuffer = null;
+            _depositCount = 0;
             _foamRecord = null;
         }
 
@@ -325,6 +354,16 @@ namespace DeepWater.Sea.Modules.Hdrp
                 cmd.SetComputeTextureParam(foamCompute, _foamKernel, s_FoamNextId, next);
                 int groups = (res + 7) / 8;
                 cmd.DispatchCompute(foamCompute, _foamKernel, groups, groups, 1);
+                if (_depositCount > 0)
+                {
+                    for (int k = 0; k < _depositCount; k++)
+                        _depositData[k] = new Vector4(_deposits[k].Centre.x, _deposits[k].Centre.y, _deposits[k].RadiusM, _deposits[k].Level);
+                    cmd.SetBufferData(_depositBuffer, _depositData, 0, 0, _depositCount);
+                    cmd.SetComputeBufferParam(foamCompute, _foamDepositKernel, s_FoamDepositsId, _depositBuffer);
+                    cmd.SetComputeIntParam(foamCompute, s_FoamDepositCountId, _depositCount);
+                    cmd.SetComputeTextureParam(foamCompute, _foamDepositKernel, s_FoamNextId, next);
+                    cmd.DispatchCompute(foamCompute, _foamDepositKernel, groups, groups, 1);
+                }
                 s_FoamGpuSampler.End(cmd);
                 Graphics.ExecuteCommandBuffer(cmd);
                 cmd.Clear();
@@ -341,11 +380,20 @@ namespace DeepWater.Sea.Modules.Hdrp
                     Centre = gridCentre,
                     Shift = shift,
                     Components = _frame.GetSubArray(0, componentCount).ToArray(),
+                    Deposits = CopyDeposits(),
                 });
+                _depositCount = 0;
                 LastResidualFoamParams = p;
                 _foamPrevTimeS = t;
                 _foamHasPrevious = true;
             }
+        }
+
+        FoamDeposit[] CopyDeposits()
+        {
+            var copy = new FoamDeposit[_depositCount];
+            System.Array.Copy(_deposits, copy, _depositCount);
+            return copy;
         }
 
         /// <summary>Residual-foam inputs for this step: the sea conditions mapped through the look.</summary>

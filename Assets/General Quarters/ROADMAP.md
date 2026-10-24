@@ -137,11 +137,21 @@ SIX's picks: G25 App UI on UI Toolkit, G26 switch seats, G27 the AI captain's ro
   - HDRP motion blur smears the frame each time the camera cuts.
   - Not re-checked in play mode: the last two fixes (camera execution order, scope labels re-placed on layout). They are build-verified and covered by the suite.
 
-### Slice 6 — Presentation (G18)
-- [ ] VLS hatch and plume, Mk 45 muzzle and shell splashes, CIWS tracers and bursts, missile trails.
-- [ ] Splashes into the foam field (needs BLUEPRINT Q2).
-- [ ] Hit effects, fire and smoke; layered audio.
-- [ ] All unreckoned; no committed DAVFX references.
+### Slice 6 — Presentation (G18) (done 2026-10-24: 72/72 GQ tests, 49/49 sea tests; the saturation Fix unchanged)
+SIX's picks: G30 effects reused where they fit and built in code where they don't, G31 a Sea State foam deposit API (Q2), G32 recordings plus synthesised sounds, G33 guns track, wake and bow wave, VLS hatches open, no blur on camera cuts.
+- [x] **The core says where; presentation decides how.** Engagement events now carry a point, a weapon and a source (VLS group, gun mount, system). None of it is in the Fix: the saturation run is `2AF5C040E4AC6B5E` before and after (`PresentationTests.Saturation_Fix_IsUnchangedByPresentationData`).
+- [x] **Effects** (`Modules/Presentation/`, built by Deep Water → General Quarters → Build Combat Effects):
+  - VLS plume, Mk 45 / CIWS / Mk 38 muzzle flashes, CIWS tracers, flak bursts, warheads, splashes, ship hits, fire and system smoke, bow spray, missile and threat trails.
+  - All on one hand-written HDRP particle shader (`GQ_Particle.shader`) with HDRP fog and soft particles, pooled by `EffectPool`.
+  - **Reuse fell through.** The vendor explosion (`HD_Naval_Explosion`) uses a built-in-pipeline shader that HDRP reports as supported but draws as untextured quads; the VFX Arsenal flames were tiny and dim at sea scale. So every effect is code-built (METHODOLOGY AP20).
+  - Missile smoke is a ribbon (`TrailRenderer`), not puffs: at 700 m/s puffs read as a dotted line (C23).
+- [x] **Splashes and the wake into the foam field** (G31): `HdrpSeaRenderer.DepositFoam`, a Gaussian deposit on the GPU field and its CPU twin, recorded for replay. Sea test `Deposit_AddsAGaussianOfItsLevel_ThenTheCapHolds`.
+- [x] **The ship moves:** the Mk 45, both CIWS and both Mk 38s train and elevate onto what they fire at at their rig's rates (`MountAnimator`; checked in play: the Mk 45 laid at 266°, 0° on its target); VLS hatch lids open and close per launch (`VlsHatches`).
+- [x] **Audio** (G32): FDS recordings for missile launch and detonation; the Mk 45, CIWS, Mk 38, flak, splash, ship hit and the general-quarters alarm synthesised from a seed (`SynthClips`). Sound arrives late by distance at 343 m/s. All 24 voices were seen playing in play mode; **nobody has listened to them yet.**
+- [x] **Camera cuts** carry no motion blur (a Volume override held for 3 frames on each cut).
+- [x] **Cost** (Editor, 2560×1440, saturation raid tail, on / off): main thread 16.05–16.10 / 15.84–15.94 ms, `GQ.Presentation` 0.025–0.031 ms, GPU 14.6–15.0 / 15.1–15.5 ms (within noise), GC ~15.0 / ~13.6 KB per frame. Saturation raid: 24 killed, 0 leaked; core 0.083 ms mean per fixed step.
+- [x] All unreckoned; no committed DAVFX references.
+- **Not verified:** listening; physical controllers on the range; the Guided Fury ground detonation still uses `HD_Naval_Explosion` and draws wrong in HDRP (a follow-up, not fixed here).
 
 ### Slice 7 — Phase review
 - [ ] Legacy supersession checklist (BurkeVLSSystem, SPG62FireControlRadar, VLSManager, BurkeMissile). Archive only after the range proves the replacement (G13).
@@ -202,6 +212,8 @@ SIX's picks: G25 App UI on UI Toolkit, G26 switch seats, G27 the AI captain's ro
   - **Built:** the combat core plays in a scene, from two seats, on App UI screens, with the AI captain in the empty seat.
   - **Gate:** the Phase 1 gate is met in play mode at 0.066 ms mean per fixed step against the 1 ms budget, presentation aside (slice 6).
   - **Found on the range:** the aircraft bug (skip / fail log).
+
+- **2026-10-24** — Slice 6 done: presentation, with the decisions in BLUEPRINT G30–G33. The Phase 1 gate's presentation half is met in play mode (sound seen playing, not yet heard). Q2 answered: Sea State gained `DepositFoam`.
 
 ## Skip / fail log
 - **2026-10-24 (slice 5):** the raid's aircraft vanished on their first step: slant range against the launch range (METHODOLOGY AP19). It was in slice 2's `ScriptedRaid`, found on the range, fixed, and a regression test added.

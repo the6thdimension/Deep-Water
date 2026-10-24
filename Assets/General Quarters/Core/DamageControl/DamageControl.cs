@@ -96,6 +96,7 @@ namespace DeepWater.GeneralQuarters.Core.DamageControl
             int hitEvent = log.Add(tick, EventKind.ShipHit, Rule,
                 System.FormattableString.Invariant($"{hit.Kind} hit at {local.z:+0;-0} m from amidships ({hit.WarheadKg:0} kg warhead): hull {HullHitPoints:0}/{_profile.HullHitPoints:0}") + where,
                 -1, causeEvent, root: RootKind.Scenario);
+            log.Locate(hitEvent, hit.Point);
 
             if (nearest >= 0 && _online[nearest])
             {
@@ -104,14 +105,16 @@ namespace DeepWater.GeneralQuarters.Core.DamageControl
                 {
                     _online[nearest] = false;
                     newlyOffline.Add(_profile.Systems[nearest].System);
-                    log.Add(tick, EventKind.SystemOffline, Rule, $"{_profile.Systems[nearest].System} OFFLINE", -1, hitEvent);
+                    int off = log.Add(tick, EventKind.SystemOffline, Rule, $"{_profile.Systems[nearest].System} OFFLINE", -1, hitEvent);
+                    log.Locate(off, own.ToWorld(_profile.Systems[nearest].PositionShip), WeaponClass.None, (int)_profile.Systems[nearest].System);
                 }
             }
 
             if (!OutOfAction && HullHitPoints <= 0f)
             {
                 OutOfAction = true;
-                log.Add(tick, EventKind.SystemOffline, Rule, "hull at zero: ship OUT OF ACTION (flooding and sinking are Damage Control L1)", -1, hitEvent);
+                int sunk = log.Add(tick, EventKind.SystemOffline, Rule, "hull at zero: ship OUT OF ACTION (flooding and sinking are Damage Control L1)", -1, hitEvent);
+                log.Locate(sunk, own.Position, WeaponClass.None, (int)ShipSystem.Hull);
             }
         }
 

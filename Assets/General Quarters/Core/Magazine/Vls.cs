@@ -159,6 +159,7 @@ namespace DeepWater.GeneralQuarters.Core.Magazine
             launchEvent = ctx.Log.Add(ctx.Tick, EventKind.Launched, Rule,
                 System.FormattableString.Invariant($"{l.Weapon} launched from {_profile.Groups[group].Name} at track {track.Id} ({range / 1000f:0.0} km); missile {used}; {Rounds(l.Weapon)} left"),
                 track.Id, assignment.CauseEvent);
+            ctx.Log.Locate(launchEvent, cell, l.Weapon, group);
 
             _inFlight.Add(new MissileInFlight
             {
@@ -183,8 +184,9 @@ namespace DeepWater.GeneralQuarters.Core.Magazine
                 if (!ctx.TargetAlive(m.TargetTruthId) || !ctx.TryTruth(m.TargetTruthId, out var target))
                 {
                     m.Done = true;
-                    ctx.Log.Add(ctx.Tick, EventKind.Note, Rule,
+                    int gone = ctx.Log.Add(ctx.Tick, EventKind.Note, Rule,
                         $"{m.Weapon} at track {m.TrackId} self-destructed: target already destroyed or gone", m.TrackId, m.LaunchEvent);
+                    ctx.Log.Locate(gone, p1, m.Weapon);
                     continue;
                 }
 
@@ -203,6 +205,7 @@ namespace DeepWater.GeneralQuarters.Core.Magazine
                         $"{m.Weapon} detonated {miss:0.0} m from track {m.TrackId} after {m.Entity.State.TimeOfFlight:0.0} s; Pk {m.Pk:0.00} → {(kill ? "KILL" : "survived")}");
                     int ev = ctx.Log.Add(ctx.Tick, kill ? EventKind.Kill : EventKind.Miss, Rule, text, m.TrackId, m.LaunchEvent,
                         root: RootKind.Chance, chance: root);
+                    ctx.Log.Locate(ev, p1, m.Weapon);
                     if (kill) ctx.RecordKill(m.TargetTruthId, m.TrackId, m.Weapon, ev);
                     continue;
                 }
@@ -211,9 +214,10 @@ namespace DeepWater.GeneralQuarters.Core.Magazine
                 if (phase == MissilePhase.Failed || phase == MissilePhase.Detonated)
                 {
                     m.Done = true;
-                    ctx.Log.Add(ctx.Tick, EventKind.Miss, Rule,
+                    int failed = ctx.Log.Add(ctx.Tick, EventKind.Miss, Rule,
                         System.FormattableString.Invariant($"{m.Weapon} at track {m.TrackId} failed after {m.Entity.State.TimeOfFlight:0.0} s (lifetime or energy)"),
                         m.TrackId, m.LaunchEvent);
+                    ctx.Log.Locate(failed, p1, m.Weapon);
                 }
             }
             _inFlight.RemoveAll(m => m.Done);

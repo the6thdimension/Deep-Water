@@ -34,6 +34,8 @@ namespace DeepWater.GeneralQuarters.Core.Magazine
         public DeterministicRng Rng;
         public EngagementLog Log;
         public List<KillReport> Kills;
+        /// <summary>The gun mount being stepped (its index in the loadout), for the events it logs; −1 otherwise.</summary>
+        public int Mount = -1;
 
         public void IndexWorld(IReadOnlyList<TruthTarget> world)
         {

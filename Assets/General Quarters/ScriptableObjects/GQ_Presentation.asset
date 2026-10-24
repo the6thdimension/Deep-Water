@@ -1,0 +1,213 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c3f85f6615db9046ba9fd061619616c, type: 3}
+  m_Name: GQ_Presentation
+  m_EditorClassIdentifier: DeepWater.GeneralQuarters::DeepWater.GeneralQuarters.ScriptableObjects.CombatPresentationSO
+  vlsLaunch:
+    prefab: {fileID: 4360338650832433355, guid: cc8f871936f5919469ab393849978548,
+      type: 3}
+    lifetimeS: 9
+    scale: 1
+  muzzleMk45:
+    prefab: {fileID: 1639923880572254326, guid: ed478eabbc847b04f9926da7a0a20700,
+      type: 3}
+    lifetimeS: 4.5
+    scale: 1
+  muzzleCiws:
+    prefab: {fileID: 4227165491272468380, guid: 49f8ad5861d280d46beb96dd4cbb2c91,
+      type: 3}
+    lifetimeS: 4
+    scale: 1
+  muzzleMk38:
+    prefab: {fileID: 3064692706744064930, guid: 3a1782bae1b7c3c42b5304cd721ef0ba,
+      type: 3}
+    lifetimeS: 5
+    scale: 1
+  airburst:
+    prefab: {fileID: 2900204703819743767, guid: 196eb0c6f2b43d04b88600dc496be165,
+      type: 3}
+    lifetimeS: 5.5
+    scale: 1
+  warhead:
+    prefab: {fileID: 2193018660663246054, guid: df7be687c0e3e71458c5503fae862682,
+      type: 3}
+    lifetimeS: 9
+    scale: 1
+  splash:
+    prefab: {fileID: 5540908186833870653, guid: 14efaca81d1a4214d866fe4042a35b87,
+      type: 3}
+    lifetimeS: 4.5
+    scale: 1
+  shipHit:
+    prefab: {fileID: 2193018660663246054, guid: df7be687c0e3e71458c5503fae862682,
+      type: 3}
+    lifetimeS: 9
+    scale: 1.4
+  fire:
+    prefab: {fileID: 4428334914886357511, guid: b6b89e4ff73939b4695f1e10e834c5b7,
+      type: 3}
+    lifetimeS: 14
+    scale: 2.5
+  systemSmoke:
+    prefab: {fileID: 2087409467846132449, guid: 5ce6e1606458d6646aa54c7bf4743200,
+      type: 3}
+    lifetimeS: 10
+    scale: 1
+  bowSpray:
+    prefab: {fileID: 858501106076099278, guid: fc2c7fa86b57b014a8b91419d36493b3, type: 3}
+    lifetimeS: 1.5
+    scale: 1
+  essmTrail:
+    prefab: {fileID: 3144542473573428440, guid: e024df4377f72e6428ad9f560a740678,
+      type: 3}
+    lifetimeS: 5
+    scale: 1
+  threatTrail:
+    prefab: {fileID: 4839843717025146090, guid: a9d298cb5cc5ac94ba7fb64e47444a47,
+      type: 3}
+    lifetimeS: 3
+    scale: 1
+  splashBelowAltitudeM: 20
+  tracerSpeedMs: 1100
+  splashFoamRadiusM: 12
+  splashFoamLevel: 0.5
+  wakeIntervalS: 0.25
+  wakeFoamRadiusM: 9
+  wakeFoamLevelAt30Kn: 0.35
+  wakeMinSpeedKn: 3
+  wakePoints:
+  - {x: 0, y: 0, z: -72}
+  - {x: -6, y: 0, z: -66}
+  - {x: 6, y: 0, z: -66}
+  - {x: -7, y: 0, z: 55}
+  - {x: 7, y: 0, z: 55}
+  bowSprayRateAt30Kn: 40
+  bowSprayPoint: {x: 0, y: 1.5, z: 68}
+  mounts:
+  - mountName: Mk 45
+    trainTransform: GQ_Mk45_Train
+    elevateTransform: GQ_Mk45_Elevate
+    trainRateDegS: 30
+    elevateRateDegS: 20
+    barrelM: 7.1
+    holdS: 4
+  - mountName: CIWS fwd
+    trainTransform: GQ_CIWS_Fwd_Train
+    elevateTransform: GQ_CIWS_Fwd_Elevate
+    trainRateDegS: 115
+    elevateRateDegS: 86
+    barrelM: 2.4
+    holdS: 3
+  - mountName: CIWS aft
+    trainTransform: GQ_CIWS_Aft_Train
+    elevateTransform: GQ_CIWS_Aft_Elevate
+    trainRateDegS: 115
+    elevateRateDegS: 86
+    barrelM: 2.4
+    holdS: 3
+  - mountName: Mk 38 port
+    trainTransform: GQ_Mk38_Port_Train
+    elevateTransform: 
+    trainRateDegS: 60
+    elevateRateDegS: 0
+    barrelM: 3.6
+    holdS: 3
+  - mountName: Mk 38 stbd
+    trainTransform: GQ_Mk38_Stbd_Train
+    elevateTransform: 
+    trainRateDegS: 60
+    elevateRateDegS: 0
+    barrelM: 3.6
+    holdS: 3
+  vlsCellPrefixes:
+  - GQ_VLS_F_
+  - GQ_VLS_A_
+  hatchSize: {x: 0.62, y: 0.06, z: 0.62}
+  hatchMaterial: {fileID: 2100000, guid: 11d3b1aecc1556848890ab2f2cd1c01c, type: 2}
+  hatchOpenS: 0.3
+  hatchHoldS: 2.5
+  hatchCloseS: 0.6
+  hatchOpenDeg: 110
+  vlsLaunchSound:
+    clip: {fileID: 8300000, guid: 87444d04163f42e43b027b5536bd85ca, type: 3}
+    synth: 8
+    volume: 1
+    maxDistanceM: 6000
+    minDistanceM: 40
+    pitch: 1
+  mk45Sound:
+    clip: {fileID: 0}
+    synth: 1
+    volume: 1
+    maxDistanceM: 8000
+    minDistanceM: 60
+    pitch: 1
+  ciwsSound:
+    clip: {fileID: 0}
+    synth: 2
+    volume: 0.9
+    maxDistanceM: 4000
+    minDistanceM: 30
+    pitch: 1
+  mk38Sound:
+    clip: {fileID: 0}
+    synth: 3
+    volume: 0.8
+    maxDistanceM: 3000
+    minDistanceM: 20
+    pitch: 1
+  airburstSound:
+    clip: {fileID: 0}
+    synth: 4
+    volume: 0.7
+    maxDistanceM: 9000
+    minDistanceM: 80
+    pitch: 1
+  detonationSound:
+    clip: {fileID: 8300000, guid: 2240071e81f3f51438b75123620477f8, type: 3}
+    synth: 9
+    volume: 1
+    maxDistanceM: 12000
+    minDistanceM: 100
+    pitch: 1
+  splashSound:
+    clip: {fileID: 0}
+    synth: 5
+    volume: 0.6
+    maxDistanceM: 3000
+    minDistanceM: 30
+    pitch: 1
+  shipHitSound:
+    clip: {fileID: 0}
+    synth: 6
+    volume: 1
+    maxDistanceM: 12000
+    minDistanceM: 100
+    pitch: 1
+  alarmSound:
+    clip: {fileID: 0}
+    synth: 7
+    volume: 0.5
+    maxDistanceM: 0
+    minDistanceM: 0
+    pitch: 1
+  speedOfSoundMs: 343
+  voices: 24
+  provenance: "AUTHORED looks (slice 6, G30). Code-built particle systems on DeepWater/General
+    Quarters/Particle (HDRP). HD_Naval_Explosion and the VFX Arsenal flames were
+    tried first and did not fit: the built-in particle shader draws untextured quads
+    under HDRP, and the flames are about a metre across and too dim under daylight
+    exposure.\nPublic: Phalanx 4,500 rounds/min in 100-round bursts (1.33 s), 115\xB0/s
+    train and 86\xB0/s elevation; Mk 38 180 rounds/min. Measured on the Blender model:
+    Mk 45 barrel 7.1 m, CIWS 2.4 m, Mk 38 3.6 m; waterline 141 m.\nSounds: VLS launch
+    and detonation are the repo's FDS recordings; the rest are synthesised stand-ins
+    (G32) until recordings are dropped in."

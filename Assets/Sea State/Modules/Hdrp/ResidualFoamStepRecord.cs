@@ -17,5 +17,7 @@ namespace DeepWater.Sea.Modules.Hdrp
         /// <summary>Index shift the step applied to the previous field.</summary>
         public int2 Shift;
         public SeaFrameComponent[] Components;
+        /// <summary>Foam deposited after the step (see <see cref="ResidualFoamMath.ApplyDeposits"/>); empty when none.</summary>
+        public FoamDeposit[] Deposits;
     }
 }

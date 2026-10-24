@@ -78,6 +78,9 @@ namespace DeepWater.GeneralQuarters.Core.Magazine
             public float Pk;
             public float RangeM;
             public int FiredEvent;
+            /// <summary>Where the burst was aimed: the track's predicted position at impact.</summary>
+            public Vector3 AimPoint;
+            public int Mount;
         }
 
         readonly GunMountProfileData _profile;
@@ -112,10 +115,16 @@ namespace DeepWater.GeneralQuarters.Core.Magazine
             _readyTick = ctx.Tick + Mathf.Max(1, Mathf.RoundToInt(cycle / ctx.TickSeconds));
             Rounds -= _profile.BurstRounds;
 
+            Vector3 aimPoint = track.PredictedPosition(impact, ctx.TickSeconds);
             int fired = ctx.Log.Add(ctx.Tick, EventKind.BurstFired, Rule,
                 System.FormattableString.Invariant($"{_profile.Name} fired {_profile.BurstRounds} rounds at track {track.Id} ({range:0} m, time of flight {tof:0.0} s, Pk {pk:0.00}); {Rounds} left"),
                 track.Id, track.CreatedEvent, cause, causeC: ctx.Doctrine.RoeEvent);
-            _bursts.Add(new Burst { TrackId = track.Id, TargetTruthId = track.TruthId, ImpactTick = impact, Pk = pk, RangeM = range, FiredEvent = fired });
+            ctx.Log.Locate(fired, aimPoint, _profile.Weapon, ctx.Mount);
+            _bursts.Add(new Burst
+            {
+                TrackId = track.Id, TargetTruthId = track.TruthId, ImpactTick = impact, Pk = pk, RangeM = range, FiredEvent = fired,
+                AimPoint = aimPoint, Mount = ctx.Mount,
+            });
 
             if (directedIndex >= 0)
             {
@@ -134,7 +143,8 @@ namespace DeepWater.GeneralQuarters.Core.Magazine
                 if (b.ImpactTick > ctx.Tick) continue;
                 if (!ctx.TargetAlive(b.TargetTruthId))
                 {
-                    ctx.Log.Add(ctx.Tick, EventKind.Note, Rule, $"{_profile.Name} burst at track {b.TrackId} wasted: target already destroyed", b.TrackId, b.FiredEvent);
+                    int wasted = ctx.Log.Add(ctx.Tick, EventKind.Note, Rule, $"{_profile.Name} burst at track {b.TrackId} wasted: target already destroyed", b.TrackId, b.FiredEvent);
+                    ctx.Log.Locate(wasted, b.AimPoint, _profile.Weapon, b.Mount);
                 }
                 else
                 {
@@ -142,6 +152,7 @@ namespace DeepWater.GeneralQuarters.Core.Magazine
                     int ev = ctx.Log.Add(ctx.Tick, kill ? EventKind.Kill : EventKind.Miss, Rule,
                         System.FormattableString.Invariant($"{_profile.Name} burst arrived at track {b.TrackId} ({b.RangeM:0} m); Pk {b.Pk:0.00} → {(kill ? "KILL" : "survived")}"),
                         b.TrackId, b.FiredEvent, root: RootKind.Chance, chance: root);
+                    ctx.Log.Locate(ev, ctx.TryTruth(b.TargetTruthId, out TruthTarget target) ? target.Position : b.AimPoint, _profile.Weapon, b.Mount);
                     if (kill) ctx.RecordKill(b.TargetTruthId, b.TrackId, _profile.Weapon, ev);
                 }
                 _bursts.RemoveAt(i--);

@@ -254,6 +254,8 @@ namespace DeepWater.Sea.Examples.Editor
                         Resolution = n, SizeM = sizeM, Centre = step.Centre, Shift = step.Shift,
                         DtS = step.DtS, Params = step.Params,
                     }.Schedule(n * n, 512).Complete();
+                    if (step.Deposits != null && step.Deposits.Length > 0)
+                        ResidualFoamMath.ApplyDeposits(b, n, step.Centre, sizeM, step.Params.Cap, step.Deposits, step.Deposits.Length);
                     (a, b) = (b, a);
                 }
                 return a.ToArray();

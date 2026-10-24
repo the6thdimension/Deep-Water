@@ -6,9 +6,12 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using DeepWater.GeneralQuarters.Examples;
 using DeepWater.GeneralQuarters.Modules.Combat;
+using DeepWater.GeneralQuarters.Modules.Presentation;
 using DeepWater.GeneralQuarters.Modules.Propulsion;
 using DeepWater.GeneralQuarters.ScriptableObjects;
 using DeepWater.Sea.Modules.Buoyancy;
+using DeepWater.Sea.Modules.Hdrp;
+using UnityEngine.Rendering;
 using Object = UnityEngine.Object;
 
 namespace DeepWater.GeneralQuarters.Editor
@@ -48,12 +51,18 @@ namespace DeepWater.GeneralQuarters.Editor
             if (AssetDatabase.LoadAssetAtPath<SceneAsset>(DemoScene) == null && !EditorApplication.ExecuteMenuItem(BuildDemoMenu))
                 return $"[GQ] {DemoScene} is missing and '{BuildDemoMenu}' could not build it.";
 
-            string assets = Ddg51CombatData.Build();
+            string assets = Ddg51CombatData.Build() + System.Environment.NewLine + CombatEffectsBuilder.Build();
             EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);   // the old range may be the open scene
-            BackUpPrevious();
             const string folder = "Assets/General Quarters/Examples/Scenes";
             if (!AssetDatabase.IsValidFolder(folder)) AssetDatabase.CreateFolder("Assets/General Quarters/Examples", "Scenes");
-            if (!AssetDatabase.CopyAsset(DemoScene, RangeScene)) return $"[GQ] Could not copy {DemoScene} to {RangeScene}.";
+            if (File.Exists(RangeScene))
+            {
+                // Overwrite the file in place, so the scene keeps its GUID (a delete and copy gave it a new one every rebuild).
+                BackUpPrevious();
+                File.Copy(DemoScene, RangeScene, true);
+                AssetDatabase.ImportAsset(RangeScene, ImportAssetOptions.ForceUpdate);
+            }
+            else if (!AssetDatabase.CopyAsset(DemoScene, RangeScene)) return $"[GQ] Could not copy {DemoScene} to {RangeScene}.";
             var scene = EditorSceneManager.OpenScene(RangeScene, OpenSceneMode.Single);
 
             // Out: the demo's hulls, its selector (its number keys and Tab would fight the range's), its camera script.
@@ -104,6 +113,22 @@ namespace DeepWater.GeneralQuarters.Editor
             var chase = cam.gameObject.AddComponent<ShipChaseCamera>();
             Set(chase, "target", ship.transform);
             Set(chase, "controls", connInput);
+            // Motion blur off for the frames after a camera cut (G33).
+            var cut = cam.gameObject.AddComponent<Volume>();
+            cut.isGlobal = true;
+            cut.priority = 100f;
+            cut.weight = 0f;
+            cut.sharedProfile = AssetDatabase.LoadAssetAtPath<VolumeProfile>(CombatEffectsBuilder.CameraCutProfile);
+            Set(chase, "cutVolume", cut);
+
+            // Presentation (slice 6): effects, mounts, hatches, foam and sound, read from the combat log.
+            var presentation = rangeGo.AddComponent<CombatPresentation>();
+            Set(presentation, "combat", combat);
+            Set(presentation, "presentation", AssetDatabase.LoadAssetAtPath<CombatPresentationSO>(CombatEffectsBuilder.PresentationAsset));
+            var sea = Object.FindAnyObjectByType<HdrpSeaRenderer>();
+            if (sea != null) Set(presentation, "sea", sea); else Debug.LogWarning("[GQ] No HdrpSeaRenderer in the demo copy: splashes and the wake leave no foam.");
+            Set(presentation, "listener", cam.transform);
+            Set(proxies, "presentation", presentation);
             cam.transform.SetPositionAndRotation(new Vector3(-150f, 40f, -200f), Quaternion.LookRotation(new Vector3(150f, -30f, 200f)));
 
             var director = rangeGo.AddComponent<RangeDirector>();
@@ -138,7 +163,6 @@ namespace DeepWater.GeneralQuarters.Editor
             Directory.CreateDirectory(dir);
             string stamp = DateTime.Now.ToString("yyyyMMdd-HHmm");
             File.Copy(RangeScene, Path.Combine(dir, $"GQ_Range.pre-rebuild-backup-{stamp}.unity"), true);
-            AssetDatabase.DeleteAsset(RangeScene);
         }
 
         // Serialized-field wiring through SerializedObject: a renamed field fails loudly (no reflection, AP1).

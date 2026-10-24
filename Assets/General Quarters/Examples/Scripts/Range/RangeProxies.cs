@@ -4,18 +4,21 @@ using DeepWater.GeneralQuarters.Core;
 using DeepWater.GeneralQuarters.Core.Magazine;
 using DeepWater.GeneralQuarters.Core.World;
 using DeepWater.GeneralQuarters.Modules.Combat;
+using DeepWater.GeneralQuarters.Modules.Presentation;
 
 namespace DeepWater.GeneralQuarters.Examples
 {
     /// <summary>
     /// Stand-in models for what the combat core is flying: the raid's threats and the ship's missiles in flight,
     /// placed each frame from the core's state (extrapolated from the last fixed step by velocity, so they don't
-    /// stutter between steps). Presentation only, never read back by the simulation. Slice 6 replaces them with
-    /// the real presentation pass (trails, plumes, splashes).
+    /// stutter between steps). Presentation only, never read back by the simulation. With a presentation component they
+    /// carry smoke trails (slice 6) that stay in the air after the stand-in is gone.
     /// </summary>
     public sealed class RangeProxies : MonoBehaviour
     {
         [SerializeField] ShipCombat combat;
+        [Tooltip("Gives the stand-ins their trails. Empty: no trails.")]
+        [SerializeField] CombatPresentation presentation;
         [Tooltip("Model for the ship's missiles (ESSM). A capsule stands in when empty.")]
         [SerializeField] GameObject missileModel;
         [Tooltip("Model for hostile anti-ship missiles. A capsule stands in when empty.")]
@@ -37,6 +40,7 @@ namespace DeepWater.GeneralQuarters.Examples
         readonly List<int> _goneThreats = new List<int>();
         readonly List<MissileInFlight> _goneMissiles = new List<MissileInFlight>();
         readonly Dictionary<int, TargetKind> _kindOf = new Dictionary<int, TargetKind>();
+        readonly Dictionary<Transform, GameObject> _trails = new Dictionary<Transform, GameObject>();
 
         public void Bind(ShipCombat host) => combat = host;
 
@@ -63,6 +67,8 @@ namespace DeepWater.GeneralQuarters.Examples
                 {
                     proxy = Take(t.Kind);
                     proxy.name = $"{t.Kind} {t.Id}";
+                    Place(proxy, t.Position + t.Velocity * lead, t.Velocity);
+                    if (t.Kind == TargetKind.AntiShipMissile) StartTrail(proxy, false);
                     _threats.Add(t.Id, proxy);
                     _kindOf[t.Id] = t.Kind;
                 }
@@ -91,6 +97,8 @@ namespace DeepWater.GeneralQuarters.Examples
                     proxy.gameObject.SetActive(true);
                     proxy.name = $"{m.Weapon} at track {m.TrackId}";
                     _missiles.Add(m, proxy);
+                    Place(proxy, m.Entity.State.Position, m.Entity.State.Velocity);
+                    StartTrail(proxy, true);
                 }
                 Place(proxy, m.Entity.State.Position + m.Entity.State.Velocity * lead, m.Entity.State.Velocity);
                 _missilesNewestFirst.Add(proxy);
@@ -100,6 +108,7 @@ namespace DeepWater.GeneralQuarters.Examples
             for (int i = 0; i < _goneMissiles.Count; i++)
             {
                 Transform proxy = _missiles[_goneMissiles[i]];
+                StopTrail(proxy, true);
                 proxy.gameObject.SetActive(false);
                 _freeMissiles.Push(proxy);
                 _missiles.Remove(_goneMissiles[i]);
@@ -112,9 +121,23 @@ namespace DeepWater.GeneralQuarters.Examples
             foreach (KeyValuePair<int, Transform> kv in _threats) Give(kv.Value, _kindOf[kv.Key]);
             _threats.Clear();
             _kindOf.Clear();
-            foreach (Transform proxy in _missiles.Values) { proxy.gameObject.SetActive(false); _freeMissiles.Push(proxy); }
+            foreach (Transform proxy in _missiles.Values) { StopTrail(proxy, true); proxy.gameObject.SetActive(false); _freeMissiles.Push(proxy); }
             _missiles.Clear();
             _missilesNewestFirst.Clear();
+        }
+
+        void StartTrail(Transform proxy, bool own)
+        {
+            if (presentation == null) return;
+            GameObject trail = presentation.AttachTrail(proxy, own);
+            if (trail != null) _trails[proxy] = trail;
+        }
+
+        void StopTrail(Transform proxy, bool own)
+        {
+            if (presentation == null || !_trails.TryGetValue(proxy, out GameObject trail)) return;
+            presentation.ReleaseTrail(trail, own);
+            _trails.Remove(proxy);
         }
 
         static bool Contains(IReadOnlyList<MissileInFlight> list, MissileInFlight m)
@@ -142,6 +165,7 @@ namespace DeepWater.GeneralQuarters.Examples
 
         void Give(Transform proxy, TargetKind kind)
         {
+            StopTrail(proxy, false);
             proxy.gameObject.SetActive(false);
             (kind == TargetKind.Aircraft ? _freeAircraft : _freeThreats).Push(proxy);
         }

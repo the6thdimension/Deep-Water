@@ -63,6 +63,10 @@ namespace DeepWater.GeneralQuarters.Core.Helm
                     c.Course = CourseMode.Manual;
                     c.RudderDeg = order.RudderDeg;
                     break;
+                case OrderKind.Course:
+                    c.Course = CourseMode.Hold;
+                    c.CourseDeg = CompassMath.Normalize(order.CourseDeg);
+                    break;
                 case OrderKind.Route:
                     c.Course = CourseMode.Route;
                     c.RouteId = order.RouteId;

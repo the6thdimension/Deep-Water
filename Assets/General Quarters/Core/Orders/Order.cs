@@ -22,6 +22,8 @@ namespace DeepWater.GeneralQuarters.Core.Orders
         Rudder = 6,
         /// <summary>Follow a route the Helm holds, at the order's speed.</summary>
         Route = 7,
+        /// <summary>Steer a course and leave the engines as they are ("come to 090").</summary>
+        Course = 8,
     }
 
     /// <summary>
@@ -84,6 +86,9 @@ namespace DeepWater.GeneralQuarters.Core.Orders
         public static Order Rudder(OrderIssuer issuer, float rudderDeg) =>
             new Order { Kind = OrderKind.Rudder, Issuer = issuer, RudderDeg = rudderDeg, TrackId = -1 };
 
+        public static Order SteerCourse(OrderIssuer issuer, float courseDeg) =>
+            new Order { Kind = OrderKind.Course, Issuer = issuer, CourseDeg = courseDeg, TrackId = -1 };
+
         public static Order FollowRoute(OrderIssuer issuer, int routeId, float speedKn) =>
             new Order { Kind = OrderKind.Route, Issuer = issuer, RouteId = routeId, SpeedKn = speedKn, TrackId = -1 };
 
@@ -108,6 +113,7 @@ namespace DeepWater.GeneralQuarters.Core.Orders
             OrderKind.Bell => System.FormattableString.Invariant($"#{Sequence} t{Tick} {Issuer}: all engines {Bell}"),
             OrderKind.Rudder => System.FormattableString.Invariant($"#{Sequence} t{Tick} {Issuer}: rudder {RudderDeg:0}°"),
             OrderKind.Route => System.FormattableString.Invariant($"#{Sequence} t{Tick} {Issuer}: follow route {RouteId} at {SpeedKn:0} kn"),
+            OrderKind.Course => System.FormattableString.Invariant($"#{Sequence} t{Tick} {Issuer}: steer {CourseDeg:000}"),
             _ => System.FormattableString.Invariant($"#{Sequence} t{Tick} {Issuer}: ROE {Roe}"),
         };
     }

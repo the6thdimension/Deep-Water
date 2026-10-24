@@ -80,6 +80,20 @@ The gate: a scripted raid against the destroyer plays end to end on the Sea Stat
   - **Cause:** at L0 there is no roll added inertia, no roll–sway–yaw coupling (4-DOF MMG) and no Ikeda roll damping.
   - **First fix:** the roll moment had left out the sway added-mass reaction. That made the swing 7° inward then 17.5° outward; with the reaction it is 2.9° inward and 13.1° outward.
 
+### Conn stand-in (2026-10-24, ahead of slice 5, at SIX's request: "a way for me to give her helm and bell orders")
+- [x] **Deep Water → General Quarters → Drive the DDG:** in the Sea State demo, play mode with the DDG under way at 12 kn. It adds the conn panel and a chase camera, and nothing is saved to the scene.
+- [x] **The 'Conn' action map** in the project-wide actions (`Assets/RHMILCOM.inputactions`, Project Settings → Input System Package). It has three control schemes: Keyboard&Mouse (a laptop), Gamepad (Xbox and any pad Unity recognises), Joystick (generic HID pads).
+  - **Rudder:** proportional on sticks, standard rudder on keys, Shift for hard over; let go and she steadies.
+  - **Bells:** ring up and down.
+  - **Course:** turned while held.
+  - **Buttons:** steady, midships, all stop.
+  - **Camera:** chase or orbit, zoom.
+- [x] **Code:** `Examples/` holds ConnInput (the one reader), ConnLogic (pure), ConnController, ConnPanel (IMGUI) and ShipChaseCamera. There is a new course-only order (`Order.SteerCourse`), and `ShipDrive` stamps order sequence numbers.
+- [x] **Tests:** ConnLogicTests, plus ConnBindingTests on virtual keyboard and mouse, XInput and generic HID devices. 102/102 with Sea State.
+  - **Play mode:** a virtual gamepad and keyboard drove the full chain (stick rudder, release to steady, d-pad bell up, S bell down, E course change).
+  - **Not tested:** physical controllers. None was plugged in.
+- [ ] **Slice 5** replaces the IMGUI panel with the real helm panel and moves the conn into the range scene.
+
 ### Slice 5 — The range
 - [ ] Range scene on the Sea State sea, with the destroyer prefab (new) and the raid.
 - [ ] Tactical display (track picture, weapon assignment, doctrine and ROE controls), helm panel, orbit and chase cameras.

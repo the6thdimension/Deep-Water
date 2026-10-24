@@ -162,6 +162,7 @@ namespace DeepWater.GeneralQuarters.Core
                 case OrderKind.Bell:
                 case OrderKind.Rudder:
                 case OrderKind.Route:
+                case OrderKind.Course:
                     Helm = HelmCommand.Apply(Helm, o);
                     break;
                 case OrderKind.CeaseFire:

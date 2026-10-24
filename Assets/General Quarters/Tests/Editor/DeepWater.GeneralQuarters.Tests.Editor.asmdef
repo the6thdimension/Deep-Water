@@ -10,7 +10,10 @@
         "DeepWater.Sea",
         "Unity.Mathematics",
         "Unity.Collections",
-        "Unity.Burst"
+        "Unity.Burst",
+        "DeepWater.GeneralQuarters.Examples",
+        "Unity.InputSystem",
+        "Unity.InputSystem.TestFramework"
     ],
     "includePlatforms": [
         "Editor"

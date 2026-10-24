@@ -1,0 +1,17 @@
+{
+    "name": "DeepWater.GeneralQuarters.Examples",
+    "rootNamespace": "DeepWater.GeneralQuarters.Examples",
+    "references": [
+        "DeepWater.GeneralQuarters",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

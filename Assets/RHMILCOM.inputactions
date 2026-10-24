@@ -189,7 +189,774 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "Conn",
+            "id": "795b0c30-6fde-4e8b-8323-54e9a79d50fb",
+            "actions": [
+                {
+                    "name": "Rudder",
+                    "type": "Value",
+                    "id": "2f8ba422-fc4c-456e-b453-6a08226aa52f",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "RudderHard",
+                    "type": "Button",
+                    "id": "730883c5-1b9b-4460-a41f-f3e955b3e2cb",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "CourseChange",
+                    "type": "Value",
+                    "id": "bc74f96e-9c95-469e-b422-e0d96f25caf3",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "RingUp",
+                    "type": "Button",
+                    "id": "eaa56e00-d54c-4459-b1db-bf729d806c6f",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "RingDown",
+                    "type": "Button",
+                    "id": "73692723-3d85-4672-aab2-ec7c3f93ef68",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Steady",
+                    "type": "Button",
+                    "id": "7700cbfb-e644-4816-a715-623d6862951e",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Midships",
+                    "type": "Button",
+                    "id": "d479d283-37ab-4c60-bf6f-127c63766054",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "AllStop",
+                    "type": "Button",
+                    "id": "b39f1d8f-b31a-4a9d-aeb7-e936523da2fa",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "CameraMode",
+                    "type": "Button",
+                    "id": "78409e61-52a9-472f-a02e-227ebb5c0ba1",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "TogglePanel",
+                    "type": "Button",
+                    "id": "b4cd6fac-a212-4d1c-b847-7972ef3cf745",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "CameraOrbit",
+                    "type": "Value",
+                    "id": "b203463d-6af5-4ff9-a7ba-3a9a279c9188",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "CameraDrag",
+                    "type": "Value",
+                    "id": "5cbbf894-3eb7-4639-857b-addd478b9194",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "CameraZoom",
+                    "type": "Value",
+                    "id": "dfeab3d7-1ca9-4526-8835-a4f144b3e425",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "CameraScroll",
+                    "type": "Value",
+                    "id": "a64d9466-5756-4162-8c4e-8ba7fd0e122f",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "be9a0006-f157-4252-9c3f-eac7fd3719cb",
+                    "path": "<Gamepad>/leftStick/x",
+                    "interactions": "",
+                    "processors": "AxisDeadzone(min=0.15,max=1)",
+                    "groups": "Gamepad",
+                    "action": "Rudder",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "44d4dc0a-7078-48fd-921a-d5f9c011973e",
+                    "path": "<Joystick>/stick/x",
+                    "interactions": "",
+                    "processors": "AxisDeadzone(min=0.15,max=1)",
+                    "groups": "Joystick",
+                    "action": "Rudder",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "A D",
+                    "id": "ae9020a7-a791-4ac0-82b6-01fc0abbe668",
+                    "path": "1DAxis",
+                    "interactions": "",
+                    "processors": "Scale(factor=0.4286)",
+                    "groups": "",
+                    "action": "Rudder",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "negative",
+                    "id": "036d6526-38b9-433b-8841-bedbe0d7df30",
+                    "path": "<Keyboard>/a",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Rudder",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "positive",
+                    "id": "5a327bfa-5ebe-4013-9484-3adfb853c8b7",
+                    "path": "<Keyboard>/d",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Rudder",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "Arrows",
+                    "id": "781ec79b-41bd-4739-8b16-78325e0a27dd",
+                    "path": "1DAxis",
+                    "interactions": "",
+                    "processors": "Scale(factor=0.4286)",
+                    "groups": "",
+                    "action": "Rudder",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "negative",
+                    "id": "17879554-67ce-40d6-a377-939ba3a3e71f",
+                    "path": "<Keyboard>/leftArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Rudder",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "positive",
+                    "id": "3a97c748-dbb3-4841-9ad1-cda2724bf724",
+                    "path": "<Keyboard>/rightArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Rudder",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "3797e32b-39f7-45b9-b0d2-5d0a69a9c7ce",
+                    "path": "<Keyboard>/shift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "RudderHard",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "Q E",
+                    "id": "39aac212-11f9-416f-a812-662871a03687",
+                    "path": "1DAxis",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CourseChange",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "negative",
+                    "id": "bae93d19-59fd-4014-b7cb-1e44d9fa45b6",
+                    "path": "<Keyboard>/q",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "CourseChange",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "positive",
+                    "id": "bb125744-0bdb-46eb-ada9-199e1b2368c2",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "CourseChange",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "D-pad",
+                    "id": "87b67826-436c-4d15-b136-ca29c5fa8251",
+                    "path": "1DAxis",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CourseChange",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "negative",
+                    "id": "26253c1e-2335-4d89-8b0a-efc1d96a33a6",
+                    "path": "<Gamepad>/dpad/left",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "CourseChange",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "positive",
+                    "id": "5f40a5da-0f09-494b-a2d8-2e2c3468b0f2",
+                    "path": "<Gamepad>/dpad/right",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "CourseChange",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "Hat",
+                    "id": "d928968b-d2e5-4707-a9a8-ff6a0fc33e68",
+                    "path": "1DAxis",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CourseChange",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "negative",
+                    "id": "e00387fb-419f-44bf-b438-ff5d0f587fb0",
+                    "path": "<Joystick>/hat/left",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Joystick",
+                    "action": "CourseChange",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "positive",
+                    "id": "6356d169-a4f5-42e2-8470-9b8c7cd8beb0",
+                    "path": "<Joystick>/hat/right",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Joystick",
+                    "action": "CourseChange",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "ee9718c6-1684-43f2-892e-90b4fefef8b5",
+                    "path": "<Keyboard>/w",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "RingUp",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "327537d5-c900-4cfd-bd8e-f68bfbb23cff",
+                    "path": "<Keyboard>/upArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "RingUp",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "33a2f28d-fa06-4839-8114-861747ba86d5",
+                    "path": "<Gamepad>/dpad/up",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "RingUp",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1c2312a0-a6ca-49d1-9ad5-924a8df8afb6",
+                    "path": "<Gamepad>/rightShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "RingUp",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "544d41ee-38ed-45bf-9900-22d860d61111",
+                    "path": "<Joystick>/hat/up",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Joystick",
+                    "action": "RingUp",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5b259b77-7d65-48c5-a7fb-568a0079936b",
+                    "path": "<Keyboard>/s",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "RingDown",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "20972ec1-e525-41ce-9e92-25219b061c8d",
+                    "path": "<Keyboard>/downArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "RingDown",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7d694b04-90ac-4125-9709-4d6edaa39a70",
+                    "path": "<Gamepad>/dpad/down",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "RingDown",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2e4c411e-6021-4a27-ab20-b56c3c91dd35",
+                    "path": "<Gamepad>/leftShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "RingDown",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8217191b-9bec-49f4-ab5b-39c616077b46",
+                    "path": "<Joystick>/hat/down",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Joystick",
+                    "action": "RingDown",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5c65f763-d0b9-4756-b9f4-357bc5401b17",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Steady",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "63339cf3-b077-4efe-a44d-9ca6e883fe0b",
+                    "path": "<Gamepad>/buttonSouth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "Steady",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e3819ed9-eac1-47ba-a206-b5931f8e4930",
+                    "path": "<Joystick>/trigger",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Joystick",
+                    "action": "Steady",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3ed53164-c130-4af5-b993-1f5d4c480d4e",
+                    "path": "<Keyboard>/x",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Midships",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "90f79dcd-48b7-4141-8a94-4b6121c00ea2",
+                    "path": "<Gamepad>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "Midships",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e016ce48-a4d3-4ad7-aee6-64986cab9c30",
+                    "path": "<Joystick>/button2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Joystick",
+                    "action": "Midships",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5f6811dd-e386-4de9-96c1-a6dc91907d7f",
+                    "path": "<Keyboard>/z",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "AllStop",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8930ff4b-36dd-44cd-b32c-26d7b2666757",
+                    "path": "<Gamepad>/buttonNorth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "AllStop",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "abb4a5c9-a82d-4be5-89c4-945ff804b42c",
+                    "path": "<Joystick>/button3",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Joystick",
+                    "action": "AllStop",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8f3d5cb4-cc04-4be6-859d-466dcac1380b",
+                    "path": "<Keyboard>/v",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "CameraMode",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "bc29b930-2d8c-4f71-96b7-b30a557e3557",
+                    "path": "<Gamepad>/buttonWest",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "CameraMode",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e8acc3dd-bb69-4374-b84e-e4394222d3d2",
+                    "path": "<Joystick>/button4",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Joystick",
+                    "action": "CameraMode",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ab2fd2e3-e90a-4349-a799-3da4771617c8",
+                    "path": "<Keyboard>/h",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "TogglePanel",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "61969c87-4413-4c6b-bebb-4a9b41a2a098",
+                    "path": "<Gamepad>/select",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "TogglePanel",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c5d0cfb5-9e26-4cd3-85cf-1871c8088c8c",
+                    "path": "<Joystick>/button5",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Joystick",
+                    "action": "TogglePanel",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "64e453fd-9cf9-4a32-a79a-928e406d8846",
+                    "path": "<Gamepad>/rightStick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "CameraOrbit",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "Right-drag",
+                    "id": "24e7a2e4-0b2d-4937-ae73-7ed06e08e9c0",
+                    "path": "OneModifier",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CameraDrag",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "modifier",
+                    "id": "6255faee-3836-4299-a1b7-095cfd8fd7cf",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "CameraDrag",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "binding",
+                    "id": "008accc1-a5aa-4e40-bb4e-2d08ed1cb20e",
+                    "path": "<Mouse>/delta",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "CameraDrag",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "Triggers",
+                    "id": "f24a7230-82a5-440c-9ce5-5d2656699b41",
+                    "path": "1DAxis",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CameraZoom",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "negative",
+                    "id": "8486948c-ce85-435f-bda0-d803b1be2268",
+                    "path": "<Gamepad>/leftTrigger",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "CameraZoom",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "positive",
+                    "id": "a492fe53-5a1e-43fc-bf4b-9b4dae7f3eaa",
+                    "path": "<Gamepad>/rightTrigger",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "CameraZoom",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "R F",
+                    "id": "3f5ad773-1fc4-4378-bfdb-94ddd533ef7b",
+                    "path": "1DAxis",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CameraZoom",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "negative",
+                    "id": "1e65b41f-1092-4887-85ec-15ea5aebc49a",
+                    "path": "<Keyboard>/f",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "CameraZoom",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "positive",
+                    "id": "aeef4c00-8545-44d5-91b8-f9d41a3e4af7",
+                    "path": "<Keyboard>/r",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "CameraZoom",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "accf48fb-2bfa-493d-b8d4-8ff6ea1c41aa",
+                    "path": "<Mouse>/scroll/y",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "CameraScroll",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
-    "controlSchemes": []
+    "controlSchemes": [
+        {
+            "name": "Keyboard&Mouse",
+            "bindingGroup": "Keyboard&Mouse",
+            "devices": [
+                {
+                    "devicePath": "<Keyboard>",
+                    "isOptional": false,
+                    "isOR": false
+                },
+                {
+                    "devicePath": "<Mouse>",
+                    "isOptional": false,
+                    "isOR": false
+                }
+            ]
+        },
+        {
+            "name": "Gamepad",
+            "bindingGroup": "Gamepad",
+            "devices": [
+                {
+                    "devicePath": "<Gamepad>",
+                    "isOptional": false,
+                    "isOR": false
+                }
+            ]
+        },
+        {
+            "name": "Joystick",
+            "bindingGroup": "Joystick",
+            "devices": [
+                {
+                    "devicePath": "<Joystick>",
+                    "isOptional": false,
+                    "isOR": false
+                }
+            ]
+        }
+    ]
 }

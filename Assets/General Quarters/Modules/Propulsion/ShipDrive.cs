@@ -44,8 +44,18 @@ namespace DeepWater.GeneralQuarters.Modules.Propulsion
         public MmgResult LastForces { get; private set; }
         public ShipMotion Motion { get; private set; }
 
-        /// <summary>Apply a helm, bell, rudder or route order now.</summary>
-        public void Issue(in Order order) => Command = HelmCommand.Apply(Command, order);
+        int _sequence;
+
+        /// <summary>
+        /// Apply a helm, bell, rudder, course or route order now, stamped with the next sequence number: the Helm
+        /// starts its controllers fresh on each new order, and tells orders apart by that number.
+        /// </summary>
+        public void Issue(in Order order)
+        {
+            Order stamped = order;
+            stamped.Sequence = ++_sequence;
+            Command = HelmCommand.Apply(Command, stamped);
+        }
 
         void Awake()
         {

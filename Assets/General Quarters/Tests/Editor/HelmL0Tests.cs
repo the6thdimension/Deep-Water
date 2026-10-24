@@ -60,6 +60,12 @@ namespace DeepWater.GeneralQuarters.Tests
 
             c = HelmCommand.Apply(c, Order.SetRoe(OrderIssuer.Captain, Roe.WeaponsHold));
             Assert.AreEqual(CourseMode.Manual, c.Course, "non-helm orders change nothing");
+
+            c = HelmCommand.Apply(c, Order.SteerCourse(OrderIssuer.Captain, 370f));
+            Assert.AreEqual(CourseMode.Hold, c.Course, "a course order takes the wheel back");
+            Assert.AreEqual(10f, c.CourseDeg, 1e-4f);
+            Assert.AreEqual(SpeedMode.Bell, c.Speed, "and leaves the engines alone");
+            Assert.AreEqual(EngineBell.AheadFlank, c.Bell);
         }
 
         [Test]

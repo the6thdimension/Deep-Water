@@ -160,6 +160,14 @@ All entries are SIX's picks of 2026-10-23, in round order. Leaning is Claude's r
 | G31 | Splashes into the foam field (Q2) | **Yes:** Sea State gains `HdrpSeaRenderer.DepositFoam`, a Gaussian deposit on the residual foam field, GPU and CPU twin, recorded for replay | Same | Locked |
 | G32 | Audio | **Recordings where we have them (FDS missile launch and detonation), synthesised from a seed for the rest**, delayed by distance at the speed of sound | Same | Locked |
 | G33 | Presentation extras | **Guns track their targets, wake and bow wave, VLS hatches open, no blur on camera cuts** | — | Locked |
+| G34 | Stream B order (2026-10-24) | **Guns L1 first**, then VLS L1 with SM-2, then Harpoon and Tomahawk | Same | Locked |
+| G35 | Gun ballistics at L1 | **3-DOF point mass:** gravity, ISA atmosphere, drag from a standard curve; no wind or Coriolis | Same | Locked |
+| G36 | How a burst kills at L1 | **Shot group:** one ballistic solution per burst. The miss distance (aim error, ship motion, bias) and a dispersion σ give a per-round hit probability against the target's presented area (or a proximity fuze's lethal radius); one seeded draw per burst | Same | Locked |
+| G37 | Mount slew and ship motion at L1 | **Slew plus roll error:** mounts train and elevate at real rates in the core and fire only once laid. The ship's roll and pitch rates times the solution latency are aim error; L1 fire control does not predict motion (L2) | Same | Locked |
+| G38 | Lead | **Ballistic lead:** iterate the time of flight against the track's constant-velocity prediction | Same | Locked |
+| G39 | Mk 45 against air | **Proximity fuze against air, point-detonating against surface targets** | Same | Locked |
+| G40 | CIWS closed loop | **Modelled:** each burst starts with an aim bias that Phalanx's spotting shrinks within the burst, carried between bursts on the same track | Same | Locked |
+| G41 | Gun data | **The G7 standard drag curve (BRL) times one form factor per projectile, CALIBRATED to its published range;** dispersions and lethality AUTHORED where nothing is public; other published figures are VALIDATION | Same | Locked |
 
 Inherited from Reckoning: R2 (everything deterministic eventually), R15 (Watches), R35 (variant B, Proposed), R36 (banned-API guard, Proposed). General Quarters applies R36 to its core now, as a source-scan test.
 
@@ -211,3 +219,4 @@ Inherited from Reckoning: R2 (everything deterministic eventually), R15 (Watches
 - **2026-10-24** — Slice 6 decisions G30–G33 (SIX); Q2 answered.
 - **2026-10-24** — Q5 answered by SIX: ESSM starts a run on SemiAuto; G29 Locked.
 - **2026-10-24** — Phase 1 complete (slice 7). G13 carried out: legacy destroyer scripts archived.
+- **2026-10-24** — Stream B started: decisions G34–G41 (SIX), Guns L1 first. Guns L1 built (slice B1); sources in `Calibration~/GUNS-SOURCES.md`.

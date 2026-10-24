@@ -199,11 +199,19 @@ namespace DeepWater.GeneralQuarters.Modules.Combat
             Vector3 forward = transform.forward;
             forward.y = 0f;
             float heading = forward.sqrMagnitude > 1e-8f ? Mathf.Atan2(forward.x, forward.z) * Mathf.Rad2Deg : 0f;
+            // Roll and pitch (and their rates) for guns L1's aim error (G37): rates about the ship's own fore-aft and
+            // athwartships axes, from PhysX's angular velocity.
+            Vector3 w = _body != null ? transform.InverseTransformDirection(_body.angularVelocity) * Mathf.Rad2Deg : Vector3.zero;
+            Vector3 euler = transform.localEulerAngles;
             return new OwnShipState
             {
                 Position = transform.position,
                 Velocity = _body != null ? _body.linearVelocity : Vector3.zero,
                 HeadingDeg = CompassMath.Normalize(heading),
+                RollDeg = -Mathf.DeltaAngle(0f, euler.z),
+                PitchDeg = -Mathf.DeltaAngle(0f, euler.x),
+                RollRateDps = -w.z,
+                PitchRateDps = -w.x,
             };
         }
 

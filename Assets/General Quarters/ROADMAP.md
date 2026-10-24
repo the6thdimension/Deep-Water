@@ -187,7 +187,36 @@ SIX's picks: G30 effects reused where they fit and built in code where they don'
 - [ ] Radar L2: beam and energy scheduling.
 
 ### Stream B — Weapons
-- [ ] Guns L1: point-mass ballistics with drag, dispersion, mount slew and arcs, firing on the roll.
+SIX's picks (2026-10-24): G34–G41. Guns L1 first.
+- [x] **Guns L1** (slice B1, done 2026-10-24: 85/85 GQ tests, 49/49 sea tests): point-mass ballistics with drag, dispersion, mount slew and arcs, firing on the roll.
+  - **Results:**
+    - **Calibrated and checked:**
+      - Mk 45 reaches 23,130 m at 47°, with its greatest range at 48.0° (published 47°).
+      - Mk 149 reaches 5,500 m at 45°.
+      - Mk 38's greatest range is 6,800 m.
+      - A vacuum shot gives v²/g; ISA matches its formulas.
+    - **Guns only against 8 sea-skimmers from 20 km:** L0 killed 0 and was hit 8 times. L1 killed 6 (CIWS 4, Mk 45 2) and was hit twice. L1's lethality comes from AUTHORED dispersions and kill chances, so treat it as a measurement, not a validation.
+    - **Saturation (24) with the real loadout:** 24 killed, 0 leaked. ESSM does almost all of it (23); the Mk 45 got 1.
+    - **Cost:** the core is 0.060 ms per fixed step against 0.066 at L0, so the firing tables cost nothing in the hot path (C27).
+  - **In play mode on the range:** the Mk 45 laid and fired with a ballistic solution (12,965 m, 10.7°, 25.4 s time of flight). PhysX roll reached 2.0°/s and showed as 22.8 m of aim error at 13 km.
+  - **Finding:** the Phalanx penetrator needs a form factor of 3.25 on the G7 curve, so its drag shape is the least certain number in the slice (`Calibration~/GUNS-SOURCES.md`).
+  - **Goldens:** the slice 5 Fix test now pins guns L0, which it was recorded at (C29). Guns L1 has its own determinism test.
+  - **Ballistics (G35, G41):** `Core/Ballistics`:
+    - an ISA atmosphere;
+    - the BRL G7 drag table times a form factor per projectile, CALIBRATED to its published range;
+    - firing tables integrated once per projectile (RK4) and cached, so fire control looks up elevation and time of flight instead of integrating every shot.
+  - **Fire control (G38):** a ballistic lead on the track's constant-velocity prediction.
+  - **Mounts (G37):** train and elevation slew in the core at their rates, within arcs and elevation limits. A mount fires only once laid. Roll and pitch rates times the solution latency are aim error; `OwnShipState` gains roll and pitch.
+  - **Hit model (G36, G39, G40):** a shot group per burst against the target's presented area (raid threats gain length and diameter). The Mk 45 uses proximity against air. CIWS uses closed-loop spotting bias. One seeded draw per burst, and the log shows the sum.
+  - **Tests:**
+    - the atmosphere and the G7 table at spot values;
+    - a vacuum check (drag off gives v²/g);
+    - the calibrated ranges, and each published figure as VALIDATION;
+    - fire control hitting what it aims at, lead on a crossing target, slew delaying the first shot, roll lowering hit probability, the CIWS bias shrinking, both Mk 45 fuzes;
+    - determinism, and a saturation raid at L1 within the 1 ms budget;
+    - the L0 golden Fix unchanged.
+  - **Not at L1:** wind, Coriolis, the shell inheriting the ship's velocity (at most 2 % of muzzle velocity at 30 kn), fire-control motion prediction and track noise (L2).
+  - **Follow-up:** presentation mounts still run their own slew. They should read the core's train and elevation (`GunMountL1.TrainDeg`, `ElevationDeg`), so what you see is what fired.
 - [ ] VLS L1: hatch and launch sequence timing, midcourse uplink.
 - [ ] SM-2 profile; Harpoon and Tomahawk profiles (Guided Fury Stream A items).
 
@@ -231,6 +260,7 @@ SIX's picks: G30 effects reused where they fit and built in code where they don'
   - **Gate:** the Phase 1 gate is met in play mode at 0.066 ms mean per fixed step against the 1 ms budget, presentation aside (slice 6).
   - **Found on the range:** the aircraft bug (skip / fail log).
 
+- **2026-10-24** — Stream B slice B1 done: guns L1 (G34–G41). Ballistic fire control from cached firing tables, slewing mounts, and a shot-group hit model with ship motion and Phalanx spotting. Guns only, L1 kills 6 of 8 sea-skimmers where L0 killed none. The core cost is unchanged. The Phalanx drag shape is the open number.
 - **2026-10-24** — Slice 7 done: the phase review. **Phase 1 is complete.** The four legacy destroyer scripts and their editor tools are archived behind a supersession checklist, and `HANDOFF.md` is written. Next: SIX picks the first element stream.
 - **2026-10-24** — Slice 6 done: presentation, with the decisions in BLUEPRINT G30–G33. The Phase 1 gate's presentation half is met in play mode (sound seen playing, not yet heard). Q2 answered: Sea State gained `DepositFoam`.
 

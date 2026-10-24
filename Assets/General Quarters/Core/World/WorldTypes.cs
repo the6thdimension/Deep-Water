@@ -17,6 +17,29 @@ namespace DeepWater.GeneralQuarters.Core.World
         public bool Alive;
         /// <summary>Radar cross-section, dBsm. Unused by radar L0; the radar equation (L1) reads it.</summary>
         public float RcsDbsm;
+        /// <summary>Length and body diameter, m, for the presented area guns L1 aim at; 0 means the kind's default (<see cref="TargetSize"/>).</summary>
+        public float LengthM, DiameterM;
+    }
+
+    /// <summary>
+    /// Sizes for targets that do not give their own (AUTHORED, typical of the kind): an anti-ship missile 5 m by 0.4 m
+    /// (Harpoon 4.6 m by 0.34 m, Exocet 4.7 by 0.35, Kh-35 4.4 by 0.42, public); an aircraft 15 m by 3 m; a surface
+    /// ship 40 m by 8 m (a fast attack craft).
+    /// </summary>
+    public static class TargetSize
+    {
+        public static void Of(in TruthTarget t, out float lengthM, out float diameterM)
+        {
+            lengthM = t.LengthM;
+            diameterM = t.DiameterM;
+            if (lengthM > 0f && diameterM > 0f) return;
+            switch (t.Kind)
+            {
+                case TargetKind.Aircraft: lengthM = 15f; diameterM = 3f; break;
+                case TargetKind.SurfaceShip: lengthM = 40f; diameterM = 8f; break;
+                default: lengthM = 5f; diameterM = 0.4f; break;
+            }
+        }
     }
 
     /// <summary>
@@ -28,6 +51,8 @@ namespace DeepWater.GeneralQuarters.Core.World
         public Vector3 Position;
         public Vector3 Velocity;
         public float HeadingDeg;
+        /// <summary>Roll (positive starboard down) and pitch (positive bow up), degrees, and their rates, deg/s. Guns L1 read the rates as aim error (G37); 0 in headless runs that do not script motion.</summary>
+        public float RollDeg, PitchDeg, RollRateDps, PitchRateDps;
 
         public Quaternion HeadingRotation => Quaternion.Euler(0f, HeadingDeg, 0f);
 

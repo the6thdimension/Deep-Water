@@ -2,7 +2,7 @@
 
 > **This document's one job:** let someone pick General Quarters up cold. What it is, what is proven, the lessons that cost hours, how to run it, and what comes next.
 > Why each piece exists is in `BLUEPRINT.md`; the work order is in `ROADMAP.md`.
-> **Last verified:** 2026-10-24, Unity 6000.4.11f1, HDRP 17.4. At the end of Phase 1: 72/72 General Quarters tests and 49/49 Sea State tests.
+> **Last verified:** 2026-10-24, Unity 6000.4.11f1, HDRP 17.4. At the end of Phase 1: 72/72 General Quarters tests and 49/49 Sea State tests. After Stream B slice B1 (guns L1): 85/85 and 49/49.
 
 ## 1. What this is
 
@@ -57,6 +57,7 @@ SIX asked for "a living breathing ship with a respectable and modular combat sys
 | Hull from Blender on Sea State | **CHAMPION** | PhysX free roll 11.18 s against 11.14 s damped theory |
 | Engine Room and Helm L0 (MMG, DTMB 5415, calibrated to USS Barry) | **CHAMPION** | 31.0 kn at 199 rpm; turning diameters and zig-zags match the calibration mirror (`Calibration~/`) |
 | The range: Captain and TAO seats, AI captain rules C1–C4 and T1, debrief, time compression | **CHAMPION** | The Phase 1 gate met in play mode |
+| Guns L1: ballistic fire control (G7 and ISA firing tables), slewing mounts, a shot-group hit model with ship motion and Phalanx spotting | **ITERATE** | The calibrated ranges are reproduced; guns alone kill 6 of 8 sea-skimmers where L0 killed 0; core cost unchanged. Dispersions and kill chances are AUTHORED, and the Phalanx drag shape (form factor 3.25) is uncertain |
 | Presentation: effects, foam deposits, mounts that track, VLS hatches, audio | **ITERATE** | Seen working in play mode at about 0.2 ms of main thread. **Nobody has listened to the audio yet** |
 | Reused vendor effects (`HD_Naval_Explosion`, VFX Arsenal) | **FAILED** | They draw wrong or too small in HDRP (AP20) |
 | Physical controllers on the range | **unverified** | Bindings are proven with virtual devices (C18). SIX has driven her at the conn ("driving feels great"); the range seats have not been tried on hardware |
@@ -86,7 +87,7 @@ SIX asked for "a living breathing ship with a respectable and modular combat sys
   3. Build Combat Effects.
   4. Build Range Scene.
 - **Just drive her:** Deep Water → General Quarters → Drive the DDG.
-- **Tests:** Test Runner → EditMode, assemblies `DeepWater.GeneralQuarters.Tests.Editor` and `DeepWater.Sea.Tests.Editor`. Expect 72 and 49.
+- **Tests:** Test Runner → EditMode, assemblies `DeepWater.GeneralQuarters.Tests.Editor` and `DeepWater.Sea.Tests.Editor`. Expect 85 and 49.
 - **Commit from the shared checkout:** the `commit-to-branch` skill with `--deny 'UnityMcpUnlock|/DAVFX/'`. HEAD stays where it is.
 
 ## 6. Next steps (in priority order)

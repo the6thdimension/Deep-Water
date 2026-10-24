@@ -11,6 +11,7 @@ using DeepWater.GeneralQuarters.Core.Captain;
 using DeepWater.GeneralQuarters.Core.Cic;
 using DeepWater.GeneralQuarters.Core.DamageControl;
 using DeepWater.GeneralQuarters.Core.Fidelity;
+using DeepWater.GeneralQuarters.Core.Ballistics;
 using DeepWater.GeneralQuarters.Core.Magazine;
 using DeepWater.GeneralQuarters.Core.Orders;
 using DeepWater.GeneralQuarters.Core.Scenario;
@@ -82,7 +83,8 @@ namespace DeepWater.GeneralQuarters.Editor
             ShipLoadoutSO so = LoadOrCreate<ShipLoadoutSO>(LoadoutAsset);
             so.seed = 1442;
             so.tickSeconds = 0.02f;
-            so.radarLevel = so.tracksLevel = so.tewaLevel = so.vlsLevel = so.gunsLevel = so.damageLevel = FidelityLevel.L0;
+            so.radarLevel = so.tracksLevel = so.tewaLevel = so.vlsLevel = so.damageLevel = FidelityLevel.L0;
+            so.gunsLevel = FidelityLevel.L1;   // Stream B slice B1 (G34)
             so.radar = new RadarProfileData { InstrumentedRangeM = 185_000f, AntennaHeightM = 20f, SweepPeriodTicks = 25 };
             so.tracks = new TrackProfileData { DropAfterTicks = 150 };
             so.tewa = new TewaProfileData
@@ -106,11 +108,11 @@ namespace DeepWater.GeneralQuarters.Editor
             so.vlsLoads = new[] { new VlsLoadEntry { weapon = WeaponClass.Essm, profile = essm, missileLevel = MissileLod.L2_RateLimited3Dof, rounds = 32, pkSingleShot = 0.8f } };
             so.guns = new[]
             {
-                Gun("Mk 45", WeaponClass.Mk45, ShipSystem.Mk45, mk45, 0f, 150f, 1_000f, 15_000f, true, true, false, 3000f, 20f, 1, 808f, 0.6f, 600, 0.03f, 0.005f),
-                Gun("CIWS fwd", WeaponClass.Ciws, ShipSystem.Ciws, ciwsFwd, 0f, 150f, 300f, 2_000f, true, false, true, 500f, 4500f, 100, 1100f, 0.85f, 1550, 0.35f, 0.08f),
-                Gun("CIWS aft", WeaponClass.Ciws, ShipSystem.Ciws, ciwsAft, 180f, 150f, 300f, 2_000f, true, false, true, 500f, 4500f, 100, 1100f, 0.85f, 1550, 0.35f, 0.08f),
-                Gun("Mk 38 port", WeaponClass.Mk38, ShipSystem.Mk38Port, mk38Port, -90f, 90f, 100f, 2_500f, false, true, false, 3000f, 180f, 10, 1100f, 0.8f, 400, 0.2f, 0.05f),
-                Gun("Mk 38 stbd", WeaponClass.Mk38, ShipSystem.Mk38Starboard, mk38Stbd, 90f, 90f, 100f, 2_500f, false, true, false, 3000f, 180f, 10, 1100f, 0.8f, 400, 0.2f, 0.05f),
+                Gun("Mk 45", WeaponClass.Mk45, ShipSystem.Mk45, mk45, 0f, 150f, 1_000f, 15_000f, true, true, false, 3000f, 20f, 1, 808f, 0.6f, 600, 0.03f, 0.005f, Mk45L1),
+                Gun("CIWS fwd", WeaponClass.Ciws, ShipSystem.Ciws, ciwsFwd, 0f, 150f, 300f, 2_000f, true, false, true, 500f, 4500f, 100, 1100f, 0.85f, 1550, 0.35f, 0.08f, CiwsL1),
+                Gun("CIWS aft", WeaponClass.Ciws, ShipSystem.Ciws, ciwsAft, 180f, 150f, 300f, 2_000f, true, false, true, 500f, 4500f, 100, 1100f, 0.85f, 1550, 0.35f, 0.08f, CiwsL1),
+                Gun("Mk 38 port", WeaponClass.Mk38, ShipSystem.Mk38Port, mk38Port, -90f, 90f, 100f, 2_500f, false, true, false, 3000f, 180f, 10, 1100f, 0.8f, 400, 0.2f, 0.05f, Mk38L1),
+                Gun("Mk 38 stbd", WeaponClass.Mk38, ShipSystem.Mk38Starboard, mk38Stbd, 90f, 90f, 100f, 2_500f, false, true, false, 3000f, 180f, 10, 1100f, 0.8f, 400, 0.2f, 0.05f, Mk38L1),
             };
             so.damage = new DamageProfileData
             {
@@ -150,6 +152,19 @@ namespace DeepWater.GeneralQuarters.Editor
                 "CIWS (Phalanx) ×2, forward and aft (public: Flight I/II carries two): 4,500 rounds/min and a 1,550-round drum (public, NAVSEA fact file); " +
                 "300-2,000 m, 100-round bursts, Pk per burst 0.35 falling to 0.08 (AUTHORED). Both are Damage Control's one CIWS system at L0.\n" +
                 "Mk 38 ×2 (25 mm), port and starboard: about 180 rounds/min (public, M242); beam arcs ±90°, 100-2,500 m, surface targets only (AUTHORED).\n" +
+                "GUNS L1 (slice B1, G35-G41; the L0 numbers above still drive target choice, rate of fire and magazines). Drag: the BRL G7 curve (McCoy, " +
+                "ARBRL-TR-02293) times a form factor CALIBRATED per projectile; ISA atmosphere; no wind. Sources: NavWeaps (navweaps.com) gun pages, read 2026-10-24.\n" +
+                "  Mk 45 5\"/54 (Flight I/II; the earlier 'Mod 4' above is the Flight IIA 5\"/62): HE-CVT 31.1 kg (Mk 68/127), 127 mm, 808 m/s with the Mk 67 cartridge, " +
+                "elevation -15/+65°, train 30°/s, elevation 20°/s (public). Form factor 0.9251 CALIBRATED to 23,130 m at 47° (public); VALIDATION: greatest range comes " +
+                "at 48.0° (published 47°). Proximity fuze against air: lethal radius 8 m, fuze 0.9 (AUTHORED); 0.3 a hit against surface targets (AUTHORED). " +
+                "Dispersion 2 mrad, solution latency 0.05 s, laid within 0.5° (AUTHORED).\n" +
+                "  CIWS Mk 149 APDS: penetrator 0.10 kg, 12.75 mm, 1,113 m/s; Block 1B elevation -25/+85°, train and elevation 115°/s (public). Form factor 3.2484 " +
+                "CALIBRATED to 5,500 m at 45° (public). A form factor that far from 1 says the G7 shape fits this penetrator poorly; no public figure checks the " +
+                "curve between muzzle and maximum range. 0.3 a hit against air, 0.05 against surface (AUTHORED). Closed-loop spotting: bias 3 mrad, time constant " +
+                "0.5 s (AUTHORED; Phalanx spots its own rounds, public, but no figure is). Dispersion 2 mrad, latency 0.02 s, laid within 1° (AUTHORED).\n" +
+                "  Mk 38 25 mm (M242) HEI-T: 0.184 kg, 25 mm, 1,100 m/s, elevation -20/+55° (public, Mk 88 mounting). Form factor 1.2057 CALIBRATED to the 6,800 m " +
+                "maximum range (public; the elevation is not given: greatest range over the mount's elevations, at 37.5°). Train and elevation 60°/s (AUTHORED: " +
+                "not public). 0.2 a hit against air, 0.15 against surface (AUTHORED). Dispersion 1.5 mrad, latency 0.1 s, laid within 1° (AUTHORED).\n" +
                 "DAMAGE CONTROL L0: hull 1,000 hit points, 1 per kg of warhead; systems 100-150 hit points within 25 m of the hit (AUTHORED: no public damage table).\n" +
                 "SCENARIO DEFAULTS: ROE weapons tight; ESSM semi-automatic (TEWA proposes, the TAO confirms), guns automatic, CIWS automatic (G14).";
             EditorUtility.SetDirty(so);
@@ -158,11 +173,37 @@ namespace DeepWater.GeneralQuarters.Editor
 
         static GunMountProfileData Gun(string name, WeaponClass weapon, ShipSystem system, Vector3 at, float facing, float arcHalf, float minRange, float maxRange,
             bool antiAir, bool antiSurface, bool selfDefence, float threatCpa, float rpm, int burst, float muzzle, float meanFraction, int magazine,
-            float pkMin, float pkMax) => new GunMountProfileData
+            float pkMin, float pkMax, GunBallisticsData ballistics) => new GunMountProfileData
         {
             Name = name, Weapon = weapon, System = system, OffsetShip = at, FacingDeg = facing, ArcHalfDeg = arcHalf, MinRangeM = minRange, MaxRangeM = maxRange,
             AntiAir = antiAir, AntiSurface = antiSurface, SelfDefence = selfDefence, ThreatCpaM = threatCpa, RoundsPerMinute = rpm, BurstRounds = burst,
             MuzzleVelocityMps = muzzle, MeanVelocityFraction = meanFraction, MagazineRounds = magazine, PkPerBurstAtMinRange = pkMin, PkPerBurstAtMaxRange = pkMax,
+            Ballistics = ballistics,
+        };
+
+        // Guns L1 data (G35-G41); every number's source is in the loadout provenance. The form factors are CALIBRATED with
+        // FiringTable.CalibrateFormFactor; GunsL1Tests re-derives each published range from them.
+        public static readonly GunBallisticsData Mk45L1 = new GunBallisticsData
+        {
+            Projectile = new ProjectileData { MassKg = 31.1f, DiameterM = 0.127f, MuzzleVelocityMps = 808f, FormFactor = 0.9251f },
+            ElevationMinDeg = -15f, ElevationMaxDeg = 65f, TrainRateDps = 30f, ElevateRateDps = 20f, LayToleranceDeg = 0.5f,
+            DispersionMrad = 2f, SolutionLatencyS = 0.05f, Fuze = FuzeKind.ProximityVsAir, LethalRadiusM = 8f, FuzeReliability = 0.9f,
+            PkPerHitAir = 0.9f, PkPerHitSurface = 0.3f,
+        };
+
+        public static readonly GunBallisticsData CiwsL1 = new GunBallisticsData
+        {
+            Projectile = new ProjectileData { MassKg = 0.10f, DiameterM = 0.01275f, MuzzleVelocityMps = 1113f, FormFactor = 3.2484f },
+            ElevationMinDeg = -25f, ElevationMaxDeg = 85f, TrainRateDps = 115f, ElevateRateDps = 115f, LayToleranceDeg = 1f,
+            DispersionMrad = 2f, SolutionLatencyS = 0.02f, Fuze = FuzeKind.Impact, PkPerHitAir = 0.3f, PkPerHitSurface = 0.05f,
+            ClosedLoopSpotting = true, SpotBiasMrad = 3f, SpotTimeConstantS = 0.5f,
+        };
+
+        public static readonly GunBallisticsData Mk38L1 = new GunBallisticsData
+        {
+            Projectile = new ProjectileData { MassKg = 0.184f, DiameterM = 0.025f, MuzzleVelocityMps = 1100f, FormFactor = 1.2057f },
+            ElevationMinDeg = -20f, ElevationMaxDeg = 55f, TrainRateDps = 60f, ElevateRateDps = 60f, LayToleranceDeg = 1f,
+            DispersionMrad = 1.5f, SolutionLatencyS = 0.1f, Fuze = FuzeKind.Impact, PkPerHitAir = 0.2f, PkPerHitSurface = 0.15f,
         };
 
         /// <summary>A named point from the layout's "mounts" block (JsonUtility cannot read that free-form block).</summary>
@@ -200,6 +241,7 @@ namespace DeepWater.GeneralQuarters.Editor
         {
             Kind = TargetKind.AntiShipMissile, Identity = Identity.Hostile, BearingDeg = bearing, RangeM = rangeM, AltitudeM = 5f, SpeedMps = 290f,
             LaunchTick = Mathf.RoundToInt(launchS / 0.02f), RcsDbsm = -10f, WarheadKg = 220f,
+            LengthM = 4.6f, DiameterM = 0.34f,   // Harpoon-class (public), for guns L1's presented area
         };
 
         static (string name, RaidThreatSpec[] threats, string provenance) SmallRaid() => ("Small 4", new[]
@@ -218,6 +260,7 @@ namespace DeepWater.GeneralQuarters.Editor
                 {
                     Kind = TargetKind.Aircraft, Identity = Identity.Hostile, BearingDeg = i == 0 ? 0f : 20f, RangeM = 80_000f, AltitudeM = 6_000f,
                     SpeedMps = 250f, LaunchTick = Mathf.RoundToInt((10f + i * 5f) / 0.02f), RcsDbsm = 5f, WarheadKg = 0f,
+                    LengthM = 15f, DiameterM = 3f,   // a strike fighter's length and fuselage depth (AUTHORED)
                 });
             return ("Standard 8+2", t.ToArray(),
                 "Two waves of 4 sea-skimmers, from 050-070° then 290-310° 40 s later, 3 s apart; 2 strike aircraft at 6 km altitude from 000° and 020°, 80 km out, " +

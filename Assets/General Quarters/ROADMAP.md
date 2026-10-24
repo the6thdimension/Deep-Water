@@ -31,7 +31,7 @@ The gate: a scripted raid against the destroyer plays end to end on the Sea Stat
 - [x] `CombatFix`: a per-tick FNV-1a fingerprint of the combat state.
 - [x] Tests: RNG reproducibility, Watch schedule, order log, ladder fallback, banned-API source scan of `Core/`.
 
-### Slice 2 — Combat core L0, headless (done 2026-10-23: 21/21 tests; 8-missile raid all killed, 9 ESSM; 24-missile raid 0.043 ms/tick)
+### Slice 2 — Combat core L0, headless (done 2026-10-23, 6745ce4: 21/21 tests; 8-missile raid all killed, 9 ESSM; 24-missile raid 0.043 ms/tick)
 - [x] Truth feed: own-ship state and truth targets (id, kind, position, velocity, identity, signature).
 - [x] Radar L0 (SPY-1D): instrumented range and radar horizon, on its Watch.
 - [x] Tracks L0: perfect correlation, stable ids, drop on loss.
@@ -42,12 +42,15 @@ The gate: a scripted raid against the destroyer plays end to end on the Sea Stat
 - [x] Scripted raid L0: sea-skimmers and aircraft on set paths.
 - [x] *Done when:* a headless raid test resolves with a cause chain for every kill, two seeded runs give identical Fix sequences, and the step stays within budget.
 
-### Slice 3 — Hull from Blender (needs Blender running with the MCP add-on)
-- [ ] Copy the DDG `.blend`; read which DDG-51 flight it is (BLUEPRINT Q1).
-- [ ] Author the collision hull (compound convex pieces) and compartments (watertight sections × decks).
-- [ ] Separate the articulated parts: Mk 45 (base / gun house / barrel), CIWS (mount / gun), VLS hatch positions fore and aft, SPG-62 ×3 (already separate).
-- [ ] Export into `Prefabs/Models`. Build buoyancy probes from hull sections; mass, centre of mass and inertia from public DDG-51 figures.
-- [ ] `hull-stability-check`: draft, displacement, GM, roll period (vs IMO).
+### Slice 3 — Hull from Blender (done 2026-10-23: 27/27 tests; PhysX roll 11.18 s vs 11.14 s damped theory)
+- [x] Copy the DDG `.blend` (`ArtSource/General Quarters/DDG51_GQ.blend`; the original is untouched, hash checked). It is a Flight I/II: two CIWS, Mk 141 Harpoon quads aft, no hangar, 32 + 64 VLS cells (BLUEPRINT Q1, answered).
+- [x] Collision hull: 17 convex pieces (11 hull segments, 6 superstructure blocks, ≤ 196 faces each). Compartments: 12 watertight sections at AUTHORED 12 m stations, full depth. ~~Split by deck~~: deferred to Damage Control L1, where flooding first needs decks.
+- [x] Articulated parts: Mk 45 (train / elevate), CIWS ×2 (base / train / elevate), Mk 38 ×2, SPG-62 ×3, 96 VLS and 8 Harpoon launch points. Exported flat (the FBX axis bake applies to first-level objects only); `Editor/Ddg51HullBuilder.cs` re-nests elevate under train and remaps the original HDRP materials.
+- [x] Export into `Prefabs/Models` (FBX ×2, `DDG51_GQ_Layout.json`). Hydrostatics MEASURED on a converged 61 × 0.5 m column grid: 8 717 t, draft 6.52 m (9.41 m at the sonar dome), KB 3.92 m, BM 4.79 m, waterline 141 × 17.7 m. Mass = displacement. GM 1.5 m and the gyradii (0.38 B, 0.25 / 0.26 L) are AUTHORED: DDG-51's KG is not public. Sea State floats it on 2 183 columns (25 × 1.5 m), chosen from a grid study (METHODOLOGY AP16).
+- [x] `hull-stability-check`:
+  - **EditMode:** righting moment at 5° gives GM 1.510 m against 1.500 m. Free roll is 10.92 s against 11.04 s theory (IMO 10.86 s, context).
+  - **PhysX:** 11.18 s damped (ζ 0.13 from the decay) against 11.14 s. Pitch is 4.27 s against 4.16 s. At rest it trims 8 cm over its length and sits 3 cm high: the probe grid's centre of buoyancy is 15 cm forward of the hull's, and the probes displace 0.3 % more.
+  - **Cost:** the DDG's buoyancy costs 0.30 ms per fixed step in the demo sea (Editor, play mode).
 
 ### Slice 4 — Engine Room and Helm L0
 - [ ] Shafts and thrust curve, twin rudders (lift and stall), speed-power resistance.
@@ -109,5 +112,8 @@ The gate: a scripted raid against the destroyer plays end to end on the Sea Stat
   - **8 sea-skimmers:** all 8 killed, 9 ESSM launched; every kill's cause chain is complete and ends in roots, with an identical Fix two runs in a row.
   - **24 sea-skimmers:** all killed, at 0.043 ms per tick (Editor), against the 1 ms budget.
   - **Observation, not tuned:** at missile L2, ESSM averaged about 720 m/s over 20 km. That is slower than published ESSM speeds; the cause is the missile level, not the combat core. A Guided Fury stream item.
+- **2026-10-23** — Slice 3 done: the hull from Blender, with a prefab (`Prefabs/DDG51_GQ.prefab`), the hull profile and the buoyancy assets.
+  - **Grid fix:** the first probe grid (9 × 4 m, 300 columns) measured its own hydrostatics and passed every upright check. At 5° of heel it lost 7.6 % of GM, and the roll test caught it. The hydrostatics are now measured on a converged grid and the probe grid is gated against them (AP16).
+  - **Prefab:** `ShipHull` sets the inertia tensor from the profile. Unity's automatic tensor from 17 convex pieces would not be a ship's.
 
 ## Skip / fail log

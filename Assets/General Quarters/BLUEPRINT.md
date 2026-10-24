@@ -186,7 +186,7 @@ Inherited from Reckoning: R2 (everything deterministic eventually), R15 (Watches
 
 | # | Question | Cost |
 |---|---|---|
-| Q1 | Which DDG-51 flight is the model? Flight I/II carries Harpoon canisters and no hangar; Flight IIA has a hangar and usually no Harpoon. I'll read the `.blend` and propose | 1 min |
+| ~~Q1~~ | ~~Which DDG-51 flight is the model?~~ **Answered 2026-10-23 by the geometry: Flight I/II.** Two CIWS, Mk 141 Harpoon quads aft, Mk 32 torpedo tubes, no hangar; VLS 32 fore and 64 aft. Its textures are named DDG112 (a Flight IIA hull number); the mesh wins. The loadout follows Flight I/II | — |
 | Q2 | May Sea State gain a small API to deposit foam and splashes (for G18's splashes into the foam field)? | 1 min |
 | Q3 | The peer ship: a mirror DDG, or a different class? | 2 min |
 | Q4 | Branch: `feat/general-quarters` is cut from `feat/environment-ocean`, since it needs the Sea State buoyancy fix. Merge path to `main` later? | 1 min |

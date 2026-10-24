@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b2edfd51d5e148478ca00b56f37e276, type: 3}
+  m_Name: DDG51_GQ_Hull
+  m_EditorClassIdentifier: DeepWater.GeneralQuarters::DeepWater.GeneralQuarters.ScriptableObjects.ShipHullProfileSO
+  buoyancy: {fileID: 11400000, guid: ec63140c9617cf34e9732fd1ec930171, type: 2}
+  massKg: 8716750
+  centerOfMassM: {x: -0, y: 0.6792, z: 0.8117}
+  gyradiusM: {x: 35.25, y: 36.66, z: 6.74}
+  displacementT: 8716.7
+  designDraftM: 6.523
+  kbM: 3.916
+  bmM: 4.786
+  metacentricHeightM: 1.5
+  compartments:
+  - name: Compartment 01
+    min: {x: -10.6101, y: -9.4053, z: 64}
+    max: {x: 10.6101, y: 10.0101, z: 76}
+  - name: Compartment 02
+    min: {x: -10.6101, y: -9.2784, z: 52}
+    max: {x: 10.6101, y: 8.9895, z: 64}
+  - name: Compartment 03
+    min: {x: -10.6101, y: -6.5466, z: 40}
+    max: {x: 10.6101, y: 7.9689, z: 52}
+  - name: Compartment 04
+    min: {x: -10.6101, y: -6.5228, z: 28}
+    max: {x: 10.6101, y: 6.9754, z: 40}
+  - name: Compartment 05
+    min: {x: -10.6101, y: -6.5228, z: 16}
+    max: {x: 10.6101, y: 6.3494, z: 28}
+  - name: Compartment 06
+    min: {x: -10.6101, y: -6.5229, z: 4}
+    max: {x: 10.6101, y: 6.3566, z: 16}
+  - name: Compartment 07
+    min: {x: -10.6101, y: -6.5228, z: -8}
+    max: {x: 10.6101, y: 6.3592, z: 4}
+  - name: Compartment 08
+    min: {x: -10.6101, y: -6.5228, z: -20}
+    max: {x: 10.6101, y: 6.3592, z: -8}
+  - name: Compartment 09
+    min: {x: -10.6101, y: -6.5228, z: -32}
+    max: {x: 10.6101, y: 6.3592, z: -20}
+  - name: Compartment 10
+    min: {x: -10.6101, y: -6.5228, z: -44}
+    max: {x: 10.6101, y: 6.3592, z: -32}
+  - name: Compartment 11
+    min: {x: -10.6101, y: -6.5228, z: -56}
+    max: {x: 10.6101, y: 6.3592, z: -44}
+  - name: Compartment 12
+    min: {x: -10.6101, y: -2.7846, z: -71}
+    max: {x: 10.6101, y: 4.8163, z: -56}
+  provenance: "Built from Assets/General Quarters/Prefabs/Models/DDG51_GQ_Layout.json
+    (ArtSource/General Quarters/DDG51_GQ.blend via author_ddg51_gq.py).\nMEASURED
+    from the hull shell on a 61 x 0.5 m column grid (15976 columns, converged): displacement
+    8717 t at the drawn waterline, draft 6.52 m, KB 3.92 m, BM 4.79 m, waterline
+    141 \xD7 17.7 m.\nBuoyancy: 2183 columns on a 25 x 1.5 m grid (AUTHORED resolution);
+    on their own they displace 8744 t with BM 4.85 m.\nGM 1.50 m: AUTHORED: ~11 s
+    natural roll by the IMO formula; DDG-51 KG/GM is not public.\nGyradii: AUTHORED
+    fractions of waterline beam/length (typical ship values): {\"roll_of_beam\":
+    0.38, \"pitch_of_length\": 0.25, \"yaw_of_length\": 0.26}.\nCompartments: AUTHORED
+    bulkhead stations every 12 m; the real DDG-51 bulkhead plan is not public.\nBuoyancy
+    damping: heave ratio 0.2, Cd 0.5 (AUTHORED, Sea State defaults)."

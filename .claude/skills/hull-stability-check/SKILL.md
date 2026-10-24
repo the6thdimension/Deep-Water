@@ -32,6 +32,9 @@ Reference values (verified 2026-10-23):
 | 154 × 20 × 12 m box, 6.3 m draft, 5 across | 2.23 m | 9.05 s undamped | PhysX 9.42 s (damping adds ~4 %) |
 | Same box, 20 across | 2.43 m | 8.67 s | 8.67 s |
 | 2 m cube buoy, 0.8 m draft, ballasted to 0.3 m above the keel | 0.41 m | 3.36 s | PhysX 3.36 s |
+| DDG-51 (General Quarters), 2 183 columns at 25 × 1.5 m, GM 1.5 m AUTHORED, k_roll 6.74 m | 1.510 m at 5° | 11.04 s undamped | EditMode 10.92 s; PhysX 11.18 s (ζ 0.13, so 11.14 s damped) |
+
+For a real hull form (not a box), the hydrostatics come from the Blender authoring script, and `HullL0Tests` in `Assets/General Quarters/Tests/Editor/` is the pattern.
 
 ## 2. Check the force model in EditMode (minutes)
 
@@ -62,3 +65,4 @@ Use the `unity-mcp-workflow` skill's `templates/play-recorder.cs`, then `scripts
 - **A uniform box is often unstable.** A cube is stable upright only for density ratio d/H below ~0.21 or above ~0.79. Real buoys and ships carry ballast, so set the centre of mass deliberately and label it AUTHORED if it isn't sourced.
 - **Upside-down symmetry is the check for any "along the body axis" offset.** It caught the first version of the 2026-10-23 fix, which none of the upright tests did.
 - **The IMO period is not a pass/fail gate for a bare probe hull.** It includes added inertia that Sea State doesn't model. Use box theory as the gate and IMO as context, until ship motion with added mass exists (Reckoning, variant B).
+- **Never measure a real hull's hydrostatics on the probe grid you float it on** (METHODOLOGY AP16). The DDG's first grid (9 × 4 m, 300 columns) agreed with its own numbers upright. At 5° it lost 7.6 % of GM, because a column whose bottom sits just under the waterline counts in full in BM but stops lifting after centimetres. Measure on a grid shown to be converged (two resolutions agree), pick the probe grid from a convergence table, and gate it heeled. The error is aliasing: a finer grid is not automatically better (17 × 2 m was as bad as 9 × 4 m; 25 × 1.5 m was within 1 %).

@@ -2,7 +2,8 @@
     "name": "DeepWater.GeneralQuarters",
     "rootNamespace": "DeepWater.GeneralQuarters",
     "references": [
-        "GuidedFury"
+        "GuidedFury",
+        "DeepWater.Sea"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

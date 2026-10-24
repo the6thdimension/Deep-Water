@@ -178,6 +178,11 @@ These are the fixed points around which the methodology orbits. Every principle 
   - *Do instead:* Apply the load at its centroid: here the submerged part's, along the column axis (`BuoyancyModel.SubmergedCentroid`). Pin it with a static test against closed-form theory in the off-axis state, here the righting moment vs wall-sided GZ within 2 %, plus a dynamic period test.
   - *Seen again in the same fix:* the first version took the axis as the body's up unflipped. That puts the force above the wet part once a hull is upside down. The new tests all passed. The demo's uniform 2 m buoy, which correctly tipped over, then floated stable upside down. Test `InvertedBox_RightsLikeAnUprightBox` now pins the symmetry. Lesson: a test suite written for the defect you found does not cover the states your fix newly reaches. Run the real scene too.
 
+- **AP16. Measuring a discretised model with itself.** Taking a body's reference numbers (displacement, KB, BM, centre of buoyancy) from the same coarse sampling the simulation runs on, then testing the simulation against them.
+  - *Where seen:* General Quarters DDG-51 hull, 2026-10-23. The first authoring script measured the hydrostatics on the same 9 × 4 m grid of 300 columns that Sea State floats. Upright checks agreed with themselves to 0.01 %. Heeled 5°, the probes gave 7.6 % less righting moment than the GM the numbers claimed, and free roll ran 3.9 % slow. The cause: a column whose bottom sits just under the waterline counts in full in the waterplane's second moment, but it stops lifting after a few centimetres of heel. On 9 × 4 m columns that is a large share of the waterplane. A grid study (9 × 4 m up to 61 × 0.5 m) showed the error is aliasing, not monotonic: 17 × 2 m was as bad as 9 × 4 m.
+  - *Why it fails:* Reference and simulation share the discretisation error, so every comparison between them reads zero. The error lives in an off-design state (heel), where no reference exists.
+  - *Do instead:* Measure on a sampling shown to be converged (two resolutions agree; here 41 × 1 m and 61 × 0.5 m within 0.02 % on displacement and 0.2 % on BM). Simulate on a coarser grid chosen from the convergence table for its cost. Gate the coarse grid against the converged numbers in a test, in the off-design state. Reference impl: `ArtSource/General Quarters/author_ddg51_gq.py` (`HYDRO_*` vs `PROBES_*`) and `HullL0Tests.Heeled5Degrees_RightingMomentGivesTheLayoutGM`. At 25 × 1.5 m (2 183 columns), GM at 5° is 1.510 against 1.500 m, and PhysX free roll is 11.18 s against 11.14 s damped theory (11.04 s undamped, ζ 0.13 from the decay).
+
 ## Candidates (under evaluation)
 
 *Ideas that might become Principles. Not yet load-bearing. Promote when grounded in a real case.*
@@ -250,3 +255,9 @@ These are the fixed points around which the methodology orbits. Every principle 
   - **Built:** the combat core at L0, pure C# and deterministic: orders, a counted SplitMix64, Watches, a Fix, and an engagement log with cause chains. A source scan bans the APIs that break determinism.
   - **Results:** an 8-missile raid is all killed, every kill is explained, and two runs give an identical Fix. A 24-missile raid runs at 0.043 ms per tick.
   - **New entries:** C14 (per-element fidelity ladders), C15 (closest-approach intercepts).
+- **2026-10-23** — General Quarters slice 3: the DDG-51 hull from Blender.
+  - **Model:** the model is a Flight I/II (two CIWS, Harpoon quads aft, no hangar, 32 + 64 VLS cells). It was split into articulated mounts, 96 VLS and 8 Harpoon launch points, 17 convex collision pieces and 12 AUTHORED compartments. It is exported flat (FBX applies the axis bake to first-level objects only) and re-nested by the Unity builder.
+  - **Hydrostatics:** measured on a converged column grid: 8 717 t, KB 3.92 m, BM 4.79 m, waterline 141 × 17.7 m. GM 1.5 m is AUTHORED, because DDG-51's KG is not public.
+  - **Floating:** Sea State floats the ship on 2 183 columns, at 0.30 ms per fixed step in the demo sea.
+  - **New entry:** AP16 (measuring a discretised model with itself). The first, self-measured grid hid a 7.6 % GM loss at heel.
+  - **Results:** 27/27 GQ tests, 46/46 sea tests.

@@ -3,9 +3,14 @@
     "rootNamespace": "DeepWater.GeneralQuarters.Tests",
     "references": [
         "DeepWater.GeneralQuarters",
+        "DeepWater.GeneralQuarters.Editor",
         "GuidedFury",
         "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner"
+        "UnityEditor.TestRunner",
+        "DeepWater.Sea",
+        "Unity.Mathematics",
+        "Unity.Collections",
+        "Unity.Burst"
     ],
     "includePlatforms": [
         "Editor"

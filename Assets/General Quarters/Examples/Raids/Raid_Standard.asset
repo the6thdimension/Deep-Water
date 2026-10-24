@@ -23,6 +23,8 @@ MonoBehaviour:
     LaunchTick: 0
     RcsDbsm: -10
     WarheadKg: 220
+    LengthM: 4.6
+    DiameterM: 0.34
   - Kind: 2
     Identity: 1
     BearingDeg: 55
@@ -32,6 +34,8 @@ MonoBehaviour:
     LaunchTick: 150
     RcsDbsm: -10
     WarheadKg: 220
+    LengthM: 4.6
+    DiameterM: 0.34
   - Kind: 2
     Identity: 1
     BearingDeg: 65
@@ -41,6 +45,8 @@ MonoBehaviour:
     LaunchTick: 300
     RcsDbsm: -10
     WarheadKg: 220
+    LengthM: 4.6
+    DiameterM: 0.34
   - Kind: 2
     Identity: 1
     BearingDeg: 70
@@ -50,6 +56,8 @@ MonoBehaviour:
     LaunchTick: 450
     RcsDbsm: -10
     WarheadKg: 220
+    LengthM: 4.6
+    DiameterM: 0.34
   - Kind: 2
     Identity: 1
     BearingDeg: 290
@@ -59,6 +67,8 @@ MonoBehaviour:
     LaunchTick: 2000
     RcsDbsm: -10
     WarheadKg: 220
+    LengthM: 4.6
+    DiameterM: 0.34
   - Kind: 2
     Identity: 1
     BearingDeg: 295
@@ -68,6 +78,8 @@ MonoBehaviour:
     LaunchTick: 2150
     RcsDbsm: -10
     WarheadKg: 220
+    LengthM: 4.6
+    DiameterM: 0.34
   - Kind: 2
     Identity: 1
     BearingDeg: 305
@@ -77,6 +89,8 @@ MonoBehaviour:
     LaunchTick: 2300
     RcsDbsm: -10
     WarheadKg: 220
+    LengthM: 4.6
+    DiameterM: 0.34
   - Kind: 2
     Identity: 1
     BearingDeg: 310
@@ -86,6 +100,8 @@ MonoBehaviour:
     LaunchTick: 2450
     RcsDbsm: -10
     WarheadKg: 220
+    LengthM: 4.6
+    DiameterM: 0.34
   - Kind: 1
     Identity: 1
     BearingDeg: 0
@@ -95,6 +111,8 @@ MonoBehaviour:
     LaunchTick: 500
     RcsDbsm: 5
     WarheadKg: 0
+    LengthM: 15
+    DiameterM: 3
   - Kind: 1
     Identity: 1
     BearingDeg: 20
@@ -104,6 +122,8 @@ MonoBehaviour:
     LaunchTick: 750
     RcsDbsm: 5
     WarheadKg: 0
+    LengthM: 15
+    DiameterM: 3
   provenance: "AUTHORED exercise raid. Sea-skimmers: Harpoon-class (220 kg warhead,
     public), 290 m/s (AUTHORED, about Mach 0.85), 5 m, RCS \u221210 dBsm. Two waves
     of 4 sea-skimmers, from 050-070\xB0 then 290-310\xB0 40 s later, 3 s apart; 2

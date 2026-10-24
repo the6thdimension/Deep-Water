@@ -37,6 +37,8 @@ namespace DeepWater.GeneralQuarters.Core.Magazine
         public int MagazineRounds;
         public float PkPerBurstAtMinRange;
         public float PkPerBurstAtMaxRange;
+        /// <summary>Guns L1's data: projectile, mount rates and limits, dispersion, fuze, lethality. Unused at L0.</summary>
+        public GunBallisticsData Ballistics;
     }
 
     /// <summary>A TAO-directed engagement for guns (an EngageOrder), held until rounds run out or cease fire.</summary>
@@ -60,108 +62,31 @@ namespace DeepWater.GeneralQuarters.Core.Magazine
     }
 
     /// <summary>
-    /// Guns L0: a burst model. A mount that is ready, online, in arc and in range fires a burst; the burst
-    /// arrives after the time of flight for the firing range and kills with a seeded Pk that falls linearly
-    /// from minimum to maximum range. Doctrine Auto lets the mount pick the most urgent threat itself
-    /// (local fire control); otherwise it fires only on directed engagements. What it does NOT model (L1+):
-    /// ballistics, drag tables, dispersion, aiming lead, mount slew, the ship's roll.
+    /// What every gun level shares: choosing what to shoot. A directed engagement (a TAO order) comes first, in
+    /// issue order; under doctrine Auto the mount takes the most urgent threat it can engage (local fire control).
+    /// Each level says what "can engage" means.
     /// </summary>
-    public sealed class GunMountL0 : IGunMount
+    public abstract class GunMountBase
     {
-        const string Rule = "Guns L0 (burst Pk by range)";
-
-        struct Burst
-        {
-            public int TrackId;
-            public int TargetTruthId;
-            public long ImpactTick;
-            public float Pk;
-            public float RangeM;
-            public int FiredEvent;
-            /// <summary>Where the burst was aimed: the track's predicted position at impact.</summary>
-            public Vector3 AimPoint;
-            public int Mount;
-        }
-
-        readonly GunMountProfileData _profile;
+        protected readonly GunMountProfileData _profile;
         readonly List<RankedThreat> _ranked = new List<RankedThreat>();
-        readonly List<Burst> _bursts = new List<Burst>();
-        long _readyTick;
 
-        public GunMountL0(in GunMountProfileData profile)
+        protected GunMountBase(in GunMountProfileData profile)
         {
             _profile = profile;
             Rounds = profile.MagazineRounds;
             Online = true;
         }
 
-        public FidelityLevel Level => FidelityLevel.L0;
         public GunMountProfileData Profile => _profile;
         public bool Online { get; set; }
-        public int Rounds { get; private set; }
+        public int Rounds { get; protected set; }
 
-        public void Step(EngagementContext ctx, List<DirectedEngagement> directed)
+        /// <summary>True if this mount can engage <paramref name="track"/> now; <paramref name="range"/> is the firing range, m.</summary>
+        protected abstract bool CanEngage(EngagementContext ctx, in Track track, out float range);
+
+        protected bool TryPickTarget(EngagementContext ctx, List<DirectedEngagement> directed, out Track track, out int cause, out int directedIndex, out float range)
         {
-            ResolveArrivals(ctx);
-            if (!Online || ctx.Tick < _readyTick || Rounds < _profile.BurstRounds) return;
-
-            if (!TryPickTarget(ctx, directed, out Track track, out int cause, out int directedIndex, out float range)) return;
-
-            float span = Mathf.Max(1f, _profile.MaxRangeM - _profile.MinRangeM);
-            float pk = Mathf.Lerp(_profile.PkPerBurstAtMinRange, _profile.PkPerBurstAtMaxRange, Mathf.Clamp01((range - _profile.MinRangeM) / span));
-            float tof = range / Mathf.Max(1f, _profile.MuzzleVelocityMps * _profile.MeanVelocityFraction);
-            long impact = ctx.Tick + Mathf.Max(1, Mathf.RoundToInt(tof / ctx.TickSeconds));
-            float cycle = _profile.BurstRounds / Mathf.Max(1e-3f, _profile.RoundsPerMinute) * 60f;
-            _readyTick = ctx.Tick + Mathf.Max(1, Mathf.RoundToInt(cycle / ctx.TickSeconds));
-            Rounds -= _profile.BurstRounds;
-
-            Vector3 aimPoint = track.PredictedPosition(impact, ctx.TickSeconds);
-            int fired = ctx.Log.Add(ctx.Tick, EventKind.BurstFired, Rule,
-                System.FormattableString.Invariant($"{_profile.Name} fired {_profile.BurstRounds} rounds at track {track.Id} ({range:0} m, time of flight {tof:0.0} s, Pk {pk:0.00}); {Rounds} left"),
-                track.Id, track.CreatedEvent, cause, causeC: ctx.Doctrine.RoeEvent);
-            ctx.Log.Locate(fired, aimPoint, _profile.Weapon, ctx.Mount);
-            _bursts.Add(new Burst
-            {
-                TrackId = track.Id, TargetTruthId = track.TruthId, ImpactTick = impact, Pk = pk, RangeM = range, FiredEvent = fired,
-                AimPoint = aimPoint, Mount = ctx.Mount,
-            });
-
-            if (directedIndex >= 0)
-            {
-                DirectedEngagement d = directed[directedIndex];
-                if (d.BurstsRemaining > 0) d.BurstsRemaining--;
-                if (d.BurstsRemaining == 0) directed.RemoveAt(directedIndex);
-                else directed[directedIndex] = d;
-            }
-        }
-
-        void ResolveArrivals(EngagementContext ctx)
-        {
-            for (int i = 0; i < _bursts.Count; i++)
-            {
-                Burst b = _bursts[i];
-                if (b.ImpactTick > ctx.Tick) continue;
-                if (!ctx.TargetAlive(b.TargetTruthId))
-                {
-                    int wasted = ctx.Log.Add(ctx.Tick, EventKind.Note, Rule, $"{_profile.Name} burst at track {b.TrackId} wasted: target already destroyed", b.TrackId, b.FiredEvent);
-                    ctx.Log.Locate(wasted, b.AimPoint, _profile.Weapon, b.Mount);
-                }
-                else
-                {
-                    bool kill = ctx.Rng.Chance(b.Pk, out ChanceRoot root);
-                    int ev = ctx.Log.Add(ctx.Tick, kill ? EventKind.Kill : EventKind.Miss, Rule,
-                        System.FormattableString.Invariant($"{_profile.Name} burst arrived at track {b.TrackId} ({b.RangeM:0} m); Pk {b.Pk:0.00} → {(kill ? "KILL" : "survived")}"),
-                        b.TrackId, b.FiredEvent, root: RootKind.Chance, chance: root);
-                    ctx.Log.Locate(ev, ctx.TryTruth(b.TargetTruthId, out TruthTarget target) ? target.Position : b.AimPoint, _profile.Weapon, b.Mount);
-                    if (kill) ctx.RecordKill(b.TargetTruthId, b.TrackId, _profile.Weapon, ev);
-                }
-                _bursts.RemoveAt(i--);
-            }
-        }
-
-        bool TryPickTarget(EngagementContext ctx, List<DirectedEngagement> directed, out Track track, out int cause, out int directedIndex, out float range)
-        {
-            // A directed engagement (TAO order) comes first, in issue order.
             for (int i = 0; i < directed.Count; i++)
             {
                 DirectedEngagement d = directed[i];
@@ -194,14 +119,111 @@ namespace DeepWater.GeneralQuarters.Core.Magazine
             return false;
         }
 
-        bool CanEngage(EngagementContext ctx, in Track track, out float range)
+        /// <summary>A directed engagement used one burst: count it down, and drop it when it is spent.</summary>
+        protected static void SpendDirected(List<DirectedEngagement> directed, int directedIndex)
+        {
+            if (directedIndex < 0) return;
+            DirectedEngagement d = directed[directedIndex];
+            if (d.BurstsRemaining > 0) d.BurstsRemaining--;
+            if (d.BurstsRemaining == 0) directed.RemoveAt(directedIndex);
+            else directed[directedIndex] = d;
+        }
+
+        /// <summary>True if <paramref name="track"/>'s kind is one this mount is fitted against.</summary>
+        protected bool KindOk(in Track track) => track.Kind == TargetKind.SurfaceShip ? _profile.AntiSurface : _profile.AntiAir;
+    }
+
+    /// <summary>
+    /// Guns L0: a burst model. A mount that is ready, online, in arc and in range fires a burst; the burst
+    /// arrives after the time of flight for the firing range and kills with a seeded Pk that falls linearly
+    /// from minimum to maximum range. Doctrine Auto lets the mount pick the most urgent threat itself
+    /// (local fire control); otherwise it fires only on directed engagements. What it does NOT model (L1+):
+    /// ballistics, drag tables, dispersion, aiming lead, mount slew, the ship's roll.
+    /// </summary>
+    public sealed class GunMountL0 : GunMountBase, IGunMount
+    {
+        const string Rule = "Guns L0 (burst Pk by range)";
+
+        struct Burst
+        {
+            public int TrackId;
+            public int TargetTruthId;
+            public long ImpactTick;
+            public float Pk;
+            public float RangeM;
+            public int FiredEvent;
+            /// <summary>Where the burst was aimed: the track's predicted position at impact.</summary>
+            public Vector3 AimPoint;
+            public int Mount;
+        }
+
+        readonly List<Burst> _bursts = new List<Burst>();
+        long _readyTick;
+
+        public GunMountL0(in GunMountProfileData profile) : base(profile) { }
+
+        public FidelityLevel Level => FidelityLevel.L0;
+
+        public void Step(EngagementContext ctx, List<DirectedEngagement> directed)
+        {
+            ResolveArrivals(ctx);
+            if (!Online || ctx.Tick < _readyTick || Rounds < _profile.BurstRounds) return;
+
+            if (!TryPickTarget(ctx, directed, out Track track, out int cause, out int directedIndex, out float range)) return;
+
+            float span = Mathf.Max(1f, _profile.MaxRangeM - _profile.MinRangeM);
+            float pk = Mathf.Lerp(_profile.PkPerBurstAtMinRange, _profile.PkPerBurstAtMaxRange, Mathf.Clamp01((range - _profile.MinRangeM) / span));
+            float tof = range / Mathf.Max(1f, _profile.MuzzleVelocityMps * _profile.MeanVelocityFraction);
+            long impact = ctx.Tick + Mathf.Max(1, Mathf.RoundToInt(tof / ctx.TickSeconds));
+            float cycle = _profile.BurstRounds / Mathf.Max(1e-3f, _profile.RoundsPerMinute) * 60f;
+            _readyTick = ctx.Tick + Mathf.Max(1, Mathf.RoundToInt(cycle / ctx.TickSeconds));
+            Rounds -= _profile.BurstRounds;
+
+            Vector3 aimPoint = track.PredictedPosition(impact, ctx.TickSeconds);
+            int fired = ctx.Log.Add(ctx.Tick, EventKind.BurstFired, Rule,
+                System.FormattableString.Invariant($"{_profile.Name} fired {_profile.BurstRounds} rounds at track {track.Id} ({range:0} m, time of flight {tof:0.0} s, Pk {pk:0.00}); {Rounds} left"),
+                track.Id, track.CreatedEvent, cause, causeC: ctx.Doctrine.RoeEvent);
+            ctx.Log.Locate(fired, aimPoint, _profile.Weapon, ctx.Mount);
+            _bursts.Add(new Burst
+            {
+                TrackId = track.Id, TargetTruthId = track.TruthId, ImpactTick = impact, Pk = pk, RangeM = range, FiredEvent = fired,
+                AimPoint = aimPoint, Mount = ctx.Mount,
+            });
+
+            SpendDirected(directed, directedIndex);
+        }
+
+        void ResolveArrivals(EngagementContext ctx)
+        {
+            for (int i = 0; i < _bursts.Count; i++)
+            {
+                Burst b = _bursts[i];
+                if (b.ImpactTick > ctx.Tick) continue;
+                if (!ctx.TargetAlive(b.TargetTruthId))
+                {
+                    int wasted = ctx.Log.Add(ctx.Tick, EventKind.Note, Rule, $"{_profile.Name} burst at track {b.TrackId} wasted: target already destroyed", b.TrackId, b.FiredEvent);
+                    ctx.Log.Locate(wasted, b.AimPoint, _profile.Weapon, b.Mount);
+                }
+                else
+                {
+                    bool kill = ctx.Rng.Chance(b.Pk, out ChanceRoot root);
+                    int ev = ctx.Log.Add(ctx.Tick, kill ? EventKind.Kill : EventKind.Miss, Rule,
+                        System.FormattableString.Invariant($"{_profile.Name} burst arrived at track {b.TrackId} ({b.RangeM:0} m); Pk {b.Pk:0.00} → {(kill ? "KILL" : "survived")}"),
+                        b.TrackId, b.FiredEvent, root: RootKind.Chance, chance: root);
+                    ctx.Log.Locate(ev, ctx.TryTruth(b.TargetTruthId, out TruthTarget target) ? target.Position : b.AimPoint, _profile.Weapon, b.Mount);
+                    if (kill) ctx.RecordKill(b.TargetTruthId, b.TrackId, _profile.Weapon, ev);
+                }
+                _bursts.RemoveAt(i--);
+            }
+        }
+
+        protected override bool CanEngage(EngagementContext ctx, in Track track, out float range)
         {
             Vector3 aim = track.PredictedPosition(ctx.Tick, ctx.TickSeconds);
             Vector3 mount = ctx.Own.ToWorld(_profile.OffsetShip);
             range = Vector3.Distance(mount, aim);
             if (range < _profile.MinRangeM || range > _profile.MaxRangeM) return false;
-            bool kindOk = track.Kind == TargetKind.SurfaceShip ? _profile.AntiSurface : _profile.AntiAir;
-            if (!kindOk) return false;
+            if (!KindOk(track)) return false;
             float bearing = ctx.Own.RelativeBearingDeg(aim);
             return Mathf.Abs(Mathf.DeltaAngle(_profile.FacingDeg, bearing)) <= _profile.ArcHalfDeg;
         }
@@ -222,6 +244,10 @@ namespace DeepWater.GeneralQuarters.Core.Magazine
             resolution = FidelityLadder.Resolve(ElementKind.Guns, requested);
             switch (resolution.Resolved)
             {
+                case FidelityLevel.L1:
+                    if (profile.Ballistics.Projectile.MassKg <= 0f || profile.Ballistics.Projectile.MuzzleVelocityMps <= 0f)
+                        throw new System.ArgumentException($"{profile.Name}: guns L1 requested, but the mount has no ballistics data (GunMountProfileData.Ballistics)");
+                    return new GunMountL1(profile);
                 default: return new GunMountL0(profile);
             }
         }

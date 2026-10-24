@@ -54,7 +54,7 @@ MonoBehaviour:
     missileLevel: 2
     rounds: 32
     pkSingleShot: 0.8
-  gunsLevel: 0
+  gunsLevel: 1
   guns:
   - Name: Mk 45
     Weapon: 3
@@ -75,6 +75,27 @@ MonoBehaviour:
     MagazineRounds: 600
     PkPerBurstAtMinRange: 0.03
     PkPerBurstAtMaxRange: 0.005
+    Ballistics:
+      Projectile:
+        MassKg: 31.1
+        DiameterM: 0.127
+        MuzzleVelocityMps: 808
+        FormFactor: 0.9251
+      ElevationMinDeg: -15
+      ElevationMaxDeg: 65
+      TrainRateDps: 30
+      ElevateRateDps: 20
+      LayToleranceDeg: 0.5
+      DispersionMrad: 2
+      SolutionLatencyS: 0.05
+      Fuze: 1
+      LethalRadiusM: 8
+      FuzeReliability: 0.9
+      PkPerHitAir: 0.9
+      PkPerHitSurface: 0.3
+      ClosedLoopSpotting: 0
+      SpotBiasMrad: 0
+      SpotTimeConstantS: 0
   - Name: CIWS fwd
     Weapon: 4
     System: 5
@@ -94,6 +115,27 @@ MonoBehaviour:
     MagazineRounds: 1550
     PkPerBurstAtMinRange: 0.35
     PkPerBurstAtMaxRange: 0.08
+    Ballistics:
+      Projectile:
+        MassKg: 0.1
+        DiameterM: 0.01275
+        MuzzleVelocityMps: 1113
+        FormFactor: 3.2484
+      ElevationMinDeg: -25
+      ElevationMaxDeg: 85
+      TrainRateDps: 115
+      ElevateRateDps: 115
+      LayToleranceDeg: 1
+      DispersionMrad: 2
+      SolutionLatencyS: 0.02
+      Fuze: 0
+      LethalRadiusM: 0
+      FuzeReliability: 0
+      PkPerHitAir: 0.3
+      PkPerHitSurface: 0.05
+      ClosedLoopSpotting: 1
+      SpotBiasMrad: 3
+      SpotTimeConstantS: 0.5
   - Name: CIWS aft
     Weapon: 4
     System: 5
@@ -113,6 +155,27 @@ MonoBehaviour:
     MagazineRounds: 1550
     PkPerBurstAtMinRange: 0.35
     PkPerBurstAtMaxRange: 0.08
+    Ballistics:
+      Projectile:
+        MassKg: 0.1
+        DiameterM: 0.01275
+        MuzzleVelocityMps: 1113
+        FormFactor: 3.2484
+      ElevationMinDeg: -25
+      ElevationMaxDeg: 85
+      TrainRateDps: 115
+      ElevateRateDps: 115
+      LayToleranceDeg: 1
+      DispersionMrad: 2
+      SolutionLatencyS: 0.02
+      Fuze: 0
+      LethalRadiusM: 0
+      FuzeReliability: 0
+      PkPerHitAir: 0.3
+      PkPerHitSurface: 0.05
+      ClosedLoopSpotting: 1
+      SpotBiasMrad: 3
+      SpotTimeConstantS: 0.5
   - Name: Mk 38 port
     Weapon: 5
     System: 6
@@ -132,6 +195,27 @@ MonoBehaviour:
     MagazineRounds: 400
     PkPerBurstAtMinRange: 0.2
     PkPerBurstAtMaxRange: 0.05
+    Ballistics:
+      Projectile:
+        MassKg: 0.184
+        DiameterM: 0.025
+        MuzzleVelocityMps: 1100
+        FormFactor: 1.2057
+      ElevationMinDeg: -20
+      ElevationMaxDeg: 55
+      TrainRateDps: 60
+      ElevateRateDps: 60
+      LayToleranceDeg: 1
+      DispersionMrad: 1.5
+      SolutionLatencyS: 0.1
+      Fuze: 0
+      LethalRadiusM: 0
+      FuzeReliability: 0
+      PkPerHitAir: 0.2
+      PkPerHitSurface: 0.15
+      ClosedLoopSpotting: 0
+      SpotBiasMrad: 0
+      SpotTimeConstantS: 0
   - Name: Mk 38 stbd
     Weapon: 5
     System: 7
@@ -151,6 +235,27 @@ MonoBehaviour:
     MagazineRounds: 400
     PkPerBurstAtMinRange: 0.2
     PkPerBurstAtMaxRange: 0.05
+    Ballistics:
+      Projectile:
+        MassKg: 0.184
+        DiameterM: 0.025
+        MuzzleVelocityMps: 1100
+        FormFactor: 1.2057
+      ElevationMinDeg: -20
+      ElevationMaxDeg: 55
+      TrainRateDps: 60
+      ElevateRateDps: 60
+      LayToleranceDeg: 1
+      DispersionMrad: 1.5
+      SolutionLatencyS: 0.1
+      Fuze: 0
+      LethalRadiusM: 0
+      FuzeReliability: 0
+      PkPerHitAir: 0.2
+      PkPerHitSurface: 0.15
+      ClosedLoopSpotting: 0
+      SpotBiasMrad: 0
+      SpotTimeConstantS: 0
   damageLevel: 0
   damage:
     HullHitPoints: 1000
@@ -210,7 +315,30 @@ MonoBehaviour:
     a 1,550-round drum (public, NAVSEA fact file); 300-2,000 m, 100-round bursts,
     Pk per burst 0.35 falling to 0.08 (AUTHORED). Both are Damage Control's one CIWS
     system at L0.\nMk 38 \xD72 (25 mm), port and starboard: about 180 rounds/min
-    (public, M242); beam arcs \xB190\xB0, 100-2,500 m, surface targets only (AUTHORED).\nDAMAGE
+    (public, M242); beam arcs \xB190\xB0, 100-2,500 m, surface targets only (AUTHORED).\nGUNS
+    L1 (slice B1, G35-G41; the L0 numbers above still drive target choice, rate of
+    fire and magazines). Drag: the BRL G7 curve (McCoy, ARBRL-TR-02293) times a form
+    factor CALIBRATED per projectile; ISA atmosphere; no wind. Sources: NavWeaps
+    (navweaps.com) gun pages, read 2026-10-24.\n  Mk 45 5\"/54 (Flight I/II; the
+    earlier 'Mod 4' above is the Flight IIA 5\"/62): HE-CVT 31.1 kg (Mk 68/127),
+    127 mm, 808 m/s with the Mk 67 cartridge, elevation -15/+65\xB0, train 30\xB0/s,
+    elevation 20\xB0/s (public). Form factor 0.9251 CALIBRATED to 23,130 m at 47\xB0
+    (public); VALIDATION: greatest range comes at 48.0\xB0 (published 47\xB0). Proximity
+    fuze against air: lethal radius 8 m, fuze 0.9 (AUTHORED); 0.3 a hit against surface
+    targets (AUTHORED). Dispersion 2 mrad, solution latency 0.05 s, laid within 0.5\xB0
+    (AUTHORED).\n  CIWS Mk 149 APDS: penetrator 0.10 kg, 12.75 mm, 1,113 m/s; Block
+    1B elevation -25/+85\xB0, train and elevation 115\xB0/s (public). Form factor
+    3.2484 CALIBRATED to 5,500 m at 45\xB0 (public). A form factor that far from
+    1 says the G7 shape fits this penetrator poorly; no public figure checks the
+    curve between muzzle and maximum range. 0.3 a hit against air, 0.05 against surface
+    (AUTHORED). Closed-loop spotting: bias 3 mrad, time constant 0.5 s (AUTHORED;
+    Phalanx spots its own rounds, public, but no figure is). Dispersion 2 mrad, latency
+    0.02 s, laid within 1\xB0 (AUTHORED).\n  Mk 38 25 mm (M242) HEI-T: 0.184 kg,
+    25 mm, 1,100 m/s, elevation -20/+55\xB0 (public, Mk 88 mounting). Form factor
+    1.2057 CALIBRATED to the 6,800 m maximum range (public; the elevation is not
+    given: greatest range over the mount's elevations, at 37.5\xB0). Train and elevation
+    60\xB0/s (AUTHORED: not public). 0.2 a hit against air, 0.15 against surface
+    (AUTHORED). Dispersion 1.5 mrad, latency 0.1 s, laid within 1\xB0 (AUTHORED).\nDAMAGE
     CONTROL L0: hull 1,000 hit points, 1 per kg of warhead; systems 100-150 hit points
     within 25 m of the hit (AUTHORED: no public damage table).\nSCENARIO DEFAULTS:
     ROE weapons tight; ESSM semi-automatic (TEWA proposes, the TAO confirms), guns

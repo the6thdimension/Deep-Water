@@ -19,6 +19,8 @@ namespace DeepWater.GeneralQuarters.Core.Scenario
         public long LaunchTick;
         public float RcsDbsm;
         public float WarheadKg;
+        /// <summary>Length and body diameter, m (guns L1 aim at the presented area); 0 = the kind's default.</summary>
+        public float LengthM, DiameterM;
     }
 
     /// <summary>
@@ -100,7 +102,7 @@ namespace DeepWater.GeneralQuarters.Core.Scenario
                 truthOut.Add(new TruthTarget
                 {
                     Id = t.Id, Kind = t.Spec.Kind, Identity = t.Spec.Identity, Position = t.Position,
-                    Velocity = t.Velocity, Alive = true, RcsDbsm = t.Spec.RcsDbsm,
+                    Velocity = t.Velocity, Alive = true, RcsDbsm = t.Spec.RcsDbsm, LengthM = t.Spec.LengthM, DiameterM = t.Spec.DiameterM,
                 });
             }
         }

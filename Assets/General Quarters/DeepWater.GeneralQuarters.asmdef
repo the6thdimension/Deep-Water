@@ -1,0 +1,16 @@
+{
+    "name": "DeepWater.GeneralQuarters",
+    "rootNamespace": "DeepWater.GeneralQuarters",
+    "references": [
+        "GuidedFury"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

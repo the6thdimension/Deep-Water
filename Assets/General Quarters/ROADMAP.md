@@ -16,7 +16,7 @@ Branch: `feat/general-quarters`, kept in step with `main` (CLAUDE.md, Branches).
 
 ---
 
-## Phase 1 — L0 engagement on the range (G20)
+## Phase 1 — L0 engagement on the range (G20) (DONE 2026-10-24)
 
 The gate: a scripted raid against the destroyer plays end to end on the Sea State range.
 - She floats and steers; the CIC detects, assigns, fires and kills or is hit.
@@ -153,9 +153,27 @@ SIX's picks: G30 effects reused where they fit and built in code where they don'
 - [x] All unreckoned; no committed DAVFX references.
 - **Not verified:** listening; physical controllers on the range; the Guided Fury ground detonation still uses `HD_Naval_Explosion` and draws wrong in HDRP (a follow-up, not fixed here).
 
-### Slice 7 — Phase review
-- [ ] Legacy supersession checklist (BurkeVLSSystem, SPG62FireControlRadar, VLSManager, BurkeMissile). Archive only after the range proves the replacement (G13).
-- [ ] Update this roadmap and BLUEPRINT; METHODOLOGY entries; a handoff.
+### Slice 7 — Phase review (done 2026-10-24)
+- [x] **Gate verdict: met.** On the range in play mode:
+  - She floats and steers.
+  - The CIC detects, assigns, fires and kills or is hit, and every engagement is explained in the log.
+  - The saturation raid (24 threats) costs 0.083 ms mean and 0.262 ms p99 of combat-core time per fixed step, against the 1 ms budget.
+  - It looks and sounds like a fight (slice 6). The sound has been seen playing but not yet heard.
+- [x] **Legacy supersession checklist** (G13). Each legacy feature is carried, superseded or deliberately dropped:
+
+  | Legacy | What it did | In General Quarters |
+  |---|---|---|
+  | `BurkeVLSSystem` | 96 Flight IIA cells; loadout packed into cells; priority launch queue; hatch, pre-launch and inter-shot delays; cell cooldown; launch events | **Superseded** by `Core/Magazine/Vls.cs`: the Flight I/II groups, 32 fore and 64 aft, per the model (Q1), with seeded launches logged with their causes. Hatches by `Modules/Presentation/VlsHatches.cs`. Launch timing in detail is VLS L1 (Stream B) |
+  | `BurkeVLSFXController` | Launch plume, launch sound, hatch animators | **Superseded** by `CombatPresentation` (VLS plume, FDS launch sound) and `VlsHatches` |
+  | `BurkeMissile` | Boost, sustain and coast homing on a Rigidbody, with a proximity fuze | **Superseded** by Guided Fury ESSM inside the core (`Vls`, Guided Fury L2). It still sits on `rim-162essm/ESSM Shell.prefab`, where Guided Fury disables it at launch (AP8); the archived script keeps that reference whole |
+  | `SPG62FireControlRadar` | A scanning radar with track quality, an STT lock and fire commands to the VLS. Despite its name, it was a search-and-track radar, not an illuminator | **Superseded** by radar L0 (4/3-earth horizon), tracks and TEWA in `Core/Cic`. A real SPG-62 illuminator is Illuminators L1 (Stream A) |
+  | `VLSManager` | A 32-cell VLS driven by `RH_RadarModule`; launch limits on wind, roll and pitch; reloads | **Superseded** for launches. **Dropped, deliberately:** its wind was `UnityEngine.Random` every few seconds (it breaks determinism, standing constraint 1), and a Mk 41 is not reloaded at sea. Launch limits from ship motion, if wanted, belong to VLS L1 |
+  | Editor tools (`BurkeVLSCellGenerator`, `EngagementTestSetup`, `SPG62FireControlRadarEditor`, `SPG62RadarScreenWindow`, `VLSManagerEditor`) | Wire and test the legacy pieces | Archived with them. Their menus still work for the old scenes |
+
+  - **Archived** (C5, now P8) to `Assets/_Archive/Destroyer Scripts_legacy/`, `Radar Scripts_legacy/` and `Missile Scripts_legacy/`, each with a README saying what it is, why it was archived and how to restore it.
+  - The `.meta` files moved with the scripts, so the scenes and prefabs that use them (`_SCENES/DDG Engagement`, `_SCENES/Rocket`, `rim-162essm/ESSM Shell.prefab`) keep their references.
+  - **Stays in place:** `RH_RadarModule`, the RH Radar routine's to archive; and `MissileController`, `DestroyerController` and `SimpleAirTarget`, which were not on the checklist. `MissileController` is `VLSManager`'s missile and no scene uses it, so it is the next candidate for the archive.
+- [x] This roadmap, the BLUEPRINT, METHODOLOGY (C5 promoted to P8, C25) and a handoff (`HANDOFF.md`).
 
 ---
 
@@ -213,6 +231,7 @@ SIX's picks: G30 effects reused where they fit and built in code where they don'
   - **Gate:** the Phase 1 gate is met in play mode at 0.066 ms mean per fixed step against the 1 ms budget, presentation aside (slice 6).
   - **Found on the range:** the aircraft bug (skip / fail log).
 
+- **2026-10-24** — Slice 7 done: the phase review. **Phase 1 is complete.** The four legacy destroyer scripts and their editor tools are archived behind a supersession checklist, and `HANDOFF.md` is written. Next: SIX picks the first element stream.
 - **2026-10-24** — Slice 6 done: presentation, with the decisions in BLUEPRINT G30–G33. The Phase 1 gate's presentation half is met in play mode (sound seen playing, not yet heard). Q2 answered: Sea State gained `DepositFoam`.
 
 ## Skip / fail log

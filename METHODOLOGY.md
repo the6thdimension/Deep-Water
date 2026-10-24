@@ -57,6 +57,10 @@ These are the fixed points around which the methodology orbits. Every principle 
 - **P3. New systems follow the `Core / Modules / ScriptableObjects / Prefabs / Examples` layout.**
   - *Why:* Predictable navigation. The Core/Modules split forces a thinking pass on what's stable vs. what varies. Examples keeps the system self-demonstrating.
   - *Origin:* Mirrors `Assets/Guided Fury/`.
+- **P8. Replaced legacy code goes to `Assets/_Archive/<original folder>_legacy/` with its `.meta` files, never deleted outright until the cutover is proven.**
+  - *Why:* The GUIDs survive, so every scene and prefab that still uses the old code keeps working. The old behaviour stays readable while its replacement is deepened, and the rollback is a move back.
+  - *Each archive folder has a README* saying what it held, what superseded it and how to restore it, and the archive follows a supersession checklist (C25).
+  - *Origin:* Promoted from C5 on 2026-10-24 after its third use: Guided Fury (`_Archive/Guided Fury_legacy/`), Carrier Ops (`Carrier_legacy/`), and General Quarters slice 7. The General Quarters archive moved 10 scripts used by two scenes and a prefab with no reference lost.
 
 ### Performance
 
@@ -251,7 +255,11 @@ These are the fixed points around which the methodology orbits. Every principle 
   - *Exercised:* `CombatEffectsBuilder.Trail`, checked from the missile camera in play mode.
 - **C24. A regenerated asset keeps its GUID by being overwritten in place.** A builder that deletes and recreates a scene or asset gives it a new GUID each run, which breaks build settings and every reference to it, and shows as a churned `.meta` in every commit. Copy over the existing file and reimport it.
   - *Exercised:* `RangeSceneBuilder` (slice 6): `GQ_Range.unity` keeps GUID `281e3cf048c5db14188104849f24eb4e` across rebuilds.
-- **C5. Replaced legacy code goes to `Assets/_Archive/`, never deleted outright until cutover is proven.** Original folder name + `_legacy` suffix; original `.meta` preserved so GUIDs survive. Lets you reference old behavior during rebuild and gives a clean rollback path. Promote after one full cutover proves the workflow.
+- ~~**C5.** Replaced legacy code goes to `Assets/_Archive/`.~~ Promoted to **P8** on 2026-10-24.
+- **C25. Archive legacy code behind a supersession checklist, not a feeling.** List every feature of the legacy code and mark each one *carried*, *superseded* (name the replacement and its level) or *dropped deliberately* (say why). A feature with no row is a regression nobody chose.
+  - *Exercised:* General Quarters slice 7 (`Assets/General Quarters/ROADMAP.md`).
+    - It found that "SPG62FireControlRadar" was a search radar rather than an illuminator, so the real illuminator is a ladder item (Illuminators L1), not a carried feature.
+    - It dropped `VLSManager`'s random wind on purpose, because it breaks determinism.
 
 ---
 
@@ -319,3 +327,4 @@ These are the fixed points around which the methodology orbits. Every principle 
   - **Results:** 67/67 GQ tests, 48/48 sea tests.
   - **Results:** 46/46 GQ tests, 48/48 sea tests.
 - **2026-10-24** — General Quarters slice 6 (presentation). Added AP20 (an effect built for another pipeline, trusted because its shader is "supported"), C22 (the core says where, presentation decides how; fingerprint and on/off A/B), C23 (a fast emitter's trail is a ribbon), C24 (a regenerated asset keeps its GUID by being overwritten in place).
+- **2026-10-24** — General Quarters slice 7 (phase review; Phase 1 complete). Promoted C5 to P8 (the `_Archive` convention, third use). Added C25 (archive behind a supersession checklist).

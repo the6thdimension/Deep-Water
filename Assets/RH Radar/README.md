@@ -32,5 +32,7 @@ RH Radar/
 ## Legacy
 
 `Assets/Scripts/Radar Scripts/RH_RadarModule.cs` and `SPG62FireControlRadar.cs` are the
-pre-McMahon predecessors. The routine archives them to `_Archive/Radar Scripts_legacy/`
-on its first iteration (Pat C5).
+pre-McMahon predecessors. `SPG62FireControlRadar` (with `VLSManager`) was archived to
+`_Archive/Radar Scripts_legacy/` on 2026-10-24 by General Quarters slice 7, which superseded
+it. `RH_RadarModule` stays for the routine to archive to the same folder on its first
+iteration (P8, formerly C5).

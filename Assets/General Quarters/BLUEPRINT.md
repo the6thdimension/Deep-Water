@@ -1,6 +1,6 @@
 # General Quarters — blueprint
 
-> **Status: LOCKED BLUEPRINT, build starting.** The 20 questions were answered by SIX on 2026-10-23; Phase 1 began the same day.
+> **Status: LOCKED BLUEPRINT; Phase 1 complete (2026-10-24).** The 20 questions were answered by SIX on 2026-10-23; Phase 1 (every element at L0, played end to end on the range) began the same day and closed with slice 7. Picking it up cold: `HANDOFF.md`.
 > **This document's one job:** say what General Quarters is and why, record every decision behind it, and define the contract each combat element follows. Work order and progress live in `ROADMAP.md`, not here.
 
 ## 1. In plain language
@@ -139,7 +139,7 @@ All entries are SIX's picks of 2026-10-23, in round order. Leaning is Claude's r
 | G10 | Navigation | **Helm, autopilot, routes + nav sensor errors** (ladder L0 → L1) | Helm/autopilot/routes | Locked |
 | G11 | Interface | **Tactical display + panels,** orbit/chase camera | Same | Locked |
 | G12 | Home | **New module + new range scene;** DDG Engagement untouched until migrated | Same | Locked |
-| G13 | Legacy destroyer code | **Supersede, then archive** (C5) once the range scene proves it | Same | Locked |
+| G13 | Legacy destroyer code | **Supersede, then archive** (C5) once the range scene proves it. Done 2026-10-24 (slice 7): the checklist is in `ROADMAP.md` | Same | Locked |
 | G14 | Autonomy | **Doctrine modes + ROE,** CIWS Auto by default, reasons logged | Same | Locked |
 | G15 | Data | **Public sources, flagged** | Same | Locked |
 | G16 | Scale | **1 DDG, raids up to ~24, 1 peer;** ~1 ms combat-core time per fixed step | Same | Locked |
@@ -210,3 +210,4 @@ Inherited from Reckoning: R2 (everything deterministic eventually), R15 (Watches
 - **2026-10-24** — Slice 5 decisions G25–G28 (SIX) and G29 (Proposed); Q5 added.
 - **2026-10-24** — Slice 6 decisions G30–G33 (SIX); Q2 answered.
 - **2026-10-24** — Q5 answered by SIX: ESSM starts a run on SemiAuto; G29 Locked.
+- **2026-10-24** — Phase 1 complete (slice 7). G13 carried out: legacy destroyer scripts archived.

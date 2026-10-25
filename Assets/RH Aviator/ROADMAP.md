@@ -11,8 +11,9 @@ unchecked items without marking `~~skipped~~` + reason.
 ## Phase 0 — Foundation
 
 - [ ] **Mine legacy flight code for domain knowledge.** Read
-  `Aircraft_Handlers/MouseFlight/Scripts/AI_FlightController.cs`,
-  `FighterJet Scripts/FlightControllerManager.cs`,
+  `_Archive/Aircraft_Handlers_legacy/MouseFlight/Scripts/AI_FlightController.cs`,
+  `_Archive/FighterJet Scripts_legacy/FlightControllerManager.cs` (both archived 2026-10-25; their
+  checklists are in each archive folder's README),
   `JMAC/Agents/*.cs`. Summarize intercept geometry, throttle curves, target-selection
   heuristics into `Assets/RH Aviator/_notes/legacy-mining.md`. **Do not modify the
   legacy files.**
@@ -20,8 +21,9 @@ unchecked items without marking `~~skipped~~` + reason.
   fuel, energy, role state). `AircraftProfileData` (mass, thrust curve, max-G, fuel,
   weapons loadout summary). Unmanaged. (C4)
 - [ ] **AircraftProfileSO + RoleProfileSO.** Authoring assets. `Bake()` to structs. (P1)
-- [ ] **IAircraftActuator contract.** Under `Core/Contracts/`. Pitch / roll / yaw / throttle
-  commands. Wheel-brakes optional. Gear/flaps optional.
+- [ ] ~~skipped~~ **IAircraftActuator contract.** Under `Core/Contracts/`. Pitch / roll / yaw / throttle
+  commands. Wheel-brakes optional. Gear/flaps optional. *Skipped 2026-10-25:* Air Wing's `ISeat` and
+  `PilotInputs` are the contract (Air Wing BLUEPRINT W5, W6). RH Aviator implements AI seats against them.
 - [ ] **IDecisionMaker contract.** Pure-C# decision-loop driver. Input: world snapshot
   (own state, sensor report, threats). Output: a `FlightCommand`.
 - [ ] **AviatorEntity pure-C# core.** Holds state. Pumps Decide → Actuate. (P6)

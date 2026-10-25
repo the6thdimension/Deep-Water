@@ -1,6 +1,6 @@
 {
-    "name": "RH.Aviator",
-    "rootNamespace": "RH.Aviator",
+    "name": "DeepWater.Aviator",
+    "rootNamespace": "DeepWater.Aviator",
     "references": [
         "RH.Shared"
     ],

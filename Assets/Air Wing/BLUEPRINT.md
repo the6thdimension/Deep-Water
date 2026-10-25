@@ -1,0 +1,222 @@
+# Air Wing — blueprint
+
+> **Status: LOCKED BLUEPRINT, NOTHING BUILT (2026-10-24).** SIX answered all 24 questions on 2026-10-24 (W1–W24). Building starts only on SIX's go.
+> **This document's one job:** say what Air Wing is and why, record every decision behind it, and define the contract each part of an aircraft follows. Work order and progress live in `ROADMAP.md`, not here. The stock-take that preceded it is summarised in §1.
+
+## 1. In plain language
+
+**The ask.** SIX, 2026-10-24: *"I want to take a turn and deal with my planes."*
+
+**What exists today (stock-take, 2026-10-24, read in source and scene files).** No aircraft in Deep Water meets the project standard.
+- The F/A-18E that the scenes use (`Assets/FDS Assets/Aircraft/F-18E.prefab`) runs on AerialArcade course code. It weighs 544 kg (1,200 lb) and pulls its velocity toward the nose on a "rail".
+- The `F-18 (1) Variant` in Dogfight runs `FighterJetController`, which never flies: nothing calls its flight code.
+- The F-16s run the vendor FlightSimLite model in `Update`, so they fly at the frame rate.
+- The UH-60M controller cancels its own weight, so it hovers at zero collective, and tilting never moves it forward.
+- No scene or prefab uses any script in `Assets/Scripts/FighterJet Scripts/` or `Assets/Scripts/Aircraft_Handlers/`.
+- Carrier Ops is healthy (pure core, profile, tests), but no aircraft is hooked to it.
+- RH Aviator is a README and a roadmap, with no code.
+
+**Air Wing** is the Navy's name for every aircraft a carrier embarks. Here it is the module that gives Deep Water real aircraft:
+- an airframe with a flight-model ladder;
+- a powerplant;
+- flight controls;
+- landing gear;
+- a cockpit (camera and HUD).
+
+The F/A-18E Super Hornet comes first (W2); the helicopter follows as its own stream (W20).
+
+**Two rules make it fit the rest of Deep Water.**
+1. **An aircraft changes only through Pilot Inputs** (stick, throttle, pedals, switches) issued by a seat. The player's devices, the mouse-aim instructor and the RH Aviator AI pilot all issue the same Pilot Inputs on the fixed tick (W6, C19). A seat can change hands mid-flight, and the record keeps the same shape (W18).
+2. **The flight core is pure C# with its own integrator** (W4). It is deterministic on one machine from day one, with a fingerprint every tick (W7). PhysX is used only for contacts: gear, deck and collisions. This is Reckoning's variant B (`RECKONING-CONCEPT.md`, R35).
+
+## 2. Vocabulary
+
+Parts are named after the real aircraft systems that do the job (W9).
+
+| Name | What it is | Code |
+|---|---|---|
+| **Air Wing** | The module | `DeepWater.AirWing`, `Assets/Air Wing/` |
+| **Airframe** | Mass, inertia, aerodynamics; the flight model and its ladder | `Airframe` |
+| **Powerplant** | Engines: throttle to thrust, afterburner | `Powerplant` |
+| **Flight Controls** | The control law: Pilot Inputs to surface commands | `FlightControls` |
+| **Landing Gear** | Struts, wheels, brakes, nosewheel steering (L1+) | `LandingGear` |
+| **Cockpit** | Cameras and HUD | `Cockpit` |
+| **Atmosphere** | ISA standard atmosphere: density, temperature, speed of sound by altitude | `Atmosphere` |
+| **Pilot Inputs** | The only way anything changes an aircraft | `PilotInputs` |
+| **Seat** | Whoever issues an aircraft's Pilot Inputs: the player, or an RH Aviator AI pilot | `ISeat` |
+| **Instructor** | Mouse aim: you point, and it works the stick for you (W15) | `MouseInstructor` |
+| **Fidelity sheet** | Per-aircraft asset that picks each part's ladder level and profile | `FidelitySheetSO` |
+| **Input log** | Every tick's Pilot Inputs, with the seat that issued them | `InputLog` |
+| **Fix** | The per-tick fingerprint of the flight state (Reckoning's word, as in General Quarters) | `FlightFix` |
+
+**Language audit.** The per-aircraft level asset is a *fidelity sheet*, not a "loadout": in aviation a loadout means weapons and stores (W25, Proposed).
+
+## 3. Architecture
+
+### 3.1 Two halves
+
+| | The flight core (Airframe, Powerplant, Flight Controls, Atmosphere, seats' decisions) | The Unity side (adapters, contacts, cameras, HUD, device readers) |
+|---|---|---|
+| Code | Pure C# (P6). No `MonoBehaviour`, no `Time`, no `UnityEngine.Random`, no `Physics`, no scene queries | `MonoBehaviour` adapters; PhysX for gear and collision contacts (L1+); `DeepWater.Input` for devices |
+| Determinism | **Bit-identical on one machine from day one** (W7): seeded RNG (P7), fixed tick, fixed substeps, fixed order, per-tick Fix. Identical across machines later, through Reckoning | PhysX contacts are repeatable on one machine only, so ground phases are flagged in the Fix (W7) |
+| Talks to the world through | A **truth feed** each tick: the sea height under each aircraft from Sea State's `ISeaSurface` (never HDRP water, AP11), runway and deck heights, and contact forces from the previous step (L1+) | Unity, via adapters |
+
+### 3.2 One tick, a written order
+
+An adapter calls `AirWing.Step(tick)` from `FixedUpdate` (P2) at the project's 50 Hz (`Fixed Timestep: 0.02`, never changed by this module, W24). Inside each tick:
+
+1. **Seats:** each seat issues this tick's Pilot Inputs.
+   - The player's devices are sampled once, at the tick boundary.
+   - The instructor turns the mouse aim into stick inputs.
+   - The AI decides on its own Watch (coarse decisions at 2–5 Hz) and works the stick every tick.
+2. **Input log:** the Pilot Inputs go into the log with their seat and tick. A replay from the log must reproduce the Fix bit for bit (W28, Proposed).
+3. **Flight Controls:** the control law turns Pilot Inputs into commands for the airframe.
+4. **Flight model:** N fixed substeps (for example 4 × 200 Hz, W24) of Airframe, Powerplant and Atmosphere.
+5. **Contacts (L1+):** gear and collision forces from PhysX's last step enter as external forces (variant B).
+6. **Fix:** fingerprint each aircraft's state: position, velocity, attitude, rates, engine state.
+
+The adapter then writes the transform, interpolated for rendering (Pat5).
+
+### 3.3 Pilot Inputs
+
+| Field | Range | Meaning at every level (W26, Proposed) |
+|---|---|---|
+| Stick pitch | −1 … +1 | A commanded load factor (G) between the profile's negative and positive limits |
+| Stick roll | −1 … +1 | A commanded roll rate up to the profile's maximum |
+| Pedals | −1 … +1 | A commanded sideslip / yaw rate |
+| Throttle | 0 … 1, plus an afterburner detent | Engine power |
+| Switches | — | Flaps, speed brake, gear (L1+), autopilot modes (altitude hold, approach speed hold), hook (carrier stream) |
+
+The stick means the same thing at L0 and at L1, so the AI and the instructor don't need retuning when an aircraft moves up a level. The Hornet's fly-by-wire already makes its stick a G and roll-rate command (W23).
+
+**Device arbitration (W27, Proposed).** The last device moved past its deadzone owns the player's seat. The instructor gives way the instant a stick axis or flight key moves.
+
+### 3.4 Seats and RH Aviator (W5, W18)
+
+- Air Wing defines `ISeat` and `PilotInputs`. RH Aviator implements AI seats against them and references Air Wing; Air Wing never references RH Aviator.
+- The carrier hookup stays in Carrier Ops, through its existing `IRecoveringAircraft` seam (W5). It is parked until the AI stream is done (W16).
+- **Switchable seats:** the player can take or hand back any aircraft mid-flight, and an AI seat flies every empty one.
+
+### 3.5 Data (W8)
+
+- Every number comes from public sources, cited in each profile asset's provenance: the U.S. Navy fact file and Boeing's published figures for weights, thrust, wing area and limits, plus NASA's published F/A-18 reports for aerodynamics and the control law.
+- **Calibration (C16):** one public figure sets one number. The remaining figures are VALIDATION.
+- **AUTHORED** marks anything estimated. NASA's public aerodynamics (the High Alpha Research Vehicle programme) is for the F/A-18A/B, not the E, so the E's aerodynamics are Hornet data scaled to the E's wing area and weight, and the scaling is marked AUTHORED.
+- **Units (W22):** SI in the core. Knots, feet, pounds, G, Mach and degrees on the HUD and in quoted public figures, converted at the edge. Every displayed number carries its unit.
+- **Empty beats fake:** a value with no source and no defensible estimate stays empty, and the level that needs it is not built.
+
+## 4. The fidelity ladder
+
+**The contract (C14, as in General Quarters).**
+- Each part is an interface plus one implementation per level, built by a factory from `(level, profile)`.
+- A fidelity sheet requests a level per part. If that level isn't built yet, the factory falls back to the highest built level **and says so**, in the log and on the HUD.
+- Every built level ships with EditMode tests, and each part's tests run at every level it has.
+- One state struct (`AirframeState`, C4) carries across all levels.
+
+| Part | L0 (honest, simple) | L1 | L2 | L3 |
+|---|---|---|---|---|
+| **Airframe** (W3) | Point mass with an energy model. Thrust minus drag sets speed along the path. Lift limited by Cl_max and the G limit sets the load factor; turn rate is g·√(n²−1)/V. First-order response to the commanded G and roll rate. Airborne only | 6-DOF rigid body with mass, inertia and aerodynamic coefficients (Hornet data, scaled to the E) | Tabulated aerodynamics against Mach, with ground effect | Fuel mass and centre-of-gravity shift |
+| **Powerplant** | Throttle and afterburner to thrust, with a density lapse with altitude (AUTHORED shape) | Spool-up time constant | Thrust tables against Mach and altitude | Fuel flow and burn (with Airframe L3) |
+| **Flight Controls** (W23) | Commanded G and roll rate tracked by a first-order lag, clipped to the profile limits | Textbook fly-by-wire in the Hornet's style: G-command pitch, roll-rate roll, AoA limiter, G limiter, yaw damper. Structure after NASA's published HARV control-law papers; gains AUTHORED | Gain schedules against dynamic pressure and Mach; automatic flaps | — |
+| **Landing Gear** | None (L0 is airborne only, W29) | Struts, wheels, brakes and nosewheel steering through PhysX contacts | — | — |
+| **Atmosphere** | ISA standard atmosphere, still air | Steady wind | Turbulence (seeded, P7) | — |
+| **Cockpit** (W11) | Chase camera; HUD with speed, altitude, AoA, G, Mach and throttle, each with its unit | Cockpit view | — | — |
+| **AI pilot** (RH Aviator, W17) | Waypoints, wingman formation, return to base with approach and landing on the runway | Fighting for position against another jet (pursuit geometry, energy), scored by time spent behind it. No weapons | Weapons: **parked**, only if SIX asks (§6, constraint 8) | — |
+| **Helicopter** (W20) | Its own stream after jet L1, on the same contracts: thrust along the rotor axis, attitude hold, ground effect | — | — | — |
+
+**Devices (W10).** Keyboard and mouse (with the instructor), an Xbox pad and the VelocityOne stick, all in slice 1, through `DeepWater.Input`'s one-reader pattern. Each device class gets a virtual-device test (C18).
+
+**Budget (W21).** At most 0.01 ms per aircraft per fixed step at L0 and 0.05 ms at L1, so twenty jets at L1 fit within 1 ms. Measured with `unity-perf-ab` in a player build. A budget is a target until it has been measured.
+
+## 5. Decision register
+
+All entries W1–W24 are SIX's picks of 2026-10-24, in round order. "Leaning" is Claude's recommendation before the pick. W25 and above are Claude's Proposed decisions, made to close gaps the picks left open; each waits for SIX's review.
+
+| # | Question | SIX's pick | Leaning | Status |
+|---|---|---|---|---|
+| W1 | What "deal with my planes" means first | **Own the flight physics:** a first-party flight-model ladder; each airframe is data | Same | Locked |
+| W2 | First airframe | **F/A-18E Super Hornet** | Same | Locked |
+| W3 | Ladder shape | **L0 point-mass energy model → L1 6-DOF with control laws → L2 tabulated aero with Mach and ground effect → L3 engines, fuel and CG** | Same | Locked |
+| W4 | Who moves the aircraft | **Own pure-C# integrator on the fixed tick; PhysX for contacts only** (Reckoning variant B) | Same | Locked |
+| W5 | Module split | **Two modules.** Air Wing owns airframes, controls and ground handling. RH Aviator is AI-only and flies through Air Wing's Pilot Inputs. The carrier hookup stays in Carrier Ops through `IRecoveringAircraft` | Same | Locked |
+| W6 | What the flight model takes in | **Pilot Inputs only** (stick, throttle, pedals, switches). The AI works the same stick. Autopilot modes are switches either seat can flip | Same | Locked |
+| W7 | Determinism | **Bit-identical on one machine from day one**, seeded, with a per-tick Fix. Cross-machine later through Reckoning. Ground-contact phases are same-machine only | Same | Locked |
+| W8 | Data | **Public cited sources** (Navy fact file, NASA F/A-18 reports). One calibrated number per public figure (C16), gaps AUTHORED. The E's aerodynamics are scaled from the A/B and flagged | Same | Locked |
+| W9 | Name | **Air Wing**; parts named after real aircraft systems | Same | Locked |
+| W10 | Controls in the first slice | **All three: VelocityOne stick, Xbox pad and mouse aim** (plus keyboard). *SIX's pick; Claude leaned to the stick first, Xbox next.* Cost: a bigger slice 1 and three device-class tests | Stick + keyboard first | Locked |
+| W11 | Camera and HUD | **Chase camera plus a HUD** (speed, altitude, AoA, G, Mach, throttle, with units); cockpit view later | Same | Locked |
+| W12 | First test bed | **Dogfight, rebuilt.** *SIX's pick; Claude leaned to a new Examples range scene* | New range scene | Locked |
+| W13 | How Dogfight is rebuilt | **An editor builder** (Deep Water → Air Wing → Build Dogfight) overwrites the scene in place, so its GUID survives (C24). The old scene stays in git history and is copied to `_Archive` (P8) | Same | Locked |
+| W14 | What goes into Dogfight | **Sea State replaces the HDRP water;** a land runway, speed and altitude gates, an airborne start with a runway start as an option (see W29), and the DDG as a still landmark. The dead jet, the two switched-off F-18Es and the radar module come out (checked 2026-10-24: Radar Suite does not use the module in Dogfight) | Same | Locked |
+| W15 | Mouse aim | **An instructor** that works the stick toward where you point, through the same Pilot Inputs. Any real stick or flight-key input overrides it at once. Our own code; MouseFlight (MIT) credited where its idea is borrowed | Same | Locked |
+| W16 | When carrier ops come | **Last, after the AI pilots.** *SIX's pick; Claude leaned to right after L1 gear.* The carrier's detail questions are parked (§7) | After L1 | Locked |
+| W17 | First AI stream | **L0:** waypoints, formation and RTB with an approach and landing on the runway. **L1:** fighting for position, scored by time behind. No weapons | Same | Locked |
+| W18 | Player seats | **Switchable:** take or hand back any aircraft mid-flight; the AI flies every empty seat (as General Quarters G3) | Same | Locked |
+| W19 | Legacy code | **Archive every unused aircraft script** to `_Archive/` with a supersession checklist (C25): `Scripts/FighterJet Scripts/`, `Scripts/Aircraft_Handlers/` (including the MouseFlight copy), `FighterJetController` and the `F-18 (1) Variant` prefab. `HelicopterController` follows once its replacement exists. The vendor kits stay where they are. The AerialArcade F-18E stays in CVN-78 and OutdoorsScene until Air Wing's jet replaces it | Same | Locked |
+| W20 | Helicopter | **Its own Air Wing stream after jet L1**, on the same contracts; the current controller stays until then | Same | Locked |
+| W21 | Performance budget | **≤ 0.01 ms per aircraft per step at L0, ≤ 0.05 ms at L1,** measured with `unity-perf-ab` in a player build | Same | Locked |
+| W22 | Units | **SI in the core; aviation units at the edge** (HUD, quoted public figures) | Same | Locked |
+| W23 | L1 control law | **Textbook Hornet-style fly-by-wire:** G-command pitch, roll-rate roll, AoA and G limiters, yaw damper; structure after NASA's HARV papers, gains AUTHORED | Same | Locked |
+| W24 | Integration rate | **Keep the 50 Hz project tick; fixed substeps inside the flight core** (for example 4 × 200 Hz) | Same | Locked |
+| W25 | The per-aircraft level asset's name | **Fidelity sheet** (`FidelitySheetSO`), not "loadout", which in aviation means weapons and stores | — | Proposed |
+| W26 | What the stick means at each level | **G and roll-rate commands at every level**, so Pilot Inputs keep one meaning up the ladder. *Mitigation:* the feel changes between L0 and L1 as the airframe's response gets richer; the HUD names the level | — | Proposed |
+| W27 | Two devices at once | **The last device moved past its deadzone owns the player's seat;** the instructor yields at once (W15). *Mitigation:* the HUD shows the active device | — | Proposed |
+| W28 | Replay | **Inputs are sampled at the tick boundary and logged per tick; a replay from the input log reproduces the Fix bit for bit** on the same machine | — | Proposed |
+| W29 | Runway start at L0 | **Waits for L1.** L0 is a point mass with no gear, so Dogfight starts airborne until Landing Gear L1 exists. The runway is built in slice 1 as scenery and as the AI's landing target | — | Proposed |
+| W30 | The jet's art | **Built from a copy of the F-18E model** (`_AIRCRAFT/F-18E/Blender/F-18E.blend`'s import), with no vendor scripts on it (AP8). The FDS F-18E prefab, AerialArcade and the original `.blend` are never modified | — | Proposed |
+| W31 | Shared helpers (RNG, fingerprint) | **Air Wing copies General Quarters' pattern, not its code** (no reference to `DeepWater.GeneralQuarters`). Extract a shared core only when a third module needs it (tenets 11 and 14) | — | Proposed |
+
+## 6. Standing constraints
+
+1. **The flight core never touches Unity runtime state.** No `UnityEngine.Time`, `UnityEngine.Random`, `Physics`, `Object.Find*`, `GameObject`, `DateTime.Now` or `Environment.TickCount`, and no unseeded `System.Random`. Value types (`Vector3`, `Quaternion`, `Mathf`, `Unity.Mathematics`) are fine.
+   - *Why:* determinism (W7).
+   - *Enforced by:* a banned-API source scan of `Core/`, as General Quarters' `CoreBannedApiTests`.
+2. **Randomness is a seeded RNG injected from the fidelity sheet;** every draw that decides an outcome is logged. *Why:* P7.
+3. **An aircraft changes only through Pilot Inputs from a seat** (W6). *Why:* switchable seats, replay, the Reckoning seam.
+4. **Tuning lives in ScriptableObjects** (P1), with cited provenance (W8); AUTHORED values are flagged, and an unsourced value stays empty.
+5. **Vendor code is read-only** (P5). AerialArcade, FlightSimLite, NWH and the MouseFlight copy are never edited. **Never modify the original F-18E `.blend` or the FDS prefab**; work on copies (W30).
+6. **Never ask the renderer for physical truth** (AP11). Sea height comes from Sea State's `ISeaSurface`, not HDRP water.
+7. **The 50 Hz project tick is not changed by this module** (W24). Substeps live inside the flight core.
+8. **Safe limits (SIX, 2026-10-24; General Quarters BLUEPRINT §6.8 applies here in full).** Air Wing is a game simulation at the level of commercial and hobby flight sims, and it stays there. In particular:
+   - public, cited data only; a figure that is not public stays AUTHORED;
+   - **no flight-control, autopilot or guidance code meant to run on real hardware:** no drones, model aircraft or real actuators. The control law and the AI pilot are game models;
+   - **no aircraft weapons unless SIX asks**, and then only abstract, as in General Quarters;
+   - no real-world targeting, no tuning to beat a specific real air defence, and opponents stay generic.
+   - *How to apply:* check every slice against this list before it is built. A request that would cross a line is said so plainly and reshaped toward the game side.
+9. **The budget is measured, never assumed** (W21).
+
+## 7. What is deliberately not here
+
+| Not in the first pass | Why / revisit when |
+|---|---|
+| **Carrier ops:** launch, trap, the moving deck, wind over the deck, Sea State feeding Carrier Ops' `ISeaStateMotion`, catapults 2–4, a tailhook on the Air Wing jet | W16. **Parked until the AI stream is done.** Questions to ask then: how the deck carries parked aircraft (kinematic Rigidbody or Reckoning), catapult and wire fidelity (constant g or profiled), wind over the deck and the air wake, and Sea State behind `ISeaStateMotion` |
+| Aircraft weapons, countermeasures, sensors (RH Aviator Phases 3–4) | Constraint 8; only if SIX asks |
+| Multi-ship tactics and mission-level AI (RH Aviator Phases 5–6) | After AI L1 |
+| Cockpit view | W11. After the chase camera and HUD prove the numbers |
+| Damage, failures, ejection | Not asked for |
+| VR (HurricaneVR is in the vendor folder) | Not asked for |
+| Multiplayer | The input log and the Fix keep the door open (W28) |
+
+## 8. Risks
+
+| Risk | Mitigation |
+|---|---|
+| **No public Super Hornet aerodynamic tables** | Hornet (A/B) data scaled, flagged AUTHORED; the fact-file figures are the calibration (C16); the residuals are named, not tuned away |
+| **Slice 1 is large** (W10: three device classes plus the instructor; W12: a scene rebuild) | Slice 1 is split into 1a–1e, each with its own tests and gate |
+| **Ground contact breaks bit-identity** (PhysX) | Ground phases are flagged in the Fix; airborne determinism tests come first; Reckoning later |
+| **One Unity Editor and one MCP bridge shared with other sessions** | Build slices only when no other session is driving the Editor; commits go in through `commit-to-branch` |
+| **Dogfight holds legacy and vendor content** | The builder overwrites it in place (W13); the old scene stays in git and in `_Archive` |
+| **The feel changes when an aircraft moves up a level** (W26) | One stick meaning across levels; the HUD names the level; L1 is tuned against the same manoeuvres as L0 |
+
+## 9. Open questions for SIX
+
+| # | Question | Cost |
+|---|---|---|
+| Q1 | W25–W31 are Proposed. Lock them as written? | 2 min |
+| ~~Q2~~ | ~~`RH Aviator`'s asmdef is `RH.Aviator` (namespace `RH.`), while new modules use `DeepWater.*`. Rename it to `DeepWater.Aviator` when the AI stream starts (Consistent, Lamport)?~~ **Answered 2026-10-25 by SIX: `DeepWater.Aviator`.** Done in slice 0 (the asmdef's name and root namespace; it has no scripts yet) | — |
+| ~~Q3~~ | ~~When the blueprint should reach `main`: now (docs only), or with slice 1?~~ **Answered 2026-10-25 by SIX: now.** Brought up to `main` with slice 0 | — |
+| Q4 | Eight files outside Air Wing still stop a player build, so W21's player-build measurement (slice 1e) can't run yet: `AerialArcade/.../F18ControllerEditor.cs` (vendor), `RH Utilities/` ×3, `RH Testing Suite/Core/TestRunner.cs`, `Scripts/Destroyer Scripts/DestroyerEditor.cs`, `_Archive/Carrier_legacy/.../CarrierEditor.cs`, and the local-only `UnityMcpUnlock.cs`. May they be fixed, and how? (Each moves into an `Editor/` folder or gains `#if UNITY_EDITOR`; the vendor file and the unlock file need your word.) ROADMAP slice 0, last item | 2 min |
+
+## Change log
+- **2026-10-24** — Stock-take (read-only), then the blueprint locked from the 24-question interview (W1–W24, SIX). Three picks differ from Claude's leaning: W10, W12 and W16. W25–W31 Proposed by Claude. Nothing built.
+- **2026-10-25** — Q2 and Q3 answered by SIX. Slice 0 done (ROADMAP). Q4 added: player-build blockers outside Air Wing.

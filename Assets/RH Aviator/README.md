@@ -4,6 +4,10 @@ Greenfield AI aircraft module. Drives any airframe (vendor F-18, fixed-wing, hel
 through an actuator contract — no tight coupling to any one vehicle. Follows McMahon
 Pat1: **SO-Profile + Pure-Core + MB-Adapter**.
 
+**Assembly:** `DeepWater.Aviator` (namespace `DeepWater.Aviator`). Renamed from `RH.Aviator` on 2026-10-25 by SIX's call (Air Wing BLUEPRINT Q2), so it matches the other `DeepWater.*` modules.
+
+**Since 2026-10-25, Air Wing owns the airframe side** (`Assets/Air Wing/BLUEPRINT.md`, W5, W6, W17). RH Aviator stays AI-only. Its AI seats issue Air Wing's `PilotInputs` through `ISeat`, exactly as the player does. That replaces the `IAircraftActuator` contract below. Aircraft weapons (L2–L3 below) stay out unless SIX asks (Air Wing §6, constraint 8).
+
 ## Folder layout
 
 ```
@@ -31,20 +35,21 @@ RH Aviator/
 
 - **Consumes:** `RH.Shared.Contracts.ISensorReport` (track input — radar, IRST, datalink).
 - **Produces:** Implements `RH.Shared.Contracts.IThreat` (the AI aircraft IS a threat to enemies).
-- **Output to airframe:** `IAircraftActuator` (defined in `Core/Contracts/`) — pitch/roll/yaw/throttle
-  command surface. Vendor F-18 wrapper, AerialArcade adapter, etc. all implement this.
+- **Output to airframe:** ~~`IAircraftActuator` (defined in `Core/Contracts/`) — pitch/roll/yaw/throttle
+  command surface. Vendor F-18 wrapper, AerialArcade adapter, etc. all implement this.~~
+  **Superseded 2026-10-25** by Air Wing's `ISeat` and `PilotInputs` (stick, throttle, pedals, switches; Air Wing W5, W6).
 
 ## Why this is decoupled from the actual flight model
 
-The flight model (PuppetMaster F-18, Flight Sim Lite, custom 6DOF) is **not** part of
+The flight model (Air Wing's first-party ladder; formerly the AerialArcade F-18E, Flight Sim Lite) is **not** part of
 this module. RH Aviator decides *what* to fly (target intercept, formation hold);
 the actuator implements *how* (control surfaces). Lets us swap airframes without
 re-authoring the AI.
 
 ## Legacy fragments
 
-- `Assets/Scripts/Aircraft_Handlers/MouseFlight/Scripts/AI_FlightController.cs`
-- `Assets/Scripts/FighterJet Scripts/FlightControllerManager.cs`
+- `Assets/_Archive/Aircraft_Handlers_legacy/MouseFlight/Scripts/AI_FlightController.cs` (archived 2026-10-25, Air Wing slice 0)
+- `Assets/_Archive/FighterJet Scripts_legacy/FlightControllerManager.cs` (archived 2026-10-25, Air Wing slice 0)
 - `Assets/JMAC/Agents/{SimpleHomingMissile, SimpleDamageable, WeaponSystem}.cs`
 
 The routine mines these for domain knowledge (intercept geometry, throttle curves)

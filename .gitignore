@@ -45,3 +45,7 @@ id_ed25519*
 
 # Claude scheduled-task runtime lock
 .claude/scheduled_tasks.lock
+
+# Unity Version Control (Plastic) workspace metadata: git is this project's version control (BUILD-SPEED-LEDGER round 1)
+/.plastic/
+/.plastic.pre-*/

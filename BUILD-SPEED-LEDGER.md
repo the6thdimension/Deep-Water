@@ -117,4 +117,31 @@
 
 ## Rounds
 
-*None yet. Each round records the change, its A/B numbers, the tests run, the decision and the seat.*
+*Each round records the change, its A/B numbers, the tests run, the decision and the seat. SIX picked every item on the menu on 2026-10-25.*
+
+**Behaviour pin (before any change):** EditMode, all seven first-party test assemblies: **301 pass, 3 fail, of 304**. The 3 failures were there before this work:
+- `ReckoningSpikeTests.Criterion2_RollPeriod_WithinTenPercentOfImo(A)`: variant A fails by design (R35).
+- `GuidedFury.Tests.L3IntegratorTests.L3_AoaProducesLift_PitchedBodyPullsToward`
+- `GuidedFury.Tests.SeekerTests.EndToEnd_L2WithConeSeekerAndProNav_AcquiresAndCloses`
+
+Every round must leave exactly this result.
+
+### Round 1: remove Unity Version Control; untrack `.plastic/` (kept)
+
+*Seat: Brendan Gregg (The Optimizer): one profile named the cost, so cut the cost, not the symptoms.*
+
+- **Change:**
+  - `com.unity.collab-proxy` removed from `Packages/manifest.json`; the lock file re-resolved.
+  - `.plastic/` (5 files, a 2023 Plastic workspace) untracked and added to `.gitignore`.
+  - The local folder renamed to `.plastic.pre-git-only-backup-20261025-1651`, not deleted.
+- **A/B, domain reload (`RequestScriptReload`, same Editor session, GQ_Range open):**
+
+| | Runs | Reload | `AwakeInstancesAfterBackupRestoration` | `BeginReloadAssembly` |
+|---|---|---|---|---|
+| A (just before) | 46.6, 56.7 s | median 51.6 s | 32.9–33.0 s | 2.6 s, 12.6 s (the stall) |
+| B (after) | 15.1, 15.2, 15.5 s | **15.2 s** | 1.64–1.71 s | 2.5–2.8 s |
+
+- **Result:** reload ×3.0 (46.5 s baseline median → 15.2 s).
+  - The 10 s stall (5 of 15 reloads before) did not appear in the 4 reloads since, including the resolve reload at 19.2 s. It was very likely the plugin's retry thread too. That is likely, not proven.
+- **Behaviour:** the change is Editor tooling only. It is covered by the test pin after Round 2.
+- **Restore:** add `"com.unity.collab-proxy": "2.12.4"` back to the manifest, and rename the backup folder to `.plastic`.

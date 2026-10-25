@@ -56,6 +56,22 @@ namespace DeepWater.GeneralQuarters.Core.World
 
         public Quaternion HeadingRotation => Quaternion.Euler(0f, HeadingDeg, 0f);
 
+        /// <summary>
+        /// The world-vertical components of the ship's x, y and z axes (starboard.y, up.y, forward.y): how much higher a
+        /// point sits in the world per metre along each ship axis. Exact for Unity's Euler order (z, then x, then y),
+        /// which is how the range reads <see cref="RollDeg"/> and <see cref="PitchDeg"/>; heading does not change it.
+        /// Upright it is (0, 1, 0). Damage Control L1 floods by it (G55).
+        /// </summary>
+        public Vector3 VerticalAxes
+        {
+            get
+            {
+                float roll = RollDeg * Mathf.Deg2Rad, pitch = PitchDeg * Mathf.Deg2Rad;
+                float cp = Mathf.Cos(pitch);
+                return new Vector3(-Mathf.Sin(roll) * cp, Mathf.Cos(roll) * cp, Mathf.Sin(pitch));
+            }
+        }
+
         public Vector3 ToShipFrame(Vector3 world) => Quaternion.Inverse(HeadingRotation) * (world - Position);
 
         public Vector3 ToWorld(Vector3 shipFrame) => Position + HeadingRotation * shipFrame;

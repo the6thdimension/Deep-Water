@@ -4,7 +4,9 @@
     "references": [
         "GuidedFury",
         "DeepWater.Sea",
-        "DeepWater.Sea.Hdrp"
+        "DeepWater.Sea.Hdrp",
+        "Unity.Mathematics",
+        "Unity.Collections"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

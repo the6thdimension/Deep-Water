@@ -1,8 +1,25 @@
+using System;
 using UnityEngine;
 using DeepWater.GeneralQuarters.ScriptableObjects;
 
 namespace DeepWater.GeneralQuarters.Examples
 {
+    /// <summary>One hole a breach preset opens: a ship-frame point and an area.</summary>
+    [Serializable]
+    public struct BreachHole
+    {
+        public Vector3 pointShip;
+        [Min(0f)] public float areaM2;
+    }
+
+    /// <summary>A scripted breach the range can open on demand (G57): one or more holes, each a Breach Order from the scenario.</summary>
+    [Serializable]
+    public struct BreachPreset
+    {
+        public string name;
+        public BreachHole[] holes;
+    }
+
     /// <summary>
     /// The General Quarters range: the patrol box the AI captain steers when nothing threatens (rule C1), the raids
     /// on offer, and the camera's window in the TAO seat. AUTHORED: an exercise area, not a real one.
@@ -26,6 +43,9 @@ namespace DeepWater.GeneralQuarters.Examples
 
         [Tooltip("Seconds the camera stays on a target after it is destroyed, before it goes back to the ship.")]
         public float cameraLingerS = 2.5f;
+
+        [Tooltip("Scripted breaches on the Captain's damage-control card (Damage Control L1, G57). Each hole is a Breach Order.")]
+        public BreachPreset[] breaches = new BreachPreset[0];
 
         [TextArea(3, 10)] public string provenance;
 

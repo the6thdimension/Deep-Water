@@ -2,14 +2,14 @@
 
 > **This document's one job:** let someone pick General Quarters up cold. What it is, what is proven, the lessons that cost hours, how to run it, and what comes next.
 > Why each piece exists is in `BLUEPRINT.md`; the work order is in `ROADMAP.md`.
-> **Last verified:** 2026-10-24, Unity 6000.4.11f1, HDRP 17.4. At the end of Phase 1: 72/72 General Quarters tests and 49/49 Sea State tests. After Stream B slice B1 (guns L1): 85/85 and 49/49.
+> **Last verified:** 2026-10-24, Unity 6000.4.11f1, HDRP 17.4. At the end of Phase 1: 72/72 General Quarters tests and 49/49 Sea State tests. After Stream B slice B1 (guns L1): 85/85 and 49/49. After Stream C slice C1 (Damage Control L1, flooding): 100/100 and 49/49.
 
 ## 1. What this is
 
 SIX asked for "a living breathing ship with a respectable and modular combat system". General Quarters is that ship: an Arleigh Burke destroyer (DDG-51, Flight I/II) that does the following.
 - She floats on the Sea State sea and steers through an engine room and a helm.
 - Her combat information center (CIC) sees threats, decides and fires: ESSM from the VLS, the Mk 45 gun, two CIWS and two Mk 38s.
-- She takes hits and loses systems.
+- She takes hits and loses systems. Holed below the waterline, she floods: she lists, trims and loses stability as the water spreads, and past the margin she sinks (Damage Control L1).
 
 **Two halves.**
 - **The combat core** (`Core/`) is plain C#. It is deterministic: a seeded run gives the same *Fix* (a 64-bit fingerprint) every time. Every decision goes into an engagement log with its causes.
@@ -44,7 +44,11 @@ SIX asked for "a living breathing ship with a respectable and modular combat sys
    - A compile during play mode freezes the Editor. Stop play first, and ask SIX first: they may be driving.
    - Setting `Application.runInBackground` in the Editor writes the player setting. Restore `PlayerSettings.runInBackground = false` after.
    - A builder that deletes and recreates a scene changes its GUID. `RangeSceneBuilder` overwrites it in place (C24).
-9. **Blender:**
+9. **Flooding (Damage Control L1):**
+   - The compartments are cut from the hull's own buoyancy columns, and their water is reckoned the way the buoyancy reckons submersion. So a space open to the sea holds exactly the buoyancy its columns lose, by construction (METHODOLOGY C30). Keep it that way when the hull changes.
+   - A first-order damage-stability formula misses what asymmetry (the waterplane's product of inertia) and flare (BM at the sunk draft) switch on. When the gate fails, fix the prediction's physics, not the tolerance (AP22). `flood_predict.py` now has both.
+   - A space's level is horizontal in the world. The free-surface effect comes from that, with no formula (C31).
+10. **Blender:**
    - Start Blender's MCP server from its Python console with `bpy.ops.mcp.start()` (port 9876).
    - Never modify the original DDG `.blend` or prefab; work on copies.
    - Export a flat FBX; the Unity builder re-nests it.
@@ -61,6 +65,7 @@ SIX asked for "a living breathing ship with a respectable and modular combat sys
 | Presentation: effects, foam deposits, mounts that track, VLS hatches, audio | **ITERATE** | Seen working in play mode at about 0.2 ms of main thread. **Nobody has listened to the audio yet** |
 | Reused vendor effects (`HD_Naval_Explosion`, VFX Arsenal) | **FAILED** | They draw wrong or too small in HDRP (AP20) |
 | Physical controllers on the range | **unverified** | Bindings are proven with virtual devices (C18). SIX has driven her at the conn ("driving feels great"); the range seats have not been tried on hardware |
+| Damage Control L1: 36 spaces cut from the buoyancy columns, orifice flooding with pressed-up spaces, the water on the Rigidbody, holes from Breach Orders and hits, loss counted from reserve buoyancy | **CHAMPION** (the model) | A wing's list matches the closed form to 0.02° in EditMode (4.321° against 4.34°) and in PhysX (4.337°); trim, sinkage and GM within their stated bands. Torricelli to 0.1 %. Seven stations sink her on the same tick twice in EditMode, and 1,400 s after the breach in PhysX, where the lost-ship guard then stops her (AP23). 0.33 ms per step at the worst. **The arrangement is AUTHORED:** deck height, wing breadth, hold uses and leak paths, because DDG-51's is not public |
 | The hull's GM of 1.5 m | **PROMISING-NOT-PROVEN** | It is AUTHORED. 5415's KG would give 1.2 m and a 9.6° steady heel, still inside Barry's band. Not changed without SIX |
 
 ## 4. What is where
@@ -69,7 +74,9 @@ SIX asked for "a living breathing ship with a respectable and modular combat sys
 |---|---|
 | `Core/` | The deterministic combat core: `CombatSystem`, loadout, orders, CIC (radar, tracks, TEWA), magazine (VLS, guns), damage control, helm, engine room, captain, scenario, log |
 | `Modules/Combat/ShipCombat.cs` | Runs the core on every fixed step: the AI captain, the raid, then `CombatSystem.Step` |
-| `Modules/Hull/`, `Modules/Propulsion/` | The hull on Sea State, and `ShipDrive` (the MMG forces into PhysX) |
+| `Modules/Hull/`, `Modules/Propulsion/` | The hull on Sea State (`ShipHull` carries the flood water's mass), `ShipFlooding` (the water onto the Rigidbody, the sea into Damage Control), and `ShipDrive` (the MMG forces into PhysX) |
+| `Core/DamageControl/` | L0 hit points; L1 `FloodPlan` (the spaces), `FloodModel` (the water), `FloodHydrostatics` (the damaged GM), `FloodMass` (ship plus water as one body) |
+| `.claude/skills/hull-stability-check/scripts/flood_predict.py` | Closed-form damage stability on the same columns: every space, any bilged set, a part-filled space. The tests' predictions come from it |
 | `Modules/Presentation/` | Effects, mounts, hatches and audio. It reads the log and never writes back |
 | `ScriptableObjects/` | Every tuning value, with its provenance |
 | `Examples/Scenes/GQ_Range.unity` | The range |
@@ -87,7 +94,9 @@ SIX asked for "a living breathing ship with a respectable and modular combat sys
   3. Build Combat Effects.
   4. Build Range Scene.
 - **Just drive her:** Deep Water → General Quarters → Drive the DDG.
-- **Tests:** Test Runner → EditMode, assemblies `DeepWater.GeneralQuarters.Tests.Editor` and `DeepWater.Sea.Tests.Editor`. Expect 85 and 49.
+- **Tests:** Test Runner → EditMode, assemblies `DeepWater.GeneralQuarters.Tests.Editor` and `DeepWater.Sea.Tests.Editor`. Expect 100 and 49 (about 3 minutes; the sinking test alone takes a minute).
+- **Flood her:** in the Captain seat, the damage-control card has four breach presets: Wing 06 S (a list), Hold 02 (a trim), Holds 05-07 (she survives), Holds 03-09 (she sinks, in about 24 minutes; use time compression). Clicking one issues real Breach Orders.
+- **Predict a breach:** `python -I .claude/skills/hull-stability-check/scripts/flood_predict.py --bilge "06 wing S"` (or `--list-spaces`, `--water "06 hold=0.5"`).
 - **Commit from the shared checkout:** the `commit-to-branch` skill with `--deny 'UnityMcpUnlock|/DAVFX/'`. HEAD stays where it is.
 
 ## 6. Next steps (in priority order)
@@ -96,13 +105,13 @@ SIX asked for "a living breathing ship with a respectable and modular combat sys
 2. **Choose the first element stream** (`ROADMAP.md`). The candidates:
    - **Radar L1 and Illuminators L1** (Stream A) would make the SPG-62s matter.
    - **Guns L1** (Stream B) would make the gun line honest.
-   - **Damage Control L1, flooding** (Stream C) would make "keeps her afloat" real.
+   - ~~**Damage Control L1, flooding** (Stream C)~~ done (slice C1). Next in Stream C: Damage Control L2 (fire and damage-control parties: pumps, plugging, counter-flooding, G58), or Engine Room L1 (the plant).
 3. **The peer ship** (Stream D) needs BLUEPRINT Q3: a mirror DDG or a different class.
 4. **Follow-up outside this module:** the Guided Fury ground detonation still uses the broken `HD_Naval_Explosion`.
 
 ## 7. Standing preferences
 
-- SIX's picks are recorded in the BLUEPRINT decision register (G1–G33). Don't re-litigate a Locked row.
+- SIX's picks are recorded in the BLUEPRINT decision register (G1–G60). Don't re-litigate a Locked row.
 - Claude manages git: commit, push, bring verified work to `main` and keep the branches level. `Guided-Fury` takes it through a PR.
   - Never force-push.
   - Never push the archive branch, DAVFX or `Assets/UnityMcpUnlock.cs`.
@@ -120,3 +129,9 @@ SIX asked for "a living breathing ship with a respectable and modular combat sys
 - **SemiAuto:** TEWA proposes an ESSM shot and the TAO confirms it (G29).
 - **MMG:** the Japanese standard method for ship manoeuvring forces (hull, propellers and rudders as separate terms).
 - **GM:** metacentric height, a ship's initial stability. Higher means stiffer and a faster roll.
+- **Permeability:** the share of a space that water can fill (the rest is machinery, stores, structure). SOLAS gives standard values.
+- **Bilged / open to the sea:** a compartment holed below the waterline, so its water stands at the sea's level.
+- **Lost buoyancy / added weight:** two equivalent ways to reckon a flooded space. Either its volume stops floating the ship, or its water is extra weight. In the probe model they agree exactly.
+- **Free surface:** a part-filled space's water runs to the low side as she heels, which costs stability (GM).
+- **Pressed up:** a space filled to its deckhead; its water pushes on through any opening at the pressure behind it.
+- **Reserve buoyancy:** what the hull could still float beyond her weight. When the water aboard uses it all, she sinks.

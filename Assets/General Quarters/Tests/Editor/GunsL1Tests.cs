@@ -326,6 +326,7 @@ namespace DeepWater.GeneralQuarters.Tests
             {
                 CombatLoadout l = AssetDatabase.LoadAssetAtPath<ShipLoadoutSO>(Ddg51CombatData.LoadoutAsset).Bake();
                 l.GunsLevel = level;
+                l.DamageLevel = FidelityLevel.L0;   // the comparison recorded for slice B1 ran at Damage Control L0
                 l.Vls.Loads[0].Rounds = 0;
                 l.DefaultRoe = Roe.WeaponsFree;
                 var cs = new CombatSystem(l);

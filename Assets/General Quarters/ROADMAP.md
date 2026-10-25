@@ -242,9 +242,68 @@ SIX's picks (2026-10-24): G34–G41. Guns L1 first.
 - [ ] Harpoon and Tomahawk profiles (Guided Fury Stream A items). Land attack goes against fictional or generic targets only (BLUEPRINT standing constraint 8, safe limits).
 
 ### Stream C — The living ship
+SIX's picks (2026-10-24): G53–G60. Damage Control L1 first.
 - [ ] Engine Room L1: the plant (4 × LM2500, CPP, fuel).
 - [ ] Helm L1: GPS/INS drift and fixes.
-- [ ] Damage Control L1: compartments and flooding into buoyancy probes (list, trim, sinking).
+- [x] **Damage Control L1** (slice C1, done 2026-10-24: 149/149 tests, 100 GQ and 49 Sea State): compartments and flooding (list, trim, sinking).
+  - **Gate, set before the first measurement:**
+    - A flooded compartment gives the predicted list within 5 % (or 0.2°), trim within 15 % (or 3 cm), sinkage within 15 % (or 2 cm) and GM within 5 %, in EditMode and in play mode with PhysX.
+    - Progressive flooding past the margin sinks her, and repeats exactly.
+  - **The spaces (G53, G54):**
+    - Blender's 12 stations, each split at the damage-control deck (y +3.4 m, AUTHORED) into a hold and an upper space.
+    - Stations 04–09 also give their outboard hold columns (beyond |x| 5.32 m, B/5 from the side) to port and starboard wing spaces.
+    - 36 spaces in all, cut from the 2,183 buoyancy columns, so their volumes follow the hull: 19,901 m³ of capacity in a 23,616 m³ hull.
+    - Permeability from SOLAS II-1 Reg. 7-3: stores 0.60, machinery 0.85, accommodation 0.95, voids 0.95.
+  - **The water (G55, G56):**
+    - `Core/DamageControl/FloodModel` keeps a volume per space and solves its level as a plane horizontal in the world, so the water runs to the low side as she heels.
+    - Q = Cd·A·√(2g·Δh) through holes (to the sea, at the sea surface Sea State gives at the hole), 0.1 m² hatches and doors, and 0.5 m² weather openings at the deck edge (all AUTHORED leak paths, condition ZEBRA). A pressed-up space takes the pressure head that balances its openings.
+    - The water's mass and centroid ride on the Rigidbody through `ShipHull.ApplyFloodWater` (the tensor carried by the parallel-axis rule). `Modules/Hull/ShipFlooding` applies them and samples the sea at the openings before buoyancy runs. The flows lag the pose by one 20 ms step.
+  - **Holes (G57):**
+    - A Breach Order (`Order.Breach`), issued from the range's four presets on the Captain's damage-control card.
+    - Leaker hits also open holes: 13.9 m² × (W / 165 kg)^(2/3), CALIBRATED to USS Stark (1987, a 165 kg Exocet, a 10 × 15 ft hole). Flagged: one figure.
+    - A hit above the main deck floods nothing (the superstructure is not subdivided).
+  - **Loss (G60):** SINKING when the water aboard reaches the hull's whole reserve buoyancy (15,490 t). CAPSIZED past 45° held for 5 s (AUTHORED). Hull hit points still damage systems but no longer decide loss.
+  - **Screens (G59):**
+    - `Examples/Scripts/UI/DamageBoard` on both seats: each space a gauge filling from the bottom, holed spaces in amber, flooded ones in red.
+    - Readouts: list, trim, draft; GM intact → now with its terms (KB + BM − KG − FS); reserve buoyancy, water, inflow.
+    - The debrief adds a flooding timeline, each line with its cause. The ticker shows BREACH and FLOOD.
+  - **Predictions:** `.claude/skills/hull-stability-check/scripts/flood_predict.py`, closed form on the same columns. It lists every space, bilges any set of them (lost buoyancy), or loads one with water (added weight and free surface).
+  - **Results, EditMode** (Sea State's probe jobs carrying the water, 3 degrees of freedom brought to rest; `DamageControlL1Tests`):
+
+    | Case | List | Trim | Sinkage | GM |
+    |---|---|---|---|---|
+    | Starboard wing 06 bilged | 4.321° (4.34) | 13.6 cm (12.9) | 6.84 cm (8.0) | 1.373 m (1.345) |
+    | Hold 02 bilged | 0.000° (0) | 88.3 cm (89.8) | 15.3 cm (15.6) | 1.656 m (1.624) |
+    | Hold 06 half full, intact | — | — | — | 1.831 m solid (1.850), 1.705 m free (1.725); free-surface loss 12.6 cm (12.6) |
+
+    - **Identity:** water at sea level in an open space weighs exactly what its columns lose (1.2718 MN against 1.2718 MN, centroids to 0.1 mm).
+    - **Orifice:** Torricelli to 0.1 %. A 1 m² hole 3 m down fills a 200 m² box in 332.5 s, against 332.5 s.
+    - **Within the margin:** holds 05–07 and their wings holed. She floats with 74 % of her reserve.
+    - **Past the margin:** holds 03–09 and their wings, 19 spaces holed. 31 are wet by the end, because water climbs through the hatches, doors and weather openings. SINKING at 1,430 s, the same tick and Fix on two runs.
+    - **Cost:** 0.33 ms per fixed step of combat core at the worst of it (31 spaces wet; Editor, Debug code), against the 1 ms budget.
+  - **Results, PhysX** (the range, calm sea, `ShipFlooding` on the Rigidbody):
+    - Starboard wing 06: list 4.337°, trim 13.6 cm, sinkage 6.87 cm, GM 1.373 m. Same as EditMode. She was under way at 19 kn (SIX had rung Full), which does not change her static lie at L1.
+    - Hold 02, dead in the water: list 0.000°, trim 88.3 cm, sinkage 15.27 cm, GM 1.656 m. Same as EditMode. The first attempt drifted astern at 1.4 m/s and read 0.34° of list; an intact baseline at that drift already showed 0.27°, so the drift caused it, not the water.
+    - Holds 03–09: SINKING 1,400 s after the breach (EditMode 1,430 s), with 32 spaces wet from 19 holed. In her last minute she went down by the head and rolled to 42°.
+    - After the verdict: `ShipFlooding` stopped her physics 7.5 s later, 69 m under. A new run raised her, upright and dry.
+    - The first PhysX sinking run crashed the Editor before that guard existed (skip / fail log, AP23).
+  - **What the gate found** (METHODOLOGY AP22): the closed form was twice wrong, never the model.
+    - An off-centre space's lost waterplane has a product of inertia, which couples heel into trim. The first wing prediction said 11.0 cm.
+    - A flared hull's waterplane widens as she sinks. The first half-full-hold prediction said GM 1.69 m.
+  - **Bug found:** the damaged GM's once-a-second refresh never ran (`tick − long.MinValue` overflows). Seen as an intact GM on a listing ship; fixed.
+  - **Safe limits (BLUEPRINT standing constraint 8), checked before the build:**
+    - Flooding is textbook physics, and every figure is public or AUTHORED.
+    - The arrangement (deck, wings, hold uses, leak paths) is AUTHORED, not DDG-51's. So the margin found here is this game hull's, and says nothing about the real ship's survivability.
+    - G57's hole size stays coarse: one public figure.
+  - **Not at L1:**
+    - Sloshing; holes as areas (a hole is a point at its centre).
+    - Products of inertia in the Rigidbody tensor.
+    - Flooding does not slow her: Engine Room L0's MMG keeps her intact manoeuvring.
+    - Crew action: pumps, plugging, counter-flooding (L2, G58).
+    - The superstructure's buoyancy.
+- [ ] Damage Control L1 follow-ups:
+  - The AUTHORED leak paths (0.1 m² hatches and doors) set how fast progressive flooding runs, and nothing public pins them.
+  - Flooding at the hull's GM of 1.5 m (AUTHORED, HANDOFF verdict ledger): the wing's list scales with 1/GM.
 - [ ] Damage Control L2: fire spread and damage-control parties.
 - [ ] Engine Room L2: casualties from damage.
 
@@ -286,7 +345,15 @@ SIX's picks (2026-10-24): G34–G41. Guns L1 first.
 - **2026-10-24** — Slice 6 done: presentation, with the decisions in BLUEPRINT G30–G33. The Phase 1 gate's presentation half is met in play mode (sound seen playing, not yet heard). Q2 answered: Sea State gained `DepositFoam`.
 - **2026-10-24** — Slice B2 replanned after SIX reversed G42, G46 and G48 to Claude's leanings. B2a shrinks to one SM-2 Block IIIA profile at L2, B2b loses the vertical boost, B2c loses the IR backup, and the load is 64 IIIA and 32 ESSM. Safe limits recorded as BLUEPRINT standing constraint 8.
 
+- **2026-10-24** — Stream C slice C1 done: Damage Control L1, compartments and flooding (G53–G60). 36 spaces cut from the buoyancy columns, orifice flooding with pressed-up spaces, the water on the Rigidbody, holes from Breach Orders and hits, loss counted from reserve buoyancy, the damage-control board and timeline. The wing's list matches the closed form to 0.02° in EditMode and in PhysX. Seven stations sink her deterministically. 149/149.
+
 ## Skip / fail log
+- **2026-10-24 (Stream C, slice C1): two predictions failed their gate, and both were the prediction's fault** (METHODOLOGY AP22). The wing's trim (13.6 against 11.0 cm) needed the damaged waterplane's product of inertia. The half-full hold's GM (1.83 against 1.69 m) needed BM at the sunk draft, because the DDG flares. Both are fixed in `flood_predict.py`, with the tolerances kept.
+- **2026-10-24 (slice C1): the first PhysX sinking run crashed the Unity Editor** (METHODOLOGY AP23).
+  - **What happened:** past her reserve buoyancy, she plunged by the head and fell without limit. Nothing below the hull is modelled, and the probes damp heave only, so a hull standing on its bow had no damping along its length.
+  - **How it showed:** HDRP reported an invalid AABB "too far away from the origin", then the drive's forces went NaN, and D3D12 lost its device.
+  - **Fix:** `ShipFlooding` stops a lost ship's physics once she is wholly under, logs it, and raises her on a new run.
+- **2026-10-24 (slice C1): flooding cost 0.55 ms per fixed step with 26 spaces wet** (Editor, Debug code). The pressure solve scanned every opening for every pressed-up space, and each wet space was solved twice a step. Fixed with per-space opening lists, segments placed only for wet spaces, one level solve a step with the centroid in the same pass, and exact heads for single-opening spaces. Now 0.27 ms at 26 spaces wet and 0.33 ms at 31.
 - **2026-10-24 (Stream B, after slice B1): the Mk 45 jerked back and forth between shots** (SIX, on the range).
   - **Cause:** the firing table flew each shot only to 100 m below the muzzle. At long range, the elevation just under the right one hit that floor before reaching the target's distance, so the solver lost its bracket and said "out of reach". That happened on alternate ticks. Each time, the mount dropped its target, turned toward rest, and took the target back.
   - **Measured on the Standard raid:** 48 drops, 120 target changes, 86 train reversals.

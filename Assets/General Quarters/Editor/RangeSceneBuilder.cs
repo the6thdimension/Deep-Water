@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using DeepWater.GeneralQuarters.Examples;
 using DeepWater.GeneralQuarters.Modules.Combat;
+using DeepWater.GeneralQuarters.Modules.Hull;
 using DeepWater.GeneralQuarters.Modules.Presentation;
 using DeepWater.GeneralQuarters.Modules.Propulsion;
 using DeepWater.GeneralQuarters.ScriptableObjects;
@@ -88,6 +89,7 @@ namespace DeepWater.GeneralQuarters.Editor
             var combat = ship.AddComponent<ShipCombat>();
             Set(combat, "loadout", loadout);
             Set(combat, "aiCaptainProfile", ai);
+            ship.AddComponent<ShipFlooding>();   // Damage Control L1: the flood water on the hull, the sea at the openings (G55)
 
             // In: the range (conn, input, seats, stand-ins) and its screen.
             var rangeGo = new GameObject("General Quarters Range");

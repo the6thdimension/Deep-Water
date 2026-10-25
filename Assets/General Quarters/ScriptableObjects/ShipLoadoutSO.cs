@@ -23,6 +23,20 @@ namespace DeepWater.GeneralQuarters.ScriptableObjects
         [Range(0f, 1f)] public float pkSingleShot;
     }
 
+    /// <summary>Damage Control L1's water and loss tuning (G56, G57, G60). Each value's source is in the loadout's provenance.</summary>
+    [Serializable]
+    public struct FloodingTuning
+    {
+        public float seawaterDensityKgM3;
+        public float gravity;
+        [Tooltip("Orifice discharge coefficient Cd in Q = Cd·A·√(2g·Δh).")]
+        public float dischargeCoefficient;
+        [Tooltip("A hit's hole: this area (m²) at the reference warhead (kg), scaled by (warhead / reference)^(2/3).")]
+        public float holeAreaAtRefM2, holeRefWarheadKg;
+        [Tooltip("CAPSIZED: heel beyond this (deg) held for this long (s).")]
+        public float capsizeHeelDeg, capsizeHoldS;
+    }
+
     /// <summary>
     /// A ship's combat loadout (BLUEPRINT §2, Loadout): for each combat element the fidelity level it asks for and
     /// that element's tuning, the seed, and the scenario's starting doctrine. Baked once into a
@@ -57,6 +71,9 @@ namespace DeepWater.GeneralQuarters.ScriptableObjects
         [Header("Damage Control")]
         public FidelityLevel damageLevel;
         public DamageProfileData damage;
+        [Tooltip("The hull whose spaces flood (Damage Control L1).")]
+        public ShipHullProfileSO hull;
+        public FloodingTuning flooding;
 
         [Header("Scenario defaults")]
         public Roe defaultRoe = Roe.WeaponsFree;
@@ -78,6 +95,12 @@ namespace DeepWater.GeneralQuarters.ScriptableObjects
                     Weapon = e.weapon, Profile = e.profile.Bake(), MissileLevel = e.missileLevel, Rounds = e.rounds, PkSingleShot = e.pkSingleShot,
                 };
             }
+            FloodingProfileData flood = default;
+            if (damageLevel >= FidelityLevel.L1)
+            {
+                if (hull == null) throw new InvalidOperationException($"Loadout '{name}': Damage Control {damageLevel} needs the hull profile.");
+                flood = hull.BakeFlooding(flooding);
+            }
             return new CombatLoadout
             {
                 Seed = (ulong)seed,
@@ -88,7 +111,7 @@ namespace DeepWater.GeneralQuarters.ScriptableObjects
                 VlsLevel = vlsLevel,
                 Vls = new VlsProfileData { LaunchIntervalS = vlsLaunchIntervalS, Groups = vlsGroups, Loads = loads },
                 GunsLevel = gunsLevel, Guns = guns,
-                DamageLevel = damageLevel, Damage = damage,
+                DamageLevel = damageLevel, Damage = damage, Flooding = flood,
                 DefaultRoe = defaultRoe,
                 DefaultDoctrine = defaultDoctrine,
             };

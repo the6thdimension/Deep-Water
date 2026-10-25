@@ -58,8 +58,9 @@ namespace DeepWater.GeneralQuarters.Editor
             range.timeScales = new[] { 1f, 2f, 4f };
             range.taoCameraViewport = new Rect(0.64f, 0.5f, 0.36f, 0.44f);
             range.cameraLingerS = 2.5f;
+            range.breaches = BreachPresets();
             range.provenance = "AUTHORED: an 8 × 6 km patrol box from the range origin (the DDG starts there, heading 000 at 12 kn), six laps. " +
-                               "The TAO camera window matches RangeScreen.uss (.gq-camera-window).";
+                               "The TAO camera window matches RangeScreen.uss (.gq-camera-window). " + BreachProvenance;
             EditorUtility.SetDirty(range);
             EnsureMaterial(FriendlyMaterial, new Color(0.86f, 0.88f, 0.9f));
             EnsureMaterial(HostileMaterial, new Color(0.85f, 0.18f, 0.14f));
@@ -83,7 +84,7 @@ namespace DeepWater.GeneralQuarters.Editor
             ShipLoadoutSO so = LoadOrCreate<ShipLoadoutSO>(LoadoutAsset);
             so.seed = 1442;
             so.tickSeconds = 0.02f;
-            so.radarLevel = so.tracksLevel = so.tewaLevel = so.vlsLevel = so.damageLevel = FidelityLevel.L0;
+            so.radarLevel = so.tracksLevel = so.tewaLevel = so.vlsLevel = FidelityLevel.L0;
             so.gunsLevel = FidelityLevel.L1;   // Stream B slice B1 (G34)
             so.radar = new RadarProfileData { InstrumentedRangeM = 185_000f, AntennaHeightM = 20f, SweepPeriodTicks = 25 };
             so.tracks = new TrackProfileData { DropAfterTicks = 150 };
@@ -166,10 +167,71 @@ namespace DeepWater.GeneralQuarters.Editor
                 "maximum range (public; the elevation is not given: greatest range over the mount's elevations, at 37.5°). Train and elevation 60°/s (AUTHORED: " +
                 "not public). 0.2 a hit against air, 0.15 against surface (AUTHORED). Dispersion 1.5 mrad, latency 0.1 s, laid within 1° (AUTHORED).\n" +
                 "DAMAGE CONTROL L0: hull 1,000 hit points, 1 per kg of warhead; systems 100-150 hit points within 25 m of the hit (AUTHORED: no public damage table).\n" +
-                "SCENARIO DEFAULTS: ROE weapons tight; ESSM semi-automatic (TEWA proposes, the TAO confirms), guns automatic, CIWS automatic (G14).";
+                "SCENARIO DEFAULTS: ROE weapons tight; ESSM semi-automatic (TEWA proposes, the TAO confirms), guns automatic, CIWS automatic (G14).\n" +
+                DamageControlL1Provenance;
+            ApplyDamageControl(so);
             EditorUtility.SetDirty(so);
             return so;
         }
+
+        /// <summary>
+        /// The range's scripted breaches (G57), the cases Damage Control L1's tests are gated on: one wing (list), one bow hold
+        /// (trim), three holds amidships (within the margin) and seven stations (past it). Public so they can be applied alone.
+        /// </summary>
+        public static BreachPreset[] BreachPresets()
+        {
+            BreachHole H(float x, float y, float z, float m2) => new BreachHole { pointShip = new Vector3(x, y, z), areaM2 = m2 };
+            BreachHole[] Gash(int firstStation, int stations)
+            {
+                var holes = new List<BreachHole>();
+                for (int st = firstStation; st < firstStation + stations; st++)
+                {
+                    float z = 70f - 12f * st;   // mid-station
+                    holes.Add(H(0f, -4f, z, 3f));
+                    holes.Add(H(7f, -2f, z, 2f));
+                    holes.Add(H(-7f, -2f, z, 2f));
+                }
+                return holes.ToArray();
+            }
+            return new[]
+            {
+                new BreachPreset { name = "Wing 06 S", holes = new[] { H(8f, -3f, 10f, 2f) } },
+                new BreachPreset { name = "Hold 02", holes = new[] { H(0f, -4f, 58f, 2f) } },
+                new BreachPreset { name = "Holds 05-07", holes = Gash(4, 3) },
+                new BreachPreset { name = "Holds 03-09", holes = Gash(2, 7) },
+            };
+        }
+
+        const string BreachProvenance =
+            "Breach presets (AUTHORED scenario damage, G57): starboard wing 06 (2 m², 3 m below the waterline), hold 02 (2 m², 4 m down), " +
+            "holds 05-07 and their wings (within the margin), holds 03-09 and their wings (past it: she sinks).";
+
+        /// <summary>
+        /// Damage Control L1 (Stream C slice C1, G53-G60): the level, the hull whose spaces flood, and the water and loss tuning.
+        /// Public so the values can be applied to the loadout asset without rebuilding everything.
+        /// </summary>
+        public static void ApplyDamageControl(ShipLoadoutSO so)
+        {
+            so.damageLevel = FidelityLevel.L1;
+            so.hull = AssetDatabase.LoadAssetAtPath<ShipHullProfileSO>(Ddg51HullBuilder.HullAsset);
+            if (so.hull == null) throw new FileNotFoundException("hull profile missing: run Build DDG-51 Hull", Ddg51HullBuilder.HullAsset);
+            so.flooding = new FloodingTuning
+            {
+                seawaterDensityKgM3 = 1025f, gravity = 9.81f, dischargeCoefficient = 0.6f,
+                holeAreaAtRefM2 = 13.9f, holeRefWarheadKg = 165f,
+                capsizeHeelDeg = 45f, capsizeHoldS = 5f,
+            };
+            if (!so.provenance.Contains("DAMAGE CONTROL L1")) so.provenance += "\n" + DamageControlL1Provenance;
+            EditorUtility.SetDirty(so);
+        }
+
+        public const string DamageControlL1Provenance =
+            "DAMAGE CONTROL L1 (G53-G60): the hull's spaces are in the hull profile (its SUBDIVISION and OPENINGS). Seawater 1,025 kg/m³ " +
+            "(matches Sea State) and g 9.81. Orifice flow Q = Cd·A·√(2g·Δh) with Cd 0.6, the textbook sharp-edged orifice (public). A hit's " +
+            "hole: area = 13.9 m² × (warhead / 165 kg)^(2/3), CALIBRATED to one public figure: USS Stark, 17 May 1987, an Exocet AM39 with a " +
+            "165 kg warhead left a hole about 10 × 15 ft (3.0 × 4.6 m) in her port side, above the waterline; the 2/3 power is cube-root blast " +
+            "scaling (AUTHORED as the law). FLAGGED: one figure. CAPSIZED past 45° held for 5 s (AUTHORED). SINKING when the water aboard leaves " +
+            "the hull's whole volume less buoyancy than her weight (G60). Hull hit points still damage systems and no longer decide loss.";
 
         static GunMountProfileData Gun(string name, WeaponClass weapon, ShipSystem system, Vector3 at, float facing, float arcHalf, float minRange, float maxRange,
             bool antiAir, bool antiSurface, bool selfDefence, float threatCpa, float rpm, int burst, float muzzle, float meanFraction, int magazine,

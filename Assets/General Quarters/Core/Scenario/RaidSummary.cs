@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using DeepWater.GeneralQuarters.Core.DamageControl;
 using DeepWater.GeneralQuarters.Core.Log;
 using DeepWater.GeneralQuarters.Core.Magazine;
 
@@ -31,6 +32,14 @@ namespace DeepWater.GeneralQuarters.Core.Scenario
         public bool OutOfAction;
         public readonly List<ShipSystem> Offline = new List<ShipSystem>();
         public int Orders, AiDecisions;
+
+        /// <summary>Damage Control L1 (G59): whether she had spaces to flood, and what the water did. Empty below L1.</summary>
+        public bool HasFlooding;
+        public int Breaches, SpacesWet, SpacesFull;
+        public float WaterT, PeakListDeg, PeakTrimM, IntactGmM, MinGmM, ReserveBuoyancy;
+        public FloodVerdict Verdict;
+        /// <summary>The flooding timeline: each breach, space and verdict with its time and what caused it.</summary>
+        public readonly List<FloodLine> Flooding = new List<FloodLine>();
         public float DurationS;
         public ulong Seed, Fix;
 
@@ -76,7 +85,51 @@ namespace DeepWater.GeneralQuarters.Core.Scenario
                 ShipSystem system = loadout.Damage.Systems[i].System;
                 if (!combat.DamageControl.IsOnline(system)) s.Offline.Add(system);
             }
+
+            IFlooding f = combat.DamageControl.Flooding;
+            if (f != null)
+            {
+                s.HasFlooding = true;
+                s.Breaches = f.Breaches;
+                s.SpacesWet = f.WetSpaces;
+                s.SpacesFull = f.FullSpaces;
+                s.WaterT = f.Water.WaterMassKg / 1000f;
+                s.PeakListDeg = f.PeakListDeg;
+                s.PeakTrimM = f.PeakTrimM;
+                s.IntactGmM = f.IntactGmM;
+                s.MinGmM = f.MinGmM;
+                s.ReserveBuoyancy = f.ReserveBuoyancy;
+                s.Verdict = f.Verdict;
+                for (int i = 0; i < events.Count; i++)
+                {
+                    EngagementEvent e = events[i];
+                    bool lost = e.Kind == EventKind.SystemOffline && e.Source == (int)ShipSystem.Hull;
+                    if (e.Kind != EventKind.Breach && e.Kind != EventKind.Flooding && !lost) continue;
+                    s.Flooding.Add(new FloodLine
+                    {
+                        TimeS = (e.Tick - raidStartTick) * combat.TickSeconds,
+                        Text = e.Text,
+                        Cause = e.CauseA >= 0 && e.CauseA < events.Count ? events[e.CauseA].Text : RootText(e),
+                    });
+                }
+            }
             return s;
         }
+
+        static string RootText(in EngagementEvent e) => e.Root switch
+        {
+            RootKind.Order => $"Order #{e.OrderSequence}",
+            RootKind.Scenario => "the scenario",
+            RootKind.Chance => "a seeded draw",
+            _ => "",
+        };
+    }
+
+    /// <summary>One line of the flooding timeline: when (seconds from the raid's start), what, and what caused it.</summary>
+    public struct FloodLine
+    {
+        public float TimeS;
+        public string Text;
+        public string Cause;
     }
 }

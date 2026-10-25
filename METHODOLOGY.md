@@ -256,6 +256,25 @@ These are the fixed points around which the methodology orbits. Every principle 
     - A test that must fly a route uses holds (heading, altitude, a bank limit) or the AI pilot, never a pursuit law.
     - An instructor that can be pointed at the ground needs a floor of its own: a bank limit when the aim is below the horizon, and ground avoidance. Open for SIX (Air Wing BLUEPRINT Q5).
     - Until then, the test claims only what pursuit can show: from the Dogfight start it flies gate 1 (`GateCourseTests.TheDogfightStart_FliesThroughGate1`).
+- **AP26. An editor integration for a tool the project doesn't use, left installed, doing network work on the main thread.** It came with the project template or an old workflow, its window stays docked, and every domain reload wakes it.
+  - *Where seen:* build-speed round 0, 2026-10-25 (`BUILD-SPEED-LEDGER.md`). `UVCSWindow.OnEnable` took 32.6 s of every 46.5 s domain reload, the same whichever scene was open.
+    - The Unity Version Control package found a `.plastic/` workspace from 2023, still tracked in git, and called its cloud server.
+    - The server refused the credentials, and the plugin retried with 1, 2, 5 and 10 s waits on the main thread, plus a background retry loop all day.
+    - Every compile, test run and play-mode entry paid for it for months. The log's "38 s reload next to a 1 s compile" looked like a script problem.
+  - *Why it fails:* nobody owns a tool nobody uses, so nobody sees it fail. It fails quietly, inside a phase (`AwakeInstancesAfterBackupRestoration`) whose name says nothing about networks or version control.
+  - *Do instead:*
+    - Profile one reload before tuning anything (`ProfilerDriver.profileEditor`, then `EditorUtility.RequestScriptReload`, then walk frame 0). One capture named the call.
+    - Keep only the editor packages for tools the project uses, and keep no other version-control system's metadata in the repo. Removing the package and untracking `.plastic/` took the reload from 46.5 to 15.2 s.
+- **AP27. Timing or building with the Editor in the background on a hybrid CPU, and believing the number.** On Intel's P-core/E-core chips, Windows 11 power throttling (EcoQoS) runs a background app and its child processes on the efficiency cores.
+  - *Where seen:* build-speed cold build and round 4, 2026-10-25, i9-12900H.
+    - Cold build: the 23 shader-compiler workers held the 8 E-cores at 100 % while the 12 P-core threads idled. Shader compiling ran 3.2× parallel on 20 threads.
+    - Opting the process tree out per process (`SetProcessInformation`, `ProcessPowerThrottling`) took the workers from 5.6 to 13 cores, and a domain reload from 16.3 to 7.4 s.
+    - Every Editor timing this project had logged with another window focused was a background number. That includes every MCP-driven session.
+  - *Why it fails:* nothing in Unity reports it. The machine looks busy (E-cores at 100 %), the workers look busy (all 23 alive), and the log's own "CPU time" per variant inflates because each variant waits for a core. The only tell is load per logical processor.
+  - *Do instead:*
+    - Read per-core load (`\Processor(*)\% Processor Time`) before trusting a background timing.
+    - Build and measure with the Editor's process tree at full speed: focus it, opt it out (`.claude/skills/unity-perf-ab/scripts/ecoqos_optout.ps1`), or have SIX exempt the executables with `powercfg /powerthrottling disable /path …`.
+    - State in every Editor figure whether it was taken in the foreground, in the background, or opted out.
 
 ## Candidates (under evaluation)
 
@@ -317,6 +336,14 @@ These are the fixed points around which the methodology orbits. Every principle 
   - *Exercised:* General Quarters Damage Control L1 (`Core/DamageControl/FloodPlan.cs`, `FloodModel.cs`). `DamageControlL1Tests.SpaceOpenToTheSea_HoldsExactlyTheBuoyancyItsColumnsLose`: 1.2718 MN against 1.2718 MN, centroids equal to 0.1 mm.
 - **C31. Free surface from a level that stays horizontal, not from a formula.** Keep each partly flooded space's water as a volume, solve its level as a plane horizontal in the world at the ship's present pose, and move its centroid there. The free-surface loss of stability then comes out of the moments, with no ρ·i/Δ term to keep in step with the geometry.
   - *Exercised:* `DamageControlL1Tests.PartFilledHold_FreeSurfaceComesFromTheLevel`. A half-full machinery hold loses 12.6 cm of GM from the moving centroid, against the closed form's 12.6 cm.
+- **C33. Never rebuild elapsed time from a log's per-item durations; time the phase itself.** Use the tool's own step timer (Unity's `BuildReport.steps`), wall-clock stamps on its log lines, and a CPU sampler per process and per core. Per-item "finished in N s" lines have no stated origin and may overlap. Neither their sum nor their per-group maximum is a clock reading.
+  - *Exercised:* build-speed, 2026-10-25. Both reconstructions were tried and reported to SIX before the cold build was timed:
+    - The sum of Unity's per-pass shader times said 805 s, about 80 % of a 16.5-minute cold build.
+    - The per-shader maximum said 115 s with the cores "already saturated". That was wrong, and it was retracted.
+    - The timed build (`BUILD-SPEED-LEDGER.md`, cold build) put shaders at ~950 s of 1,313 s, 3.2× parallel on 20 threads.
+    - Only the per-core sampler showed why: the workers were held on the 8 efficiency cores (AP27).
+- **C34. First-party asmdefs don't auto-reference.** Set `autoReferenced: false` unless code in `Assembly-CSharp*` really uses the assembly. Every auto-referenced asmdef is an input to the four predefined assemblies. A private edit then re-runs their IL post-processing, and a public edit recompiles them.
+  - *Exercised:* build-speed round 2, 20 asmdefs. A private one-line edit in `DeepWater.Sea` compiled in 1.2–1.6 s instead of 3.7–4.3 s; a public one in 3.1–3.4 s instead of 12.7–13.6 s. The predefined assemblies compiled with 0 errors, which proved nothing used them; tests unchanged (301/304, the same 3 old failures).
 - **C32. One MonoBehaviour per file, named after it, and a scene test that fails on a missing script.** Unity links a scene's component to its script asset, and the script asset to the class named like the file. A `MonoBehaviour` declared in a file of another name has no script asset of its own, so a scene saved with it comes back with a missing script.
   - *Exercised:* Air Wing slice 1e. `RunwayStrip` had shipped in slice 1d inside `SceneSurface.cs`, before any scene used it. It moved to its own file as `FlatGround`, a better name for ground that serves land as well as runways. `DogfightSceneTests` reads the saved scene's `m_Script` GUIDs and fails on any that resolves to nothing, so a missing script now shows as a red test, not a grey component.
   - *Not reproduced here:* the failure is Unity's documented rule (the class name must match the file name), caught before it bit.
@@ -399,3 +426,4 @@ These are the fixed points around which the methodology orbits. Every principle 
 - **2026-10-24** — General Quarters Stream C slice C1 (Damage Control L1, flooding). Added AP22 (a closed-form gate that leaves out a term the new case switches on), AP23 (a body declared lost, left running in the physics engine: the first PhysX sinking run crashed the Editor), C30 (flood in the columns you float on), C31 (free surface from a level that stays horizontal).
 - **2026-10-25** — Air Wing slice 0 (clean-up). Added AP24 (editor API compiled into the player): nine files across seven areas broke the player-script compile, one hidden behind the compiler's declaration-first error list.
 - **2026-10-25** — Air Wing slice 1e (Dogfight rebuilt). Added AP25 (pure pursuit near the ground, as a pilot or an instructor) and C32 (one MonoBehaviour per file, and a scene test that fails on a missing script). C25 exercised again.
+- **2026-10-25** — Build speed (`BUILD-SPEED-LEDGER.md`, `perf/build-speed`). Added AP26 (an unused editor integration doing network work on the main thread: Unity Version Control cost 32.6 s of every 46.5 s reload), AP27 (timing or building with the Editor in the background on a hybrid CPU: Windows held Unity on the efficiency cores, and a reload took 16.3 s throttled against 7.4 s opted out), C33 (time the phase, never rebuild it from per-item log durations; two wrong reconstructions kept on the record) and C34 (first-party asmdefs do not auto-reference; compile ×2.8 to ×4).

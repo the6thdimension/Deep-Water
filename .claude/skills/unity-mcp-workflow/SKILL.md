@@ -74,6 +74,11 @@ Runs C# by compiling a **transient assembly** against the loaded project assembl
 9. **`wait_build.sh`'s symbol must be code, not a comment** (2026-10-24, 4 minutes lost). Comments never reach the DLL, so waiting for a phrase from a doc comment always times out, even after a good build. Wait for a new class, method or field name.
 10. **A RunCommand can do its work and lose its reply** (2026-10-24, 30 minutes). A command that saved assets and a scene, sent just after a forced recursive reimport of a whole module folder, timed out after 1,800 s. The bridge had stopped for a domain reload. The command had in fact run: the assets and the scene were saved. Before re-sending, check the state it should have left (`GetState`, then a read-only RunCommand). Reimport only the folders you edited, never a module root with its FBX and textures.
 11. **Someone may be driving the Game view.** SIX plays the range while sessions work. A play recording that shows orders you never gave (a Captain rudder order from the mouse, breach-preset clicks, bells) was a human at the controls. Read the core's order log (`Combat.Orders.All`, with issuers) before you trust a recording, and ask before taking over play mode.
+12. **A RunCommand that blocks the main thread gets re-sent, in a loop** (2026-10-25, 30 minutes, ≈75 player builds).
+   - What happened: an inline `BuildPipeline.BuildPlayer` held the main thread for 77 s. The relay logged the client as disconnected, then re-sent its cached request when the bridge came back. Each copy built again, blocked again and was re-sent again. Each build took 22–24 s, so the loop ran until the 1,800 s tool timeout and kept going after it.
+   - Stop it: make the next copy fail its own guard. Entering play mode (`Unity_ManageEditor Play`) did this, because the command refused when `isPlaying`. Then wait a minute for silence before `Stop`.
+   - Prevention: make every RunCommand idempotent: check the state it would leave, and do nothing if it is already there. Never run anything long inline (player builds, full reimports, long bakes). Prefer a menu item you can check by its output file.
+   - `EditorApplication.delayCall` is no escape: while the Editor was unfocused it fired 262 s late.
 
 ## Play mode & timing
 

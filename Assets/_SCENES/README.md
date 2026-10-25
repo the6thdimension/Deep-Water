@@ -4,10 +4,10 @@ One-line description of what each scene exercises. **Keep these accurate** — C
 
 | Scene | What it exercises |
 |---|---|
-| `CVN-78 FORD` | Gerald R. Ford-class supercarrier — HDRP ocean + physically-based sky, AerialArcade-flyable F-18E spotted on the deck (`AirplaneAudio`, `XboxAirplane_Input`, `Waypoint_FixedWing`), `CarrierController` for sway / elevators / catapults (mostly stubbed). Currently no targets, no scenario — pure flight-ops sandbox. Cleanup applied 2026-05-17 (legacy VR + RCC scene manager removed). |
+| `CVN-78 FORD` | Gerald R. Ford-class supercarrier — HDRP ocean + physically-based sky, four AerialArcade F-18Es on the deck (two switched off; two flying `AIAirplaneController` waypoints). Carrier Ops `CarrierBehaviour` on the CVN78 prefab (sway, catapults, elevators, FLOLS, wires): only catapult 1 is fully wired, no aircraft is attached to a catapult and no jet carries `TailhookHook`, so nothing launches or traps yet (Air Wing carrier stream, parked). Currently no targets, no scenario — pure flight-ops sandbox. Cleanup applied 2026-05-17 (legacy VR + RCC scene manager removed); rows corrected 2026-10-25. |
 | `DDG Engagement` | Arleigh Burke DDG running a SAM engagement (VLS / ESSM / SPG-62 fire control). Primary scene for testing the missile + radar + VLS stack end-to-end. |
-| `Dogfight` | Fixed-wing air-to-air combat. Exercises `FixedWingController`, AI flight, mouse flight, waypoint AI. |
-| `Helo` | Helicopter flight + handling (`HelicopterController`). |
+| `Dogfight` | **To be rebuilt as Air Wing's test bed** (W12, ROADMAP slice 1e). Today: both FDS F-18Es switched off; the only live aircraft is a `FighterJetController` F-18 that never flies (nothing calls its flight code); a DDG and an `RH_RadarModule`; HDRP water. |
+| `Helo` | UH-60M with the legacy `HelicopterController`, which cancels its own weight (hovers at zero collective) and never translates from tilt. Air Wing's helicopter stream replaces it after jet L1 (W20). |
 | `Rocket` | Rocketry / ballistics sandbox — `Rocket`, `RocketBehavior`, `RocketPhysics`. |
 | `Rocket Man` | (TODO — describe: variant of Rocket with a player/controlled element?) |
 | `SENTINAL` | (TODO — describe sentinel scenario: what unit, what behavior is being tested?) |

@@ -1,5 +1,7 @@
 using UnityEngine;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using System.Collections.Generic;
 using System;
 using System.Linq;
@@ -32,6 +34,7 @@ namespace RH.Testing
                 return;
             }
             
+#if UNITY_EDITOR
             // Check if we need to switch to play mode
             if (test.TestMode == TestMode.PlayMode && !EditorApplication.isPlaying)
             {
@@ -39,7 +42,9 @@ namespace RH.Testing
                 QueueTestForPlayMode(test);
                 return;
             }
-            
+#endif
+            // (A player is always in play mode, so there every test runs now.)
+
             // Run the test and measure execution time
             float startTime = Time.realtimeSinceStartup;
             bool success = false;
@@ -108,22 +113,22 @@ namespace RH.Testing
             // If we have play mode tests, queue them to run after entering play mode
             if (playModeTests.Count > 0)
             {
+#if UNITY_EDITOR
                 if (!EditorApplication.isPlaying)
                 {
                     Debug.Log($"Entering play mode to run {playModeTests.Count} play mode tests");
                     QueueTestsForPlayMode(playModeTests);
+                    return;
                 }
-                else
+#endif
+                // Already in play mode (always, in a player): run the play mode tests now
+                foreach (var test in playModeTests)
                 {
-                    // If already in play mode, run the play mode tests
-                    foreach (var test in playModeTests)
-                    {
-                        RunTest(test);
-                    }
-                    
-                    // Fire the all tests completed event
-                    OnAllTestsCompleted?.Invoke(allTestResults);
+                    RunTest(test);
                 }
+
+                // Fire the all tests completed event
+                OnAllTestsCompleted?.Invoke(allTestResults);
             }
             else
             {
@@ -132,6 +137,9 @@ namespace RH.Testing
             }
         }
         
+#if UNITY_EDITOR
+        // Entering play mode is an Editor action; a player build leaves this plumbing out.
+
         /// <summary>
         /// Queues a test to run after entering play mode
         /// </summary>
@@ -200,7 +208,8 @@ namespace RH.Testing
                 EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
             }
         }
-        
+#endif
+
         /// <summary>
         /// Gets all test results
         /// </summary>

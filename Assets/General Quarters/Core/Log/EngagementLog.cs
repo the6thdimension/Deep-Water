@@ -23,6 +23,10 @@ namespace DeepWater.GeneralQuarters.Core.Log
         SystemOffline = 14,
         /// <summary>A seat-holder's decision: the AI captain applying one of its named rules.</summary>
         Decision = 15,
+        /// <summary>A hole opened in the hull (Damage Control L1): by a Breach Order or a hit.</summary>
+        Breach = 16,
+        /// <summary>Water on the move (Damage Control L1): a space starts taking water, a space floods, a list mark is passed.</summary>
+        Flooding = 17,
     }
 
     /// <summary>Where a cause chain ends (Reckoning §4.10): an Order, the scenario, or a seeded draw.</summary>

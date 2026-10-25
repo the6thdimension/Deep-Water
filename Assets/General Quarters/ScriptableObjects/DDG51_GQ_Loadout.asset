@@ -256,7 +256,7 @@ MonoBehaviour:
       ClosedLoopSpotting: 0
       SpotBiasMrad: 0
       SpotTimeConstantS: 0
-  damageLevel: 0
+  damageLevel: 1
   damage:
     HullHitPoints: 1000
     HullDamagePerWarheadKg: 1
@@ -287,6 +287,15 @@ MonoBehaviour:
     - System: 8
       PositionShip: {x: 0, y: -3, z: -20}
       HitPoints: 150
+  hull: {fileID: 11400000, guid: 2448c0967a30b1a489e96e306928b257, type: 2}
+  flooding:
+    seawaterDensityKgM3: 1025
+    gravity: 9.81
+    dischargeCoefficient: 0.6
+    holeAreaAtRefM2: 13.9
+    holeRefWarheadKg: 165
+    capsizeHeelDeg: 45
+    capsizeHoldS: 5
   defaultRoe: 1
   defaultDoctrine:
   - Weapon: 2
@@ -342,4 +351,14 @@ MonoBehaviour:
     CONTROL L0: hull 1,000 hit points, 1 per kg of warhead; systems 100-150 hit points
     within 25 m of the hit (AUTHORED: no public damage table).\nSCENARIO DEFAULTS:
     ROE weapons tight; ESSM semi-automatic (TEWA proposes, the TAO confirms), guns
-    automatic, CIWS automatic (G14)."
+    automatic, CIWS automatic (G14).\nDAMAGE CONTROL L1 (G53-G60): the hull's spaces
+    are in the hull profile (its SUBDIVISION and OPENINGS). Seawater 1,025 kg/m\xB3
+    (matches Sea State) and g 9.81. Orifice flow Q = Cd\xB7A\xB7\u221A(2g\xB7\u0394h)
+    with Cd 0.6, the textbook sharp-edged orifice (public). A hit's hole: area =
+    13.9 m\xB2 \xD7 (warhead / 165 kg)^(2/3), CALIBRATED to one public figure: USS
+    Stark, 17 May 1987, an Exocet AM39 with a 165 kg warhead left a hole about 10
+    \xD7 15 ft (3.0 \xD7 4.6 m) in her port side, above the waterline; the 2/3 power
+    is cube-root blast scaling (AUTHORED as the law). FLAGGED: one figure. CAPSIZED
+    past 45\xB0 held for 5 s (AUTHORED). SINKING when the water aboard leaves the
+    hull's whole volume less buoyancy than her weight (G60). Hull hit points still
+    damage systems and no longer decide loss."

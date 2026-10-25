@@ -5,6 +5,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using DeepWater.GeneralQuarters.Core.DamageControl;
 using DeepWater.GeneralQuarters.Modules.Hull;
 using DeepWater.GeneralQuarters.Modules.Propulsion;
 using DeepWater.GeneralQuarters.ScriptableObjects;
@@ -110,6 +111,46 @@ namespace DeepWater.GeneralQuarters.Editor
             return so;
         }
 
+        /// <summary>
+        /// Damage Control L1's subdivision and openings (G53, G54, G56). Every number here is AUTHORED except the
+        /// permeabilities (SOLAS) and the wing breadth's anchor (SOLAS's assumed damage penetration): DDG-51's internal
+        /// arrangement is not public. Public so the values can be applied to the hull asset without rebuilding the prefab.
+        /// </summary>
+        public static void ApplySubdivision(ShipHullProfileSO so)
+        {
+            so.damageControlDeckY = 3.4f;
+            so.wingInboardXM = 5.32f;
+            so.wingFirstStation = 3;
+            so.wingLastStation = 8;
+            so.holdUse = new[]
+            {
+                SpaceUse.Stores, SpaceUse.Stores, SpaceUse.Stores,
+                SpaceUse.Machinery, SpaceUse.Machinery, SpaceUse.Machinery, SpaceUse.Machinery, SpaceUse.Machinery, SpaceUse.Machinery,
+                SpaceUse.Stores, SpaceUse.Stores, SpaceUse.Machinery,
+            };
+            so.permeabilityStores = 0.60f;
+            so.permeabilityMachinery = 0.85f;
+            so.permeabilityAccommodation = 0.95f;
+            so.permeabilityVoid = 0.95f;
+            so.hatchAreaM2 = 0.1f;
+            so.doorAreaM2 = 0.1f;
+            so.doorSillM = 0.3f;
+            so.weatherAreaM2 = 0.5f;
+            EditorUtility.SetDirty(so);
+        }
+
+        public const string SubdivisionProvenance =
+            "SUBDIVISION (Damage Control L1, G53 G54): Blender's 12 stations, each split at the damage-control deck into a hold and an upper " +
+            "space; the six midship holds (04-09) also give their outboard columns to port and starboard wing spaces. Spaces are cut from the " +
+            "buoyancy columns, so their volumes follow the hull. Damage-control deck at y +3.4 m (AUTHORED: DDG-51's is the second deck, height " +
+            "not public; about 3 m under the main deck amidships). Wing bulkheads at |x| 5.32 m, B/5 in from the waterline side (AUTHORED as a " +
+            "position; B/5 is SOLAS's assumed transverse damage penetration). Hold uses AUTHORED: 01-03 stores, 04-09 machinery (main and " +
+            "auxiliary machinery rooms), 10-11 stores, 12 machinery (steering gear); upper spaces accommodation; wing spaces voids. " +
+            "Permeability by use from SOLAS II-1 Reg. 7-3 (public): stores 0.60, machinery 0.85, accommodation 0.95, void 0.95.\n" +
+            "OPENINGS (G56, all AUTHORED): at General Quarters (condition ZEBRA) hatches and doors are shut, so each is a leak path: 0.1 m² per " +
+            "hold hatch through the damage-control deck, 0.1 m² per door between neighbouring upper spaces with a 0.3 m sill; 0.5 m² of weather " +
+            "openings (vents, doors, uptakes) per upper space per side at the main deck edge.";
+
         static ShipHullProfileSO BuildHullProfile(HullLayout layout, BuoyancyHullSO buoyancy)
         {
             HullLayout.Hydrostatics h = layout.hydrostatics;
@@ -123,10 +164,12 @@ namespace DeepWater.GeneralQuarters.Editor
             so.kbM = h.kb_m;
             so.bmM = h.bm_m;
             so.metacentricHeightM = h.gm_m;
+            so.waterlineLengthM = h.length_wl_m;
             so.compartments = layout.compartments.Select(c => new ShipHullProfileSO.Compartment
             {
                 name = c.name, min = HullLayout.V(c.min), max = HullLayout.V(c.max),
             }).ToArray();
+            ApplySubdivision(so);
             so.provenance =
                 $"Built from {LayoutJson} ({layout.source}).\n" +
                 $"{layout.hydrostatics_note}: displacement {h.displacement_t:0} t at the drawn waterline, draft {h.draft_m:0.00} m, " +
@@ -136,7 +179,8 @@ namespace DeepWater.GeneralQuarters.Editor
                 $"GM {h.gm_m:0.00} m: {h.gm_note}.\n" +
                 $"Gyradii: {h.gyradius_note}.\n" +
                 $"Compartments: {layout.compartments_note}.\n" +
-                $"Buoyancy damping: heave ratio {HeaveDampingRatio}, Cd {QuadraticDragCd} (AUTHORED, Sea State defaults), heave axis only.";
+                $"Buoyancy damping: heave ratio {HeaveDampingRatio}, Cd {QuadraticDragCd} (AUTHORED, Sea State defaults), heave axis only.\n" +
+                SubdivisionProvenance;
             EditorUtility.SetDirty(so);
             return so;
         }

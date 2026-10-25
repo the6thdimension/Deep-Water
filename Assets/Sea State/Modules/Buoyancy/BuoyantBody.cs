@@ -24,6 +24,8 @@ namespace DeepWater.Sea.Modules.Buoyancy
 
         public Rigidbody Body { get; private set; }
         public BuoyancyHullSO Hull => hull;
+        /// <summary>The system that floats this body (and, through it, the sea it floats on).</summary>
+        public BuoyancySystem System => system;
 
         /// <summary>Runtime wiring (e.g. for spawned hulls).</summary>
         public void Configure(BuoyancySystem buoyancySystem, BuoyancyHullSO hullAsset)

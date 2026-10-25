@@ -21,6 +21,7 @@ MonoBehaviour:
   kbM: 3.916
   bmM: 4.786
   metacentricHeightM: 1.5
+  waterlineLengthM: 141
   compartments:
   - name: Compartment 01
     min: {x: -10.6101, y: -9.4053, z: 64}
@@ -58,6 +59,19 @@ MonoBehaviour:
   - name: Compartment 12
     min: {x: -10.6101, y: -2.7846, z: -71}
     max: {x: 10.6101, y: 4.8163, z: -56}
+  damageControlDeckY: 3.4
+  wingInboardXM: 5.32
+  wingFirstStation: 3
+  wingLastStation: 8
+  holdUse: 000000010101010101000001
+  permeabilityStores: 0.6
+  permeabilityMachinery: 0.85
+  permeabilityAccommodation: 0.95
+  permeabilityVoid: 0.95
+  hatchAreaM2: 0.1
+  doorAreaM2: 0.1
+  doorSillM: 0.3
+  weatherAreaM2: 0.5
   provenance: "Built from Assets/General Quarters/Prefabs/Models/DDG51_GQ_Layout.json
     (ArtSource/General Quarters/DDG51_GQ.blend via author_ddg51_gq.py).\nMEASURED
     from the hull shell on a 61 x 0.5 m column grid (15976 columns, converged): displacement
@@ -69,4 +83,19 @@ MonoBehaviour:
     \"yaw_of_length\": 0.25}; roll and yaw from the SIMMAN 2008 DTMB 5415 table (ixx/B
     0.37, izz/Lpp 0.25), pitch AUTHORED.\nCompartments: AUTHORED bulkhead stations
     every 12 m; the real DDG-51 bulkhead plan is not public.\nBuoyancy damping: heave
-    ratio 0.2, Cd 0.5 (AUTHORED, Sea State defaults), heave axis only."
+    ratio 0.2, Cd 0.5 (AUTHORED, Sea State defaults), heave axis only.\nSUBDIVISION
+    (Damage Control L1, G53 G54): Blender's 12 stations, each split at the damage-control
+    deck into a hold and an upper space; the six midship holds (04-09) also give
+    their outboard columns to port and starboard wing spaces. Spaces are cut from
+    the buoyancy columns, so their volumes follow the hull. Damage-control deck at
+    y +3.4 m (AUTHORED: DDG-51's is the second deck, height not public; about 3 m
+    under the main deck amidships). Wing bulkheads at |x| 5.32 m, B/5 in from the
+    waterline side (AUTHORED as a position; B/5 is SOLAS's assumed transverse damage
+    penetration). Hold uses AUTHORED: 01-03 stores, 04-09 machinery (main and auxiliary
+    machinery rooms), 10-11 stores, 12 machinery (steering gear); upper spaces accommodation;
+    wing spaces voids. Permeability by use from SOLAS II-1 Reg. 7-3 (public): stores
+    0.60, machinery 0.85, accommodation 0.95, void 0.95.\nOPENINGS (G56, all AUTHORED):
+    at General Quarters (condition ZEBRA) hatches and doors are shut, so each is
+    a leak path: 0.1 m\xB2 per hold hatch through the damage-control deck, 0.1 m\xB2
+    per door between neighbouring upper spaces with a 0.3 m sill; 0.5 m\xB2 of weather
+    openings (vents, doors, uptakes) per upper space per side at the main deck edge."

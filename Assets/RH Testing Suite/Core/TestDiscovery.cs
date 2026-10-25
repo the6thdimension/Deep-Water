@@ -1,3 +1,6 @@
+// Discovery reads the AssetDatabase and is called only from the Editor window
+// (RHTestSuiteWindow), so the whole file is Editor-only and stays out of player builds.
+#if UNITY_EDITOR
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
@@ -381,3 +384,4 @@ namespace RH.Testing
         }
     }
 }
+#endif

@@ -57,6 +57,35 @@ Use the `unity-mcp-workflow` skill's `templates/play-recorder.cs`, then `scripts
 2. Heel each hull 5° **about its own forward axis**, zero its velocities, and record heel per fixed step for about 40 s.
 3. The recorder logs `rb.inertiaTensor`. Feed `--inertia-roll` (the component about the length axis, z for Sea State hulls) back into `hull_predict.py`, and compare the periods.
 
+## 4. A damaged ship (Damage Control L1)
+
+`scripts/flood_predict.py` is the closed form for flooding on the DDG's own probe columns. The subdivision defaults match the hull profile (G53, G54).
+
+```bash
+python -I .claude/skills/hull-stability-check/scripts/flood_predict.py --list-spaces          # every space: use, permeability, capacity
+python -I .claude/skills/hull-stability-check/scripts/flood_predict.py --bilge "06 wing S"    # open to the sea: lost buoyancy
+python -I .claude/skills/hull-stability-check/scripts/flood_predict.py --water "06 hold=0.5"  # intact, part full: added weight + free surface
+```
+
+- **Bilged spaces:** sinkage, list (wall-sided) and trim, coupled through the damaged waterplane's product of inertia. GM by lost buoyancy, and the added-weight view.
+- **Part-filled spaces:** the sunk waterline is found from the columns (not wall-sided: the DDG flares), with the free-surface correction.
+- **The pattern** is `Assets/General Quarters/Tests/Editor/DamageControlL1Tests.cs`. `FloodedHullRig` brings Sea State's jobs plus the water to rest in 3 degrees of freedom. Gates: list 5 % (0.2°), trim and sinkage 15 % (3 cm, 2 cm), GM 5 %.
+
+Reference values (verified 2026-10-24):
+
+| Case | Predicted | EditMode | PhysX |
+|---|---|---|---|
+| Starboard wing 06 bilged | list 4.34°, trim 12.9 cm, sinkage 8.0 cm, GM 1.345 m | 4.321°, 13.6 cm, 6.84 cm, 1.373 m | 4.337°, 13.6 cm, 6.87 cm |
+| Hold 02 bilged | trim 89.8 cm, sinkage 15.6 cm, GM 1.624 m | 88.3 cm, 15.3 cm, 1.656 m | 88.3 cm, 15.27 cm (dead in the water) |
+| Hold 06 half full | GM 1.850 solid, 1.725 free (12.6 cm) | 1.831, 1.705 (12.6 cm) | — |
+
+**Damage traps:**
+- Measure a flooded lie in PhysX with her dead in the water: zero the velocities after the Stop bell. Drifting astern at 1.4 m/s, the drive alone heeled her 0.27°.
+- Run past a SINKING verdict, not only to it. A sunk hull with no seabed falls without limit and took the Editor down once (METHODOLOGY AP23).
+- An off-centre space needs the waterplane's product of inertia. Without it, the wing's trim came out 11.0 cm instead of 12.9.
+- A large sinkage on a flared hull needs BM at the new draft. Wall-sided, the half-full hold's GM came out 0.14 m low.
+- When a gate fails, find the missing term before touching the tolerance (METHODOLOGY AP22).
+
 ## Traps
 
 - **Unity recomputes its automatic inertia tensor about a scripted centre of mass** (parallel-axis shift: the buoy went 2187 → 3794 kg·m²). Predict with the tensor Unity reports.

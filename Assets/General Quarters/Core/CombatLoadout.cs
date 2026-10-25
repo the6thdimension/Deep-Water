@@ -40,6 +40,8 @@ namespace DeepWater.GeneralQuarters.Core
 
         public FidelityLevel DamageLevel;
         public DamageProfileData Damage;
+        /// <summary>The hull's spaces and the flooding tuning; needed from Damage Control L1 (G53–G60).</summary>
+        public FloodingProfileData Flooding;
 
         public Roe DefaultRoe = Roe.WeaponsTight;
         public DoctrineDefault[] DefaultDoctrine = new DoctrineDefault[0];

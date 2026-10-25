@@ -1,0 +1,104 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97095a1de10787b4ba2bdfc411a1eb2f, type: 3}
+  m_Name: FA18E_AirWing
+  m_EditorClassIdentifier: DeepWater.AirWing::DeepWater.AirWing.ScriptableObjects.AircraftProfileSO
+  displayName: F/A-18E Super Hornet
+  wingAreaFt2: 500
+  spanFt: 44.9
+  emptyWeightLb: 32081
+  internalFuelLb: 14400
+  cd0: 0.025
+  oswaldEfficiency: 0.8
+  clMax: 1.6
+  clMaxNegative: 0.8
+  clAlphaPerRad: 3.5
+  flapsDeltaClMax: 0.5
+  flapsDeltaCd: 0.04
+  speedBrakeDeltaCd: 0.05
+  engineCount: 2
+  militaryThrustPerEngineLbf: 13000
+  maxThrustPerEngineLbf: 22000
+  idleThrustFraction: 0.05
+  thrustLapseExponent: 1.2726
+  loadFactorMax: 7.5
+  loadFactorMin: -3
+  rollRateMaxDegS: 150
+  loadFactorTimeConstantS: 0.25
+  rollTimeConstantS: 0.3
+  provenance: 'Sources and tags in full: Assets/Air Wing/Calibration~/F18E-SOURCES.md
+    (read 2026-10-25).
+
+    PUBLIC = official page; CALIBRATED = fitted to one public
+    figure (C16); AUTHORED = our estimate.
+
+
+    spanFt 44.9: PUBLIC, Navy fact file
+    (Wingspan 44.9 ft); Boeing agrees.
+
+    engineCount 2: PUBLIC, Navy fact file
+    (two F414-GE-400).
+
+    maxThrustPerEngineLbf 22000: PUBLIC, Navy fact file and
+    GE F414 datasheet (22,000 lb static). Conflict: Boeing says 17,000 lb per engine.
+
+    militaryThrustPerEngineLbf
+    13000: AUTHORED (commonly quoted dry thrust; not on Navy, Boeing or GE pages).
+
+    wingAreaFt2
+    500: AUTHORED (secondary sources agree; no official page found).
+
+    emptyWeightLb
+    32081: AUTHORED (secondary sources 30,600 to 32,100 lb).
+
+    internalFuelLb
+    14400: AUTHORED (secondary sources 14,400 to 14,700 lb).
+
+    cd0 0.025: AUTHORED
+    (textbook fighter with pylons; NASA Hornet data at L1).
+
+    oswaldEfficiency
+    0.80: AUTHORED (textbook).
+
+    clMax 1.6: AUTHORED (clean).
+
+    clMaxNegative
+    0.8: AUTHORED (half of clMax).
+
+    clAlphaPerRad 3.5: AUTHORED (low aspect ratio;
+    sets the HUD''s angle of attack only).
+
+    flapsDeltaClMax 0.5, flapsDeltaCd
+    0.04: AUTHORED.
+
+    speedBrakeDeltaCd 0.05: AUTHORED (no dedicated speed brake;
+    control surfaces do it).
+
+    idleThrustFraction 0.05: AUTHORED.
+
+    thrustLapseExponent
+    1.2726: CALIBRATED to the service ceiling 50,000 ft (Navy fact file and Boeing,
+    50,000+ ft) at empty + half internal fuel, clean, maximum afterburner, climb
+    speeds up to Mach 0.9 (Calibration~/l0_calibration.py).
+
+    loadFactorMax 7.5,
+    loadFactorMin -3.0: AUTHORED (widely quoted; not on the official pages found).
+
+    rollRateMaxDegS
+    150: AUTHORED.
+
+    loadFactorTimeConstantS 0.25, rollTimeConstantS 0.30: AUTHORED
+    (L0 control-law response).
+
+    VALIDATION, not fitted: maximum speed Mach 1.8+
+    (Navy) / Mach 1.6 (Boeing); L0 gives Mach 1.41 at 40,000 ft and 1.54 at sea level
+    (no Mach effects until L2).'

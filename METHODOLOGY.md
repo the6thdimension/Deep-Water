@@ -211,10 +211,40 @@ These are the fixed points around which the methodology orbits. Every principle 
     - When something on screen jitters, log the decision per tick (here the mount's target id) before touching the motion.
   - *Reference impl:* `Core/Ballistics/FiringTable.TrySolve`, `GunsL1Tests.FireControl_SolutionPassesThroughTheAimPoint_AndRefusesWhatIsOutOfReach`, `Mk45_StaysOnItsTarget_UntilItIsGone`.
 
+- **AP22. A closed-form gate that leaves out a term the new case switches on.** A first-order prediction (wall-sided, small angles, the drawn waterplane), written once and proven on symmetric cases, used as the gate for a case that brings in physics the formula never had.
+  - *Where seen:* General Quarters Damage Control L1, 2026-10-24 (`.claude/skills/hull-stability-check/scripts/flood_predict.py`). Twice in one slice, the simulation disagreed with the prediction and the prediction was wrong.
+    - A flooded starboard wing trimmed her 13.6 cm; the closed form said 11.0. An off-centre lost waterplane has a product of inertia, which couples heel into trim. With it, the prediction is 12.9 cm.
+    - A half-full hold gave GM 1.83 m solid; the closed form said 1.69. It took BM from the drawn waterplane, but 26 cm of sinkage on a flared hull widens it. Taken at the sunk draft, 1.85.
+  - *Why it fails:* A gate is only as good as the physics it holds. The tempting fixes are both wrong: widening the tolerance, or tuning the simulation toward the formula. The free-surface loss itself matched to the millimetre (12.6 cm), which is what said the simulation was right and the baseline was not.
+  - *Do instead:* When a gate fails, first list what the new case switches on: asymmetry (products of inertia), a large draft change (flare), large angles. Add the missing term to the prediction, record what it was and what it changed, and keep the tolerance you set before measuring. Fix the simulation only when a term the prediction already holds disagrees. Reference: `DamageControlL1Tests.FloodedWing_ListsTrimsAndLosesGm_AsPredicted`, `PartFilledHold_FreeSurfaceComesFromTheLevel`.
+
+- **AP23. A body the simulation has declared lost, left running in the physics engine.** A verdict ("sinking", "destroyed") ends the entity in the model's terms, while the rigid body carries on under forces the model no longer means: no seabed, no ground, drag that only exists in the regime the body has left.
+  - *Where seen:* General Quarters Damage Control L1, 2026-10-24, the first PhysX sinking run on the range. Past her reserve buoyancy she plunged by the head. The probes damp heave only (G21), so a hull standing on its bow has no damping along its length, and nothing below it is modelled. She fell without limit. The camera followed her down. HDRP raised "Invalid worldAABB … too far away from the origin" and thousands of `IsFinite` assertions, then the drive's forces went NaN and the Editor lost its D3D12 device and crashed. The EditMode rig never showed it, because it stopped at the verdict.
+  - *Why it fails:* A verdict is a statement about the model; the physics engine has not heard it. Whatever the model leaves out of the post-verdict regime is now unbounded, and the first symptom shows up far away (in the renderer), not where the cause is.
+  - *Do instead:* Give every terminal verdict an end state in the engine: freeze, remove, or hand over to a model built for it. Run a test past the verdict, not only to it. Reference impl: `Modules/Hull/ShipFlooding` (`StopHer` once she is wholly under; `RaiseHer` on a new run).
+
 - **AP20. Trusting an effect built for another render pipeline because the engine says its shader is supported.** Dropping a vendor particle prefab into an HDRP scene because `Shader.isSupported` is true and the asset store page shows it burning.
   - *Where seen:* General Quarters slice 6, 2026-10-24. `HD_Naval_Explosion` uses the built-in pipeline's "Particles/Standard Unlit". HDRP reports it as supported and draws it as untextured grey quads. The VFX Arsenal flames rendered, but at a size and brightness made for a close camera, not a ship at 2 km under HDRP exposure. The same explosion still sits in a Guided Fury ground detonation.
   - *Why it fails:* "Supported" means it compiles, not that HDRP gives it the passes, the exposure and the fog it expects. Effects are authored for a scale and an exposure as much as a pipeline.
   - *Do instead:* Probe every candidate effect in the target scene, at the target distance, under the scene's exposure, and look at a screenshot before adopting it. If it fails, build it on a shader written for the pipeline (a ForwardOnly pass, display-relative colour, the pipeline's fog). Reference impl: `Assets/General Quarters/Modules/Presentation/Shaders/GQ_Particle.shader`, `Editor/CombatEffectsBuilder.cs`.
+
+- **AP24. Editor API in code that compiles into the player.** A script that uses `UnityEditor` (an inspector, an editor window, `AssetDatabase`, `EditorApplication`) sitting where Unity compiles it into the player. In the predefined assemblies, only a folder named exactly `Editor` makes code editor-only; inside an asmdef, that folder name means nothing, and the asmdef itself must be editor-only.
+  - *Where seen:* Air Wing slice 0, 2026-10-25. A player-script compile failed with zero assemblies on nine files across seven areas:
+    - an `Editors/` folder (`FixedWingController_Editor.cs`);
+    - an earlier archive move that lifted `CarrierEditor.cs` out of its `Editor/` folder;
+    - inspectors left beside their components (`F18ControllerEditor.cs`, `DestroyerEditor.cs`);
+    - editor tools in a runtime folder (RH Utilities ×3);
+    - a test runner's play-mode plumbing (`TestRunner.cs`);
+    - a local editor hook (`UnityMcpUnlock.cs`).
+    A tenth file, `TestDiscovery.cs`, was not in the list at all: the compiler stops at declaration errors and does not report method bodies, so a use that sits only in a body hides until the declaration errors are gone.
+  - *Why it fails:* The Editor compiles every assembly with `UnityEditor` available, so these errors never show while working in the Editor. They surface only in a player build, and nobody builds a player during Editor work. One file breaks the whole build, and the error list under-reports.
+  - *Do instead:*
+    - Keep the `Editor` folder name through every move and archive.
+    - Guard mixed files with `#if UNITY_EDITOR`, around the editor part only, when runtime code still calls the rest.
+    - After fixing a batch, compile again until the list is empty rather than trusting the first list.
+    - Make a player-script compile (`PlayerBuildInterface.CompilePlayerScripts`, which compiles scripts only and builds no content) part of a module's gate.
+
+    Reference: Air Wing ROADMAP slice 0, last item.
 
 ## Candidates (under evaluation)
 
@@ -272,6 +302,10 @@ These are the fixed points around which the methodology orbits. Every principle 
   - *Exercised:* guns L1's Kill and Miss events, which the tests parse (`GunsL1Tests`).
 - **C29. A golden fingerprint pins a fidelity level, not "whatever the shipped loadout is".** When the shipped loadout moves an element up a level, a golden test recorded at the old level pins that level explicitly. The new level gets its own determinism test. Otherwise the golden breaks for a reason it was never about, and someone "fixes" it by pasting the new number.
   - *Exercised:* `PresentationTests.Saturation_Fix_IsUnchangedByPresentationData` now sets guns L0 (slice B1).
+- **C30. Flood in the columns you float on.** Cut a hull's compartments from the same columns its buoyancy uses, and reckon each column's water the way the buoyancy reckons its submersion (the same bottom, the same centroid). Then water standing at sea level in a space open to the sea weighs exactly what that space's columns lose in buoyancy, at the same points. Added weight and lost buoyancy agree at equilibrium by construction, and a space's volume follows the real hull shape for free.
+  - *Exercised:* General Quarters Damage Control L1 (`Core/DamageControl/FloodPlan.cs`, `FloodModel.cs`). `DamageControlL1Tests.SpaceOpenToTheSea_HoldsExactlyTheBuoyancyItsColumnsLose`: 1.2718 MN against 1.2718 MN, centroids equal to 0.1 mm.
+- **C31. Free surface from a level that stays horizontal, not from a formula.** Keep each partly flooded space's water as a volume, solve its level as a plane horizontal in the world at the ship's present pose, and move its centroid there. The free-surface loss of stability then comes out of the moments, with no ρ·i/Δ term to keep in step with the geometry.
+  - *Exercised:* `DamageControlL1Tests.PartFilledHold_FreeSurfaceComesFromTheLevel`. A half-full machinery hold loses 12.6 cm of GM from the moving centroid, against the closed form's 12.6 cm.
 - ~~**C5.** Replaced legacy code goes to `Assets/_Archive/`.~~ Promoted to **P8** on 2026-10-24.
 - **C25. Archive legacy code behind a supersession checklist, not a feeling.** List every feature of the legacy code and mark each one *carried*, *superseded* (name the replacement and its level) or *dropped deliberately* (say why). A feature with no row is a regression nobody chose.
   - *Exercised:* General Quarters slice 7 (`Assets/General Quarters/ROADMAP.md`).
@@ -347,3 +381,5 @@ These are the fixed points around which the methodology orbits. Every principle 
 - **2026-10-24** — General Quarters slice 7 (phase review; Phase 1 complete). Promoted C5 to P8 (the `_Archive` convention, third use). Added C25 (archive behind a supersession checklist).
 - **2026-10-24** — General Quarters Stream B slice B1 (guns L1). Added C26 (standard drag curve plus one calibrated form factor; distance from 1 is a finding), C27 (fire control looks up firing tables), C28 (a hit model prints its sum), C29 (a golden pins a fidelity level).
 - **2026-10-24** — Added AP21 (a table lookup that says "no answer" when its bracket falls off the table): the Mk 45 jitter SIX reported after guns L1.
+- **2026-10-24** — General Quarters Stream C slice C1 (Damage Control L1, flooding). Added AP22 (a closed-form gate that leaves out a term the new case switches on), AP23 (a body declared lost, left running in the physics engine: the first PhysX sinking run crashed the Editor), C30 (flood in the columns you float on), C31 (free surface from a level that stays horizontal).
+- **2026-10-25** — Air Wing slice 0 (clean-up). Added AP24 (editor API compiled into the player): nine files across seven areas broke the player-script compile, one hidden behind the compiler's declaration-first error list.

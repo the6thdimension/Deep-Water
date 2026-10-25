@@ -22,6 +22,13 @@
                 <appui:Text text="Orders" size="S" class="gq-caption" />
                 <appui:Text name="helm-orders" text="" size="XS" class="gq-mono gq-log" />
             </ui:VisualElement>
+            <!-- Damage Control L1 (G59): the spaces and how she lies; the breach presets are the scenario's (G57). -->
+            <ui:VisualElement name="dc-captain" class="gq-card gq-dc" picking-mode="Position">
+                <appui:Heading text="DAMAGE CONTROL" size="XS" class="gq-card-title" />
+                <ui:VisualElement name="dc-captain-board" />
+                <appui:Text text="Scripted breaches (the scenario)" size="S" class="gq-caption" />
+                <ui:VisualElement name="dc-breach-row" class="gq-row" />
+            </ui:VisualElement>
             <appui:Text name="camera-label" text="Camera: own ship  (C)" size="XS" class="gq-caption gq-camera-caption" />
             <ui:VisualElement name="scope-inset" class="gq-card gq-inset" picking-mode="Position" />
             <ui:VisualElement name="ticker-captain" class="gq-card gq-ticker" picking-mode="Ignore">
@@ -71,6 +78,7 @@
                     <appui:Text name="systems-text" text="" size="XS" class="gq-mono" />
                     <appui:Text name="hull-text" text="" size="XS" class="gq-caption" />
                     <ui:VisualElement name="hull-bar" class="gq-bar-track"><ui:VisualElement name="hull-fill" class="gq-bar-fill" /></ui:VisualElement>
+                    <ui:VisualElement name="dc-tao-board" class="gq-dc-tao" />
                     <appui:Text name="ticker-tao-text" text="" size="XS" class="gq-mono gq-log gq-log--tao" />
                 </ui:VisualElement>
             </ui:VisualElement>

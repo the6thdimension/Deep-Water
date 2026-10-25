@@ -1,7 +1,9 @@
 {
     "name": "DeepWater.AirWing",
     "rootNamespace": "DeepWater.AirWing",
-    "references": [],
+    "references": [
+        "Unity.InputSystem"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

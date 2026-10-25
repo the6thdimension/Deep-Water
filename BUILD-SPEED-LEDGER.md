@@ -145,3 +145,23 @@ Every round must leave exactly this result.
   - The 10 s stall (5 of 15 reloads before) did not appear in the 4 reloads since, including the resolve reload at 19.2 s. It was very likely the plugin's retry thread too. That is likely, not proven.
 - **Behaviour:** the change is Editor tooling only. It is covered by the test pin after Round 2.
 - **Restore:** add `"com.unity.collab-proxy": "2.12.4"` back to the manifest, and rename the backup folder to `.plastic`.
+
+### Round 2: first-party asmdefs off auto-reference (kept)
+
+*Seat: Sam Newman (The Decoupler): an edge nothing uses is still an edge every build walks.*
+
+- **Change:** `autoReferenced: false` in 20 first-party asmdefs:
+  - Air Wing ×2, Carrier Ops ×2, General Quarters ×3, Guided Fury ×2, RH Aviator, RH Radar, RH Radar Suite ×2, RH Shared, DeepWater.Input ×2, Sea State ×4.
+  - The test asmdefs and the Reckoning spike already had it.
+- **What it proves:** the predefined assemblies (`Assembly-CSharp*`) compiled with 0 errors without them, so nothing in them used first-party code. `Unity_RunCommand` still compiles against first-party types (checked with `typeof(DeepWater.Sea.Core.SeaStateDirector)`).
+- **A/B, the same one-line probe in `SeaStateDirector.cs`, explicit refresh, 2 runs each:**
+
+| Edit | A compile | B compile | A → ready | B → ready |
+|---|---|---|---|---|
+| Private line | 3.66, 4.33 s (22 nodes) | **1.56, 1.19 s** (18 nodes) | 24.5, 24.3 s | 24.7, 24.8 s |
+| Public line | 12.67, 13.57 s (67 nodes) | **3.40, 3.12 s** (51 nodes) | 34.0, 35.4 s | **25.6, 25.8 s** |
+
+- **Result:** compile ×2.8 for a private edit and ×4.0 for a public one.
+  - The private edit's "ready" did not move. In this harness the reload never starts sooner than ~7.8 s after the refresh call, whatever the compile time (see Instrument note below). A faster compile lands inside that floor.
+- **Behaviour (R1 + R2):** 301 pass, 3 fail, the same three as the pin.
+- **Instrument note:** with the Editor unfocused and driven through the MCP bridge, "Reloading assemblies after finishing script compilation" came at 7.5–8.0 s after the `MARK` in every cycle whose compile ended before that (4 of 4).

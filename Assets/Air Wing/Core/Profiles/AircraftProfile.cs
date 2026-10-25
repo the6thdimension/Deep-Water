@@ -1,0 +1,117 @@
+using System;
+
+namespace DeepWater.AirWing.Core.Profiles
+{
+    /// <summary>The airframe's numbers, SI (W22). Baked from an <c>AircraftProfileSO</c>, which carries each number's source.</summary>
+    public struct AirframeProfile
+    {
+        public float WingAreaM2;
+        public float SpanM;
+        public float EmptyMassKg;
+        public float InternalFuelKg;
+        /// <summary>Zero-lift drag coefficient.</summary>
+        public float CD0;
+        /// <summary>Span efficiency in the induced-drag term K = 1 / (π e AR).</summary>
+        public float OswaldEfficiency;
+        public float CLmax;
+        /// <summary>Largest negative lift coefficient, as a positive number.</summary>
+        public float CLmaxNegative;
+        /// <summary>Lift-curve slope, per radian (gives the angle of attack the HUD shows at L0).</summary>
+        public float CLalphaPerRad;
+        public float FlapsDeltaCLmax;
+        public float FlapsDeltaCD;
+        public float SpeedBrakeDeltaCD;
+
+        public float AspectRatio => SpanM * SpanM / WingAreaM2;
+        public float InducedDragFactor => 1f / ((float)Math.PI * OswaldEfficiency * AspectRatio);
+
+        public void Validate()
+        {
+            Positive(WingAreaM2, nameof(WingAreaM2));
+            Positive(SpanM, nameof(SpanM));
+            Positive(EmptyMassKg, nameof(EmptyMassKg));
+            NonNegative(InternalFuelKg, nameof(InternalFuelKg));
+            NonNegative(CD0, nameof(CD0));
+            Positive(OswaldEfficiency, nameof(OswaldEfficiency));
+            Positive(CLmax, nameof(CLmax));
+            NonNegative(CLmaxNegative, nameof(CLmaxNegative));
+            Positive(CLalphaPerRad, nameof(CLalphaPerRad));
+        }
+
+        internal static void Positive(float v, string name)
+        {
+            if (!(v > 0f) || float.IsInfinity(v)) throw new ArgumentOutOfRangeException(name, v, "must be positive and finite");
+        }
+
+        internal static void NonNegative(float v, string name)
+        {
+            if (!(v >= 0f) || float.IsInfinity(v)) throw new ArgumentOutOfRangeException(name, v, "must be zero or positive and finite");
+        }
+    }
+
+    /// <summary>The engines' numbers, SI.</summary>
+    public struct PowerplantProfile
+    {
+        public int EngineCount;
+        /// <summary>Static sea-level thrust per engine at military power (no afterburner), newtons.</summary>
+        public float MilitaryThrustPerEngineN;
+        /// <summary>Static sea-level thrust per engine at maximum afterburner, newtons.</summary>
+        public float MaxThrustPerEngineN;
+        /// <summary>Idle thrust as a fraction of military thrust.</summary>
+        public float IdleThrustFraction;
+        /// <summary>Thrust falls with density as σ^x, σ = ρ/ρ₀ (L0 has no ram or Mach effect).</summary>
+        public float ThrustLapseExponent;
+
+        public void Validate()
+        {
+            if (EngineCount < 1) throw new ArgumentOutOfRangeException(nameof(EngineCount), EngineCount, "at least one engine");
+            AirframeProfile.NonNegative(MilitaryThrustPerEngineN, nameof(MilitaryThrustPerEngineN));
+            AirframeProfile.NonNegative(MaxThrustPerEngineN, nameof(MaxThrustPerEngineN));
+            if (MaxThrustPerEngineN < MilitaryThrustPerEngineN)
+                throw new ArgumentOutOfRangeException(nameof(MaxThrustPerEngineN), MaxThrustPerEngineN, "afterburner thrust below military thrust");
+            if (!(IdleThrustFraction >= 0f && IdleThrustFraction <= 1f))
+                throw new ArgumentOutOfRangeException(nameof(IdleThrustFraction), IdleThrustFraction, "must be 0 … 1");
+            AirframeProfile.NonNegative(ThrustLapseExponent, nameof(ThrustLapseExponent));
+        }
+    }
+
+    /// <summary>The flight-control law's limits and response, SI.</summary>
+    public struct ControlsProfile
+    {
+        /// <summary>Positive load-factor limit, g (full aft stick).</summary>
+        public float LoadFactorMax;
+        /// <summary>Negative load-factor limit, g, as a negative number (full forward stick).</summary>
+        public float LoadFactorMin;
+        /// <summary>Roll rate at full stick, radians per second.</summary>
+        public float RollRateMaxRadS;
+        /// <summary>First-order time constant of the load-factor response, seconds.</summary>
+        public float LoadFactorTimeConstantS;
+        /// <summary>First-order time constant of the roll-rate response, seconds.</summary>
+        public float RollTimeConstantS;
+
+        public void Validate()
+        {
+            if (!(LoadFactorMax > 1f)) throw new ArgumentOutOfRangeException(nameof(LoadFactorMax), LoadFactorMax, "must exceed 1 g");
+            if (!(LoadFactorMin < 1f)) throw new ArgumentOutOfRangeException(nameof(LoadFactorMin), LoadFactorMin, "must be below 1 g");
+            AirframeProfile.Positive(RollRateMaxRadS, nameof(RollRateMaxRadS));
+            AirframeProfile.Positive(LoadFactorTimeConstantS, nameof(LoadFactorTimeConstantS));
+            AirframeProfile.Positive(RollTimeConstantS, nameof(RollTimeConstantS));
+        }
+    }
+
+    /// <summary>One aircraft type's baked profile (C7): every part's numbers.</summary>
+    public struct AircraftProfile
+    {
+        public string Name;
+        public AirframeProfile Airframe;
+        public PowerplantProfile Powerplant;
+        public ControlsProfile Controls;
+
+        public void Validate()
+        {
+            Airframe.Validate();
+            Powerplant.Validate();
+            Controls.Validate();
+        }
+    }
+}

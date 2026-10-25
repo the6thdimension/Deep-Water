@@ -2,7 +2,7 @@
 
 > **This document's one job:** let someone pick General Quarters up cold. What it is, what is proven, the lessons that cost hours, how to run it, and what comes next.
 > Why each piece exists is in `BLUEPRINT.md`; the work order is in `ROADMAP.md`.
-> **Last verified:** 2026-10-24, Unity 6000.4.11f1, HDRP 17.4. At the end of Phase 1: 72/72 General Quarters tests and 49/49 Sea State tests. After Stream B slice B1 (guns L1): 85/85 and 49/49. After Stream C slice C1 (Damage Control L1, flooding): 100/100 and 49/49.
+> **Last verified:** 2026-10-25, Unity 6000.4.11f1, HDRP 17.4. At the end of Phase 1: 72/72 General Quarters tests and 49/49 Sea State tests. After Stream B slice B1 (guns L1): 85/85 and 49/49. After Stream C slice C1 (Damage Control L1, flooding): 100/100 and 49/49.
 
 ## 1. What this is
 

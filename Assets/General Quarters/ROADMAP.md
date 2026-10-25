@@ -245,7 +245,7 @@ SIX's picks (2026-10-24): G34–G41. Guns L1 first.
 SIX's picks (2026-10-24): G53–G60. Damage Control L1 first.
 - [ ] Engine Room L1: the plant (4 × LM2500, CPP, fuel).
 - [ ] Helm L1: GPS/INS drift and fixes.
-- [x] **Damage Control L1** (slice C1, done 2026-10-24: 149/149 tests, 100 GQ and 49 Sea State): compartments and flooding (list, trim, sinking).
+- [x] **Damage Control L1** (slice C1, built 2026-10-24, PhysX gate closed 2026-10-25, 84fb04b: 149/149 tests, 100 GQ and 49 Sea State): compartments and flooding (list, trim, sinking).
   - **Gate, set before the first measurement:**
     - A flooded compartment gives the predicted list within 5 % (or 0.2°), trim within 15 % (or 3 cm), sinkage within 15 % (or 2 cm) and GM within 5 %, in EditMode and in play mode with PhysX.
     - Progressive flooding past the margin sinks her, and repeats exactly.
@@ -345,7 +345,7 @@ SIX's picks (2026-10-24): G53–G60. Damage Control L1 first.
 - **2026-10-24** — Slice 6 done: presentation, with the decisions in BLUEPRINT G30–G33. The Phase 1 gate's presentation half is met in play mode (sound seen playing, not yet heard). Q2 answered: Sea State gained `DepositFoam`.
 - **2026-10-24** — Slice B2 replanned after SIX reversed G42, G46 and G48 to Claude's leanings. B2a shrinks to one SM-2 Block IIIA profile at L2, B2b loses the vertical boost, B2c loses the IR backup, and the load is 64 IIIA and 32 ESSM. Safe limits recorded as BLUEPRINT standing constraint 8.
 
-- **2026-10-24** — Stream C slice C1 done: Damage Control L1, compartments and flooding (G53–G60). 36 spaces cut from the buoyancy columns, orifice flooding with pressed-up spaces, the water on the Rigidbody, holes from Breach Orders and hits, loss counted from reserve buoyancy, the damage-control board and timeline. The wing's list matches the closed form to 0.02° in EditMode and in PhysX. Seven stations sink her deterministically. 149/149.
+- **2026-10-25** — Stream C slice C1 done (84fb04b): Damage Control L1, compartments and flooding (G53–G60). 36 spaces cut from the buoyancy columns, orifice flooding with pressed-up spaces, the water on the Rigidbody, holes from Breach Orders and hits, loss counted from reserve buoyancy, the damage-control board and timeline. The wing's list matches the closed form to 0.02° in EditMode and in PhysX. Seven stations sink her deterministically. 149/149.
 
 ## Skip / fail log
 - **2026-10-24 (Stream C, slice C1): two predictions failed their gate, and both were the prediction's fault** (METHODOLOGY AP22). The wing's trim (13.6 against 11.0 cm) needed the damaged waterplane's product of inertia. The half-full hold's GM (1.83 against 1.69 m) needed BM at the sunk draft, because the DDG flares. Both are fixed in `flood_predict.py`, with the tolerances kept.

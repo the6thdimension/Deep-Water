@@ -14,7 +14,7 @@
 - **Git (SIX, 2026-10-24):** Claude manages git without asking. Verified work is committed, pushed and brought up to `main`, and every branch is kept level; `Guided-Fury` takes it through a PR.
 - **Never pushed:** the archive branch, DAVFX and the MCP unlock script. There are no force pushes.
 
-**Status (2026-10-25): slices 0 and 1a–1d done.** The F/A-18E flies at L0 in `Examples/Scenes/AirWing_FlightTest.unity` (see `README.md`). Next: slice 1e (Dogfight rebuilt, the Phase 1 gate). SIX said to keep going (2026-10-25).
+**Status (2026-10-25): Phase 1 done (slices 0 and 1a–1e), except one item.** The F/A-18E flies at L0 in the rebuilt Dogfight and in the flight-test scene (see `README.md`). The budget is met in a player build. Not done: a live run of Dogfight from the stick and the mouse. SIX said to stop after slice 1e: Phase 2 waits for SIX, and so do BLUEPRINT Q5 (an instructor floor) and Q6 (a reset after a crash).
 
 ---
 
@@ -159,7 +159,7 @@ The gate: the F/A-18E flies in the rebuilt Dogfight at L0, from each device clas
 ### Slice 1d — The jet in Unity: adapter, art, camera, HUD, and a flight-test scene (done 2026-10-25, d05ae0d: 49/49 tests; flown in play mode with a virtual Xbox pad)
 - [x] `Modules/Aircraft/AirWingRunner` (execution order −50): builds every `AircraftView`'s aircraft from the profile and the sheet, logs each part's level and any fallback, seats it (player or hold), and steps the `FlightCore` once per FixedUpdate.
 - [x] `Modules/Aircraft/AircraftView`: the pose is interpolated between the last two ticks (Pat5; measured in play, the drawn jet trails the core by 0.5 to 4 m at about 210 m/s, one tick). Moving parts follow the last Pilot Inputs (presentation only). No Rigidbody, no vendor script (AP8).
-- [x] `Modules/World/SceneSurface` + `RunwayStrip`: the truth feed's ground is the Sea State simulation's height (`ISeaSurface`, never HDRP water, AP11) or a runway's top; with no sea, a flat fallback that says so. The runner refuses a director that is not ready.
+- [x] `Modules/World/SceneSurface` + `RunwayStrip` (renamed `FlatGround` in slice 1e, in its own file): the truth feed's ground is the Sea State simulation's height (`ISeaSurface`, never HDRP water, AP11) or a runway's top; with no sea, a flat fallback that says so. The runner refuses a director that is not ready.
 - [x] The Air Wing jet (W30): **Deep Water → Air Wing → Build F-A-18E Prefab** writes `Prefabs/FA18E_AirWing.prefab`, an `AircraftView` over an instance of the F-18E model (503 renderers); the model and the FDS prefab are only read.
   - `FA18E_Visuals.asset` (`AircraftVisualsSO`) maps 8 surfaces (ailerons, stabilators, rudders, flaps), copied from the FDS prefab's AerialArcade settings. The stabilators run on −stick pitch, because AerialArcade's pitch was positive pushing. Rudder travel AUTHORED at 30°.
 - [x] `Modules/Cockpit/ChaseCamera` (W11): behind and above the jet, eased; looks along the mouse aim while the instructor flies.
@@ -181,21 +181,45 @@ The gate: the F/A-18E flies in the rebuilt Dogfight at L0, from each device clas
   - the stabilator deflection sign by eye.
 - *Known:* the gear shows down in flight (the model's rest pose; animated with Landing Gear L1).
 
-### Slice 1e — Dogfight rebuilt (W12, W13, W14) and the phase gate
-- [ ] Back up first: copy `Assets/_SCENES/Dogfight.unity` to `Assets/_Archive/Dogfight_legacy/` (P8); git keeps history.
-- [ ] Builder, Deep Water → Air Wing → Build Dogfight: overwrites `Dogfight.unity` in place, so its GUID survives (C24). It builds:
-  - the Sea State sea, replacing the HDRP water;
-  - a land runway at the sea's edge;
-  - speed and altitude gates;
-  - the DDG as a still landmark;
-  - the Air Wing F/A-18E starting airborne (a runway start waits for L1, W29);
-  - the input root and the HUD.
-- [ ] Out of the scene: the `F-18 (1) Variant` (`FighterJetController`), the two switched-off FDS F-18Es, and the `RH_RadarModule` instance (Radar Suite doesn't use it here; the script stays for Rocket and SENTINAL).
-- [ ] Archive `Assets/_SCENES/Rocket/FighterJetController.cs` and `Assets/_AIRCRAFT/F-18 (1) Variant.prefab` with checklist rows (W19), once the GUID scan shows nothing else references them.
-- [ ] Play-mode check in the Editor, with each device class: fly the gates; the numbers agree with the tests; crashing into the sea registers. Labelled verified only once done in the Editor.
-- [ ] Budget (W21): `unity-perf-ab`, one aircraft at L0 and twenty, in a player build. Target ≤ 0.01 ms per aircraft per fixed step. Record the A/B numbers in this file.
-- [ ] METHODOLOGY: append what the phase taught, with provenance, to Candidates or Principles.
-- [ ] *Done when:* all Air Wing tests pass; the replay test is bit-identical; Dogfight flies from all three device classes in the Editor; the budget is measured (met or reported as missed); the slice 0 and 1e archives carry their checklists.
+### Slice 1e — Dogfight rebuilt (W12, W13, W14) and the phase gate (done 2026-10-25: 59/59 tests; budget met in a player build, 2.7 µs per aircraft per step)
+- [x] Back up first: `Assets/_SCENES/Dogfight.unity` copied to `Assets/_Archive/Dogfight_legacy/Dogfight.unity` (P8, a new GUID for the copy). The builder refuses to run while no copy exists.
+- [x] Builder, **Deep Water → Air Wing → Build Dogfight** (`Editor/DogfightBuilder.cs`), overwrites `Dogfight.unity` in place: GUID `6981d1a2…` kept (C24, tested). It builds:
+  - the Sea State sea, sky and sun, replacing the HDRP water;
+  - land at the sea's edge (8 × 4 km, top at 8 m) with **runway 09/27** (2,438 × 61 m) along the coast. Both are truth-feed ground through `FlatGround`; meeting them is a crash at L0;
+  - **four gates** flown in order, from `Examples/Dogfight/Dogfight_Gates.asset` (`GateCourseSO`, all AUTHORED): 5,000 ft at 350–450 kt; 1,000 ft over the DDG; a climb to 6,000 ft at ≥ 300 kt; a 500 ft pass along the runway at 250–350 kt. The next ring is orange, the HUD names it with its bands and marks it `[ n ]`, and it reports what the jet held through the last one. Each gate flown is logged;
+  - the DDG-51 model (`General Quarters/Prefabs/Models/DDG51_GQ.fbx`) as a still landmark under gate 2: 16 renderers, no colliders, no scripts;
+  - the Air Wing F/A-18E airborne at 5,000 ft and 400 kt heading 000, 2.5 km off the coast (a runway start waits for L1, W29); the player seat, the chase camera and the HUD (the rig shared with the flight-test scene, `AirWingBuilders.BuildRig`).
+- [x] `Core/Gates/GateCourse.cs` (pure, in the banned-API scan): `Gate` (an upright ring flown one way), `Band` (any, at least, a range), `GatePass`. The path's crossing of the gate's plane is solved inside the tick, and the speed and altitude are taken there. The course only reads state, so it cannot change the flight or its Fix. `Modules/World/GateCourseView` draws the rings and feeds the course after the runner steps (order −40).
+- [x] **Found and fixed:** slice 1d's `RunwayStrip` was a MonoBehaviour declared inside `SceneSurface.cs`, so a scene would have saved it as a missing script. It moved to its own file as `FlatGround`, which also serves land (METHODOLOGY C32).
+- [x] Out of the scene: the `F-18 (1) Variant` (`FighterJetController`), the two switched-off FDS F-18Es, the `RH_RadarModule`, the AerialArcade waypoints, `Cat 1` and the old engine audio. `DogfightSceneTests` reads the saved scene: only Air Wing, Sea State and Unity scripts, none missing, one runner, one seat, one course, one sea, two pieces of ground, one Air Wing jet.
+- [x] Archived (W19) to `Assets/_Archive/Dogfight_legacy/` with the C25 checklist (`README.md` there), GUIDs kept: `FighterJetController.cs` and `WaypointManager.cs` (from `_SCENES/Rocket/`; the second needs the first to compile), `WaypointManager (1).prefab` (unused), `F-18 (1) Variant.prefab`. GUID scan: nothing else references them.
+- [~] Play-mode check per device class. **What is proven:**
+  - in EditMode, every device class through its bindings (`DeviceBindingTests`, slice 1c);
+  - Dogfight's start, course asset and gate logic through the flight core (`GateCourseTests.TheDogfightStart_FliesThroughGate1`: gate 1 at 22.0 s, 479 kt, 5,000 ft, 0.0 m off centre);
+  - SIX flew Dogfight in the Editor with a gamepad. Seen read-only: the seat owner was `Gamepad` at tick 372; no Air Wing errors in the log; no gate flown before SIX stopped.
+
+  **Not run:** Claude's own play run in Dogfight with virtual keyboard, pad and mouse. The Editor was in use: General Quarters' range was open in it, apparently in play, and Claude's Stop at about 13:58 may have ended that run. After that, Claude left the Editor alone. Crashing into the sea registering is proven in EditMode (`FlightL0Tests.MeetingTheSurfaceWithNoGear_IsACrash_AndTheWreckStaysPut`), not yet seen in Dogfight.
+- [x] **Finding, open for SIX (BLUEPRINT Q5, METHODOLOGY AP25):** the mouse instructor can fly the jet into the sea.
+  - Aimed at each next gate, it dives at gate 2. It comes through sinking 93 m/s at 641 kt, pushes −2.7 G while rolling toward gate 3 behind it, and meets the sea 2.8 s later.
+  - Lined up 3 km out, it flies gates 1–3, then meets the land short of gate 4.
+  - With the dive limited to 8°, it still banks past 90° toward any aim below the horizon.
+  - A heading-and-altitude-hold test pilot does not crash, but at 500 kt and 60° of bank it turns too wide to line up on gate 2. Flying the whole course is left to SIX and to the AI pilot (Phase 3).
+- [x] **Budget (W21), unity-perf-ab.** The instrument is `Modules/Diagnostics/FlightBenchmark`: the flight core alone, N aircraft straight and level on hold seats, 500 warm-up ticks discarded, 5,000 ticks timed, the median of 3. It leaves out the sea sample, the views and the HUD.
+
+  | Where | 1 aircraft | 20 aircraft | Budget |
+  |---|---|---|---|
+  | **Player** (Windows, Mono, release; i9-12900H; two runs) | **2.69, 2.70 µs** per step | **2.76, 2.73 µs** per aircraft per step (55.3, 54.6 µs per step) | ≤ 10 µs: **met** (×3.6) |
+  | Editor (Debug code optimisation; two runs) | 8.24, 8.83 µs | 8.35, 8.72 µs per aircraft | not the budget's instrument |
+
+  - The player is `Builds/AirWingBenchmark/` (git-ignored): **Deep Water → Air Wing → Build Benchmark Player**, then `AirWingBenchmark.exe -batchmode -nographics -airwingBenchOut <file>`. The first player build of the project took 16.5 min (HDRP shaders): 356 MB, 0 errors, 140 warnings.
+  - Allocation is **not measured**: `GC.GetAllocatedBytesForCurrentThread` returns 0 in Unity's Mono, even for a 100 kB array, so the harness prints no figure rather than a false zero.
+- [x] METHODOLOGY: AP25 (pure pursuit near the ground, as a pilot or an instructor) and C32 (one MonoBehaviour per file, and a scene test that fails on a missing script); C25 exercised again.
+- [~] *Done when:*
+  - all Air Wing tests pass: **met**, 59/59;
+  - the replay test is bit-identical: **met**, `SeatTests.ReplayingTheInputLog_ReproducesTheFixBitForBit`;
+  - Dogfight flies from all three device classes in the Editor: **partly met**. Bindings are proven in EditMode; SIX flew it with a gamepad; Claude's live run was not done, and the stick and the mouse have not been flown live in Dogfight;
+  - the budget is measured: **met**;
+  - the slice 0 and 1e archives carry their checklists: **met**.
 - *Anti-goals for Phase 1:* no landing gear or ground handling; no 6-DOF; no AI pilot; no carrier; no weapons; no cockpit view; no helicopter; no change to the project's fixed timestep; no edits to vendor code or to the original F-18E model and prefab.
 
 ---
@@ -225,3 +249,4 @@ Revisit when Phase 3 is done. The questions for SIX are in BLUEPRINT §7.
 - **2026-10-25** — Slice 1b done (8b34492): the L0 flight core and the F/A-18E profile; ceiling CALIBRATED (50,001 ft), top speed VALIDATION residual recorded; 33/33 tests.
 - **2026-10-25** — Slice 1c done (75f836e): seats, arbitration, the mouse instructor, replay and the device reader; 45/45 tests.
 - **2026-10-25** — Slice 1d done (d05ae0d): the jet in Unity, the chase camera, the HUD and, at SIX's request, the flight-test scene; 49/49 tests; flown in play with a virtual Xbox pad.
+- **2026-10-25** — Slice 1e done: Dogfight rebuilt in place by its builder, with land, runway 09/27, four gates and the DDG landmark; the old scene and the dead jet archived; the budget met in a player build (2.7 µs per aircraft per step, ×3.6 under); 59/59 tests. Found: the mouse instructor flies into the sea when aimed low (BLUEPRINT Q5), and `RunwayStrip` would have saved as a missing script (fixed as `FlatGround`). Not done: a live Dogfight run from the stick and the mouse. Stopped at SIX's word.

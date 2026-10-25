@@ -1,6 +1,6 @@
 # Air Wing — blueprint
 
-> **Status: LOCKED BLUEPRINT (W1–W31); slice 0 done, slice 1a under way (2026-10-25).** SIX answered all 24 questions on 2026-10-24 (W1–W24) and locked W25–W31 on 2026-10-25. Progress is in `ROADMAP.md`.
+> **Status: LOCKED BLUEPRINT (W1–W31); Phase 1 done (slices 0 and 1a–1e) except a live Dogfight run from the stick and the mouse; stopped at SIX's word before Phase 2 (2026-10-25).** SIX answered all 24 questions on 2026-10-24 (W1–W24) and locked W25–W31 on 2026-10-25. Progress is in `ROADMAP.md`.
 > **This document's one job:** say what Air Wing is and why, record every decision behind it, and define the contract each part of an aircraft follows. Work order and progress live in `ROADMAP.md`, not here. The stock-take that preceded it is summarised in §1.
 
 ## 1. In plain language
@@ -216,9 +216,12 @@ All entries W1–W24 are SIX's picks of 2026-10-24, in round order. "Leaning" is
 | ~~Q2~~ | ~~`RH Aviator`'s asmdef is `RH.Aviator` (namespace `RH.`), while new modules use `DeepWater.*`. Rename it to `DeepWater.Aviator` when the AI stream starts (Consistent, Lamport)?~~ **Answered 2026-10-25 by SIX: `DeepWater.Aviator`.** Done in slice 0 (the asmdef's name and root namespace; it has no scripts yet) | — |
 | ~~Q3~~ | ~~When the blueprint should reach `main`: now (docs only), or with slice 1?~~ **Answered 2026-10-25 by SIX: now.** Brought up to `main` with slice 0 | — |
 | ~~Q4~~ | **Answered 2026-10-25 by SIX: fix all eight**, the AerialArcade file included, plus a local-only guard on `UnityMcpUnlock.cs` that is never committed. Done (ROADMAP slice 0, last item): player scripts compile with 0 errors. *The question was:* ~~Eight files outside Air Wing still stop a player build, so W21's player-build measurement (slice 1e) can't run yet: `AerialArcade/.../F18ControllerEditor.cs` (vendor), `RH Utilities/` ×3, `RH Testing Suite/Core/TestRunner.cs`, `Scripts/Destroyer Scripts/DestroyerEditor.cs`, `_Archive/Carrier_legacy/.../CarrierEditor.cs`, and the local-only `UnityMcpUnlock.cs`. May they be fixed, and how? (Each moves into an `Editor/` folder or gains `#if UNITY_EDITOR`; the vendor file and the unlock file need your word.)~~ | — |
+| Q5 | **The mouse instructor can fly the jet into the sea.** Its lift-on-aim law banks past 90° toward any aim below the horizon and pushes negative G toward an aim behind; it has no sense of height. Measured in slice 1e: aimed at Dogfight's low gates, it meets the sea or the land every time (METHODOLOGY AP25). Add a floor to the instructor: a bank limit while the aim is below the horizon, and a pull-up when the time to impact drops under a few seconds, with the values in `PlayerSeatSettings.asset`? Stick, pad and keys are untouched: they fly the jet as commanded. | S: one item in slice 1e or Phase 2, with tests |
+| Q6 | **A crash ends the flight until you stop and press Play again.** Add a reset (keyboard R, Xbox View) that puts the jet back at the scene's start? It would go into the input log as an event, so replays stay bit-identical. | S |
 
 ## Change log
 - **2026-10-24** — Stock-take (read-only), then the blueprint locked from the 24-question interview (W1–W24, SIX). Three picks differ from Claude's leaning: W10, W12 and W16. W25–W31 Proposed by Claude. Nothing built.
 - **2026-10-25** — Q2 and Q3 answered by SIX. Slice 0 done (ROADMAP). Q4 added: player-build blockers outside Air Wing.
 - **2026-10-25** — Q4 answered by SIX (fix all eight); done, and player scripts compile with 0 errors.
 - **2026-10-25** — Q1 answered by SIX: W25–W31 locked as written. Slice 1a started.
+- **2026-10-25** — Slices 1b–1d done (ROADMAP). Slice 1e: Q5 (the mouse instructor has no floor) and Q6 (a reset after a crash) added.

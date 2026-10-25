@@ -246,6 +246,17 @@ These are the fixed points around which the methodology orbits. Every principle 
 
     Reference: Air Wing ROADMAP slice 0, last item.
 
+- **AP25. Pure pursuit near the ground, as a pilot or as an instructor.** A steering law that rolls the lift onto an aim point and pulls (MouseFlight's idea, Air Wing's mouse instructor), aimed at targets low and to the side, or used as the "pilot" in a test that flies a course.
+  - *Where seen:* Air Wing slice 1e, 2026-10-25. A test aimed the instructor at each next Dogfight gate in turn. It dived straight at gate 2 (1,000 ft) and came through it sinking 93 m/s at 641 kt. Gate 3 lay behind and above, so it pushed −2.7 G while rolling toward it, then pulled 7.5 G at 78° of bank, and met the sea 2.8 s after the gate. Three variants failed the same way:
+    - lined up on a point 2 km before each gate: it met the sea short of gate 2;
+    - lined up 3 km out: it flew gates 1–3, then met the land short of gate 4;
+    - the dive limited to 8°: it still met the sea, because toward any aim below the horizon the law banks past 90° and the "turn" becomes a descending slice.
+  - *Why it fails:* The law knows the angle to the aim and nothing else. It has no idea of height, sink rate or the time a pull-out takes, and putting the lift on a point below the horizon means rolling past 90°. Far from the ground a human moving the mouse makes up for it. Near the ground, or with no human, nothing does.
+  - *Do instead:*
+    - A test that must fly a route uses holds (heading, altitude, a bank limit) or the AI pilot, never a pursuit law.
+    - An instructor that can be pointed at the ground needs a floor of its own: a bank limit when the aim is below the horizon, and ground avoidance. Open for SIX (Air Wing BLUEPRINT Q5).
+    - Until then, the test claims only what pursuit can show: from the Dogfight start it flies gate 1 (`GateCourseTests.TheDogfightStart_FliesThroughGate1`).
+
 ## Candidates (under evaluation)
 
 *Ideas that might become Principles. Not yet load-bearing. Promote when grounded in a real case.*
@@ -306,11 +317,15 @@ These are the fixed points around which the methodology orbits. Every principle 
   - *Exercised:* General Quarters Damage Control L1 (`Core/DamageControl/FloodPlan.cs`, `FloodModel.cs`). `DamageControlL1Tests.SpaceOpenToTheSea_HoldsExactlyTheBuoyancyItsColumnsLose`: 1.2718 MN against 1.2718 MN, centroids equal to 0.1 mm.
 - **C31. Free surface from a level that stays horizontal, not from a formula.** Keep each partly flooded space's water as a volume, solve its level as a plane horizontal in the world at the ship's present pose, and move its centroid there. The free-surface loss of stability then comes out of the moments, with no ρ·i/Δ term to keep in step with the geometry.
   - *Exercised:* `DamageControlL1Tests.PartFilledHold_FreeSurfaceComesFromTheLevel`. A half-full machinery hold loses 12.6 cm of GM from the moving centroid, against the closed form's 12.6 cm.
+- **C32. One MonoBehaviour per file, named after it, and a scene test that fails on a missing script.** Unity links a scene's component to its script asset, and the script asset to the class named like the file. A `MonoBehaviour` declared in a file of another name has no script asset of its own, so a scene saved with it comes back with a missing script.
+  - *Exercised:* Air Wing slice 1e. `RunwayStrip` had shipped in slice 1d inside `SceneSurface.cs`, before any scene used it. It moved to its own file as `FlatGround`, a better name for ground that serves land as well as runways. `DogfightSceneTests` reads the saved scene's `m_Script` GUIDs and fails on any that resolves to nothing, so a missing script now shows as a red test, not a grey component.
+  - *Not reproduced here:* the failure is Unity's documented rule (the class name must match the file name), caught before it bit.
 - ~~**C5.** Replaced legacy code goes to `Assets/_Archive/`.~~ Promoted to **P8** on 2026-10-24.
 - **C25. Archive legacy code behind a supersession checklist, not a feeling.** List every feature of the legacy code and mark each one *carried*, *superseded* (name the replacement and its level) or *dropped deliberately* (say why). A feature with no row is a regression nobody chose.
   - *Exercised:* General Quarters slice 7 (`Assets/General Quarters/ROADMAP.md`).
     - It found that "SPG62FireControlRadar" was a search radar rather than an illuminator, so the real illuminator is a ladder item (Illuminators L1), not a carried feature.
     - It dropped `VLSManager`'s random wind on purpose, because it breaks determinism.
+  - *Exercised again:* Air Wing slices 0 and 1e (`Assets/_Archive/FighterJet Scripts_legacy/`, `Aircraft_Handlers_legacy/`, `Dogfight_legacy/`). The 1e checklist found that `WaypointManager.cs` needed the dead `FighterJetController` to compile, so the two were archived together.
 
 ---
 
@@ -383,3 +398,4 @@ These are the fixed points around which the methodology orbits. Every principle 
 - **2026-10-24** — Added AP21 (a table lookup that says "no answer" when its bracket falls off the table): the Mk 45 jitter SIX reported after guns L1.
 - **2026-10-24** — General Quarters Stream C slice C1 (Damage Control L1, flooding). Added AP22 (a closed-form gate that leaves out a term the new case switches on), AP23 (a body declared lost, left running in the physics engine: the first PhysX sinking run crashed the Editor), C30 (flood in the columns you float on), C31 (free surface from a level that stays horizontal).
 - **2026-10-25** — Air Wing slice 0 (clean-up). Added AP24 (editor API compiled into the player): nine files across seven areas broke the player-script compile, one hidden behind the compiler's declaration-first error list.
+- **2026-10-25** — Air Wing slice 1e (Dogfight rebuilt). Added AP25 (pure pursuit near the ground, as a pilot or an instructor) and C32 (one MonoBehaviour per file, and a scene test that fails on a missing script). C25 exercised again.

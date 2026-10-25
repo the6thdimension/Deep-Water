@@ -56,7 +56,7 @@ namespace DeepWater.AirWing.Modules.Aircraft
                 Debug.LogError($"[Air Wing] The Sea State director on {sea.name} is not ready (no library?); using the flat fallback.", this);
                 seaSurface = null;
             }
-            var surface = new SceneSurface(seaSurface, FindObjectsByType<RunwayStrip>(FindObjectsInactive.Exclude), fallbackSurfaceHeightM);
+            var surface = new SceneSurface(seaSurface, FindObjectsByType<FlatGround>(FindObjectsInactive.Exclude), fallbackSurfaceHeightM);
             _core = new FlightCore(new SubstepClock(Time.fixedDeltaTime, sheet.SubstepsPerTick), surface);
 
             _views.AddRange(FindObjectsByType<AircraftView>(FindObjectsInactive.Exclude).OrderBy(v => v.AircraftId));

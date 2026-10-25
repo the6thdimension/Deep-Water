@@ -14,7 +14,7 @@
 - **Git (SIX, 2026-10-24):** Claude manages git without asking. Verified work is committed, pushed and brought up to `main`, and every branch is kept level; `Guided-Fury` takes it through a PR.
 - **Never pushed:** the archive branch, DAVFX and the MCP unlock script. There are no force pushes.
 
-**Status (2026-10-25): slice 0 done; no flight code yet.** The blueprint is locked and on `main`. Slice 1 starts on SIX's go, once no other session is driving the Unity Editor.
+**Status (2026-10-25): slice 0 and slice 1a done; no flight model yet.** The blueprint is locked (W1–W31) and on `main`. Slice 1b (the L0 flight core) starts on SIX's go, once no other session is driving the Unity Editor.
 
 ---
 
@@ -66,16 +66,26 @@ The gate: nothing anyone uses changes, a player build compiles, and the legacy a
 
 The gate: the F/A-18E flies in the rebuilt Dogfight at L0, from each device class. The numbers on the HUD are right by test, a replay from the input log reproduces the Fix bit for bit, and one aircraft costs ≤ 0.01 ms per fixed step in a player build.
 
-### Slice 1a — Module skeleton and contracts
-- [ ] Folders per P3 (`Core`, `Modules`, `ScriptableObjects`, `Prefabs`, `Examples`, `Tests`) and asmdefs (`DeepWater.AirWing`, `DeepWater.AirWing.Tests.Editor`). No reference to `DeepWater.GeneralQuarters` (W31).
-- [ ] `PilotInputs` (stick pitch and roll, pedals, throttle with the afterburner detent, switches) and `ISeat`, with the issuer and tick.
-- [ ] `InputLog`: append-only, one entry per seat per tick.
-- [ ] `AirframeState` (C4): position, velocity, attitude, body rates, engine state. SI units (W22).
-- [ ] Fidelity-ladder contract (C14): a level per part, factories, and fallback out loud. `FidelitySheetSO` (W25).
-- [ ] Fixed substep clock: N substeps per 50 Hz tick, N from the fidelity sheet (W24).
-- [ ] `FlightFix`: a per-tick FNV-1a fingerprint of every aircraft's state.
-- [ ] Seeded RNG (pattern copied from General Quarters, W31).
-- [ ] Tests: banned-API source scan of `Core/` (constraint 1); ladder fallback; substep clock; input log; Fix stable for identical states.
+### Slice 1a — Module skeleton and contracts (done 2026-10-25, 44d5bfd: 19/19 tests; player scripts compile)
+- [x] Asmdefs `DeepWater.AirWing` (no references at all, so none to `DeepWater.GeneralQuarters`; a test reads the asmdef to keep it that way, W31) and `DeepWater.AirWing.Tests.Editor`. Folders `Core/`, `ScriptableObjects/`, `Tests/`. **`Modules/`, `Prefabs/` and `Examples/` come with their first content** (slices 1d, 1e). Git keeps no empty folders, so an empty folder's `.meta` would arrive without its folder.
+- [x] `Core/Inputs/PilotInputs.cs`: stick pitch and roll, pedals, throttle 0 … 1 with an afterburner flag, `PilotSwitches` flags. `Clamped()` clamps device overshoot and throws on NaN or infinity (a seat bug, not an input). `Core/Inputs/Seat.cs`: `ISeat.Issue(tick, aircraftId, in state)` and `SeatKind` (Player, Ai, Hold, Scenario, Replay).
+- [x] `Core/Inputs/InputLog.cs`: append-only, ticks in order, at most one entry per aircraft per tick (anything else throws); each entry records the seat; `TryGet(tick, aircraft)`.
+- [x] `Core/State/AirframeState.cs` (C4): position, velocity, attitude, body rates, load factor, mass, fuel, engine spool, status, in-contact. SI units, Unity's axes.
+- [x] `Core/Fidelity/FidelityLadder.cs`: `PartLadder<TProfile, TPart>`, one builder per built level. A request resolves to the highest built level at or below it and says so; a ladder with nothing at or below the request throws. `FidelitySheet` (baked) and `ScriptableObjects/FidelitySheetSO.cs` (W25).
+- [x] `Core/Simulation/SubstepClock.cs` (W24): N fixed substeps (1 … 16) per tick, time from the tick count (never accumulated).
+- [x] `Core/Simulation/FlightFix.cs`: FNV-1a over exact bits, aircraft in ascending id order, a contact flag per tick (W7); `FixLog.FirstDivergence`.
+- [x] `Core/Simulation/DeterministicRng.cs`: SplitMix64 with counted draws (pattern copied from General Quarters, W31).
+- [x] Tests (`Tests/Editor`, 19, all passing in the Editor):
+  - banned-API source scan of `Core/`;
+  - Air Wing never references General Quarters;
+  - SplitMix64 reference value and reproducibility;
+  - ladder fallback, no running above the request across a gap, nothing built throws, duplicates refused;
+  - the sheet bakes every level, the substeps and the seed, and refuses 0 substeps;
+  - substeps tile the tick, and time comes from the tick count. **Measured:** a float accumulator is 269 s off after 10⁶ ticks; the clock is exact;
+  - the input log's order and uniqueness, overshoot clamped, NaN refused;
+  - two seats issue through the same door;
+  - the Fix is stable for identical states and sees one ulp of altitude; contact flagged; id order enforced; `FirstDivergence` names the tick.
+- [x] Gate (AP24): player-script compile (StandaloneWindows64) has 0 errors, 92 assemblies, `DeepWater.AirWing` built; no warnings from Air Wing.
 
 ### Slice 1b — Airframe, Powerplant, Flight Controls and Atmosphere at L0, headless
 - [ ] `Atmosphere` L0: ISA standard atmosphere (density, temperature, speed of sound to at least 20 km). Tested against the published ISA table.
@@ -154,3 +164,4 @@ Revisit when Phase 3 is done. The questions for SIX are in BLUEPRINT §7.
 ## Change log
 - **2026-10-24** — Roadmap written with the blueprint (W1–W31). Nothing built.
 - **2026-10-25** — Slice 0 done (63650de). Found: live audio in the legacy folder (moved to `_AIRCRAFT/Audio/`) and eight player-build blockers outside Air Wing (BLUEPRINT Q4).
+- **2026-10-25** — W25–W31 locked by SIX. Slice 1a done (44d5bfd): the core contracts, 19/19 tests.

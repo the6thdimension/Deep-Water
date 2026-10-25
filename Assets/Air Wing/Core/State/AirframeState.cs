@@ -23,10 +23,16 @@ namespace DeepWater.AirWing.Core.State
         public Vector3 Velocity;
         /// <summary>Body to world rotation; the body's +Z is the nose, +Y the canopy.</summary>
         public Quaternion Attitude;
-        /// <summary>Angular velocity in body axes, radians per second (x pitch, y yaw, z roll).</summary>
+        /// <summary>
+        /// Angular velocity in body axes, radians per second (x pitch, y yaw, z roll), in Unity's sense: positive about
+        /// +X pitches the nose down, about +Y yaws right, about +Z rolls the right wing up. At L0, a point mass with no
+        /// sideslip, these are the flight path's (wind-axis) rates; the body is drawn the angle of attack above it.
+        /// </summary>
         public Vector3 BodyRates;
-        /// <summary>Load factor along the body's +Y axis, in g (1 in level flight).</summary>
+        /// <summary>Load factor along the lift (the body's +Y at L0), in g: 1 in level flight.</summary>
         public float LoadFactor;
+        /// <summary>Angle of attack, radians: how far the nose sits above the flight path.</summary>
+        public float AngleOfAttack;
         /// <summary>Current mass, kilograms (changes with fuel at L3).</summary>
         public float MassKg;
         /// <summary>Fuel aboard, kilograms (burned from L3).</summary>

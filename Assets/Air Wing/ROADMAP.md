@@ -14,7 +14,7 @@
 - **Git (SIX, 2026-10-24):** Claude manages git without asking. Verified work is committed, pushed and brought up to `main`, and every branch is kept level; `Guided-Fury` takes it through a PR.
 - **Never pushed:** the archive branch, DAVFX and the MCP unlock script. There are no force pushes.
 
-**Status (2026-10-25): slice 0 and slice 1a done; no flight model yet.** The blueprint is locked (W1–W31) and on `main`. Slice 1b (the L0 flight core) starts on SIX's go, once no other session is driving the Unity Editor.
+**Status (2026-10-25): slices 0, 1a and 1b done.** The F/A-18E flies at L0, headless and tested. Next: slice 1c (seats and devices). SIX said to keep going (2026-10-25).
 
 ---
 
@@ -87,24 +87,42 @@ The gate: the F/A-18E flies in the rebuilt Dogfight at L0, from each device clas
   - the Fix is stable for identical states and sees one ulp of altitude; contact flagged; id order enforced; `FirstDivergence` names the tick.
 - [x] Gate (AP24): player-script compile (StandaloneWindows64) has 0 errors, 92 assemblies, `DeepWater.AirWing` built; no warnings from Air Wing.
 
-### Slice 1b — Airframe, Powerplant, Flight Controls and Atmosphere at L0, headless
-- [ ] `Atmosphere` L0: ISA standard atmosphere (density, temperature, speed of sound to at least 20 km). Tested against the published ISA table.
-- [ ] `Airframe` L0, a point-mass energy model (BLUEPRINT §4):
-  - thrust minus drag along the path; drag = parasite + induced;
-  - lift up to Cl_max and the G limit sets the achievable load factor;
-  - turn rate g·√(n²−1)/V; climb and zoom from energy;
-  - crashed when below the truth-fed surface height (sea from Sea State, runway from the scene).
-- [ ] `Powerplant` L0: throttle and afterburner to thrust, with a density lapse (shape AUTHORED).
-- [ ] `FlightControls` L0: commanded G and roll rate (W26), tracked by a first-order lag and clipped to the profile limits.
-- [ ] `AirframeProfileSO` for the F/A-18E, with each number's source in its provenance: weights, wing area, thrust (military and afterburner), G limits, maximum speed and ceiling from the Navy fact file and Boeing's published figures. Drag, Cl_max and lag time constants are CALIBRATED to one public figure each, or AUTHORED and flagged (C16). Sources go in `Calibration~/F18E-SOURCES.md`. An unsourced value stays empty (W8).
-- [ ] Tests:
-  - determinism: two seeded runs give identical Fix sequences;
-  - substep independence: 2, 4 and 8 substeps agree within a stated tolerance on a 60 s manoeuvre;
-  - straight and level: trim holds altitude and speed;
-  - sustained turn rate matches g·√(n²−1)/V at the trimmed speed;
-  - the G limit holds at full stick;
-  - a zoom climb with thrust and drag off conserves energy within tolerance;
-  - published figures each marked CALIBRATED or VALIDATION.
+### Slice 1b — Airframe, Powerplant, Flight Controls and Atmosphere at L0, headless (done 2026-10-25, 8b34492: 33/33 tests)
+- [x] `Core/Atmosphere`: the ISA (U.S. Standard Atmosphere 1976 to 32 km, clamped outside −610 m … 32 km), `AtmosphereL0`. Matches the standard's layer values (0, 11, 20 and 32 km).
+- [x] `Core/Airframe/AirframeL0`: a point mass in a wind frame that rolls about the velocity.
+  - Thrust minus drag (parasite + induced, plus flaps and speed brake) acts along the path.
+  - Lift is the demanded load factor, clipped to what Cl_max allows at this dynamic pressure; gravity acts down; semi-implicit Euler.
+  - The body is drawn α = C_L/C_Lα above the path. At L0, `BodyRates` are the path's wind-axis rates.
+  - No Mach effect, ground effect or sideslip; the pedals do nothing at L0.
+- [x] `Core/Powerplant/PowerplantL0`: idle to military power with the throttle, maximum afterburner with its switch, T = T_SL·σ^x; no spool, ram effect or fuel burn.
+- [x] `Core/FlightControls/FlightControlsL0` (W23, W26): the stick commands n (neutral 1 g, linear to +7.5 / −3.0) and a roll rate, each through an exact discrete first-order lag.
+- [x] `Core/Aircraft` and `AircraftFactory`: parts built through their ladders (L0 registered for all five; landing gear L0 is "none").
+  - Surface check after every substep: meeting the sea or a runway with no gear is a crash, frozen in place (AP23).
+  - `FlightCore`: the tick of BLUEPRINT §3.2 (seat → input log → substeps → Fix); `ISurfaceTruth` is the truth feed's ground.
+- [x] **Renamed:** the profile is `AircraftProfileSO` (it carries every part's numbers), not `AirframeProfileSO`.
+  - `ScriptableObjects/FA18E_AirWing.asset` stores public figures in their quoted units (lb, ft, lbf) and converts in `Bake()` (W22); every field has a provenance line.
+  - `FA18E_FidelitySheet.asset`: all parts at L0, 4 substeps, seed 1442.
+- [x] `Calibration~/F18E-SOURCES.md`: every number tagged PUBLIC, CALIBRATED, VALIDATION or AUTHORED.
+  - **Official public figures** (Navy fact file 2021, Boeing, GE datasheet): span, two engines, 22,000 lb static thrust per engine, maximum takeoff weight, Mach 1.8+, 50,000+ ft.
+  - **Conflicts kept, not hidden:** Boeing gives 17,000 lb per engine and Mach 1.6.
+  - **AUTHORED:** wing area, empty weight, internal fuel, dry thrust and the G limits have no official page; they are AUTHORED, with the secondary sources' spread.
+- [x] **Calibration (C16, C17):** one number. The thrust lapse exponent x = 1.2726, fitted in the mirror `Calibration~/l0_calibration.py` to the 50,000 ft service ceiling (empty + half fuel, maximum afterburner, climb speeds capped at Mach 0.9). The C# model reproduces it: **50,001 ft**.
+- [x] **Validation (not fitted):** maximum level speed is Mach 1.41 at 40,000 ft and Mach 1.54 at sea level, against Mach 1.8+ (Navy) / 1.6 (Boeing). The residual is L0's missing Mach effects, a **known gap until L2**: it is too slow at altitude and too fast at sea level. C# matches the mirror to 0.01.
+- [x] Tests (`AtmosphereL0Tests`, `FlightL0Tests`; 33/33 with slice 1a's):
+  - the ISA table;
+  - the factory builds L0 and says so when L2 is asked;
+  - two runs give the same Fix on all 3,000 ticks, two jets, both airborne;
+  - substeps 2 / 4 / 8 move a 13 km path by 11.6 m / 3.8 m (limits 1 % / 0.5 %, set before measuring), and the error shrinks with the substep;
+  - trim holds 5,000 m and 200 m/s within 5 m and 0.5 m/s for 60 s;
+  - a level turn at 60° bank turns at g√(n²−1)/V within 1 %, to the right;
+  - full aft stick holds 7.5 g when fast and n = qS·CLmax/W when slow;
+  - with thrust and drag off, a zoom climb keeps energy within 0.2 %;
+  - full right stick rolls right at 95 % of the limit in 1 s, and the jet turns right;
+  - a crash freezes on the surface;
+  - the ceiling (CALIBRATED) and top speed (VALIDATION) match the mirror;
+  - every profile field has a provenance line.
+- [x] **Found while testing, the scenario not the model:** the first 60 s test manoeuvre rolled past 90° (0.6 stick plus the roll lag's tail) and spiralled into the sea at 2.3 g. A trace confirmed the physics; the script now rolls to about 60°.
+- [x] Gate (AP24): player-script compile has 0 errors, 92 assemblies.
 
 ### Slice 1c — Seats and devices (W10, W15, W18, W27, W28)
 - [ ] Player seat: devices sampled once per tick, at the tick boundary, through `DeepWater.Input` (one reader, many adapters). Action maps for keyboard and mouse, the Xbox pad and the VelocityOne. Extends the existing `VelocityOne.inputactions` without breaking the MissileRange and carrier adapters.
@@ -165,3 +183,4 @@ Revisit when Phase 3 is done. The questions for SIX are in BLUEPRINT §7.
 - **2026-10-24** — Roadmap written with the blueprint (W1–W31). Nothing built.
 - **2026-10-25** — Slice 0 done (63650de). Found: live audio in the legacy folder (moved to `_AIRCRAFT/Audio/`) and eight player-build blockers outside Air Wing (BLUEPRINT Q4).
 - **2026-10-25** — W25–W31 locked by SIX. Slice 1a done (44d5bfd): the core contracts, 19/19 tests.
+- **2026-10-25** — Slice 1b done (8b34492): the L0 flight core and the F/A-18E profile; ceiling CALIBRATED (50,001 ft), top speed VALIDATION residual recorded; 33/33 tests.

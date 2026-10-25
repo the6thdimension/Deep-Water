@@ -68,6 +68,7 @@ namespace DeepWater.AirWing.Core.Simulation
             h = Mix(h, s.Attitude);
             h = Mix(h, s.BodyRates);
             h = Mix(h, s.LoadFactor);
+            h = Mix(h, s.AngleOfAttack);
             h = Mix(h, s.MassKg);
             h = Mix(h, s.FuelKg);
             h = Mix(h, s.EngineSpool);

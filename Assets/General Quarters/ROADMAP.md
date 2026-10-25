@@ -219,27 +219,27 @@ SIX's picks (2026-10-24): G34–G41. Guns L1 first.
   - [x] **Follow-up done (2026-10-24):** at guns L1 the presentation mounts follow the core's lay (`IGunMount.TryGetLay`), so what you see is what fired. L0 keeps its own slew.
     - **Test:** `PresentationTests.MountAnimator_AtGunsL1_ShowsTheCoresLay`. 135/135 with Sea State.
     - **Play mode, Standard raid:** the Mk 45 trained to 79.4°, and the model was never more than 0.13° from the core. The CIWS and Mk 38s did not fire in that raid, so they were checked by the test only.
-- [ ] **VLS L1, SM-2 and the illuminators** (slice B2; SIX's picks G42–G52). Four parts, each with its own tests and gate:
+- [ ] **VLS L1, SM-2 and the illuminators** (slice B2; SIX's picks G42–G52, with G42, G46 and G48 reversed on 2026-10-24 to Claude's leanings). Each part has its own tests and gate:
   - [ ] **B2a, Guided Fury (on a branch cut from `Guided-Fury`, G52):**
-    - fly L4 headless: the bridge bakes the profile's aero tables, so L4 no longer falls back to L3;
-    - SM-2 Block IIIA (RIM-66M-5) and IIIB profiles built by a builder (the `EssmProfileBuilder` pattern), with the Mk 104 dual-thrust motor and public data cited;
-    - IIIB's IR seeker data;
+    - an SM-2 Block IIIA (RIM-66M-5) profile built by a builder (the `EssmProfileBuilder` pattern), with the Mk 104 dual-thrust motor and public data cited;
+    - it flies at L2, like ESSM (G46);
     - Guided Fury's own tests;
     - VALIDATION of ESSM and SM-2 flyout against published speed and range. At L2, ESSM averaged about 720 m/s over 20 km.
+    - ~~fly L4 headless (the bridge bakes the aero tables)~~: dropped with G46's reversal. ~~Block IIIB profile and IR seeker data~~: dropped with G48's reversal.
   - [ ] **B2b, VLS L1 (G42, G43):**
     - per-cell launch sequence (hatch, ignition, clear the cell) and cell scheduling;
     - the ship's velocity added at launch;
-    - the vertical climb and a constrained pitch-over, giving a minimum range;
     - midcourse to a predicted intercept point refreshed at the uplink rate, with limited uplink channels;
-    - the load (G50): 48 IIIA, 16 IIIB, 32 ESSM;
+    - the load (G50): 64 IIIA, 32 ESSM;
     - SM-2 pairs (G51).
+    - ~~The vertical climb and a constrained pitch-over~~: dropped with G42's reversal.
   - [ ] **B2c, Illuminators L1 (G44, G45):**
     - three SPG-62s (one forward, two aft) with arcs, slew and settle;
     - terminal homing claims one for its last seconds, assigned by time to go;
-    - with none free, an ESSM or IIIA cannot complete its intercept, while a IIIB falls back to IR (G49, flagged: every IR terminal is counted, and saturation is reported with and without IIIB).
-  - [ ] **B2d, budget (G47):** a `unity-perf-ab` A/B at saturation. If L4 misses 1 ms, missiles beyond a set number in flight run at L3, and the log and HUD say so.
-  - **Gate:** the saturation raid resolves, repeats exactly and fits 1 ms. The debrief explains every missile from launch through uplink to the illuminator (or IR) and the result.
-- [ ] Harpoon and Tomahawk profiles (Guided Fury Stream A items).
+    - with none free, the missile cannot complete its intercept. ~~IIIB falls back to IR (G49)~~: moot with G48's reversal.
+  - [ ] **B2d, budget (G47):** a `unity-perf-ab` A/B at saturation against 1 ms. At L2 the L3 fallback should not be needed; if it is, the log and HUD say so.
+  - **Gate:** the saturation raid resolves, repeats exactly and fits 1 ms. The debrief explains every missile from launch through uplink to the illuminator and the result.
+- [ ] Harpoon and Tomahawk profiles (Guided Fury Stream A items). Land attack goes against fictional or generic targets only (BLUEPRINT standing constraint 8, safe limits).
 
 ### Stream C — The living ship
 - [ ] Engine Room L1: the plant (4 × LM2500, CPP, fuel).
@@ -284,6 +284,7 @@ SIX's picks (2026-10-24): G34–G41. Guns L1 first.
 - **2026-10-24** — Stream B slice B1 done: guns L1 (G34–G41). Ballistic fire control from cached firing tables, slewing mounts, and a shot-group hit model with ship motion and Phalanx spotting. Guns only, L1 kills 6 of 8 sea-skimmers where L0 killed none. The core cost is unchanged. The Phalanx drag shape is the open number.
 - **2026-10-24** — Slice 7 done: the phase review. **Phase 1 is complete.** The four legacy destroyer scripts and their editor tools are archived behind a supersession checklist, and `HANDOFF.md` is written. Next: SIX picks the first element stream.
 - **2026-10-24** — Slice 6 done: presentation, with the decisions in BLUEPRINT G30–G33. The Phase 1 gate's presentation half is met in play mode (sound seen playing, not yet heard). Q2 answered: Sea State gained `DepositFoam`.
+- **2026-10-24** — Slice B2 replanned after SIX reversed G42, G46 and G48 to Claude's leanings. B2a shrinks to one SM-2 Block IIIA profile at L2, B2b loses the vertical boost, B2c loses the IR backup, and the load is 64 IIIA and 32 ESSM. Safe limits recorded as BLUEPRINT standing constraint 8.
 
 ## Skip / fail log
 - **2026-10-24 (Stream B, after slice B1): the Mk 45 jerked back and forth between shots** (SIX, on the range).

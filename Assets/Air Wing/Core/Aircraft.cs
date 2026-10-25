@@ -32,6 +32,9 @@ namespace DeepWater.AirWing.Core
 
         public AirframeState State;
 
+        /// <summary>The Pilot Inputs of the last tick stepped (for presentation: the HUD and moving surfaces).</summary>
+        public PilotInputs LastInputs { get; private set; }
+
         internal Aircraft(int id, in AircraftProfile profile, IAtmosphere atmosphere, IAirframe airframe, IPowerplant powerplant,
                           IFlightControls controls, ILandingGear gear, IReadOnlyList<FidelityResolution> levels, in AirframeState start)
         {
@@ -53,6 +56,7 @@ namespace DeepWater.AirWing.Core
         /// </summary>
         public void Step(in PilotInputs inputs, float surfaceHeightM, in SubstepClock clock)
         {
+            LastInputs = inputs;
             if (State.Status != FlightStatus.Flying) return;
             float dt = (float)clock.SubstepSeconds;
             for (int k = 0; k < clock.Substeps; k++)

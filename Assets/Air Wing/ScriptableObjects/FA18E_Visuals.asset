@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52aafccdb5f25864f9d7e7f5185b4b40, type: 3}
+  m_Name: FA18E_Visuals
+  m_EditorClassIdentifier: DeepWater.AirWing::DeepWater.AirWing.ScriptableObjects.AircraftVisualsSO
+  surfaces:
+  - transformName: Aileron_Left
+    driver: 0
+    axis: {x: 0, y: 0, z: -1}
+    maxAngleDeg: 10
+    smoothing: 2
+  - transformName: Aileron_Right
+    driver: 0
+    axis: {x: 0, y: 0, z: 1}
+    maxAngleDeg: 10
+    smoothing: 2
+  - transformName: ELEVATOR_LEFT_1
+    driver: 1
+    axis: {x: 1, y: 0, z: 0}
+    maxAngleDeg: 10
+    smoothing: 5
+  - transformName: ELEVATOR_RIGHT_1
+    driver: 1
+    axis: {x: 1, y: 0, z: 0}
+    maxAngleDeg: 10
+    smoothing: 5
+  - transformName: rudder_left
+    driver: 2
+    axis: {x: 0, y: 0, z: -1}
+    maxAngleDeg: 30
+    smoothing: 2
+  - transformName: rudder_right
+    driver: 2
+    axis: {x: 0, y: 0, z: -1}
+    maxAngleDeg: 30
+    smoothing: 2
+  - transformName: Flaps_Left
+    driver: 3
+    axis: {x: 0, y: 0, z: 1}
+    maxAngleDeg: 15
+    smoothing: 1
+  - transformName: Flaps_Right
+    driver: 3
+    axis: {x: 0, y: 0, z: 1}
+    maxAngleDeg: 15
+    smoothing: 1
+  provenance: "Copied 2026-10-25 from Assets/FDS Assets/Aircraft/F-18E.prefab's AerialArcade
+    ControlSurface settings (transform names, axes, max angles, smoothing). Rudder
+    travel AUTHORED at 30\xB0 (the FDS prefab used 50\xB0). Presentation only; the
+    flight core never reads it."

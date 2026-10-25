@@ -14,7 +14,7 @@
 - **Git (SIX, 2026-10-24):** Claude manages git without asking. Verified work is committed, pushed and brought up to `main`, and every branch is kept level; `Guided-Fury` takes it through a PR.
 - **Never pushed:** the archive branch, DAVFX and the MCP unlock script. There are no force pushes.
 
-**Status (2026-10-24): NOTHING BUILT.** The blueprint is locked. Building starts on SIX's go, once no other session is driving the Unity Editor.
+**Status (2026-10-25): slice 0 done; no flight code yet.** The blueprint is locked and on `main`. Slice 1 starts on SIX's go, once no other session is driving the Unity Editor.
 
 ---
 
@@ -29,19 +29,35 @@
 
 ---
 
-## Slice 0 — Clean-up (S)
+## Slice 0 — Clean-up (S) (done 2026-10-25, 63650de: 44/44 GUIDs kept; 0 aircraft errors in the player-script compile)
 
 The gate: nothing anyone uses changes, a player build compiles, and the legacy aircraft code has a checklist of what replaces it.
-- [ ] Archive (P8) `Assets/Scripts/FighterJet Scripts/` → `Assets/_Archive/FighterJet Scripts_legacy/`, with its `.meta` files.
-- [ ] Archive `Assets/Scripts/Aircraft_Handlers/` → `Assets/_Archive/Aircraft_Handlers_legacy/`, with its `.meta` files, including the MouseFlight copy (MIT; keep its licence headers).
-- [ ] **Fix found 2026-10-24:** `FixedWing_Handlers/Editors/FixedWingController_Editor.cs` uses `UnityEditor` from a folder named `Editors`, not `Editor`, and has no `#if UNITY_EDITOR` guard. That breaks any player build, which W21's measurement needs. It moves into an `Editor/` subfolder in the archive.
-- [ ] A `README.md` in each archive folder with the supersession checklist (C25): for every file, what it did and whether it is *carried*, *superseded* (named, with the slice that brings it) or *dropped deliberately* (with the reason). Format as `_Archive/Destroyer Scripts_legacy/README.md`.
-- [ ] `FighterJetController` and the `F-18 (1) Variant` prefab are **not** archived here: Dogfight still references them. They go in slice 1e, with the rebuild.
-- [ ] Fix stale words:
-  - `Assets/_SCENES/README.md` says Dogfight uses `FixedWingController`, mouse flight and waypoint AI; it uses none of them. It also says CVN-78 uses the legacy `CarrierController`; it uses `CarrierBehaviour`.
-  - `Assets/RH Aviator/README.md` says "PuppetMaster F-18"; PuppetMaster is RootMotion's ragdoll tool.
-- [ ] *Done when:* a GUID scan shows no scene or prefab references broken; the project compiles with zero errors; a player build of one scene compiles; every archived file has a checklist row.
-- *Anti-goals:* no new code; no vendor folder touched; AerialArcade, FlightSimLite and the FDS F-18E unchanged.
+- [x] Archive (P8) `Assets/Scripts/FighterJet Scripts/` → `Assets/_Archive/FighterJet Scripts_legacy/`, with its `.meta` files (moved with `AssetDatabase.MoveAsset`).
+- [x] Archive `Assets/Scripts/Aircraft_Handlers/` → `Assets/_Archive/Aircraft_Handlers_legacy/`, with its `.meta` files, including the MouseFlight copy (MIT headers kept).
+  - **Found on the way:** three audio files in the folder are live. `newF85 Sounds/afterburner.mp3`, `mid55.wav` and `TRANSPORTATION_JET_MILITARY_Fighter_Turbine_Steady_Soft_04.wav` are referenced by CVN-78 FORD, Dogfight and OutdoorsScene (the F-18E's audio). They moved to `Assets/_AIRCRAFT/Audio/` rather than the archive.
+  - **Measured:** all 44 GUIDs unchanged (41 files and folders, the two folder roots, the audio folder).
+- [x] **Fix found 2026-10-24:** `FixedWing_Handlers/Editors/` renamed to `Editor/`. `FixedWingController_Editor.cs` uses `UnityEditor`, and "Editors" is not a special folder.
+  - **Measured (player-script compile, StandaloneWindows64):** before, the file's errors were in the list; after, 0 errors from any aircraft file.
+- [x] A `README.md` in each archive folder with the supersession checklist (C25), one row per file: carried, superseded (named, with the slice that brings it) or dropped deliberately (with the reason).
+- [x] `FighterJetController` and the `F-18 (1) Variant` prefab are **not** archived here: Dogfight still references them. They go in slice 1e, with the rebuild.
+- [x] Fixed stale words:
+  - `Assets/_SCENES/README.md`: the Dogfight, CVN-78 FORD and Helo rows now say what is wired.
+  - `Assets/RH Aviator/README.md`: no more "PuppetMaster F-18"; the legacy paths point to the archive; the `IAircraftActuator` contract is struck through, superseded by Air Wing's `ISeat` + `PilotInputs` (W5, W6). The matching RH Aviator ROADMAP item is marked ~~skipped~~ with the reason.
+- [x] **Q2 (SIX, 2026-10-25):** `RH Aviator.asmdef` renamed `RH.Aviator` → `DeepWater.Aviator` (name and root namespace). Nothing referenced it by name; it has no scripts yet.
+- [x] *Done when:*
+  - the moved GUIDs all resolve (scan above);
+  - the Editor compiles clean, with every moved type resolved from its new folder (compile-clean RunCommand);
+  - every archived file has a checklist row;
+  - ~~a player build of one scene compiles~~: **not met, for reasons outside slice 0** (next item). Air Wing's part is met: zero aircraft errors.
+- [ ] **Player build still blocked outside Air Wing** (found 2026-10-25, BLUEPRINT Q4). It blocks W21's measurement in slice 1e. Each file needs an `Editor/` folder or an `#if UNITY_EDITOR` guard:
+  - `AerialArcade/Code/Scripts/F18/F18ControllerEditor.cs` (vendor: SIX's word);
+  - `RH Utilities/RH_SceneManager.cs`, `SceneManagerCore.cs`, `SceneValidationSystem.cs`;
+  - `RH Testing Suite/Core/TestRunner.cs`;
+  - `Scripts/Destroyer Scripts/DestroyerEditor.cs`;
+  - `_Archive/Carrier_legacy/Carrier Controller/CarrierEditor.cs` (an earlier archive moved it out of its `Editor/` folder);
+  - `UnityMcpUnlock.cs` (local-only, never committed: SIX's word).
+- *METHODOLOGY candidate (to add when METHODOLOGY.md has no other session's uncommitted edits):* **Editor API in code that compiles into the player.** Unity treats only a folder named exactly `Editor` (or an editor-only asmdef) as editor code. On 2026-10-25, nine files across seven areas broke the player-script compile this way. One was an `Editors` folder; one was an earlier archive move that lifted a script out of its `Editor/` folder. Because nobody builds a player during Editor work, it stayed invisible. Do instead: keep the `Editor` folder name through every move, or guard with `#if UNITY_EDITOR`; make a player-script compile (`PlayerBuildInterface.CompilePlayerScripts`) part of a module's gate.
+- *Anti-goals (held):* no new code; no vendor folder touched; AerialArcade, FlightSimLite and the FDS F-18E unchanged.
 
 ---
 
@@ -136,3 +152,4 @@ Revisit when Phase 3 is done. The questions for SIX are in BLUEPRINT §7.
 
 ## Change log
 - **2026-10-24** — Roadmap written with the blueprint (W1–W31). Nothing built.
+- **2026-10-25** — Slice 0 done (63650de). Found: live audio in the legacy folder (moved to `_AIRCRAFT/Audio/`) and eight player-build blockers outside Air Wing (BLUEPRINT Q4).

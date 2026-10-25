@@ -28,9 +28,9 @@ namespace DeepWater.AirWing.Editor
     /// </summary>
     public static class AirWingBuilders
     {
-        const string Root = "Assets/Air Wing";
+        internal const string Root = "Assets/Air Wing";
         const string ModelPath = "Assets/_AIRCRAFT/F-18E/Blender/F-18E.blend";
-        const string PrefabPath = Root + "/Prefabs/FA18E_AirWing.prefab";
+        internal const string PrefabPath = Root + "/Prefabs/FA18E_AirWing.prefab";
         const string VisualsPath = Root + "/ScriptableObjects/FA18E_Visuals.asset";
         const string ProfilePath = Root + "/ScriptableObjects/FA18E_AirWing.asset";
         const string SheetPath = Root + "/ScriptableObjects/FA18E_FidelitySheet.asset";
@@ -40,8 +40,8 @@ namespace DeepWater.AirWing.Editor
 
         // The Sea State demo's sea (Assets/Sea State/Examples/Editor/SeaStateDemoSceneBuilder.cs), reused as it is.
         const string OceanPrefabPath = "Assets/_ENVIRONMENT/Ocean System.prefab";
-        const string SunPrefabPath = "Assets/_ENVIRONMENT/Sun.prefab";
-        const string SkyPrefabPath = "Assets/_ENVIRONMENT/Sky and Fog Volume.prefab";
+        internal const string SunPrefabPath = "Assets/_ENVIRONMENT/Sun.prefab";
+        internal const string SkyPrefabPath = "Assets/_ENVIRONMENT/Sky and Fog Volume.prefab";
         const string SeaLookPath = "Assets/Sea State/Examples/Settings/HdrpSeaLook.asset";
         const string SeaDecalMaterialPath = "Assets/Sea State/Modules/Hdrp/Materials/SeaWaveDecal.mat";
         const string SeaFoamComputePath = "Assets/Sea State/Modules/Hdrp/Shaders/SeaFoam.compute";
@@ -81,35 +81,60 @@ namespace DeepWater.AirWing.Editor
 
             // Load assets only after the scene switch (AP12).
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
-            var profile = AssetDatabase.LoadAssetAtPath<AircraftProfileSO>(ProfilePath);
-            var sheet = AssetDatabase.LoadAssetAtPath<FidelitySheetSO>(SheetPath);
-            var seatSettings = AssetDatabase.LoadAssetAtPath<PlayerSeatSettingsSO>(SeatSettingsPath);
-            var actions = AssetDatabase.LoadAssetAtPath<InputActionAsset>(ActionsPath);
-            if (prefab == null || profile == null || sheet == null || seatSettings == null || actions == null)
-            {
-                Debug.LogError("[Air Wing] A required asset is missing (prefab, profile, fidelity sheet, seat settings or input actions); nothing saved.");
-                return;
-            }
+            if (!RigAssetsPresent()) return;
 
             Instantiate(SunPrefabPath);
             Instantiate(SkyPrefabPath);
             SeaStateDirector sea = BuildSea();
+            BuildRig(sea, new Vector3(0f, 1500f, 0f), 0f);
 
+            Directory.CreateDirectory(Path.GetDirectoryName(FlightTestScenePath));
+            EditorSceneManager.SaveScene(scene, FlightTestScenePath);
+            AssetDatabase.SaveAssets();
+            Debug.Log($"[Air Wing] Built {FlightTestScenePath}: Sea State sea, player seat, runner, one F/A-18E at 1,500 m and 400 kt, chase camera, HUD.");
+        }
+
+        /// <summary>The flight rig every Air Wing scene shares, and what it returns to the scene builder.</summary>
+        internal struct Rig
+        {
+            public AirWingRunner Runner;
+            public FlightHud Hud;
+        }
+
+        /// <summary>True when the prefab, profile, fidelity sheet, seat settings and input actions all load; logs otherwise.</summary>
+        internal static bool RigAssetsPresent()
+        {
+            if (AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath) != null && AssetDatabase.LoadAssetAtPath<AircraftProfileSO>(ProfilePath) != null &&
+                AssetDatabase.LoadAssetAtPath<FidelitySheetSO>(SheetPath) != null && AssetDatabase.LoadAssetAtPath<PlayerSeatSettingsSO>(SeatSettingsPath) != null &&
+                AssetDatabase.LoadAssetAtPath<InputActionAsset>(ActionsPath) != null)
+                return true;
+            Debug.LogError("[Air Wing] A required asset is missing (prefab, profile, fidelity sheet, seat settings or input actions); nothing saved.");
+            return false;
+        }
+
+        /// <summary>
+        /// The player seat, the runner on the sea, one F/A-18E airborne at <paramref name="jetPosition"/> on
+        /// <paramref name="headingDeg"/> (its view's start speed), the chase camera and the HUD. Call after the scene
+        /// switch (AP12) and after <see cref="RigAssetsPresent"/>.
+        /// </summary>
+        internal static Rig BuildRig(SeaStateDirector sea, Vector3 jetPosition, float headingDeg)
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
             var inputGo = new GameObject("Player Seat");
             var seat = inputGo.AddComponent<PlayerSeatInput>();
-            Set(seat, "actions", actions);
-            Set(seat, "settings", seatSettings);
+            Set(seat, "actions", AssetDatabase.LoadAssetAtPath<InputActionAsset>(ActionsPath));
+            Set(seat, "settings", AssetDatabase.LoadAssetAtPath<PlayerSeatSettingsSO>(SeatSettingsPath));
 
             var runnerGo = new GameObject("Air Wing");
             var runner = runnerGo.AddComponent<AirWingRunner>();
-            Set(runner, "profile", profile);
-            Set(runner, "fidelitySheet", sheet);
+            Set(runner, "profile", AssetDatabase.LoadAssetAtPath<AircraftProfileSO>(ProfilePath));
+            Set(runner, "fidelitySheet", AssetDatabase.LoadAssetAtPath<FidelitySheetSO>(SheetPath));
             Set(runner, "playerSeat", seat);
             Set(runner, "sea", sea);
 
+            Quaternion heading = Quaternion.Euler(0f, headingDeg, 0f);
             var jet = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
-            jet.transform.SetPositionAndRotation(new Vector3(0f, 1500f, 0f), Quaternion.identity);
+            jet.transform.SetPositionAndRotation(jetPosition, heading);
 
             var camGo = new GameObject("Main Camera") { tag = "MainCamera" };
             var cam = camGo.AddComponent<Camera>();
@@ -117,17 +142,13 @@ namespace DeepWater.AirWing.Editor
             cam.farClipPlane = 30000f;
             camGo.AddComponent<HDAdditionalCameraData>();
             camGo.AddComponent<AudioListener>();
-            camGo.transform.SetPositionAndRotation(new Vector3(0f, 1506f, -26f), Quaternion.identity);
+            camGo.transform.SetPositionAndRotation(jetPosition + heading * new Vector3(0f, 6f, -26f), heading);
             var chase = camGo.AddComponent<ChaseCamera>();
             Set(chase, "runner", runner);
             var hud = camGo.AddComponent<FlightHud>();
             Set(hud, "runner", runner);
             Set(hud, "viewCamera", cam);
-
-            Directory.CreateDirectory(Path.GetDirectoryName(FlightTestScenePath));
-            EditorSceneManager.SaveScene(scene, FlightTestScenePath);
-            AssetDatabase.SaveAssets();
-            Debug.Log($"[Air Wing] Built {FlightTestScenePath}: Sea State sea, player seat, runner, one F/A-18E at 1,500 m and 400 kt, chase camera, HUD.");
+            return new Rig { Runner = runner, Hud = hud };
         }
 
         /// <summary>The F/A-18E's moving parts, copied from the FDS prefab's AerialArcade surface settings (read only).</summary>
@@ -160,7 +181,7 @@ namespace DeepWater.AirWing.Editor
             new AircraftVisualsSO.Surface { transformName = name, driver = driver, axis = axis, maxAngleDeg = maxDeg, smoothing = smoothing };
 
         /// <summary>The Sea State demo's sea: HDRP water with the Ocean System's look, the director and the renderer.</summary>
-        static SeaStateDirector BuildSea()
+        internal static SeaStateDirector BuildSea()
         {
             var seaGo = new GameObject("Sea");
             var surface = seaGo.AddComponent<WaterSurface>();
@@ -182,14 +203,14 @@ namespace DeepWater.AirWing.Editor
             return director;
         }
 
-        static void Instantiate(string path)
+        internal static void Instantiate(string path)
         {
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
             if (prefab == null) { Debug.LogWarning($"[Air Wing] {path} not found; skipped."); return; }
             PrefabUtility.InstantiatePrefab(prefab);
         }
 
-        static bool AnyDirtyScene()
+        internal static bool AnyDirtyScene()
         {
             for (int i = 0; i < EditorSceneManager.sceneCount; i++)
                 if (EditorSceneManager.GetSceneAt(i).isDirty)
@@ -200,7 +221,7 @@ namespace DeepWater.AirWing.Editor
             return false;
         }
 
-        static void Set(Object target, string field, Object value)
+        internal static void Set(Object target, string field, Object value)
         {
             var so = new SerializedObject(target);
             SerializedProperty p = so.FindProperty(field);

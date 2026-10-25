@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc6a9cedd7b0ead43a578eb10e896db0, type: 3}
+  m_Name: Dogfight_Gates
+  m_EditorClassIdentifier: DeepWater.AirWing::DeepWater.AirWing.ScriptableObjects.GateCourseSO
+  gates:
+  - name: "Gate 1 \xB7 5,000 ft"
+    centreM: {x: 0, y: 1524, z: 2500}
+    headingDeg: 0
+    radiusM: 100
+    speedBandKt: {x: 350, y: 450}
+    altitudeBandFt: {x: 4500, y: 5500}
+  - name: "Gate 2 \xB7 DDG pass, 1,000 ft"
+    centreM: {x: 3000, y: 305, z: 6000}
+    headingDeg: 90
+    radiusM: 100
+    speedBandKt: {x: 0, y: 0}
+    altitudeBandFt: {x: 800, y: 1200}
+  - name: "Gate 3 \xB7 climb to 6,000 ft"
+    centreM: {x: 6000, y: 1829, z: -1000}
+    headingDeg: 180
+    radiusM: 100
+    speedBandKt: {x: 300, y: 0}
+    altitudeBandFt: {x: 5500, y: 6500}
+  - name: "Gate 4 \xB7 runway pass, 500 ft"
+    centreM: {x: 0, y: 152, z: -5500}
+    headingDeg: 270
+    radiusM: 60
+    speedBandKt: {x: 250, y: 350}
+    altitudeBandFt: {x: 300, y: 700}
+  provenance: 'AUTHORED 2026-10-25 for the Dogfight test bed (slice 1e). A loop:
+    north at 5,000 ft; east, down to 1,000 ft, over the DDG; south, climbing to 6,000
+    ft; west along runway 09/27 at 500 ft; then north again. Legs of 5 to 8 km leave
+    room for the turns: at 400 kt and 4 G the turn radius is about 1.1 km. Gate 4''s
+    ring is 60 m so it stays 84 m clear of the runway. The EditMode test ''TheInstructor_FliesTheDogfightCourse''
+    checks the course can be flown at L0.'

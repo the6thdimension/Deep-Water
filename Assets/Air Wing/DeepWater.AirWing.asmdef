@@ -2,7 +2,9 @@
     "name": "DeepWater.AirWing",
     "rootNamespace": "DeepWater.AirWing",
     "references": [
-        "Unity.InputSystem"
+        "Unity.InputSystem",
+        "DeepWater.Sea",
+        "Unity.Mathematics"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

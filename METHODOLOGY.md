@@ -228,6 +228,24 @@ These are the fixed points around which the methodology orbits. Every principle 
   - *Why it fails:* "Supported" means it compiles, not that HDRP gives it the passes, the exposure and the fog it expects. Effects are authored for a scale and an exposure as much as a pipeline.
   - *Do instead:* Probe every candidate effect in the target scene, at the target distance, under the scene's exposure, and look at a screenshot before adopting it. If it fails, build it on a shader written for the pipeline (a ForwardOnly pass, display-relative colour, the pipeline's fog). Reference impl: `Assets/General Quarters/Modules/Presentation/Shaders/GQ_Particle.shader`, `Editor/CombatEffectsBuilder.cs`.
 
+- **AP24. Editor API in code that compiles into the player.** A script that uses `UnityEditor` (an inspector, an editor window, `AssetDatabase`, `EditorApplication`) sitting where Unity compiles it into the player. In the predefined assemblies, only a folder named exactly `Editor` makes code editor-only; inside an asmdef, that folder name means nothing, and the asmdef itself must be editor-only.
+  - *Where seen:* Air Wing slice 0, 2026-10-25. A player-script compile failed with zero assemblies on nine files across seven areas:
+    - an `Editors/` folder (`FixedWingController_Editor.cs`);
+    - an earlier archive move that lifted `CarrierEditor.cs` out of its `Editor/` folder;
+    - inspectors left beside their components (`F18ControllerEditor.cs`, `DestroyerEditor.cs`);
+    - editor tools in a runtime folder (RH Utilities ×3);
+    - a test runner's play-mode plumbing (`TestRunner.cs`);
+    - a local editor hook (`UnityMcpUnlock.cs`).
+    A tenth file, `TestDiscovery.cs`, was not in the list at all: the compiler stops at declaration errors and does not report method bodies, so a use that sits only in a body hides until the declaration errors are gone.
+  - *Why it fails:* The Editor compiles every assembly with `UnityEditor` available, so these errors never show while working in the Editor. They surface only in a player build, and nobody builds a player during Editor work. One file breaks the whole build, and the error list under-reports.
+  - *Do instead:*
+    - Keep the `Editor` folder name through every move and archive.
+    - Guard mixed files with `#if UNITY_EDITOR`, around the editor part only, when runtime code still calls the rest.
+    - After fixing a batch, compile again until the list is empty rather than trusting the first list.
+    - Make a player-script compile (`PlayerBuildInterface.CompilePlayerScripts`, which compiles scripts only and builds no content) part of a module's gate.
+
+    Reference: Air Wing ROADMAP slice 0, last item.
+
 ## Candidates (under evaluation)
 
 *Ideas that might become Principles. Not yet load-bearing. Promote when grounded in a real case.*
@@ -364,3 +382,4 @@ These are the fixed points around which the methodology orbits. Every principle 
 - **2026-10-24** — General Quarters Stream B slice B1 (guns L1). Added C26 (standard drag curve plus one calibrated form factor; distance from 1 is a finding), C27 (fire control looks up firing tables), C28 (a hit model prints its sum), C29 (a golden pins a fidelity level).
 - **2026-10-24** — Added AP21 (a table lookup that says "no answer" when its bracket falls off the table): the Mk 45 jitter SIX reported after guns L1.
 - **2026-10-24** — General Quarters Stream C slice C1 (Damage Control L1, flooding). Added AP22 (a closed-form gate that leaves out a term the new case switches on), AP23 (a body declared lost, left running in the physics engine: the first PhysX sinking run crashed the Editor), C30 (flood in the columns you float on), C31 (free surface from a level that stays horizontal).
+- **2026-10-25** — Air Wing slice 0 (clean-up). Added AP24 (editor API compiled into the player): nine files across seven areas broke the player-script compile, one hidden behind the compiler's declaration-first error list.

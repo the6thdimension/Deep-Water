@@ -1,6 +1,6 @@
 # Theatre — blueprint (with METOC and Gravity)
 
-> **Status: PICKED, AWAITING SIX'S LOCK (2026-10-24). THEORETICAL — NOTHING BUILT.** SIX answered all 20 questions on 2026-10-24 (E1–E20). Items E21–E25 are Claude's proposals that fall out of the picks and need SIX's word. The only measured facts so far are from the read-only stock-take (`environment-maps-stocktake.md` in the side-session notes) and the HDRP 17.4 source.
+> **Status: LOCKED BLUEPRINT (SIX, 2026-10-25). NOTHING BUILT YET.** SIX answered all 20 questions on 2026-10-24 (E1–E20) and locked them on 2026-10-25, accepting Claude's proposals E21–E25. The first theatre is a strait; slice 1 is a spike, run in the project on its own branch. The only measured facts so far are from the read-only stock-take (`environment-maps-stocktake.md` in the side-session notes) and the HDRP 17.4 source.
 > **This document's one job:** say what the environment modules are and why, and record every decision behind them. Work order and progress live in `ROADMAP.md`, not here.
 
 ## 1. In plain language
@@ -143,35 +143,35 @@ Each implemented level ships with EditMode tests. A request above the highest bu
 
 ## 5. Decision register
 
-E1–E20 are SIX's picks of 2026-10-24, in round order. Leaning is Claude's recommendation before the pick. **Flagged** picks carry their mitigation. Status becomes **Locked** on SIX's word.
+E1–E20 are SIX's picks of 2026-10-24, in round order, locked 2026-10-25. Leaning is Claude's recommendation before the pick. **Flagged** picks carry their mitigation. E21–E25 were Claude's proposals; SIX accepted them on 2026-10-25.
 
 | # | Question | SIX's pick | Leaning | Status |
 |---|---|---|---|---|
-| E1 | Where maps come from | **Both kinds behind one model: fictional first, real landforms second.** Real landforms bring real elevation and seabed only: no real roads, buildings, ports or bases, and weapons never aim at a real named place | Same | Picked |
-| E2 | Size and precision | **A 64 km box (±32 km), one fixed origin.** Double in the reckoned core, float only at the presentation boundary (≤ 3.9 mm). A coarse no-physics ring to the horizon. No rebasing | Same | Picked |
-| E3 | First purposes | **Ship operations near coasts, then low-level flight** | Same | Picked |
-| E4 | Performance budget | **Balanced:** terrain + sky ≤ 2 ms GPU, ≤ 0.5 ms CPU, ≤ 512 MB; theatre queries ≤ 0.05 ms per fixed tick. Editor numbers at a stated resolution. The first build slice opens with a measured baseline (`unity-perf-ab`) | Same | Picked |
-| E5 | Height spacing | **16 m everywhere:** one 4 097² grid covers the box, about 135 MB with Unity's, PhysX's and the core's copies (8 m would be about 540 MB) | Same | Picked |
-| E6 | How the sea meets the coast | **The whole ladder:** depth damping + breaking cap → lee shelter → shoaling → refraction. **Flagged:** coast wave maps cost memory (about 400 MB for a 2 km band along 200 km of coast at 16 m, illustrative), rays can cross, and HDRP's far field cannot refract. *Mitigation:* built rung by rung; the slice-1 spike (E9) measures the maps; fallback: ship up to shoaling and park refraction with the spike's numbers | Depth damping + breaking first, shelter next | Picked, flagged |
-| E7 | Earth curvature | **Truly curved geometry** about the box centre. **Flagged:** HDRP's water is one flat plane; gravity must point at the centre (E10). *Mitigation:* the slice-1 spike tests drawing a curved sea; fallback: the simulation stays fully curved and the drawn sea is a flat plane kept level under the camera. Low coasts beyond ~10 km then sink too early; the drawing gap is labelled | Curvature in reckoned maths only, visuals flat | Picked, flagged |
-| E8 | How fictional theatres are made | **Theatre types as ScriptableObjects** (strait, archipelago, fjord, bay, open coast) with a few dials and a seed; the same type and seed give the same theatre, bit for bit | Same | Picked |
-| E9 | De-risking E6 and E7 | **Lock now, spike first in slice 1.** The plan bends to the spike's result | Same | Picked |
-| E10 | Gravity across modules | **Module by module:** each module adopts the shared Gravity as a rung on its own ladder when next worked on. Until then it declares itself flat-earth, and its golden fingerprints stay at the flat level (C29) | Same | Picked |
-| E11 | Bake or generate at load | **Bake in the Editor;** the asset is the truth and its hash enters the Fix | Same (generate-at-load later for the sandbox) | Picked |
-| E12 | What the seabed does to ships | **Grounding** (a logged event for General Quarters' damage control), **depth under the keel** for helm and AI, and **shallow-water handling** (squat, wider turning below ~3× draft) as a General Quarters engine-room rung | Grounding + sounder now, handling later | Picked |
-| E13 | Sky, weather and fog | **The full atmosphere pack now** (Reckoning §4.11): wind field, fronts, seeded gusts, visibility, cloud, rain; the sea grown by wind over fetch and duration; the Douglas dial becomes a labelled override. **Supersedes Reckoning R21** ("later") | Conditions record as simulation inputs; atmosphere later per R21 | Picked; R21 superseded |
-| E14 | The land's look | **Rule-based:** 4–6 layers by height, slope, shore distance and wetness, plus sparse seeded trees and scrub | Same | Picked |
-| E15 | Ground material | **Classes (mud, sand, gravel, rock) on seabed and land.** Seabed class decides grounding; land classes wait for ground vehicles | Seabed only, deciding grounding | Picked |
-| E16 | Hand edits | **Overlays:** separate layers replayed after every regeneration, included in the bake and its hash | Same | Picked |
-| E17 | Real-landform route | **Copy Cartographer's coordinate core and import downloaded files** converted offline with GDAL. No network code | Same | Picked |
-| E18 | Module boundaries | **Theatre** (land, seabed, coast coupling), **METOC** (atmosphere), **Gravity** (shared core); Sea State stays its own | Same | Picked |
-| E19 | Names | **The military-planning family:** Theatre, Theatre type, Overlay, Exposure, Gravity, METOC, METOC report | Charting family | Picked |
-| E20 | Slice order | **Theatre first:** spike → baked fictional theatre → coast rung 1 + grounding on demo hulls → General Quarters adopts Gravity → METOC L0 → coast rungs 2–4 | Same | Picked |
-| E21 | Mixing curved and flat modules | **A theatre admits only modules that use Gravity;** flat-earth modules keep their own flat scenes until they adopt | — | Proposed |
-| E22 | The far ring | **Look only, to ~200 km.** Sensors never need it: a straight line between two points in the box stays in the box. SIX did not object (2026-10-24) | — | Proposed |
-| E23 | The class word | **Ground** for the class map (true on land and seabed; "Material" collides with Unity's `Material`). **Going** reserved for the derived land-movement rating. Family 2's "Going" overclaimed for the seabed | — | Proposed |
-| E24 | Where sensor curvature lives | **In each sensor's profile:** an effective-radius factor (radar 4/3, optical ~7/6), not in Gravity | — | Proposed |
-| E25 | Earth model | **One sphere per theatre:** R = 6 371 km for fictional theatres (AUTHORED); real landforms use the exact WGS84 converter | — | Proposed |
+| E1 | Where maps come from | **Both kinds behind one model: fictional first, real landforms second.** Real landforms bring real elevation and seabed only: no real roads, buildings, ports or bases, and weapons never aim at a real named place | Same | Locked |
+| E2 | Size and precision | **A 64 km box (±32 km), one fixed origin.** Double in the reckoned core, float only at the presentation boundary (≤ 3.9 mm). A coarse no-physics ring to the horizon. No rebasing | Same | Locked |
+| E3 | First purposes | **Ship operations near coasts, then low-level flight** | Same | Locked |
+| E4 | Performance budget | **Balanced:** terrain + sky ≤ 2 ms GPU, ≤ 0.5 ms CPU, ≤ 512 MB; theatre queries ≤ 0.05 ms per fixed tick. Editor numbers at a stated resolution. The first build slice opens with a measured baseline (`unity-perf-ab`) | Same | Locked |
+| E5 | Height spacing | **16 m everywhere:** one 4 097² grid covers the box, about 135 MB with Unity's, PhysX's and the core's copies (8 m would be about 540 MB) | Same | Locked |
+| E6 | How the sea meets the coast | **The whole ladder:** depth damping + breaking cap → lee shelter → shoaling → refraction. **Flagged:** coast wave maps cost memory (about 400 MB for a 2 km band along 200 km of coast at 16 m, illustrative), rays can cross, and HDRP's far field cannot refract. *Mitigation:* built rung by rung; the slice-1 spike (E9) measures the maps; fallback: ship up to shoaling and park refraction with the spike's numbers | Depth damping + breaking first, shelter next | Locked, flagged |
+| E7 | Earth curvature | **Truly curved geometry** about the box centre. **Flagged:** HDRP's water is one flat plane; gravity must point at the centre (E10). *Mitigation:* the slice-1 spike tests drawing a curved sea; fallback: the simulation stays fully curved and the drawn sea is a flat plane kept level under the camera. Low coasts beyond ~10 km then sink too early; the drawing gap is labelled | Curvature in reckoned maths only, visuals flat | Locked, flagged |
+| E8 | How fictional theatres are made | **Theatre types as ScriptableObjects** (strait, archipelago, fjord, bay, open coast) with a few dials and a seed; the same type and seed give the same theatre, bit for bit | Same | Locked |
+| E9 | De-risking E6 and E7 | **Lock now, spike first in slice 1.** The plan bends to the spike's result | Same | Locked |
+| E10 | Gravity across modules | **Module by module:** each module adopts the shared Gravity as a rung on its own ladder when next worked on. Until then it declares itself flat-earth, and its golden fingerprints stay at the flat level (C29) | Same | Locked |
+| E11 | Bake or generate at load | **Bake in the Editor;** the asset is the truth and its hash enters the Fix | Same (generate-at-load later for the sandbox) | Locked |
+| E12 | What the seabed does to ships | **Grounding** (a logged event for General Quarters' damage control), **depth under the keel** for helm and AI, and **shallow-water handling** (squat, wider turning below ~3× draft) as a General Quarters engine-room rung | Grounding + sounder now, handling later | Locked |
+| E13 | Sky, weather and fog | **The full atmosphere pack now** (Reckoning §4.11): wind field, fronts, seeded gusts, visibility, cloud, rain; the sea grown by wind over fetch and duration; the Douglas dial becomes a labelled override. **Supersedes Reckoning R21** ("later") | Conditions record as simulation inputs; atmosphere later per R21 | Locked; R21 superseded |
+| E14 | The land's look | **Rule-based:** 4–6 layers by height, slope, shore distance and wetness, plus sparse seeded trees and scrub | Same | Locked |
+| E15 | Ground material | **Classes (mud, sand, gravel, rock) on seabed and land.** Seabed class decides grounding; land classes wait for ground vehicles | Seabed only, deciding grounding | Locked |
+| E16 | Hand edits | **Overlays:** separate layers replayed after every regeneration, included in the bake and its hash | Same | Locked |
+| E17 | Real-landform route | **Copy Cartographer's coordinate core and import downloaded files** converted offline with GDAL. No network code | Same | Locked |
+| E18 | Module boundaries | **Theatre** (land, seabed, coast coupling), **METOC** (atmosphere), **Gravity** (shared core); Sea State stays its own | Same | Locked |
+| E19 | Names | **The military-planning family:** Theatre, Theatre type, Overlay, Exposure, Gravity, METOC, METOC report | Charting family | Locked |
+| E20 | Slice order | **Theatre first:** spike → baked fictional theatre → coast rung 1 + grounding on demo hulls → General Quarters adopts Gravity → METOC L0 → coast rungs 2–4 | Same | Locked |
+| E21 | Mixing curved and flat modules | **A theatre admits only modules that use Gravity;** flat-earth modules keep their own flat scenes until they adopt | — | Locked (accepted 2026-10-25) |
+| E22 | The far ring | **Look only, to ~200 km.** Sensors never need it: a straight line between two points in the box stays in the box. accepted by SIX (2026-10-25) | — | Locked (accepted 2026-10-25) |
+| E23 | The class word | **Ground** for the class map (true on land and seabed; "Material" collides with Unity's `Material`). **Going** reserved for the derived land-movement rating. Family 2's "Going" overclaimed for the seabed | — | Locked (accepted 2026-10-25) |
+| E24 | Where sensor curvature lives | **In each sensor's profile:** an effective-radius factor (radar 4/3, optical ~7/6), not in Gravity | — | Locked (accepted 2026-10-25) |
+| E25 | Earth model | **One sphere per theatre:** R = 6 371 km for fictional theatres (AUTHORED); real landforms use the exact WGS84 converter | — | Locked (accepted 2026-10-25) |
 
 Inherited from Reckoning: R2 (everything deterministic eventually), R5 (a few ships in ~20 km: the play area inside the 64 km box), R14 (Windows, same build), R15 (Watches). **R21 is superseded by E13.**
 
@@ -190,7 +190,7 @@ Inherited from Reckoning: R2 (everything deterministic eventually), R5 (a few sh
    - Every source's licence is recorded and shown.
    - No Google, Cesium ion or ArcGIS content in any baked asset; their terms restrict caching and baking (from memory; verify).
 7. **Vendor code is read-only** (P5): HDRP, Cesium, ArcGIS.
-8. **One "down" per theatre** (E21, once locked). Every module in a theatre uses Gravity.
+8. **One "down" per theatre** (E21). Every module in a theatre uses Gravity; flat-earth modules keep their own flat scenes until they adopt it.
 9. **Overlays always win.** A regeneration never discards a hand edit.
 10. **Budgets are measured, never assumed:** `unity-perf-ab`, Editor resolution stated (E4).
 
@@ -226,11 +226,12 @@ Inherited from Reckoning: R2 (everything deterministic eventually), R5 (a few sh
 
 | # | Question | Cost |
 |---|---|---|
-| Q1 | Lock the blueprint (E1–E20 to Locked)? | 1 min |
-| Q2 | E21–E25 (curved-only theatres, the far ring, Ground/Going, sensor curvature in profiles, the Earth model): accept? | 2 min |
-| Q3 | The first theatre type: a **strait** (my pick: two coasts, a shoal, a headland, enough for the test scene), or another? | 1 min |
+| ~~Q1~~ | ~~Lock the blueprint?~~ **Answered 2026-10-25: locked.** | — |
+| ~~Q2~~ | ~~E21–E25: accept?~~ **Answered 2026-10-25: accepted.** | — |
+| ~~Q3~~ | ~~The first theatre type?~~ **Answered 2026-10-25: a strait** (two coasts, a shoal, a headland). | — |
 | Q4 | Revoke the Cesium ion token and the ArcGIS API key that are public on `origin/main` (found in the stock-take; not part of this module) | 10 min in two dashboards |
-| Q5 | Where the slice-1 spike runs: in the project on its own branch (my pick, as on 2026-10-23), or a throwaway project? | 1 min |
+| ~~Q5~~ | ~~Where the slice-1 spike runs?~~ **Answered 2026-10-25: in the project, on its own branch** (`feat/theatre-spike`, cut from `feat/environment-maps`). | — |
 
 ## Change log
 - **2026-10-24** — Stock-take (read-only), then the 20-question interview: E1–E20 picked by SIX in five rounds. E6, E7, E12, E13, E15 and E19 differ from Claude's leaning. E13 supersedes Reckoning R21. E21–E25 proposed. Blueprint written, awaiting lock.
+- **2026-10-25** — Locked by SIX: E1–E20 Locked, E21–E25 accepted, the first theatre is a strait (Q3), the spike runs in the project on its own branch (Q5). Q4 (revoking the public Cesium and ArcGIS keys) stays open.

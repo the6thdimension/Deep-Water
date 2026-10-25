@@ -2,7 +2,7 @@
 
 **This document's one job:** what to do next, and what is done. Why each piece exists is in `BLUEPRINT.md` (decisions E1–E25).
 
-**Status: PLANNED, NOTHING BUILT (2026-10-24).** Building starts only when SIX says go *and* says the Unity Editor is free; other sessions share it.
+**Status: BLUEPRINT LOCKED (2026-10-25), NOTHING BUILT.** Building starts only when SIX says go *and* says the Unity Editor is free; other sessions share it.
 
 **Rules (same as General Quarters):**
 - Phases MAY be reordered for dependency.
@@ -65,7 +65,7 @@ Plan only; the criteria are written before any code, per `spike-with-pass-criter
 | CB6 | CPU query cost with maps (`SeaBenchmark`, 8 192 probes) | ≤ 3× today (182 → ≤ 550 ns/probe) | The DDG's buoyancy is 0.30 ms per fixed step today |
 | CB7 | Where rays cross (behind the shoal) | after smoothing, amplitude factor ≤ 3, no NaN or unbounded spike | Bounded behaviour, not a calibrated value |
 
-**Where it runs (Q5, SIX to decide):** proposed in the project on its own branch, as on 2026-10-23.
+**Where it runs (Q5, answered 2026-10-25):** in the project, on its own branch `feat/theatre-spike`, cut from `feat/environment-maps`, as on 2026-10-23.
 - Its own folder, `Assets/Theatre Spike/`, with its own assembly that nothing references.
 - Sea State is not edited: the spike carries its own evaluator and decal variant.
 - No package changes are expected. If one is needed, its files are backed up first and a footprint note goes in the side-session notes.
@@ -77,7 +77,7 @@ Plan only; the criteria are written before any code, per `spike-with-pass-criter
 - [ ] Folders per P3 for `Theatre` and `Gravity`; asmdefs (`DeepWater.Theatre`, `DeepWater.Gravity`, `.Tests.Editor`); a banned-API source scan of both cores.
 - [ ] `Gravity`: `Down(p)`, `Drop(p)` on one sphere per theatre (E25), pure C#, tests against d²/2R and the tilt table.
 - [ ] `HeightField` (signed, 16 m, 4 097²), `GroundClass` map, `TheatreQuery` (height, depth, ground, line of sight with curvature and a per-sensor effective radius, E24).
-- [ ] `TheatreTypeSO`: a **strait** (Q3), with dials and a seed. A deterministic CPU bake, and an FNV-1a hash of the result.
+- [ ] `TheatreTypeSO`: a **strait** (Q3, answered 2026-10-25), with dials and a seed. A deterministic CPU bake, and an FNV-1a hash of the result.
 - [ ] Overlays (E16): a height stroke and a ground-paint layer, replayed after regeneration; the hash covers them.
 - [ ] Draw: HDRP Terrain built from the bake, with the drop baked into the heights; 4–6 rule layers and sparse seeded vegetation (E14); the far ring (E22) as coarse look-only heights.
 - [ ] Builder menu: **Deep Water → Theatre → Bake Theatre** and **Build Demo Scene**. The scene GUID survives rebuilds (C24).

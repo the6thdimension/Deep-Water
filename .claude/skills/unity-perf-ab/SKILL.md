@@ -34,6 +34,11 @@ Project rule (CLAUDE.md, methodology C11): profile before claiming a perf win, a
 ## Traps that fake a result
 
 - **Auto-refresh while the Editor is unfocused is erratic** (2026-10-25): one saved `.cs` was picked up in 7 s, the next in 237 s. Time edit cycles from an explicit `AssetDatabase.Refresh()` after a `MARK` line, not from the save.
+- **An unfocused Editor runs on the efficiency cores** (2026-10-25, the i9-12900H's 8 E-cores). Windows 11 power throttling (EcoQoS) confines a background Unity and its workers to the E-cores.
+  - A domain reload took 16.3 s throttled and 7.4 s with the process tree opted out. Shader compiling used 5.6 cores throttled and 13 cores opted out.
+  - Every Editor number taken while another window has focus is a background number, which includes every MCP-driven session. Say which you measured.
+  - Check with `Get-Counter '\Processor(*)\% Processor Time'`: logical 12–19 pinned at 100 % while 0–11 idle means throttled.
+  - The opt-out prototype is `scripts/ecoqos_optout.ps1 -EditorPid <Unity pid> -Log <file>` (BUILD-SPEED-LEDGER round 4).
 - **A long-running Editor drifts slower.** Domain reloads went from 38 s in the morning to 46–57 s after 5 h, with no code change. Interleave A and B runs (ABAB), and report n and the range.
 - **Game view resolution changes everything.** A switch to a fixed 2560×1440 between runs cut fps from ≈97 to 32 with no code change. The marker template records the resolution; compare only like with like.
 - **No GPU timestamps outside the render context.** `CommandBuffer.BeginSample` executed from `LateUpdate` via `Graphics.ExecuteCommandBuffer` reports 0; so did a `ProfilingSampler` outside the context. Time GPU work inside `beginContextRendering`. Check `SystemInfo.supportsGpuRecorder`.

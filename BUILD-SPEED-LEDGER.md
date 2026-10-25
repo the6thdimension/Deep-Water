@@ -101,19 +101,82 @@
 - **`EditorApplication.delayCall` fired 262 s late** while the Editor was unfocused.
 - **Auto-refresh is erratic while unfocused:** one edit was picked up in 7 s, the next in 237 s. Cycles therefore call `Refresh` explicitly.
 
-## Menu (ranked by time saved in the daily loop): awaiting SIX's picks
+## The full catalog: everything that could make Deep Water faster to work on (2026-10-25)
 
-| # | Change | Expected gain | Risk | Touches | Whose call |
-|---|---|---|---|---|---|
-| 1 | Remove `com.unity.collab-proxy` (Unity Version Control); untrack `.plastic/` | Reload 46.5 → ~14 s (−32.6 s, profiled). Edit → ready ~52 → ~20 s; play entry ~51 → ~19 s. Maybe also the +10 s stall (unverified) | Low: git is the VCS, and the plugin cannot log in anyway | `Packages/manifest.json`, `packages-lock.json`, `.gitignore`, `git rm --cached .plastic` | SIX (package removal) |
-| 1b | …or only close the UVCS window | The same 32.6 s, on this machine only | None; its background retries and file watcher stay | Editor layout | SIX |
-| 2 | Enter play mode without a domain reload (the scene still reloads) | Play entry ~19 s (after #1) → ~2–3 s | Medium: stale static state is a determinism bug. About 23 first-party static fields and collections need resets; vendor statics are unaudited | `EditorSettings.asset`, ~10 first-party files, a two-plays-same-Fix test | SIX |
-| 3 | `autoReferenced: false` on first-party asmdefs that the predefined assemblies don't use | Public edit compile 13.5 → ~4 s; private edit ~4.7 → ~3 s | Low: the compiler proves it | ~25 first-party `.asmdef` files | SIX (asmdef work) |
-| 4 | Remove unused packages, one A/B each: Visual Scripting, ML-Agents, Cesium (only `Mapping.unity` uses it), PostProcessing v2 (NWH's `PostProcessingController` needs it) | Unmeasured. Fewer of the 215 assemblies to load and scan; Cesium also saves its 0.29 s window constructor, 108 cold variants and 2 GB of cache. Estimate 1–5 s per reload | Low to medium: a feature is lost | Manifest, lock file; PostProcessing v2 also touches a vendor file | SIX (package removal) |
-| 5 | A logged HDRP shader stripper for shaders that can never render here (`Standard`, legacy PostProcessing, Cesium if not shipped) | Cold build: ~5–10 % of the shader CPU. The big two (Lit, TemporalAA) need HDRP feature decisions | Low, with a "stripped" log and a build smoke test | New editor script | SIX |
-| 6 | Unity Accelerator (free local cache service) | A cold Library or a second machine reuses imports (and shader variants, unverified on 6000.4) | Low; installs a service | Preferences, `EditorSettings` cache-server fields | SIX |
-| 7 | Asmdefs inside Obi and HurricaneVR (a vendor change) | Legacy edit compile 6.55 → ~2.5 s | Medium: vendor folders, editor/runtime splits | Vendor folders | SIX |
-| — | Kept as they are | Mono is already the Windows backend (IL2CPP would add minutes); Editor Debug mode doesn't affect compile time; the disk is NVMe | | | |
+*SIX asked for any and everything, from preferences to methods nobody has tried. Each item gives its status:*
+- *done*: committed on `perf/build-speed`;
+- *measured*: an A/B number exists;
+- *estimated*: arithmetic from measured parts, not run;
+- *untested*.
+
+*"SIX" in the "who" column means a Windows or account setting Claude must not change.*
+
+**Where the day stands (Editor in the background, the state every MCP session works in):** domain reload 46.5 → 7.4 s. Private-edit compile 4.7 → 1.2–1.6 s; public-edit compile 13.5 → 3.1–3.4 s. Cold build 1,313 s, with ~5 min of it lost to the efficiency cores.
+
+### A. The machine (biggest wins, mostly settings)
+
+| # | What | Gain | Status | Who |
+|---|---|---|---|---|
+| A1 | **Run Unity's process tree at full speed, not on the E-cores.** Windows 11 power throttling holds a background Unity on the 8 efficiency cores | Reload ×2.2 (16.3 → 7.4 s). Shader workers 5.6 → 13 cores. Cold build ~−5 min | measured (reload, cores); estimated (build) | see A1a–d |
+| A1a | Build it in: a first-party Editor tool, "Full Speed". On load it opts `Unity.exe` out, and every few seconds every child process (shader workers, Bee, `csc`, ILPP runner, Burst). Windows-only, no admin, a menu toggle, logged | As A1, automatically, in every session | prototype proven (`ecoqos_optout.ps1`) | Claude |
+| A1b | Exempt the executables for good: `powercfg /powerthrottling disable /path "<exe>"` (admin) for `Unity.exe`, `UnityShaderCompiler.exe`, `bee_backend.exe`, `Unity.ILPP.Runner.exe`, `dotnet.exe`, `netcorerun.exe`, and Burst's compiler, under `C:\Program Files\Unity\Hub\Editor\6000.4.11f1\` | As A1, without a tool. Redo after each Unity upgrade | untested | SIX |
+| A1c | Windows power mode "Best performance" while plugged in (Settings > System > Power). Currently Balanced | Less throttling everywhere | untested | SIX |
+| A1d | Keep Unity focused during builds | As A1 for that build | follows from A1 | SIX |
+| A2 | Microsoft Defender exclusions for the project folder, `Library`, the Unity install and `%LOCALAPPDATA%\Unity`. Or move the project to a Windows 11 **Dev Drive** (ReFS, with Defender's performance mode) | File-heavy phases: import, compile, Bee. Defender used 0.19 core during shaders, so likely small | untested | SIX |
+| A3 | Free space: `C:` 3 % free (32 GB), `F:` 7 % | Avoids slow paths on a nearly full NVMe (Unity's global caches and Temp are on `C:`) | untested | SIX |
+| A4 | Cooling: an OEM performance fan profile; the laptop on a stand | Sustained all-core clocks in long builds | untested | SIX |
+| A5 | Open the project by its real path `F:\…` instead of the junction `C:\Users\SIX\Unity Projects` | May make auto-refresh reliable (the junction trap) | untested | SIX |
+
+### B. Unity Editor settings and habits
+
+| # | What | Gain | Status | Who |
+|---|---|---|---|---|
+| B1 | **Enter play mode without a domain reload** (the scene still reloads). Needs about 23 first-party static fields reset at play start, and a test that a seeded run gives the same Fix twice | Play entry ~9 s (est. after A1) → ~2 s | approved (round 5), not built | Claude |
+| B2 | FR2 (Find Reference 2): turn off its auto-refresh, or close its window | −1.4 s after every reload | measured cost | SIX or Claude |
+| B3 | Preferences > General > Interaction Mode: "No Throttling" | May remove the ~7.8 s compile-to-reload floor seen while unfocused | untested | SIX |
+| B4 | Preferences > General > Script Changes While Playing: "Recompile After Finished Playing" | Avoids the play-mode compile freeze (10+ min lost once) | known trap | SIX |
+| B5 | Editor code optimization "Release" (the bug icon, bottom right). It is "Debug" now | Faster editor-side C#: tests, play-mode sim. No compile change | untested | SIX |
+| B6 | Asset Pipeline: Parallel Import on | Big model and texture imports | untested | SIX |
+
+### C. Project structure
+
+| # | What | Gain | Status | Who |
+|---|---|---|---|---|
+| C1 | Remove Unity Version Control and untrack `.plastic/` | Reload −31 s | **done** (round 1) | — |
+| C2 | First-party asmdefs off auto-reference | Compile ×2.8 (private edit), ×4 (public edit) | **done** (round 2) | — |
+| C3 | Remove unused packages | Fewer of the 215 assemblies per reload | Visual Scripting **done**. ML-Agents, Cesium (also −245 s of compile per cold build), PostProcessing v2 parked | Claude |
+| C4 | Asmdefs inside Obi and HurricaneVR (a vendor change) | Legacy-edit compile 6.6 → ~2.5 s | approved, not built | Claude |
+| C5 | **Freeze vendor code into precompiled DLLs** (Obi, HurricaneVR, RootMotion, RCC, NWH): built once, then never recompiled or post-processed | `Assembly-CSharp` 763 → ~90 files; firstpass emptied | untested | SIX decides |
+| C6 | Move unused vendor demo content out of `Assets/` (or into `Name~` folders, which Unity ignores): Obi samples, RCC demo, NWH demo, HurricaneVR examples, VFX Arsenal examples | Less to scan, import, compile and ship. Needs a usage audit first | untested | SIX decides |
+| C7 | Audit every `Resources/` folder (RCC, Obi, NWH, Cesium): all of it ships, and its shaders compile in every build | `resources.assets` packaging took 140 s cold | measured cost | Claude |
+| C8 | Startup hooks per reload: the AI Assistant bridge 1.9 s (vendor; report to Unity), Entities 0.55 s (locked by Reckoning) | Small | measured cost | — |
+
+### D. Player builds
+
+| # | What | Gain | Status | Who |
+|---|---|---|---|---|
+| D1 | **Burst AOT for one CPU target (AVX2) instead of SSE2 + SSE4.** Burst compiles every job once per target | Burst step ~−50 % (66 s → ~33 s per code-changed build), faster code. Needs an AVX2 CPU (any since 2013) | estimated | Claude |
+| D2 | Two build profiles. "Iterate": development build, Burst *Fast Compilation*, one CPU target, one quality level, no compression. "Release": as now | Iteration builds much faster; release unchanged | untested | Claude |
+| D3 | Scripts-only player builds when only code changed (`BuildOptions.BuildScriptsOnly`, development builds) | Skips data packaging | untested | Claude |
+| D4 | **Fewer shader variants**, for cold builds | Lower the 950 s shader phase | Claude, with SIX's look at visuals | |
+| D4a | Turn off ray tracing in "HDRP High Fidelity" if it isn't wanted | `HDRP/Lit`'s DXR passes, ~290 s of compile time | estimated | SIX decides |
+| D4b | 6000.4 **Shader Build Settings, keyword declaration overrides**: turn chosen HDRP keywords into runtime branching or material-usage variants, without editing HDRP | `TemporalAA` alone is 1,284 variants and 768 s | untested | Claude |
+| D4c | A logged stripper for shaders HDRP can't render (built-in `Standard`, legacy PostProcessing) | ~100 s of compile time | estimated | Claude |
+| D4d | Make the four HDRP assets agree, or ship one quality level in development builds (HDRP compiles the union of their features) | Unknown | untested | SIX decides |
+| D5 | Unity Accelerator (free cache service) for imports and shaders, shared by the laptop and any second checkout | A fresh `Library` or another machine compiles nothing twice | untested | SIX installs; Claude configures |
+| D6 | DXC, the faster shader compiler: 6000.4 has no project switch (only per-pass pragmas inside HDRP). A later Unity adds "Shader Compiler Backend Selection", which needs a DX12-only player | Faster per variant (Unity's docs) | blocked on a Unity upgrade | SIX decides |
+| D7 | Keep Mono for development builds (IL2CPP adds minutes) | — | already so | — |
+
+### E. Novel and experimental
+
+| # | What | Gain | Status | Who |
+|---|---|---|---|---|
+| E1 | **"Full Speed" (A1a), as a project tool.** Unity tooling that manages Windows power throttling for its own process tree | ×2 on everything done in the background | prototype proven | Claude |
+| E2 | **A background cache warmer.** A second checkout (`git worktree`) with its own `Library` builds headless overnight, or when HDRP or shader files change, and feeds Accelerator. The Editor's cold builds become cache hits, and the Editor is never locked by a build | A cold build becomes ~1–2 min | untested; needs D5 | SIX and Claude |
+| E3 | **Slowest-variant-first pre-compile.** Unity compiles one shader at a time, and `HDRP/Lit`'s slowest variants (~48 s each) leave cores idle at the end. Compile them in parallel ahead of the build through `ShaderData.Pass.CompileVariant` | Removes the idle tails (780–900 s, 1,050–1,200 s) | research: unknown whether it fills the build's cache | Claude |
+| E4 | **Hot reload** with open-source FastScriptReload (MIT): apply C# edits without a domain reload, even in play mode | Edit → running ~1 s for supported changes | untested; determinism risk for sim code | SIX decides |
+| E5 | `Library/Bee` and `Temp` on a RAM disk or Dev Drive | Small on NVMe | untested | SIX |
+| E6 | Unity on CoreCLR (a future Unity 6.x): domain reloads go away | The reload, entirely | watch item | — |
 
 ## Rounds
 
@@ -165,3 +228,59 @@ Every round must leave exactly this result.
   - The private edit's "ready" did not move. In this harness the reload never starts sooner than ~7.8 s after the refresh call, whatever the compile time (see Instrument note below). A faster compile lands inside that floor.
 - **Behaviour (R1 + R2):** 301 pass, 3 fail, the same three as the pin.
 - **Instrument note:** with the Editor unfocused and driven through the MCP bridge, "Reloading assemblies after finishing script compilation" came at 7.5–8.0 s after the `MARK` in every cycle whose compile ended before that (4 of 4).
+
+### Round 3a: remove Visual Scripting (kept, measured once)
+
+- **Why it could go:** no C# references it, and no scene, prefab or asset references any of its 1,845 asset GUIDs (scanned with `pkg_refs.py`).
+- **Cost of the change:** one full recompile (79 s, 1,381 nodes), then a 19.1 s reload, against 16.2 and 16.4 s just before.
+- **Not A/B'd:** SIX asked to stop A/B-ing small gains and to focus on shader compilation.
+- **Parked (SIX approved them, then redirected):** ML-Agents, Cesium and PostProcessing v2.
+  - ML-Agents: the legacy `SENTINAL.unity` holds 3 `BehaviorParameters`, with no Agent script anywhere.
+  - Cesium: `Mapping.unity` and `Assets/CesiumSettings` use it, and its two tileset shaders cost 245 s of compile time in every cold build.
+  - PostProcessing v2: NWH's `PostProcessingController.cs` imports it without a guard. The fix is `#if UNITY_POST_PROCESSING_STACK_V2` around the file, plus dropping that stale define.
+
+### Instrumented cold player build (2026-10-25 17:18, Editor unfocused)
+
+*Seat: Brendan Gregg (The Optimizer): put a clock on the phase and a sampler on every core.*
+
+- **Setup:**
+  - The Air Wing benchmark scene, `BuildOptions.CleanBuildCache`, written to `Builds/BuildSpeed/AirWingCold/`.
+  - `Library/ShaderCache`, `Library/BurstCache/Windows-Intel` and `Library/PlayerDataCache` were renamed to `*.pre-coldtest-backup-20261025-1717`, not deleted. They are now stale duplicates for SIX to remove when he likes. `ShaderCache.db` was locked by the Editor, so it was left in place.
+- **Result:** Succeeded, 0 errors, **1,313 s**, 354 MB. Steps, from `BuildReport`:
+
+| Step | Seconds | What runs |
+|---|---|---|
+| Compile scripts (player) | 116.6 | `csc` + IL post-processing over ~90 assemblies, ~5.6 cores busy |
+| Writing asset files | **1,065.6** | Packaging `globalgamemanagers.assets` 925.0 s and `resources.assets` 140.4 s. **Shader compilation runs here** |
+| Postprocess built player | 95.5 | Bee player build, Burst AOT (3–10 cores) |
+| Everything else | ~35 | Preprocess, scenes 4.1 s, built-in extras |
+
+- **Shaders:**
+  - 207 shaders, 4,555 variants, 2 local cache hits, 2,998 s of logged compile time over ~950 s: **3.2× parallel on 20 threads**.
+  - Top: `HDRP/Lit` 982 s (105 variants), `Hidden/HDRP/TemporalAA` 768 s (1,284), `HDRP/Water` 318 s (122), the two Cesium tileset shaders 245 s (108), `CloudLayer` 135 s, `FinalPass` 128 s, `HDRISky` 89 s.
+- **Why only 3.2×: Windows held the build on the efficiency cores.**
+  - The i9-12900H has 6 P-cores (logical 0–11) and 8 E-cores (logical 12–19). With the Editor in the background, Windows 11 power throttling (EcoQoS) ran all 23 `UnityShaderCompiler` workers on the 8 E-cores.
+  - Per logical processor, E-cores 12–19 sat at 100 % while P-cores 0–11 sat at 0–55 %, at 145–168 % clock. Each worker used ~0.33 core and had "Ready" threads (runnable, not scheduled). Not the disk (1 % busy), not Defender (0.19 core), not heat (121 % clock).
+  - At +523 s the workers were opted out of power throttling, per process (`SetProcessInformation(ProcessPowerThrottling)`, the switch Task Manager's "Efficiency mode" uses; it ends with the process). All 20 logical processors went to 100 %, and the workers went from **5.6 to 12.4–13.2 cores**.
+  - Later dips to 4–7 cores (780–900 s, 1,050–1,200 s) are a few slow `HDRP/Lit` variants compiling alone.
+- **Estimate (not measured):** the whole build unthrottled would take ~1,000 s, saving ~4 min of the shader phase and ~1 min of the script compile.
+- **Two wrong readings, reported before this measurement and kept on the record (methodology C33):**
+  - "~80 % shaders" came from summing per-pass times. It was close, by luck.
+  - "~115 s, cores saturated" came from the per-shader maximum. It was wrong.
+
+### Round 4: run the Editor's process tree at full speed (measured; the tool is not built yet)
+
+*Seat: Brendan Gregg (The Optimizer): the machine was half idle; find out who holds the other half.*
+
+- **Change (prototype, scratch only):** a watcher opted `Unity.exe` and every process it starts out of power throttling, every 2 s: 39 processes, including the 22 shader workers, `Unity.ILPP.Runner`, Package Manager and the MCP relay. Nothing in the project or in Windows settings changed. The effect ends when those processes exit.
+- **A/B, domain reload (`RequestScriptReload`), Editor unfocused in both:**
+
+| | Runs | Reload | `ProcessInitializeOnLoadAttributes` | `AwakeInstances…` |
+|---|---|---|---|---|
+| A (round 3a state, throttled) | 16.2, 16.4 s | 16.3 s | 4.38–4.42 s | 1.86–1.91 s |
+| B (opted out) | 7.53, 7.27 s | **7.4 s** | 1.87–1.99 s | 0.85–0.86 s |
+
+- **Result:** reload ×2.2. From the day's baseline: **46.5 s → 7.4 s (×6.3)**.
+- **What it means:** with the Editor in the background, every Editor operation runs on E-cores. That covers compiles, reloads, tests and builds, and every session driving the Editor over MCP.
+  - The numbers in rounds 0–3 are background numbers.
+  - With the Editor in the foreground, Windows does not throttle it.

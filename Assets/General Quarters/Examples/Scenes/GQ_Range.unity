@@ -1023,6 +1023,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 1392554498}
+    - targetCorrespondingSourceObject: {fileID: 2079039183047107412, guid: 5a08bafcc00a86f488c9c01b980c0e73,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1392554499}
   m_SourcePrefab: {fileID: 100100000, guid: 5a08bafcc00a86f488c9c01b980c0e73, type: 3}
 --- !u!4 &1392554495 stripped
 Transform:
@@ -1063,6 +1067,18 @@ MonoBehaviour:
   loadout: {fileID: 11400000, guid: 6fa78c546100b4e46958590d385fa391, type: 2}
   aiCaptainProfile: {fileID: 11400000, guid: 107fe622b10eb6b4fa79b608f7e66479, type: 2}
   aiCaptainLevel: 0
+--- !u!114 &1392554499
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1392554497}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d075f1cd1b743d40aefdc19e9a8992e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: DeepWater.GeneralQuarters::DeepWater.GeneralQuarters.Modules.Hull.ShipFlooding
 --- !u!1 &2065960841
 GameObject:
   m_ObjectHideFlags: 0

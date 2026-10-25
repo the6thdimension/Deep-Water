@@ -71,6 +71,10 @@ Runs C# by compiling a **transient assembly** against the loaded project assembl
    - Moving the camera in the same frame as the capture adds motion blur. Move it a frame earlier if the image matters.
 8. **Unity recomputes its automatic inertia tensor about a scripted centre of mass** (parallel-axis shift, seen 2026-10-23: 2187 → 3794 kg·m² for a 0.7 m drop). Read `rb.inertiaTensor` in play before predicting any rotational period. The recorder logs it.
 
+9. **`wait_build.sh`'s symbol must be code, not a comment** (2026-10-24, 4 minutes lost). Comments never reach the DLL, so waiting for a phrase from a doc comment always times out, even after a good build. Wait for a new class, method or field name.
+10. **A RunCommand can do its work and lose its reply** (2026-10-24, 30 minutes). A command that saved assets and a scene, sent just after a forced recursive reimport of a whole module folder, timed out after 1,800 s. The bridge had stopped for a domain reload. The command had in fact run: the assets and the scene were saved. Before re-sending, check the state it should have left (`GetState`, then a read-only RunCommand). Reimport only the folders you edited, never a module root with its FBX and textures.
+11. **Someone may be driving the Game view.** SIX plays the range while sessions work. A play recording that shows orders you never gave (a Captain rudder order from the mouse, breach-preset clicks, bells) was a human at the controls. Read the core's order log (`Combat.Orders.All`, with issuers) before you trust a recording, and ask before taking over play mode.
+
 ## Play mode & timing
 
 - **Controls:** `Unity_ManageEditor` Actions `Play`, `Stop` and `GetState` (`IsPlaying`, `IsPaused`, `IsCompiling`, `IsUpdating`).

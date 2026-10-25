@@ -33,6 +33,82 @@ MonoBehaviour:
     width: 0.36
     height: 0.44
   cameraLingerS: 2.5
+  breaches:
+  - name: Wing 06 S
+    holes:
+    - pointShip: {x: 8, y: -3, z: 10}
+      areaM2: 2
+  - name: Hold 02
+    holes:
+    - pointShip: {x: 0, y: -4, z: 58}
+      areaM2: 2
+  - name: Holds 05-07
+    holes:
+    - pointShip: {x: 0, y: -4, z: 22}
+      areaM2: 3
+    - pointShip: {x: 7, y: -2, z: 22}
+      areaM2: 2
+    - pointShip: {x: -7, y: -2, z: 22}
+      areaM2: 2
+    - pointShip: {x: 0, y: -4, z: 10}
+      areaM2: 3
+    - pointShip: {x: 7, y: -2, z: 10}
+      areaM2: 2
+    - pointShip: {x: -7, y: -2, z: 10}
+      areaM2: 2
+    - pointShip: {x: 0, y: -4, z: -2}
+      areaM2: 3
+    - pointShip: {x: 7, y: -2, z: -2}
+      areaM2: 2
+    - pointShip: {x: -7, y: -2, z: -2}
+      areaM2: 2
+  - name: Holds 03-09
+    holes:
+    - pointShip: {x: 0, y: -4, z: 46}
+      areaM2: 3
+    - pointShip: {x: 7, y: -2, z: 46}
+      areaM2: 2
+    - pointShip: {x: -7, y: -2, z: 46}
+      areaM2: 2
+    - pointShip: {x: 0, y: -4, z: 34}
+      areaM2: 3
+    - pointShip: {x: 7, y: -2, z: 34}
+      areaM2: 2
+    - pointShip: {x: -7, y: -2, z: 34}
+      areaM2: 2
+    - pointShip: {x: 0, y: -4, z: 22}
+      areaM2: 3
+    - pointShip: {x: 7, y: -2, z: 22}
+      areaM2: 2
+    - pointShip: {x: -7, y: -2, z: 22}
+      areaM2: 2
+    - pointShip: {x: 0, y: -4, z: 10}
+      areaM2: 3
+    - pointShip: {x: 7, y: -2, z: 10}
+      areaM2: 2
+    - pointShip: {x: -7, y: -2, z: 10}
+      areaM2: 2
+    - pointShip: {x: 0, y: -4, z: -2}
+      areaM2: 3
+    - pointShip: {x: 7, y: -2, z: -2}
+      areaM2: 2
+    - pointShip: {x: -7, y: -2, z: -2}
+      areaM2: 2
+    - pointShip: {x: 0, y: -4, z: -14}
+      areaM2: 3
+    - pointShip: {x: 7, y: -2, z: -14}
+      areaM2: 2
+    - pointShip: {x: -7, y: -2, z: -14}
+      areaM2: 2
+    - pointShip: {x: 0, y: -4, z: -26}
+      areaM2: 3
+    - pointShip: {x: 7, y: -2, z: -26}
+      areaM2: 2
+    - pointShip: {x: -7, y: -2, z: -26}
+      areaM2: 2
   provenance: "AUTHORED: an 8 \xD7 6 km patrol box from the range origin (the DDG
     starts there, heading 000 at 12 kn), six laps. The TAO camera window matches
-    RangeScreen.uss (.gq-camera-window)."
+    RangeScreen.uss (.gq-camera-window). Breach presets (AUTHORED scenario damage,
+    G57): starboard wing 06 (2 m\xB2, 3 m below the waterline), hold 02 (2 m\xB2,
+    4 m down), holds 05-07 and their wings (within the margin), holds 03-09 and their
+    wings (past it: she sinks)."

@@ -81,6 +81,15 @@ namespace DeepWater.GeneralQuarters.Examples
             return true;
         }
 
+        /// <summary>Open a breach preset's holes: one Breach Order each, from the scenario (G57). Below Damage Control L1 the core notes it and floods nothing.</summary>
+        public void Breach(int preset)
+        {
+            if (preset < 0 || preset >= range.breaches.Length) return;
+            BreachPreset b = range.breaches[preset];
+            foreach (BreachHole h in b.holes) combat.Issue(Order.Breach(OrderIssuer.Scenario, h.pointShip, h.areaM2));
+            Note($"breach '{b.name}': {b.holes.Length} hole{(b.holes.Length == 1 ? "" : "s")} opened by the scenario");
+        }
+
         public void SwitchSeat() => SetSeat(PlayerSeat == Seat.Captain ? Seat.Tao : Seat.Captain);
 
         public void SetSeat(Seat seat)

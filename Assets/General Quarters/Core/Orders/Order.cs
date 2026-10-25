@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace DeepWater.GeneralQuarters.Core.Orders
 {
     /// <summary>Who gave an Order. The ship never knows whether a seat is human (BLUEPRINT §3.3).</summary>
@@ -24,6 +26,8 @@ namespace DeepWater.GeneralQuarters.Core.Orders
         Route = 7,
         /// <summary>Steer a course and leave the engines as they are ("come to 090").</summary>
         Course = 8,
+        /// <summary>Open a hole in the hull: a scripted breach (Damage Control L1, G57). Issued by the scenario or a test.</summary>
+        Breach = 9,
     }
 
     /// <summary>
@@ -77,6 +81,12 @@ namespace DeepWater.GeneralQuarters.Core.Orders
         public DoctrineMode Mode;
         public Roe Roe;
 
+        // Breach
+        /// <summary>Where the hole is, in the ship frame (x starboard, y up, z forward; origin at the waterline amidships), m.</summary>
+        public Vector3 PointShip;
+        /// <summary>The hole's area, m².</summary>
+        public float AreaM2;
+
         public static Order Helm(OrderIssuer issuer, float courseDeg, float speedKn) =>
             new Order { Kind = OrderKind.Helm, Issuer = issuer, CourseDeg = courseDeg, SpeedKn = speedKn, TrackId = -1 };
 
@@ -104,6 +114,9 @@ namespace DeepWater.GeneralQuarters.Core.Orders
         public static Order SetRoe(OrderIssuer issuer, Roe roe) =>
             new Order { Kind = OrderKind.Roe, Issuer = issuer, Roe = roe, TrackId = -1 };
 
+        public static Order Breach(OrderIssuer issuer, Vector3 pointShip, float areaM2) =>
+            new Order { Kind = OrderKind.Breach, Issuer = issuer, PointShip = pointShip, AreaM2 = areaM2, TrackId = -1 };
+
         public override string ToString() => Kind switch
         {
             OrderKind.Helm => System.FormattableString.Invariant($"#{Sequence} t{Tick} {Issuer}: helm course {CourseDeg:0}°, {SpeedKn:0} kn"),
@@ -114,6 +127,7 @@ namespace DeepWater.GeneralQuarters.Core.Orders
             OrderKind.Rudder => System.FormattableString.Invariant($"#{Sequence} t{Tick} {Issuer}: rudder {RudderDeg:0}°"),
             OrderKind.Route => System.FormattableString.Invariant($"#{Sequence} t{Tick} {Issuer}: follow route {RouteId} at {SpeedKn:0} kn"),
             OrderKind.Course => System.FormattableString.Invariant($"#{Sequence} t{Tick} {Issuer}: steer {CourseDeg:000}"),
+            OrderKind.Breach => System.FormattableString.Invariant($"#{Sequence} t{Tick} {Issuer}: breach {AreaM2:0.00} m² at ({PointShip.x:+0.0;-0.0}, {PointShip.y:+0.0;-0.0}, {PointShip.z:+0.0;-0.0}) m"),
             _ => System.FormattableString.Invariant($"#{Sequence} t{Tick} {Issuer}: ROE {Roe}"),
         };
     }

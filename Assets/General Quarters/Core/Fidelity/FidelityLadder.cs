@@ -61,6 +61,7 @@ namespace DeepWater.GeneralQuarters.Core.Fidelity
             switch (element)
             {
                 case ElementKind.Guns: return FidelityLevel.L1;   // Stream B slice B1 (2026-10-24)
+                case ElementKind.DamageControl: return FidelityLevel.L1;   // Stream C slice C1 (2026-10-24)
                 // Phase 1: every element starts at L0.
                 default: return FidelityLevel.L0;
             }

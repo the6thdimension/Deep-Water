@@ -33,6 +33,7 @@ namespace DeepWater.GeneralQuarters.Core
         readonly List<FidelityResolution> _fidelity = new List<FidelityResolution>();
         readonly ISensorModel _radar;
         readonly IGunMount[] _guns;
+        OwnShipState _own;
 
         public OrderLog Orders { get; } = new OrderLog();
         public EngagementLog Log { get; } = new EngagementLog();
@@ -66,7 +67,7 @@ namespace DeepWater.GeneralQuarters.Core
             Vls = VlsFactory.Create(loadout.VlsLevel, loadout.Vls, _clock, out r); Note(r);
             _guns = new IGunMount[loadout.Guns.Length];
             for (int i = 0; i < _guns.Length; i++) { _guns[i] = GunFactory.Create(loadout.GunsLevel, loadout.Guns[i], out r); if (i == 0) Note(r); }
-            DamageControl = DamageControlFactory.Create(loadout.DamageLevel, loadout.Damage, out r); Note(r);
+            DamageControl = DamageControlFactory.Create(loadout.DamageLevel, loadout.Damage, loadout.Flooding, out r); Note(r);
 
             // The scenario's starting doctrine is a root like any Order: Inquiry can cite it.
             int roe = Log.Add(0, EventKind.OrderApplied, DoctrineRule, $"scenario default ROE {loadout.DefaultRoe}", root: RootKind.Scenario);
@@ -89,6 +90,7 @@ namespace DeepWater.GeneralQuarters.Core
         public void Step(in OwnShipState own, IReadOnlyList<TruthTarget> world, IReadOnlyList<ShipHit> hits, List<KillReport> kills)
         {
             long tick = Tick;
+            _own = own;
             _clock.Tick = tick;
             _ctx.Tick = tick;
             _ctx.TickSeconds = _loadout.TickSeconds;
@@ -138,7 +140,7 @@ namespace DeepWater.GeneralQuarters.Core
             _ctx.Mount = -1;
             PruneDirected();
 
-            // 7. Damage control
+            // 7. Damage control: this tick's hits, then the element's own step (flooding, from L1).
             for (int i = 0; i < hits.Count; i++)
             {
                 ShipHit hit = hits[i];
@@ -148,6 +150,7 @@ namespace DeepWater.GeneralQuarters.Core
                 foreach (ShipSystem s in _offline) TakeOffline(s);
                 if (Tracks.TryGetByTruth(hit.ThreatId, out t)) Tracks.MarkDestroyed(t.Id);
             }
+            DamageControl.Step(tick, _loadout.TickSeconds, own, Log);
 
             // 8. Fix
             Fix = Fingerprint(Fix, tick);
@@ -172,6 +175,9 @@ namespace DeepWater.GeneralQuarters.Core
                 case OrderKind.CeaseFire:
                     int ceaseTrack = o.TrackId;
                     _directed.RemoveAll(d => ceaseTrack < 0 || d.TrackId == ceaseTrack);
+                    break;
+                case OrderKind.Breach:
+                    DamageControl.Breach(o.Tick, o, _own, ev, Log);
                     break;
                 case OrderKind.Engage:
                     if (IsMissile(o.Weapon))

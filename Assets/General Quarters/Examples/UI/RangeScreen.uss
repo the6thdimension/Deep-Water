@@ -66,6 +66,14 @@
 .gq-ticker { position: absolute; left: 500px; right: 330px; bottom: 10px; max-height: 128px; overflow: hidden; }
 .gq-log { white-space: normal; color: rgb(200, 215, 228); }
 
+/* Damage control (both seats, G59) */
+.gq-dc { position: absolute; right: 10px; top: 54px; width: 440px; }
+.gq-dc-view { margin-top: 2px; margin-bottom: 4px; }
+.gq-dc-side { height: 44px; }
+.gq-dc-plan { height: 36px; }
+.gq-dc-tao { margin-top: 4px; }
+.gq-dc-tao .gq-dc-side { height: 28px; }
+
 /* TAO seat (camera window: left 64 %, top 6 %, 44 % high, as the profile's viewport rect) */
 .gq-backdrop { position: absolute; background-color: rgb(4, 8, 13); }
 .gq-backdrop--left { left: 0; top: 0; bottom: 0; width: 64%; }

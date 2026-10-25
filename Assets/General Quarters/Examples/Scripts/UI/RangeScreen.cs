@@ -5,6 +5,7 @@ using UnityEngine.UIElements;
 using DeepWater.GeneralQuarters.Core;
 using DeepWater.GeneralQuarters.Core.Captain;
 using DeepWater.GeneralQuarters.Core.Cic;
+using DeepWater.GeneralQuarters.Core.DamageControl;
 using DeepWater.GeneralQuarters.Core.Helm;
 using DeepWater.GeneralQuarters.Core.Log;
 using DeepWater.GeneralQuarters.Core.Magazine;
@@ -59,6 +60,7 @@ namespace DeepWater.GeneralQuarters.Examples
         ActionButton _stopButton;
         readonly Dictionary<WeaponClass, ActionButton[]> _doctrineButtons = new Dictionary<WeaponClass, ActionButton[]>();
         TrackScope _scopeMain, _scopeInset;
+        DamageBoard _dcCaptain, _dcTao;
         readonly List<TrackRow> _rows = new List<TrackRow>();
         readonly List<TrackScope.Blip> _blips = new List<TrackScope.Blip>();
         readonly List<TrackScope.MissileBlip> _missileBlips = new List<TrackScope.MissileBlip>();
@@ -136,6 +138,17 @@ namespace DeepWater.GeneralQuarters.Examples
             _hull = Q<AppText>("hull-text");
             _helpText = Q<AppText>("help-text");
             _helpText.text = HelpText;
+
+            _dcCaptain = new DamageBoard(false);
+            Q<VisualElement>("dc-captain-board").Add(_dcCaptain);
+            _dcTao = new DamageBoard(true);
+            Q<VisualElement>("dc-tao-board").Add(_dcTao);
+            VisualElement breaches = Q<VisualElement>("dc-breach-row");
+            for (int i = 0; i < director.Range.breaches.Length; i++)
+            {
+                int preset = i;
+                Btn(breaches, director.Range.breaches[i].name, () => director.Breach(preset));
+            }
 
             _seatButton = Q<AppButton>("seat-button");
             _seatButton.clickable.clicked += () => director.SwitchSeat();
@@ -302,6 +315,7 @@ namespace DeepWater.GeneralQuarters.Examples
             RefreshScopes(combat, c);
             if (director.PlayerSeat == Seat.Captain) RefreshHelm(combat, c);
             else RefreshTao(combat, c);
+            (director.PlayerSeat == Seat.Captain ? _dcCaptain : _dcTao).Refresh(c.DamageControl.Flooding);
             string ticker = Ticker(c, director.PlayerSeat == Seat.Captain ? 6 : 4);
             if (director.PlayerSeat == Seat.Captain) _tickerCaptain.text = ticker; else _tickerTao.text = ticker;
         }
@@ -526,7 +540,8 @@ namespace DeepWater.GeneralQuarters.Examples
             {
                 EngagementEvent e = events[i];
                 bool notable = e.Kind == EventKind.Launched || e.Kind == EventKind.Kill || e.Kind == EventKind.Miss || e.Kind == EventKind.ShipHit
-                               || e.Kind == EventKind.SystemOffline || e.Kind == EventKind.Decision || (e.Kind == EventKind.Note && e.Rule != null && e.Rule.StartsWith("Range"));
+                               || e.Kind == EventKind.SystemOffline || e.Kind == EventKind.Decision || e.Kind == EventKind.Breach || e.Kind == EventKind.Flooding
+                               || (e.Kind == EventKind.Note && e.Rule != null && e.Rule.StartsWith("Range"));
                 if (!notable) continue;
                 string text = e.Text.Length > 150 ? e.Text.Substring(0, 147) + "…" : e.Text;
                 _tickerLines.Add($"{Clock(e.Tick * c.TickSeconds)}  {KindWord(e.Kind)}  {text}");
@@ -546,6 +561,8 @@ namespace DeepWater.GeneralQuarters.Examples
             EventKind.ShipHit => "HIT",
             EventKind.SystemOffline => "DAMAGE",
             EventKind.Decision => "AI",
+            EventKind.Breach => "BREACH",
+            EventKind.Flooding => "FLOOD",
             _ => "RANGE",
         };
 
@@ -567,6 +584,7 @@ namespace DeepWater.GeneralQuarters.Examples
             Line(card, _sb.Append('.').ToString());
             Line(card, $"Damage: hull {s.HullHitPoints:0} / {s.HullHitPointsMax:0}{(s.OutOfAction ? ", OUT OF ACTION" : "")}" +
                        (s.Offline.Count > 0 ? $"; offline: {string.Join(", ", s.Offline)}." : "; every system online."));
+            if (s.HasFlooding) FloodingLines(card, s);
             Line(card, $"{s.Orders} orders ({s.AiDecisions} AI captain decisions) · {Clock(s.DurationS)} of raid · seed {s.Seed} · Fix {s.Fix:X16}");
             float p99 = cost.CorePercentileMs(0.99f);
             Line(card, $"Combat core per fixed step during the raid (this machine{(Application.isEditor ? ", Editor" : "")}): mean {cost.CoreMeanMs:0.000} ms · " +
@@ -582,6 +600,24 @@ namespace DeepWater.GeneralQuarters.Examples
             card.Add(buttons);
             _debrief = Modal.Build(_panel, card);
             _debrief.Show();
+        }
+
+        /// <summary>The flooding summary and its timeline, each line with its cause (G59).</summary>
+        static void FloodingLines(VisualElement card, RaidSummary s)
+        {
+            if (s.Flooding.Count == 0) { Line(card, "Flooding: none (no hole below the water)."); return; }
+            string outcome = s.Verdict == FloodVerdict.Afloat ? "SAVED: afloat" : s.Verdict == FloodVerdict.Sinking ? "LOST: SINKING" : "LOST: CAPSIZED";
+            Line(card, $"Flooding: {s.Breaches} spaces holed, {s.SpacesWet} wet, {s.SpacesFull} flooded, {s.WaterT:0} t of water. " +
+                       $"Peak list {Mathf.Abs(s.PeakListDeg):0.0}°, peak trim {Mathf.Abs(s.PeakTrimM):0.00} m; GM {s.IntactGmM:0.00} → {s.MinGmM:0.00} m at worst; " +
+                       $"reserve buoyancy {s.ReserveBuoyancy:0%}. {outcome}.");
+            const int shown = 14;
+            for (int i = 0; i < s.Flooding.Count && i < shown; i++)
+            {
+                FloodLine l = s.Flooding[i];
+                string cause = string.IsNullOrEmpty(l.Cause) ? "" : "  ← " + (l.Cause.Length > 70 ? l.Cause.Substring(0, 67) + "…" : l.Cause);
+                Line(card, $"   {(l.TimeS < 0f ? "−" : "")}{Clock(Mathf.Abs(l.TimeS))}  {l.Text}{cause}");
+            }
+            if (s.Flooding.Count > shown) Line(card, $"   … and {s.Flooding.Count - shown} more in the engagement log.");
         }
 
         static void Line(VisualElement card, string text)
@@ -664,6 +700,7 @@ namespace DeepWater.GeneralQuarters.Examples
             "  Keyboard & mouse: track Q E or [ ] (or click) · engage ESSM 1 · Mk 45 2 · CIWS 3 · cease fire Backspace · cease all Delete · ROE O · scope zoom − = or wheel\n" +
             "  Xbox / gamepad: track LB RB · engage ESSM A · Mk 45 B · CIWS Y · cease fire tap D-pad ↓ · cease all hold D-pad ↓ · ROE D-pad ↑ · scope zoom D-pad ← →\n" +
             "  Generic pad: track hat ← → · ESSM trigger · Mk 45 button 2 · CIWS button 3 · cease fire tap hat ↓ · cease all hold hat ↓ · ROE hat ↑\n\n" +
+            "DAMAGE CONTROL (Captain seat): the breach buttons open the scenario's scripted holes (Breach Orders, G57). The board shows each space filling, and how she lies.\n\n" +
             "The seat you leave goes to the AI captain; its decisions show in the log as AI. Rebind in Project Settings → Input System Package (maps Conn, Tao, Range).";
     }
 }

@@ -14,7 +14,7 @@
 - **Git (SIX, 2026-10-24):** Claude manages git without asking. Verified work is committed, pushed and brought up to `main`, and every branch is kept level; `Guided-Fury` takes it through a PR.
 - **Never pushed:** the archive branch, DAVFX and the MCP unlock script. There are no force pushes.
 
-**Status (2026-10-25): slices 0, 1a and 1b done.** The F/A-18E flies at L0, headless and tested. Next: slice 1c (seats and devices). SIX said to keep going (2026-10-25).
+**Status (2026-10-25): slices 0, 1a, 1b and 1c done.** The F/A-18E flies at L0 headless, from any seat, with replay. Next: slice 1d (the jet in Unity). SIX said to keep going (2026-10-25).
 
 ---
 
@@ -124,16 +124,37 @@ The gate: the F/A-18E flies in the rebuilt Dogfight at L0, from each device clas
 - [x] **Found while testing, the scenario not the model:** the first 60 s test manoeuvre rolled past 90° (0.6 stick plus the roll lag's tail) and spiralled into the sea at 2.3 g. A trace confirmed the physics; the script now rolls to about 60°.
 - [x] Gate (AP24): player-script compile has 0 errors, 92 assemblies.
 
-### Slice 1c — Seats and devices (W10, W15, W18, W27, W28)
-- [ ] Player seat: devices sampled once per tick, at the tick boundary, through `DeepWater.Input` (one reader, many adapters). Action maps for keyboard and mouse, the Xbox pad and the VelocityOne. Extends the existing `VelocityOne.inputactions` without breaking the MissileRange and carrier adapters.
-- [ ] Mouse-aim instructor: you aim the camera with the mouse, and it issues stick pitch and roll that bring the velocity vector onto the aim point. Throttle is untouched. Any stick axis or flight key overrides it at once (W15).
-- [ ] Device arbitration: the last device moved past its deadzone owns the seat; the HUD shows which (W27).
-- [ ] Seat swap plumbing (W18): a seat can be handed over mid-flight. A `HoldSeat` that keeps the last inputs stands in until RH Aviator's AI seat exists (Phase 3).
-- [ ] Tests:
-  - C18 virtual-device tests, one per device class: keyboard and mouse, an XInput pad, and a generic HID stick (`Joystick` layout with a hat);
-  - the instructor converges on a fixed aim point at L0;
-  - override takes effect within one tick;
-  - **replay:** feeding the input log back reproduces the Fix bit for bit (W28).
+### Slice 1c — Seats and devices (W10, W15, W18, W27, W28) (done 2026-10-25, 75f836e: 45/45 tests)
+- [x] **Deviation, with the reason:** Air Wing reads its devices from its own `Modules/Input/AirWingFlight.inputactions`, with **one action map per source** (Keyboard, Mouse, Gamepad, Stick).
+  - The plan was to extend `VelocityOne.inputactions`. W27 (the last device moved owns the seat) needs each device's values on their own, and one action bound across devices mixes them.
+  - The VelocityOne and the MissileRange and carrier adapters are untouched.
+  - The joystick paths match `VelocityOne.inputactions` (stick y inverted, z twist, rz lever, buttons 2–4), so a stick reads the same here as elsewhere.
+- [x] `Modules/Input/FlightDeviceReader` (plain C#): `Poll()` every frame gathers presses (XOR, so two presses between ticks flip twice) and mouse travel; `Read()` once per tick returns a `DeviceFrame`.
+  - **Found while testing:** an `InputAction` reads 0 whenever its control sits at the default value, so a lever at mid-travel (raw 0) read as idle. The lever is now read from its control, and its first read syncs the seat to where the lever sits.
+  - `PlayerSeatInput` (MonoBehaviour, execution order −60) owns the reader and the seat.
+- [x] `Core/Seats/PlayerSeat` (pure, W27):
+  - the last source moved past its deadzone owns stick and pedals (ties: the owner keeps it, else stick > pad > keyboard);
+  - the mouse takes over only on a tick when nothing else moved, with the aim starting on the flight path, so nothing jumps; any flight axis or key overrides it on the same tick (W15);
+  - one shared throttle lever, with the afterburner past a detent; switch toggles from any source flip the switch; `Owner` is exposed for the HUD.
+- [x] `Core/Seats/MouseInstructor` (W15): rolls the lift toward the aim, pulls by the error in the lift plane, levels the wings within 5°, never touches the throttle. Gains AUTHORED in `PlayerSeatSettings.asset`; the idea is credited to MouseFlight (MIT).
+- [x] `Core/Seats/HoldSeat` (W18, until the AI seat exists) and `ReplaySeat` (W28; a gap in the log throws). Hand-over is `FlightCore.SetSeat`.
+- [x] Tests (45/45 with 1a and 1b):
+  - `SeatTests`:
+    - arbitration and override in one tick;
+    - the mouse takes over with no jump;
+    - the shared lever, the afterburner detent, and toggles from any source;
+    - **the instructor brings the path from 60.5° off the aim to 0.06° in 20 s** at L0;
+    - **replay reproduces the Fix bit for bit over 1,500 ticks**;
+    - a seat changes hands mid-flight and the log keeps its shape;
+    - a replay gap throws.
+  - `DeviceBindingTests` (C18, `InputTestFixture`), one test per device class:
+    - keyboard and mouse;
+    - an XInput controller;
+    - a generic HID flight stick (custom layout with a stick, z twist, rz lever and buttons).
+    - Then the reader and the seat together: the stick overrides the mouse on the tick it moves.
+  - **Found while testing:** Unity's stick deadzone on these sticks is per axis (0.125 … 0.925, rescaled): a raw 0.7 reads 0.71875. The tests now expect that, and the seat's own deadzone default is 0.05 on top of it, not 0.1.
+- [x] Gate (AP24): player-script compile has 0 errors, 92 assemblies.
+- *Not verified:* a physical VelocityOne, Xbox pad or mouse in the Editor. The bindings are proved with virtual devices only, and the lever's direction on the real stick may need `invertLever`. Play-mode flying comes in slice 1e.
 
 ### Slice 1d — The jet in Unity: adapter, art, camera, HUD
 - [ ] `AirWingAircraft` adapter: pumps `AirWing.Step` from `FixedUpdate`; render interpolation (Pat5); truth feed (Sea State `ISeaSurface.Sample` under each aircraft, never HDRP water, AP11).
@@ -184,3 +205,4 @@ Revisit when Phase 3 is done. The questions for SIX are in BLUEPRINT §7.
 - **2026-10-25** — Slice 0 done (63650de). Found: live audio in the legacy folder (moved to `_AIRCRAFT/Audio/`) and eight player-build blockers outside Air Wing (BLUEPRINT Q4).
 - **2026-10-25** — W25–W31 locked by SIX. Slice 1a done (44d5bfd): the core contracts, 19/19 tests.
 - **2026-10-25** — Slice 1b done (8b34492): the L0 flight core and the F/A-18E profile; ceiling CALIBRATED (50,001 ft), top speed VALIDATION residual recorded; 33/33 tests.
+- **2026-10-25** — Slice 1c done (75f836e): seats, arbitration, the mouse instructor, replay and the device reader; 45/45 tests.

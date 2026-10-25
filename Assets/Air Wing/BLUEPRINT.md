@@ -1,6 +1,6 @@
 # Air Wing — blueprint
 
-> **Status: LOCKED BLUEPRINT, NOTHING BUILT (2026-10-24).** SIX answered all 24 questions on 2026-10-24 (W1–W24). Building starts only on SIX's go.
+> **Status: LOCKED BLUEPRINT (W1–W31); slice 0 done, slice 1a under way (2026-10-25).** SIX answered all 24 questions on 2026-10-24 (W1–W24) and locked W25–W31 on 2026-10-25. Progress is in `ROADMAP.md`.
 > **This document's one job:** say what Air Wing is and why, record every decision behind it, and define the contract each part of an aircraft follows. Work order and progress live in `ROADMAP.md`, not here. The stock-take that preceded it is summarised in §1.
 
 ## 1. In plain language
@@ -49,7 +49,7 @@ Parts are named after the real aircraft systems that do the job (W9).
 | **Input log** | Every tick's Pilot Inputs, with the seat that issued them | `InputLog` |
 | **Fix** | The per-tick fingerprint of the flight state (Reckoning's word, as in General Quarters) | `FlightFix` |
 
-**Language audit.** The per-aircraft level asset is a *fidelity sheet*, not a "loadout": in aviation a loadout means weapons and stores (W25, Proposed).
+**Language audit.** The per-aircraft level asset is a *fidelity sheet*, not a "loadout": in aviation a loadout means weapons and stores (W25).
 
 ## 3. Architecture
 
@@ -69,7 +69,7 @@ An adapter calls `AirWing.Step(tick)` from `FixedUpdate` (P2) at the project's 5
    - The player's devices are sampled once, at the tick boundary.
    - The instructor turns the mouse aim into stick inputs.
    - The AI decides on its own Watch (coarse decisions at 2–5 Hz) and works the stick every tick.
-2. **Input log:** the Pilot Inputs go into the log with their seat and tick. A replay from the log must reproduce the Fix bit for bit (W28, Proposed).
+2. **Input log:** the Pilot Inputs go into the log with their seat and tick. A replay from the log must reproduce the Fix bit for bit (W28).
 3. **Flight Controls:** the control law turns Pilot Inputs into commands for the airframe.
 4. **Flight model:** N fixed substeps (for example 4 × 200 Hz, W24) of Airframe, Powerplant and Atmosphere.
 5. **Contacts (L1+):** gear and collision forces from PhysX's last step enter as external forces (variant B).
@@ -79,7 +79,7 @@ The adapter then writes the transform, interpolated for rendering (Pat5).
 
 ### 3.3 Pilot Inputs
 
-| Field | Range | Meaning at every level (W26, Proposed) |
+| Field | Range | Meaning at every level (W26) |
 |---|---|---|
 | Stick pitch | −1 … +1 | A commanded load factor (G) between the profile's negative and positive limits |
 | Stick roll | −1 … +1 | A commanded roll rate up to the profile's maximum |
@@ -89,7 +89,7 @@ The adapter then writes the transform, interpolated for rendering (Pat5).
 
 The stick means the same thing at L0 and at L1, so the AI and the instructor don't need retuning when an aircraft moves up a level. The Hornet's fly-by-wire already makes its stick a G and roll-rate command (W23).
 
-**Device arbitration (W27, Proposed).** The last device moved past its deadzone owns the player's seat. The instructor gives way the instant a stick axis or flight key moves.
+**Device arbitration (W27).** The last device moved past its deadzone owns the player's seat. The instructor gives way the instant a stick axis or flight key moves.
 
 ### 3.4 Seats and RH Aviator (W5, W18)
 
@@ -130,7 +130,7 @@ The stick means the same thing at L0 and at L1, so the AI and the instructor don
 
 ## 5. Decision register
 
-All entries W1–W24 are SIX's picks of 2026-10-24, in round order. "Leaning" is Claude's recommendation before the pick. W25 and above are Claude's Proposed decisions, made to close gaps the picks left open; each waits for SIX's review.
+All entries W1–W24 are SIX's picks of 2026-10-24, in round order. "Leaning" is Claude's recommendation before the pick. W25–W31 are Claude's proposals to close gaps the picks left open; SIX locked them as written on 2026-10-25.
 
 | # | Question | SIX's pick | Leaning | Status |
 |---|---|---|---|---|
@@ -158,13 +158,13 @@ All entries W1–W24 are SIX's picks of 2026-10-24, in round order. "Leaning" is
 | W22 | Units | **SI in the core; aviation units at the edge** (HUD, quoted public figures) | Same | Locked |
 | W23 | L1 control law | **Textbook Hornet-style fly-by-wire:** G-command pitch, roll-rate roll, AoA and G limiters, yaw damper; structure after NASA's HARV papers, gains AUTHORED | Same | Locked |
 | W24 | Integration rate | **Keep the 50 Hz project tick; fixed substeps inside the flight core** (for example 4 × 200 Hz) | Same | Locked |
-| W25 | The per-aircraft level asset's name | **Fidelity sheet** (`FidelitySheetSO`), not "loadout", which in aviation means weapons and stores | — | Proposed |
-| W26 | What the stick means at each level | **G and roll-rate commands at every level**, so Pilot Inputs keep one meaning up the ladder. *Mitigation:* the feel changes between L0 and L1 as the airframe's response gets richer; the HUD names the level | — | Proposed |
-| W27 | Two devices at once | **The last device moved past its deadzone owns the player's seat;** the instructor yields at once (W15). *Mitigation:* the HUD shows the active device | — | Proposed |
-| W28 | Replay | **Inputs are sampled at the tick boundary and logged per tick; a replay from the input log reproduces the Fix bit for bit** on the same machine | — | Proposed |
-| W29 | Runway start at L0 | **Waits for L1.** L0 is a point mass with no gear, so Dogfight starts airborne until Landing Gear L1 exists. The runway is built in slice 1 as scenery and as the AI's landing target | — | Proposed |
-| W30 | The jet's art | **Built from a copy of the F-18E model** (`_AIRCRAFT/F-18E/Blender/F-18E.blend`'s import), with no vendor scripts on it (AP8). The FDS F-18E prefab, AerialArcade and the original `.blend` are never modified | — | Proposed |
-| W31 | Shared helpers (RNG, fingerprint) | **Air Wing copies General Quarters' pattern, not its code** (no reference to `DeepWater.GeneralQuarters`). Extract a shared core only when a third module needs it (tenets 11 and 14) | — | Proposed |
+| W25 | The per-aircraft level asset's name | **Fidelity sheet** (`FidelitySheetSO`), not "loadout", which in aviation means weapons and stores | — | Locked |
+| W26 | What the stick means at each level | **G and roll-rate commands at every level**, so Pilot Inputs keep one meaning up the ladder. *Mitigation:* the feel changes between L0 and L1 as the airframe's response gets richer; the HUD names the level | — | Locked |
+| W27 | Two devices at once | **The last device moved past its deadzone owns the player's seat;** the instructor yields at once (W15). *Mitigation:* the HUD shows the active device | — | Locked |
+| W28 | Replay | **Inputs are sampled at the tick boundary and logged per tick; a replay from the input log reproduces the Fix bit for bit** on the same machine | — | Locked |
+| W29 | Runway start at L0 | **Waits for L1.** L0 is a point mass with no gear, so Dogfight starts airborne until Landing Gear L1 exists. The runway is built in slice 1 as scenery and as the AI's landing target | — | Locked |
+| W30 | The jet's art | **Built from a copy of the F-18E model** (`_AIRCRAFT/F-18E/Blender/F-18E.blend`'s import), with no vendor scripts on it (AP8). The FDS F-18E prefab, AerialArcade and the original `.blend` are never modified | — | Locked |
+| W31 | Shared helpers (RNG, fingerprint) | **Air Wing copies General Quarters' pattern, not its code** (no reference to `DeepWater.GeneralQuarters`). Extract a shared core only when a third module needs it (tenets 11 and 14) | — | Locked |
 
 ## 6. Standing constraints
 
@@ -212,7 +212,7 @@ All entries W1–W24 are SIX's picks of 2026-10-24, in round order. "Leaning" is
 
 | # | Question | Cost |
 |---|---|---|
-| Q1 | W25–W31 are Proposed. Lock them as written? | 2 min |
+| ~~Q1~~ | ~~W25–W31 are Proposed. Lock them as written?~~ **Answered 2026-10-25 by SIX: locked as written.** | — |
 | ~~Q2~~ | ~~`RH Aviator`'s asmdef is `RH.Aviator` (namespace `RH.`), while new modules use `DeepWater.*`. Rename it to `DeepWater.Aviator` when the AI stream starts (Consistent, Lamport)?~~ **Answered 2026-10-25 by SIX: `DeepWater.Aviator`.** Done in slice 0 (the asmdef's name and root namespace; it has no scripts yet) | — |
 | ~~Q3~~ | ~~When the blueprint should reach `main`: now (docs only), or with slice 1?~~ **Answered 2026-10-25 by SIX: now.** Brought up to `main` with slice 0 | — |
 | ~~Q4~~ | **Answered 2026-10-25 by SIX: fix all eight**, the AerialArcade file included, plus a local-only guard on `UnityMcpUnlock.cs` that is never committed. Done (ROADMAP slice 0, last item): player scripts compile with 0 errors. *The question was:* ~~Eight files outside Air Wing still stop a player build, so W21's player-build measurement (slice 1e) can't run yet: `AerialArcade/.../F18ControllerEditor.cs` (vendor), `RH Utilities/` ×3, `RH Testing Suite/Core/TestRunner.cs`, `Scripts/Destroyer Scripts/DestroyerEditor.cs`, `_Archive/Carrier_legacy/.../CarrierEditor.cs`, and the local-only `UnityMcpUnlock.cs`. May they be fixed, and how? (Each moves into an `Editor/` folder or gains `#if UNITY_EDITOR`; the vendor file and the unlock file need your word.)~~ | — |
@@ -221,3 +221,4 @@ All entries W1–W24 are SIX's picks of 2026-10-24, in round order. "Leaning" is
 - **2026-10-24** — Stock-take (read-only), then the blueprint locked from the 24-question interview (W1–W24, SIX). Three picks differ from Claude's leaning: W10, W12 and W16. W25–W31 Proposed by Claude. Nothing built.
 - **2026-10-25** — Q2 and Q3 answered by SIX. Slice 0 done (ROADMAP). Q4 added: player-build blockers outside Air Wing.
 - **2026-10-25** — Q4 answered by SIX (fix all eight); done, and player scripts compile with 0 errors.
+- **2026-10-25** — Q1 answered by SIX: W25–W31 locked as written. Slice 1a started.

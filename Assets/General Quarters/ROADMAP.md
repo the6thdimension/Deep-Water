@@ -181,7 +181,7 @@ SIX's picks: G30 effects reused where they fit and built in code where they don'
 
 ### Stream A — Sensors and CIC
 - [ ] Radar L1: radar equation (RCS in dBsm, Pd/Pfa), sea clutter from `SeaConditions`.
-- [ ] Illuminators L1: three SPG-62 channels gate terminal homing.
+- [ ] ~~Illuminators L1: three SPG-62 channels gate terminal homing.~~ Moved to Stream B slice B2c (G44, 2026-10-24).
 - [ ] Tracks L1: measurement noise, α-β/Kalman filter, track quality.
 - [ ] TEWA L1: Pk-weighted pairing, shoot-look-shoot.
 - [ ] Radar L2: beam and energy scheduling.
@@ -219,8 +219,27 @@ SIX's picks (2026-10-24): G34–G41. Guns L1 first.
   - [x] **Follow-up done (2026-10-24):** at guns L1 the presentation mounts follow the core's lay (`IGunMount.TryGetLay`), so what you see is what fired. L0 keeps its own slew.
     - **Test:** `PresentationTests.MountAnimator_AtGunsL1_ShowsTheCoresLay`. 135/135 with Sea State.
     - **Play mode, Standard raid:** the Mk 45 trained to 79.4°, and the model was never more than 0.13° from the core. The CIWS and Mk 38s did not fire in that raid, so they were checked by the test only.
-- [ ] VLS L1: hatch and launch sequence timing, midcourse uplink.
-- [ ] SM-2 profile; Harpoon and Tomahawk profiles (Guided Fury Stream A items).
+- [ ] **VLS L1, SM-2 and the illuminators** (slice B2; SIX's picks G42–G52). Four parts, each with its own tests and gate:
+  - [ ] **B2a, Guided Fury (on a branch cut from `Guided-Fury`, G52):**
+    - fly L4 headless: the bridge bakes the profile's aero tables, so L4 no longer falls back to L3;
+    - SM-2 Block IIIA (RIM-66M-5) and IIIB profiles built by a builder (the `EssmProfileBuilder` pattern), with the Mk 104 dual-thrust motor and public data cited;
+    - IIIB's IR seeker data;
+    - Guided Fury's own tests;
+    - VALIDATION of ESSM and SM-2 flyout against published speed and range. At L2, ESSM averaged about 720 m/s over 20 km.
+  - [ ] **B2b, VLS L1 (G42, G43):**
+    - per-cell launch sequence (hatch, ignition, clear the cell) and cell scheduling;
+    - the ship's velocity added at launch;
+    - the vertical climb and a constrained pitch-over, giving a minimum range;
+    - midcourse to a predicted intercept point refreshed at the uplink rate, with limited uplink channels;
+    - the load (G50): 48 IIIA, 16 IIIB, 32 ESSM;
+    - SM-2 pairs (G51).
+  - [ ] **B2c, Illuminators L1 (G44, G45):**
+    - three SPG-62s (one forward, two aft) with arcs, slew and settle;
+    - terminal homing claims one for its last seconds, assigned by time to go;
+    - with none free, an ESSM or IIIA cannot complete its intercept, while a IIIB falls back to IR (G49, flagged: every IR terminal is counted, and saturation is reported with and without IIIB).
+  - [ ] **B2d, budget (G47):** a `unity-perf-ab` A/B at saturation. If L4 misses 1 ms, missiles beyond a set number in flight run at L3, and the log and HUD say so.
+  - **Gate:** the saturation raid resolves, repeats exactly and fits 1 ms. The debrief explains every missile from launch through uplink to the illuminator (or IR) and the result.
+- [ ] Harpoon and Tomahawk profiles (Guided Fury Stream A items).
 
 ### Stream C — The living ship
 - [ ] Engine Room L1: the plant (4 × LM2500, CPP, fuel).

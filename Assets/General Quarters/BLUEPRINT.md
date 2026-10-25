@@ -167,17 +167,17 @@ All entries are SIX's picks of 2026-10-23, in round order. Leaning is Claude's r
 | G38 | Lead | **Ballistic lead:** iterate the time of flight against the track's constant-velocity prediction | Same | Locked |
 | G39 | Mk 45 against air | **Proximity fuze against air, point-detonating against surface targets** | Same | Locked |
 | G40 | CIWS closed loop | **Modelled:** each burst starts with an aim bias that Phalanx's spotting shrinks within the burst, carried between bursts on the same track | Same | Locked |
-| G42 | VLS L1 scope (2026-10-24, slice B2) | **Launch sequence, ship velocity, midcourse uplink, and a real vertical launch:** per-cell hatch, ignition and clear-the-cell timing; the ship's velocity added at launch; the missile climbs vertically, then pitches over within a constrained rate before it can turn toward the target (this costs a minimum range) | Sequence, uplink and ship velocity, without the vertical boost | Locked |
+| G42 | VLS L1 scope (2026-10-24, slice B2) | **Launch sequence, uplink and ship velocity, without the vertical boost:** per-cell hatch, ignition and clear-the-cell timing; the ship's velocity added at launch; midcourse uplink (G43). *Reversed by SIX on 2026-10-24 to Claude's leaning, from:* ~~a real vertical launch: the missile climbs vertically, then pitches over within a constrained rate before it can turn toward the target (this costs a minimum range)~~ | Same | Locked (reversed) |
 | G43 | Midcourse uplink | **Channels and an update rate:** in midcourse the missile flies to a predicted intercept point that SPY-1 refreshes at an uplink rate. Only a limited number of missiles can be guided at once (AUTHORED) | Same | Locked |
 | G44 | Illuminators (pulled forward from Stream A) | **In this slice:** terminal homing needs one of three SPG-62s for its last seconds | Same | Locked |
 | G45 | SPG-62 model | **Real arcs and slew:** one forward and two aft, each with its own arc, slew and settle time. A missile entering terminal claims a free illuminator that can see the target, assigned by time to go | Same | Locked |
-| G46 | Missile fidelity in the core | **ESSM and SM-2 both at Guided Fury L4 (full aero).** The bridge bakes Guided Fury's aero tables for headless use, which is Guided Fury work | SM-2 at L2, like ESSM | Locked |
-| G47 | Budget with L4 | **Keep 1 ms (G16).** If L4 cannot meet it at saturation, missiles beyond a set number in flight run at L3, and the log and the HUD say so | Same | Locked |
-| G48 | SM-2 variants | **Both Block IIIA (RIM-66M-5) and Block IIIB** (adds an IR terminal seeker) | IIIA | Locked |
-| G49 | Block IIIB's IR seeker | **IR backup now:** if no illuminator is free, IIIB homes on IR from an AUTHORED acquisition range. **Flagged:** it eases the illuminator bottleneck and may flatter saturation results. *Mitigation:* every IR terminal is logged and counted in the debrief, and a test reports saturation with and without IIIB | IIIB flies as IIIA until EW exists | Locked (flagged) |
-| G50 | VLS load | **64 SM-2 (48 IIIA, 16 IIIB) and 32 ESSM** (8 cells quad-packed); 24 cells left for Tomahawk and VLA. AUTHORED | Same | Locked |
+| G46 | Missile fidelity in the core | **SM-2 at Guided Fury L2, like ESSM.** No L4 bridge. *Reversed by SIX on 2026-10-24 to Claude's leaning, from:* ~~ESSM and SM-2 both at Guided Fury L4 (full aero), with the bridge baking Guided Fury's aero tables for headless use~~ | Same | Locked (reversed) |
+| G47 | Budget with L4 | **Keep 1 ms (G16).** If L4 cannot meet it at saturation, missiles beyond a set number in flight run at L3, and the log and the HUD say so. *Since G46's reversal (2026-10-24) the missiles fly at L2, so this fallback applies only if a missile level is raised later; the 1 ms gate itself stands* | Same | Locked |
+| G48 | SM-2 variants | **Block IIIA (RIM-66M-5) only.** *Reversed by SIX on 2026-10-24 to Claude's leaning, from:* ~~both Block IIIA and Block IIIB (adds an IR terminal seeker)~~ | Same | Locked (reversed) |
+| G49 | Block IIIB's IR seeker | ~~IR backup now: if no illuminator is free, IIIB homes on IR from an AUTHORED acquisition range. Flagged: it eases the illuminator bottleneck and may flatter saturation results.~~ **Moot since 2026-10-24:** with G48 reversed there is no IIIB, so no IR seeker is built and the flag goes with it. Every SM-2 and ESSM needs a free illuminator to complete an intercept (G44) | IIIB flies as IIIA until EW exists | Moot |
+| G50 | VLS load | **64 SM-2 Block IIIA and 32 ESSM** (8 cells quad-packed); 24 cells left for Tomahawk and VLA. AUTHORED. *Changed 2026-10-24 with G48's reversal, from:* ~~48 IIIA and 16 IIIB~~ | Same | Locked |
 | G51 | Salvo doctrine | **SM-2 in pairs (shoot-shoot), ESSM one at a time.** Shoot-look-shoot stays TEWA L1 (Stream A) | Same | Locked |
-| G52 | Where the missile work lands | **Through Guided-Fury:** a feature branch cut from `Guided-Fury` for the L4 bridge and the SM-2 profiles, a PR into `Guided-Fury`, then everything levels | Same | Locked |
+| G52 | Where the missile work lands | **Through Guided-Fury:** a feature branch cut from `Guided-Fury` for the SM-2 Block IIIA profile, a PR into `Guided-Fury`, then everything levels. *The L4 bridge left this item with G46's reversal (2026-10-24)* | Same | Locked |
 | G41 | Gun data | **The G7 standard drag curve (BRL) times one form factor per projectile, CALIBRATED to its published range;** dispersions and lethality AUTHORED where nothing is public; other published figures are VALIDATION | Same | Locked |
 
 Inherited from Reckoning: R2 (everything deterministic eventually), R15 (Watches), R35 (variant B, Proposed), R36 (banned-API guard, Proposed). General Quarters applies R36 to its core now, as a source-scan test.
@@ -193,6 +193,21 @@ Inherited from Reckoning: R2 (everything deterministic eventually), R15 (Watches
 5. **Vendor code is read-only** (P5). DAVFX is never referenced by a committed asset, because the public repo can't carry it.
 6. **Never modify the original DDG `.blend` or prefab.** Work on copies (G4, G12).
 7. **The ~1 ms combat-core budget per fixed step** (G16) is measured with the `unity-perf-ab` harness, never assumed.
+8. **Safe limits (SIX, 2026-10-24).** General Quarters is a game simulation, built at the level of commercial and hobby naval sims, and it stays there. The test is whether the work could help someone cause real-world harm.
+   - **Stays fine:**
+     - public, cited specifications at the level of reference sites, fact files and academic papers (G15);
+     - textbook physics and engineering models: ballistics, the radar equation, manoeuvring, buoyancy, flooding;
+     - abstract lethality: hit points, AUTHORED kill chances, systems going offline;
+     - fictional or generic scenarios, raids and opponents, and AI captains that play the game.
+   - **Not done:**
+     1. **No non-public data:** nothing classified, leaked, export-controlled (ITAR/EAR technical data) or for official use only, even when it is easy to find. A figure that is not public stays AUTHORED.
+     2. **Nothing that runs on real hardware:** no guidance, autopilot, fire-control or seeker code meant to drive physical actuators, drones, model rockets or real sensors. The core stays a game simulation.
+     3. **No real-world targeting:** no strike planning against real places, real coordinates, real infrastructure or real people. Land attack (Tomahawk) goes against fictional or generic targets only.
+     4. **No engineering-grade lethality:** no warhead or fragmentation design, and no vulnerability models of real ships, systems or people meant to predict or improve real-world damage. Damage stays abstract and coarse; a single public historical figure may calibrate a game mechanic (as G57 does).
+     5. **No defeat-optimisation against real systems:** no tuning of tactics, electronic warfare or countermeasures to beat a specific real-world defence or radar. EW and ECCM stay generic.
+     6. **No mass-casualty weapons:** nothing chemical, biological, radiological or nuclear, in any form.
+     7. **Peer opponents stay generic:** a mirror DDG or a fictional class. "How to defeat a specific real navy's current ships" is not a goal.
+   - *How to apply:* before a slice is built, check its items against this list. A request that would cross a line is said so plainly and reshaped toward the game side; it is not quietly built.
 
 ## 7. What is deliberately not here
 
@@ -231,4 +246,5 @@ Inherited from Reckoning: R2 (everything deterministic eventually), R15 (Watches
 - **2026-10-24** — Q5 answered by SIX: ESSM starts a run on SemiAuto; G29 Locked.
 - **2026-10-24** — Phase 1 complete (slice 7). G13 carried out: legacy destroyer scripts archived.
 - **2026-10-24** — Stream B slice B2 decisions G42–G52 (SIX): VLS L1 with a vertical launch, uplink, SPG-62 illuminators pulled forward, ESSM and SM-2 at L4, both SM-2 blocks, IIIB with IR backup (flagged).
+- **2026-10-24** — Reversals (SIX, back to Claude's leaning): G42 drops the vertical boost, G46 puts SM-2 at L2 like ESSM, G48 keeps Block IIIA only. Consequences: G49 moot (no IIIB, no IR seeker, the flag goes), G50 becomes 64 IIIA and 32 ESSM, G47's L3 fallback is unused at L2, G52 loses the L4 bridge. Standing constraint 8 added: safe limits.
 - **2026-10-24** — Stream B started: decisions G34–G41 (SIX), Guns L1 first. Guns L1 built (slice B1); sources in `Calibration~/GUNS-SOURCES.md`.

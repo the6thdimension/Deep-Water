@@ -75,7 +75,7 @@ Reckoning knows nothing about water. The Chronometer, Watches, Orders, Log, Fix 
 | Weapons | Guided Fury was built in this spirit (pure core, fixed step); reckoned status unaudited |
 | Sensors (radar, EO/IR) | RH Radar Suite and JMAC; determinism unaudited |
 | Captains (AI) | To build: simple deterministic captains |
-| Atmosphere (wind field, fronts, gusts) | Later (R21); the sea keeps a socket for it |
+| Atmosphere (wind field, fronts, gusts) | ~~Later (R21)~~ **Now**, as the METOC module (Theatre blueprint E13, 2026-10-24); the sea's socket becomes its input |
 
 ### 4.2 The design surface is shared state, not behaviours
 Rules stay small and talk only through shared quantities: the wave field, foam coverage, sea conditions, wind, contacts. The sea already publishes one (`SeaConditions`), read by buoyancy, foam and radar clutter. Every rule that reads and writes shared state multiplies the possible interactions; a rule that calls another rule directly does not.
@@ -146,7 +146,7 @@ Luck is named, never hidden: "gust, chance (seed 1442, draw 88)".
 
 > Captain Vega slowed to 8 kn because: aircraft contact at 9 km on radar; sea state 2, so the wake is visible; rule *hide the wake*.
 
-### 4.11 Beyond the sea (direction, later)
+### 4.11 Beyond the sea (direction; brought forward 2026-10-24 as METOC, Theatre blueprint E13)
 The atmosphere becomes the upstream cause of almost everything, kept light:
 - a coarse wind field (kilometre cells, about 1 Hz);
 - fronts as moving lines;
@@ -228,7 +228,7 @@ Status: **Locked** is SIX's pick. **Proposed** is Claude's recommended default; 
 
 | # | Question | SIX's pick | Leaning | Status |
 |---|---|---|---|---|
-| R21 | Weather as driver | **C:** the Douglas dial stays the input for now, behind a seam the atmosphere can take over later | C | Locked |
+| R21 | Weather as driver | ~~**C:** the Douglas dial stays the input for now, behind a seam the atmosphere can take over later~~ **Superseded 2026-10-24 by Theatre E13** (`Assets/Theatre/BLUEPRINT.md`): SIX picked the full atmosphere pack now. The sea is grown by wind over fetch and duration; the Douglas dial becomes the god's labelled override | C | Superseded |
 | R22 | Fog of war | **A:** each role sees only its sensors; the god sees all | A | Locked |
 | R23 | Replay from either side | **B:** arrives with toy 2; the recording exists from day one | B | Locked |
 
@@ -298,7 +298,7 @@ Restate these wherever a future session lands.
 | VR | R17. HurricaneVR is in the project; not in scope yet |
 | Cross-platform determinism | R14. Windows PCs, same build, first |
 | Seakeeping-grade motion (strip theory, RAOs) | R13. Probes + added mass + wave damping first |
-| Atmosphere pack | R21. The sea keeps a seam (its conditions come from one place) so the atmosphere can drive it later |
+| ~~Atmosphere pack~~ | ~~R21. The sea keeps a seam (its conditions come from one place) so the atmosphere can drive it later~~ Moved into scope 2026-10-24 (Theatre E13, METOC module) |
 | Theatre scale | R5. A few ships in 20 km; distant-tier rules come later |
 | A persistent world | R19. Snapshot + Log only |
 
@@ -387,3 +387,4 @@ Candidates from this work, for `METHODOLOGY.md` once SIX agrees:
   - the physics spike and the Sea State buoyancy fix it surfaced.
 
   Stamped THEORETICAL apart from the spike and the fix. Five open questions for SIX.
+- **2026-10-24** — R21 superseded by Theatre blueprint E13 (SIX's pick in the environment interview): the atmosphere pack comes now, as the METOC module. §4 table, §4.11 heading and §9 updated to match.

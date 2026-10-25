@@ -14,7 +14,7 @@
 - **Git (SIX, 2026-10-24):** Claude manages git without asking. Verified work is committed, pushed and brought up to `main`, and every branch is kept level; `Guided-Fury` takes it through a PR.
 - **Never pushed:** the archive branch, DAVFX and the MCP unlock script. There are no force pushes.
 
-**Status (2026-10-25): slices 0, 1a, 1b and 1c done.** The F/A-18E flies at L0 headless, from any seat, with replay. Next: slice 1d (the jet in Unity). SIX said to keep going (2026-10-25).
+**Status (2026-10-25): slices 0 and 1a–1d done.** The F/A-18E flies at L0 in `Examples/Scenes/AirWing_FlightTest.unity` (see `README.md`). Next: slice 1e (Dogfight rebuilt, the Phase 1 gate). SIX said to keep going (2026-10-25).
 
 ---
 
@@ -156,12 +156,30 @@ The gate: the F/A-18E flies in the rebuilt Dogfight at L0, from each device clas
 - [x] Gate (AP24): player-script compile has 0 errors, 92 assemblies.
 - *Not verified:* a physical VelocityOne, Xbox pad or mouse in the Editor. The bindings are proved with virtual devices only, and the lever's direction on the real stick may need `invertLever`. Play-mode flying comes in slice 1e.
 
-### Slice 1d — The jet in Unity: adapter, art, camera, HUD
-- [ ] `AirWingAircraft` adapter: pumps `AirWing.Step` from `FixedUpdate`; render interpolation (Pat5); truth feed (Sea State `ISeaSurface.Sample` under each aircraft, never HDRP water, AP11).
-- [ ] The Air Wing F/A-18E prefab, built by an editor builder from a copy of the F-18E model (W30). No AerialArcade, NWH or vendor scripts on it (AP8). Control surfaces animated from the core's state, presentation only.
-- [ ] Chase camera (W11), decoupled from the airframe so the mouse instructor can aim it.
-- [ ] HUD (W11, W22): airspeed in kt, altitude in ft, AoA in degrees, G, Mach, throttle with the afterburner shown. Every number carries its unit; the HUD also names the active device, the seat and each part's level (W26, W27).
-- [ ] Tests: unit conversions at the edge; HUD values match core state.
+### Slice 1d — The jet in Unity: adapter, art, camera, HUD, and a flight-test scene (done 2026-10-25, d05ae0d: 49/49 tests; flown in play mode with a virtual Xbox pad)
+- [x] `Modules/Aircraft/AirWingRunner` (execution order −50): builds every `AircraftView`'s aircraft from the profile and the sheet, logs each part's level and any fallback, seats it (player or hold), and steps the `FlightCore` once per FixedUpdate.
+- [x] `Modules/Aircraft/AircraftView`: the pose is interpolated between the last two ticks (Pat5; measured in play, the drawn jet trails the core by 0.5 to 4 m at about 210 m/s, one tick). Moving parts follow the last Pilot Inputs (presentation only). No Rigidbody, no vendor script (AP8).
+- [x] `Modules/World/SceneSurface` + `RunwayStrip`: the truth feed's ground is the Sea State simulation's height (`ISeaSurface`, never HDRP water, AP11) or a runway's top; with no sea, a flat fallback that says so. The runner refuses a director that is not ready.
+- [x] The Air Wing jet (W30): **Deep Water → Air Wing → Build F-A-18E Prefab** writes `Prefabs/FA18E_AirWing.prefab`, an `AircraftView` over an instance of the F-18E model (503 renderers); the model and the FDS prefab are only read.
+  - `FA18E_Visuals.asset` (`AircraftVisualsSO`) maps 8 surfaces (ailerons, stabilators, rudders, flaps), copied from the FDS prefab's AerialArcade settings. The stabilators run on −stick pitch, because AerialArcade's pitch was positive pushing. Rudder travel AUTHORED at 30°.
+- [x] `Modules/Cockpit/ChaseCamera` (W11): behind and above the jet, eased; looks along the mouse aim while the instructor flies.
+- [x] `Modules/Cockpit/FlightHud` (W11, W22, W26, W27): TAS kt (no calibrated airspeed is claimed at L0), Mach, α °, G, ft, ft/min, heading, throttle % or AB, `SEAT PLAYER · <device>`, every part's level, a velocity marker and the aim ring.
+  - **Decision (Claude, for review):** drawn with IMGUI. No assets, works at once; a UI Toolkit HUD can replace it once the layout settles. It allocates a little per frame.
+  - `Core/Cockpit/HudReadout` does the conversions, pure and tested.
+- [x] **Added at SIX's request (2026-10-25):** a bare flight-test scene. **Deep Water → Air Wing → Build Flight Test Scene** writes `Examples/Scenes/AirWing_FlightTest.unity`: the Sea State demo's sea, sky and sun, the player seat, the runner, one F/A-18E at 1,500 m and 400 kt, the chase camera and the HUD. How to fly it, and the controls, are in `README.md`.
+- [x] Tests (49/49):
+  - `CockpitTests`: HUD conversions (10,000 ft, 1,000 ft/min, 500 kt, heading, Mach) and the exact unit definitions;
+  - `PrefabTests`: only Air Wing scripts and no Rigidbody on the jet; every moving part names a transform in the model.
+- [x] **Play-mode smoke run** (Editor, flight-test scene, a virtual XInput pad added in play mode, C18's live check):
+  - the seat went `None` → `Gamepad` on the tick the stick moved;
+  - right stick banked right and turned right; the pull read 4.86 g, the stick-to-G map after Unity's deadzone;
+  - the runner used the Sea State sea; the camera held 26.7 m; no Air Wing errors or warnings;
+  - a screenshot shows the jet, the sea and the HUD (437 kt, M 0.67, α 11.0°, 4.9 G).
+- [x] Gate (AP24): player-script compile has 0 errors, 92 assemblies; the editor assembly is not in the player.
+- *Not verified:*
+  - a physical Xbox pad or VelocityOne: SIX's flight test;
+  - the stabilator deflection sign by eye.
+- *Known:* the gear shows down in flight (the model's rest pose; animated with Landing Gear L1).
 
 ### Slice 1e — Dogfight rebuilt (W12, W13, W14) and the phase gate
 - [ ] Back up first: copy `Assets/_SCENES/Dogfight.unity` to `Assets/_Archive/Dogfight_legacy/` (P8); git keeps history.
@@ -206,3 +224,4 @@ Revisit when Phase 3 is done. The questions for SIX are in BLUEPRINT §7.
 - **2026-10-25** — W25–W31 locked by SIX. Slice 1a done (44d5bfd): the core contracts, 19/19 tests.
 - **2026-10-25** — Slice 1b done (8b34492): the L0 flight core and the F/A-18E profile; ceiling CALIBRATED (50,001 ft), top speed VALIDATION residual recorded; 33/33 tests.
 - **2026-10-25** — Slice 1c done (75f836e): seats, arbitration, the mouse instructor, replay and the device reader; 45/45 tests.
+- **2026-10-25** — Slice 1d done (d05ae0d): the jet in Unity, the chase camera, the HUD and, at SIX's request, the flight-test scene; 49/49 tests; flown in play with a virtual Xbox pad.

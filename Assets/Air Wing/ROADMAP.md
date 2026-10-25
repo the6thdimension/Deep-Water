@@ -48,16 +48,17 @@ The gate: nothing anyone uses changes, a player build compiles, and the legacy a
   - the moved GUIDs all resolve (scan above);
   - the Editor compiles clean, with every moved type resolved from its new folder (compile-clean RunCommand);
   - every archived file has a checklist row;
-  - ~~a player build of one scene compiles~~: **not met, for reasons outside slice 0** (next item). Air Wing's part is met: zero aircraft errors.
-- [ ] **Player build still blocked outside Air Wing** (found 2026-10-25, BLUEPRINT Q4). It blocks W21's measurement in slice 1e. Each file needs an `Editor/` folder or an `#if UNITY_EDITOR` guard:
-  - `AerialArcade/Code/Scripts/F18/F18ControllerEditor.cs` (vendor: SIX's word);
-  - `RH Utilities/RH_SceneManager.cs`, `SceneManagerCore.cs`, `SceneValidationSystem.cs`;
-  - `RH Testing Suite/Core/TestRunner.cs`;
-  - `Scripts/Destroyer Scripts/DestroyerEditor.cs`;
-  - `_Archive/Carrier_legacy/Carrier Controller/CarrierEditor.cs` (an earlier archive moved it out of its `Editor/` folder);
-  - `UnityMcpUnlock.cs` (local-only, never committed: SIX's word).
-- *METHODOLOGY candidate (to add when METHODOLOGY.md has no other session's uncommitted edits):* **Editor API in code that compiles into the player.** Unity treats only a folder named exactly `Editor` (or an editor-only asmdef) as editor code. On 2026-10-25, nine files across seven areas broke the player-script compile this way. One was an `Editors` folder; one was an earlier archive move that lifted a script out of its `Editor/` folder. Because nobody builds a player during Editor work, it stayed invisible. Do instead: keep the `Editor` folder name through every move, or guard with `#if UNITY_EDITOR`; make a player-script compile (`PlayerBuildInterface.CompilePlayerScripts`) part of a module's gate.
-- *Anti-goals (held):* no new code; no vendor folder touched; AerialArcade, FlightSimLite and the FDS F-18E unchanged.
+  - a player build of one scene compiles: at first **not met, for reasons outside slice 0** (next item); Air Wing's part was met (zero aircraft errors). **Met for player scripts since 0d24231** (next item). A full player build with content has not been run yet; slice 1e does it for W21.
+- [x] **Player build blocked outside Air Wing** (found 2026-10-25, BLUEPRINT Q4; fixed the same day on SIX's word, 0d24231). Each file got an `Editor/` folder (GUID kept) or an `#if UNITY_EDITOR` guard:
+  - `AerialArcade/Code/Scripts/F18/F18ControllerEditor.cs` → `F18/Editor/` (vendor; SIX's word);
+  - `RH Utilities/RH_SceneManager.cs`, `SceneManagerCore.cs`, `SceneValidationSystem.cs` → `RH Utilities/Editor/` (only editor code calls them);
+  - `RH Testing Suite/Core/TestRunner.cs`: guards around its play-mode plumbing only. `TestResultExporter` (runtime) still calls `GetAllTestResults()`, and in a player every test simply runs. `TestDiscovery.cs`: the whole file is guarded (AssetDatabase; only the editor window calls it). It never showed in the error list: the compiler stops at declaration errors and skips method bodies, so a body-only use hides behind them;
+  - `Scripts/Destroyer Scripts/DestroyerEditor.cs` → `Destroyer Scripts/Editor/`;
+  - `_Archive/Carrier_legacy/Carrier Controller/CarrierEditor.cs` → `Carrier Controller/Editor/` (an earlier archive had lifted it out of its `Editor/` folder);
+  - `UnityMcpUnlock.cs`: wrapped in `#if UNITY_EDITOR` **locally only**; it stays git-ignored and is never committed.
+  - **Measured (player-script compile, StandaloneWindows64):** 0 errors, 91 assemblies (it had failed with 0 assemblies). The Editor recompiled clean, and every moved type resolves (`Assembly-CSharp-Editor` for the inspectors and RH Utilities, `Assembly-CSharp` for the test-suite core).
+- *METHODOLOGY:* added as AP24 (editor API compiled into the player).
+- *Anti-goals:* held for slice 0 itself (no new code, no vendor folder touched). The follow-up moved one AerialArcade file into an `Editor/` folder on SIX's word; no vendor file's content changed.
 
 ---
 

@@ -79,6 +79,21 @@ Runs C# by compiling a **transient assembly** against the loaded project assembl
    - Stop it: make the next copy fail its own guard. Entering play mode (`Unity_ManageEditor Play`) did this, because the command refused when `isPlaying`. Then wait a minute for silence before `Stop`.
    - Prevention: make every RunCommand idempotent: check the state it would leave, and do nothing if it is already there. Never run anything long inline (player builds, full reimports, long bakes). Prefer a menu item you can check by its output file.
    - `EditorApplication.delayCall` is no escape: while the Editor was unfocused it fired 262 s late.
+   - What works: schedule the long call from a one-shot `EditorApplication.update` hook guarded by a `SessionState` key, and have it write its report to a file (BUILD-SPEED-LEDGER: the instrumented builds).
+13. **A package that opens a modal dialog when it loads stalls every MCP session** (2026-10-25, FastScriptReload 1.8.0).
+   - Its `[InitializeOnLoad]` welcome code called a modal dialog on the first domain load after install. The main thread waited for a click, the bridge went silent ("Named pipe socket file not found"), and the relay shut itself down after 180 s.
+   - The Editor log shows the dialog's text and its buttons (`| Ok … | No … |`). Only a human can answer it.
+   - Before adding a package, search its source for `DisplayDialog` in `[InitializeOnLoad]` code paths. Ask SIX to be at the Editor for the first load, or pre-set the preference the dialog asks about.
+   - To see what's open: list the Editor process's visible windows (`EnumWindows`, then `EnumChildWindows` for a dialog's buttons). A button can be pressed from outside with `PostMessage(BM_CLICK)`, but only the one SIX would choose (METHODOLOGY AP28).
+14. **A hung Editor: measure before you wait** (2026-10-25, FastScriptReload, two hangs).
+   - From PowerShell: `Get-Process -Id <pid>`, its `Responding`, and `TotalProcessorTime` twice, 5 s apart. Find the pid by the `-projectpath` in the command line (`Get-CimInstance Win32_Process`).
+   - Not responding while using cores, for seconds, is normal: play entry, import, a build. Not responding and idle (under 0.2 s of CPU in 5 s) is a deadlock, and it doesn't recover.
+   - Ending the Editor is SIX's call: ask, then stop only that process and its children. Another project's Editor may be running too.
+   - Before a risky step, run a watchdog that samples it every 2 s to a file (METHODOLOGY C35).
+15. **Another Unity Editor starting takes over `Editor.log`** (2026-10-25). SIX opened a second project, and its Editor truncated the shared log.
+   - The Deep Water Editor kept writing at its old offset, leaving a hole of zeros. After a restart, its lines may not reach the file at all.
+   - `wait_build.sh` and every grep of the log then see nothing new. Check `Application.consoleLogPath` and the file's size, and prefer results files a command writes itself.
+16. **`Unity_RunCommand` copies nested classes to namespace scope** (2026-10-25). The tool's rewriter emitted a nested `ICallbacks` class a second time outside `CommandScript`, and that copy could not see the outer class's constant (CS0103). In a nested class, use literals or its own members only.
 
 ## Play mode & timing
 

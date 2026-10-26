@@ -39,8 +39,45 @@ namespace DeepWater.AirWing.Core.Powerplant
         public float Step(in PilotInputs inputs, in AirData air, ref AirframeState state, float dt)
         {
             state.EngineSpool = inputs.Throttle;
+            state.AfterburnerSpool = inputs.Afterburner ? 1f : 0f;
             float sigma = (float)(air.DensityKgM3 / Isa.SeaLevelDensity);
             return StaticThrustN(inputs) * (float)Math.Pow(sigma, _p.ThrustLapseExponent);
+        }
+    }
+
+    /// <summary>
+    /// Powerplant L1 (BLUEPRINT §4): the engines take time. The core spool (idle 0 … military 1) follows the throttle
+    /// with a first-order lag, faster down than up; with the afterburner selected, it lights only once the core is above
+    /// <see cref="PowerplantProfile.AfterburnerMinSpool"/> and fades in and out with its own lags. Thrust is
+    /// military × (idle + (1 − idle) × spool) plus the afterburner's extra × its spool, with L0's density lapse. The time
+    /// constants are AUTHORED (no public spool data for the F414 was found). No fuel burn (L3).
+    /// </summary>
+    public sealed class PowerplantL1 : IPowerplant
+    {
+        readonly PowerplantProfile _p;
+
+        public PowerplantL1(in PowerplantProfile profile)
+        {
+            if (!profile.HasSpool) throw new ArgumentException("Powerplant L1 needs spool time constants");
+            profile.Validate();
+            _p = profile;
+        }
+
+        public float Step(in PilotInputs inputs, in AirData air, ref AirframeState state, float dt)
+        {
+            float target = inputs.Afterburner ? 1f : inputs.Throttle;
+            float tau = target > state.EngineSpool ? _p.SpoolUpTauS : _p.SpoolDownTauS;
+            state.EngineSpool += (target - state.EngineSpool) * (1f - (float)Math.Exp(-dt / tau));
+
+            bool lit = inputs.Afterburner && state.EngineSpool >= _p.AfterburnerMinSpool;
+            float abTarget = lit ? 1f : 0f;
+            float abTau = lit ? _p.AfterburnerLightTauS : _p.AfterburnerOffTauS;
+            state.AfterburnerSpool += (abTarget - state.AfterburnerSpool) * (1f - (float)Math.Exp(-dt / abTau));
+
+            float perEngine = _p.MilitaryThrustPerEngineN * (_p.IdleThrustFraction + (1f - _p.IdleThrustFraction) * state.EngineSpool)
+                            + (_p.MaxThrustPerEngineN - _p.MilitaryThrustPerEngineN) * state.AfterburnerSpool;
+            float sigma = (float)(air.DensityKgM3 / Isa.SeaLevelDensity);
+            return _p.EngineCount * perEngine * (float)Math.Pow(sigma, _p.ThrustLapseExponent);
         }
     }
 }

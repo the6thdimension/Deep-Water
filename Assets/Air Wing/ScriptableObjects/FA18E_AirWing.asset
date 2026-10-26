@@ -30,6 +30,11 @@ MonoBehaviour:
   maxThrustPerEngineLbf: 22000
   idleThrustFraction: 0.05
   thrustLapseExponent: 1.2726
+  spoolUpTauS: 1.2
+  spoolDownTauS: 0.8
+  afterburnerLightTauS: 0.4
+  afterburnerOffTauS: 0.25
+  afterburnerMinSpool: 0.9
   loadFactorMax: 7.5
   loadFactorMin: -3
   rollRateMaxDegS: 150
@@ -255,11 +260,15 @@ MonoBehaviour:
     fits'' drag, which is almost nil at low alpha (C_D 0.004 at alpha 0; the authors
     note their low-alpha data are thin).
 
-    Flight Controls L1 (slice 2b, W23):
-    alphaLimitDeg 30, loadFactorCommandTauS 0.3, alphaGainPerS 2, loadFactorIntegralDegPerGs
-    1.15, pitchRateBandwidth 6, rollRateBandwidth 5, yawRateBandwidth 3, sideslipGainPerS
-    2, sideslipPerPedalDeg 8: AUTHORED, a nonlinear-dynamic-inversion law after Snell,
-    Enns and Garrard (J. Guidance 15(4), 1992), tuned in Calibration~/l1_fbw_mirror.py
+    spoolUpTauS 1.2, spoolDownTauS 0.8,
+    afterburnerLightTauS 0.4, afterburnerOffTauS 0.25, afterburnerMinSpool 0.9: AUTHORED,
+    Powerplant L1''s spool (slice 2c); no public F414 spool figures were found.
+
+    Flight
+    Controls L1 (slice 2b, W23): alphaLimitDeg 30, loadFactorCommandTauS 0.3, alphaGainPerS
+    2, loadFactorIntegralDegPerGs 1.15, pitchRateBandwidth 6, rollRateBandwidth 5,
+    yawRateBandwidth 3, sideslipGainPerS 2, sideslipPerPedalDeg 8: AUTHORED, a nonlinear-dynamic-inversion
+    law after Snell, Enns and Garrard (J. Guidance 15(4), 1992), tuned in Calibration~/l1_fbw_mirror.py
     against criteria fixed before tuning (ROADMAP slice 2b). stabilatorBandwidth,
     stabilatorRateDegS, stabilatorMinDeg, stabilatorMaxDeg, aileronBandwidth, aileronRateDegS,
     aileronMinDeg, aileronMaxDeg, rudderBandwidth, rudderRateDegS, rudderMinDeg,

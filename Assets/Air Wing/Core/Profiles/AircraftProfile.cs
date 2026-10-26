@@ -61,6 +61,14 @@ namespace DeepWater.AirWing.Core.Profiles
         public float IdleThrustFraction;
         /// <summary>Thrust falls with density as σ^x, σ = ρ/ρ₀ (L0 has no ram or Mach effect).</summary>
         public float ThrustLapseExponent;
+        /// <summary>
+        /// Powerplant L1's spool (AUTHORED): the core spool follows the throttle with these time constants, seconds;
+        /// the afterburner lights only above <see cref="AfterburnerMinSpool"/> and fades in and out with its own.
+        /// All zero: no L1 data (L1 then falls back to L0 and says so).
+        /// </summary>
+        public float SpoolUpTauS, SpoolDownTauS, AfterburnerLightTauS, AfterburnerOffTauS, AfterburnerMinSpool;
+
+        public bool HasSpool => SpoolUpTauS > 0f && SpoolDownTauS > 0f && AfterburnerLightTauS > 0f && AfterburnerOffTauS > 0f;
 
         public void Validate()
         {
@@ -72,6 +80,8 @@ namespace DeepWater.AirWing.Core.Profiles
             if (!(IdleThrustFraction >= 0f && IdleThrustFraction <= 1f))
                 throw new ArgumentOutOfRangeException(nameof(IdleThrustFraction), IdleThrustFraction, "must be 0 … 1");
             AirframeProfile.NonNegative(ThrustLapseExponent, nameof(ThrustLapseExponent));
+            if (HasSpool && !(AfterburnerMinSpool >= 0f && AfterburnerMinSpool <= 1f))
+                throw new ArgumentOutOfRangeException(nameof(AfterburnerMinSpool), AfterburnerMinSpool, "must be 0 … 1");
         }
     }
 

@@ -132,9 +132,12 @@ namespace DeepWater.AirWing.Core.Airframe
         /// by bisection between the profile's lower α and the curve's peak; clamped at either end. Flight Controls L1
         /// turns a G command into an α command with it.
         /// </summary>
-        public static float AlphaForBasicLift(in AirframeL1Profile p, float cl)
+        public static float AlphaForBasicLift(in AirframeL1Profile p, float cl) => AlphaForBasicLift(p, cl, LiftPeakAlpha(p));
+
+        /// <summary>As above, with the lift peak already known (it depends only on the profile: cache it).</summary>
+        public static float AlphaForBasicLift(in AirframeL1Profile p, float cl, float peakAlpha)
         {
-            float lo = p.AlphaMinRad, hi = LiftPeakAlpha(p);
+            float lo = p.AlphaMinRad, hi = peakAlpha;
             if (cl <= Poly(p.Aero.CL, lo)) return lo;
             if (cl >= Poly(p.Aero.CL, hi)) return hi;
             for (int i = 0; i < 32; i++)

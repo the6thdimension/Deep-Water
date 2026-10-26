@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 624af4d1462e53042a6bc2e04421bea2, type: 3}
   m_Name: FA18E_FidelitySheet
   m_EditorClassIdentifier: DeepWater.AirWing::DeepWater.AirWing.ScriptableObjects.FidelitySheetSO
-  airframe: 0
-  powerplant: 0
-  flightControls: 0
+  airframe: 1
+  powerplant: 1
+  flightControls: 1
   landingGear: 0
   atmosphere: 0
   substepsPerTick: 4

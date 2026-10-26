@@ -17,9 +17,11 @@ namespace DeepWater.AirWing.Modules.Diagnostics
         public readonly int Ticks;
         public readonly int Substeps;
         public readonly double MsPerStep;
+        public readonly string Levels;
 
-        public BenchmarkResult(int aircraft, int ticks, int substeps, double msPerStep)
+        public BenchmarkResult(int aircraft, int ticks, int substeps, double msPerStep, string levels = "")
         {
+            Levels = levels;
             Aircraft = aircraft;
             Ticks = ticks;
             Substeps = substeps;
@@ -30,7 +32,7 @@ namespace DeepWater.AirWing.Modules.Diagnostics
 
         public override string ToString() =>
             $"{Aircraft} aircraft × {Ticks} ticks ({Substeps} substeps): {MsPerStep * 1000.0:F2} µs per step, " +
-            $"{MsPerAircraftStep * 1000.0:F2} µs per aircraft per step";
+            $"{MsPerAircraftStep * 1000.0:F2} µs per aircraft per step [{Levels}]";
     }
 
     /// <summary>
@@ -50,7 +52,7 @@ namespace DeepWater.AirWing.Modules.Diagnostics
             float speed = 400f * (float)Units.KnotToMetrePerSecond;
             for (int i = 0; i < aircraft; i++)
             {
-                var start = AircraftFactory.LevelStart(profile, new Vector3(500f * i, 5000f, 0f), 0f, speed, 0.6f * profile.Airframe.InternalFuelKg);
+                var start = AircraftFactory.LevelStart(profile, sheet, new Vector3(500f * i, 5000f, 0f), 0f, speed, 0.6f * profile.Airframe.InternalFuelKg, 0.7f);
                 core.Add(AircraftFactory.Build(i + 1, profile, sheet, start), new HoldSeat(new PilotInputs { Throttle = 0.7f }));
             }
             for (int t = 0; t < warmupTicks; t++) core.Step();
@@ -58,7 +60,7 @@ namespace DeepWater.AirWing.Modules.Diagnostics
             var clock = Stopwatch.StartNew();
             for (int t = 0; t < ticks; t++) core.Step();
             clock.Stop();
-            return new BenchmarkResult(aircraft, ticks, sheet.SubstepsPerTick, clock.Elapsed.TotalMilliseconds / ticks);
+            return new BenchmarkResult(aircraft, ticks, sheet.SubstepsPerTick, clock.Elapsed.TotalMilliseconds / ticks, string.Join("; ", core.Find(1).Levels));
         }
 
         /// <summary>The median of <paramref name="repeats"/> runs by cost per step.</summary>

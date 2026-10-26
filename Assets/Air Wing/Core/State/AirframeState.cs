@@ -53,6 +53,8 @@ namespace DeepWater.AirWing.Core.State
         public float FuelKg;
         /// <summary>Engine spool, 0 (idle) … 1 (full), afterburner excluded (spool dynamics from Powerplant L1).</summary>
         public float EngineSpool;
+        /// <summary>The afterburner's share of its extra thrust, 0 (out) … 1 (full); Powerplant L1. Follows the switch at L0.</summary>
+        public float AfterburnerSpool;
         public FlightStatus Status;
         /// <summary>Touching a surface through PhysX this tick (L1+). Such ticks are flagged in the Fix (W7).</summary>
         public bool InContact;

@@ -61,6 +61,14 @@ namespace DeepWater.AirWing.Editor
             so.dragFloorCd0 = so.cd0;
             so.dragFloorK = (float)(1.0 / (System.Math.PI * so.oswaldEfficiency * so.spanFt * so.spanFt / so.wingAreaFt2));
 
+            // Powerplant L1 (slice 2c). AUTHORED: idle to military about 4 s (95 % in 3.6 s), down a little faster; the
+            // afterburner lights above 90 % core spool and comes in over about a second.
+            so.spoolUpTauS = 1.2f;
+            so.spoolDownTauS = 0.8f;
+            so.afterburnerLightTauS = 0.4f;
+            so.afterburnerOffTauS = 0.25f;
+            so.afterburnerMinSpool = 0.9f;
+
             // Flight Controls L1 (slice 2b). AUTHORED gains, tuned in Calibration~/l1_fbw_mirror.py.
             so.alphaLimitDeg = 30f;
             so.loadFactorCommandTauS = 0.3f;
@@ -101,6 +109,8 @@ namespace DeepWater.AirWing.Editor
                 "Fixed at L1; fuel burn moves them at L3.\n" +
                 "dragFloorCd0, dragFloorK: AUTHORED, the L0 polar (cd0 and 1/(pi e AR)) as a floor under the fits' drag, which is " +
                 "almost nil at low alpha (C_D 0.004 at alpha 0; the authors note their low-alpha data are thin).\n" +
+                "spoolUpTauS 1.2, spoolDownTauS 0.8, afterburnerLightTauS 0.4, afterburnerOffTauS 0.25, afterburnerMinSpool 0.9: " +
+                "AUTHORED, Powerplant L1's spool (slice 2c); no public F414 spool figures were found.\n" +
                 "Flight Controls L1 (slice 2b, W23): alphaLimitDeg 30, loadFactorCommandTauS 0.3, alphaGainPerS 2, " +
                 "loadFactorIntegralDegPerGs 1.15, pitchRateBandwidth 6, rollRateBandwidth 5, yawRateBandwidth 3, sideslipGainPerS 2, " +
                 "sideslipPerPedalDeg 8: AUTHORED, a nonlinear-dynamic-inversion law after Snell, Enns and Garrard (J. Guidance 15(4), 1992), " +

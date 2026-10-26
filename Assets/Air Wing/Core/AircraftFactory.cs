@@ -29,7 +29,8 @@ namespace DeepWater.AirWing.Core
             .Register(FidelityLevel.L1, p => new AirframeL1(p.Airframe, p.AirframeL1));            // slice 2a, paired in 2b
 
         static readonly PartLadder<PowerplantProfile, IPowerplant> PowerplantLadder = new PartLadder<PowerplantProfile, IPowerplant>(PartKind.Powerplant)
-            .Register(FidelityLevel.L0, p => new PowerplantL0(p));                                 // slice 1b
+            .Register(FidelityLevel.L0, p => new PowerplantL0(p))                                  // slice 1b
+            .Register(FidelityLevel.L1, p => new PowerplantL1(p));                                 // slice 2c
 
         static readonly PartLadder<AircraftProfile, IFlightControls> ControlsLadder = new PartLadder<AircraftProfile, IFlightControls>(PartKind.FlightControls)
             .Register(FidelityLevel.L0, p => new FlightControlsL0(p.Controls))                     // slice 1b
@@ -45,7 +46,11 @@ namespace DeepWater.AirWing.Core
             IAtmosphere atmosphere = AtmosphereLadder.Build(sheet.Level(PartKind.Atmosphere), default, out var r0); levels.Add(r0);
             ResolveAirframeAndControls(profile, sheet, out FidelityLevel airframeLevel, out FidelityLevel controlsLevel, out string pairing);
             IAirframe airframe = AirframeLadder.BuildAt(sheet.Level(PartKind.Airframe), airframeLevel, profile, pairing, out var r1); levels.Add(r1);
-            IPowerplant powerplant = PowerplantLadder.Build(sheet.Level(PartKind.Powerplant), profile.Powerplant, out var r2); levels.Add(r2);
+            FidelityLevel ppRequested = sheet.Level(PartKind.Powerplant);
+            FidelityLevel ppLevel = PowerplantLadder.Resolve(ppRequested).Resolved;
+            string ppReason = null;
+            if (ppLevel >= FidelityLevel.L1 && !profile.Powerplant.HasSpool) { ppLevel = FidelityLevel.L0; ppReason = $"{profile.Name} has no spool data"; }
+            IPowerplant powerplant = PowerplantLadder.BuildAt(ppRequested, ppLevel, profile.Powerplant, ppReason, out var r2); levels.Add(r2);
             IFlightControls controls = ControlsLadder.BuildAt(sheet.Level(PartKind.FlightControls), controlsLevel, profile, pairing, out var r3); levels.Add(r3);
             ILandingGear gear = GearLadder.Build(sheet.Level(PartKind.LandingGear), default, out var r4); levels.Add(r4);
             return new Aircraft(id, profile, atmosphere, airframe, powerplant, controls, gear, levels, start);

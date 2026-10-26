@@ -22,6 +22,16 @@ namespace RH.Testing
         
         // List to store all test results
         private static List<TestResult> allTestResults = new List<TestResult>();
+
+        // Play mode starts without a domain reload (BUILD-SPEED-LEDGER, round 6): drop the last session's
+        // subscribers and results before the first scene loads.
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetStatics()
+        {
+            OnTestCompleted = null;
+            OnAllTestsCompleted = null;
+            allTestResults = new List<TestResult>();
+        }
         
         /// <summary>
         /// Runs a single test

@@ -13,6 +13,11 @@ namespace DeepWater.AirWing.Core.Inputs
         HookDown = 1 << 3,
         AltitudeHold = 1 << 4,
         ApproachSpeedHold = 1 << 5,
+        /// <summary>
+        /// Momentary, not a switch (BLUEPRINT Q6): set for one tick, it puts the aircraft back at its start state
+        /// before that tick flies. It travels in the Pilot Inputs so the input log records it and a replay repeats it.
+        /// </summary>
+        Reset = 1 << 15,
     }
 
     /// <summary>

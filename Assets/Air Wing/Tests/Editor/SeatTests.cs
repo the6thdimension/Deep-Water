@@ -137,6 +137,64 @@ namespace DeepWater.AirWing.Tests
             Assert.IsTrue(i.Has(PilotSwitches.SpeedBrake));
         }
 
+        // ── Reset (BLUEPRINT Q6) ──────────────────────────────────────────
+
+        [Test]
+        public void Reset_IsMomentary_FromAnySource_AndLeavesTheSwitchesAlone()
+        {
+            var seat = new PlayerSeat(Settings, Tick, startSwitches: PilotSwitches.FlapsDown);
+            AirframeState s = Level();
+            DeviceSample keys = DeviceSample.Idle, pad = DeviceSample.Idle;
+            keys.Toggles = PilotSwitches.Reset;
+            pad.Toggles = PilotSwitches.Reset;
+
+            PilotInputs i = Issue(seat, Frame(keys: keys, pad: pad), s);
+            Assert.IsTrue(i.Has(PilotSwitches.Reset), "two sources pressing it on one tick still reset (no XOR)");
+            Assert.IsTrue(i.Has(PilotSwitches.FlapsDown), "the switches are untouched");
+            i = Issue(seat, Frame(), s);
+            Assert.IsFalse(i.Has(PilotSwitches.Reset), "momentary: one tick only");
+            Assert.IsTrue(i.Has(PilotSwitches.FlapsDown));
+        }
+
+        [Test]
+        public void AReset_PutsTheJetBackAtItsStart_EvenAfterACrash_AndTheReplayRepeatsIt()
+        {
+            AircraftProfile p = F18E();
+            AirframeState low = AircraftFactory.LevelStart(p, new Vector3(0f, 300f, 0f), 0f, 200f, 3000f);
+            var seat = new PlayerSeat(Settings, Tick, startLever: 0.8f);
+            var live = new FlightCore(new SubstepClock(Tick, 4), new FlatSurface(0f));
+            live.Add(AircraftFactory.Build(1, p, Sheet(), low), seat);
+            Core.Aircraft jet = live.Find(1);
+
+            long t = 0;
+            for (; t < 1000 && jet.State.Status == FlightStatus.Flying; t++) { seat.Submit(Frame(keys: Moved(pitch: -1f))); live.Step(); }
+            Assert.AreEqual(FlightStatus.Crashed, jet.State.Status, "full forward stick from 300 m meets the sea");
+
+            DeviceSample reset = DeviceSample.Idle;
+            reset.Toggles = PilotSwitches.Reset;
+            seat.Submit(Frame(keys: reset));
+            live.Step();
+            Assert.AreEqual(1, jet.Resets);
+            Assert.AreEqual(FlightStatus.Flying, jet.State.Status, "back in the air");
+
+            // The reset tick flies exactly what a fresh jet flies on its first tick with the same inputs.
+            live.Inputs.TryGet(t, 1, out InputEntry resetTick);
+            var fresh = new FlightCore(new SubstepClock(Tick, 4), new FlatSurface(0f));
+            PilotInputs same = resetTick.Inputs;
+            same.Switches &= ~PilotSwitches.Reset;
+            fresh.Add(AircraftFactory.Build(1, p, Sheet(), low), new HoldSeat(same));
+            fresh.Step();
+            Assert.AreEqual(fresh.Find(1).State.Position, jet.State.Position);
+            Assert.AreEqual(fresh.Find(1).State.Velocity, jet.State.Velocity);
+
+            for (int k = 0; k < 200; k++) { seat.Submit(Frame()); live.Step(); }
+            var replay = new FlightCore(new SubstepClock(Tick, 4), new FlatSurface(0f));
+            replay.Add(AircraftFactory.Build(1, p, Sheet(), low), new ReplaySeat(live.Inputs));
+            for (long k = 0; k < live.Tick; k++) replay.Step();
+            Assert.AreEqual(-1, live.Fixes.FirstDivergence(replay.Fixes), "crash, reset and the flight after it replay bit for bit");
+            Assert.AreEqual(1, replay.Find(1).Resets);
+        }
+
         // ── The instructor (W15) flies the L0 jet ─────────────────────────
 
         [Test]

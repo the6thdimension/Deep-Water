@@ -44,6 +44,8 @@ namespace DeepWater.AirWing.Modules.Aircraft
         /// <summary>The core's aircraft, once the runner has built it.</summary>
         public Core.Aircraft Aircraft => _aircraft;
 
+        int _resets;
+
         internal void Bind(Core.Aircraft aircraft)
         {
             _aircraft = aircraft;
@@ -54,7 +56,16 @@ namespace DeepWater.AirWing.Modules.Aircraft
 
         /// <summary>Called by the runner around each tick.</summary>
         internal void BeforeTick() => _previous = _current;
-        internal void AfterTick() => _current = _aircraft.State;
+        internal void AfterTick()
+        {
+            _current = _aircraft.State;
+            if (_aircraft.Resets != _resets)
+            {
+                // A reset jumps the jet back to its start: snap there rather than sweep across the map.
+                _resets = _aircraft.Resets;
+                _previous = _current;
+            }
+        }
 
         void Update()
         {

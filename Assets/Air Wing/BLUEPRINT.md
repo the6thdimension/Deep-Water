@@ -1,6 +1,6 @@
 # Air Wing — blueprint
 
-> **Status: LOCKED BLUEPRINT (W1–W31); Phase 1 done (slices 0 and 1a–1e) except a live Dogfight run from the stick and the mouse; stopped at SIX's word before Phase 2 (2026-10-25).** SIX answered all 24 questions on 2026-10-24 (W1–W24) and locked W25–W31 on 2026-10-25. Progress is in `ROADMAP.md`.
+> **Status: LOCKED BLUEPRINT (W1–W31); Phase 1 done (slices 0 and 1a–1e) except a live Dogfight run from the stick and the mouse; Phase 2 (jet L1) started 2026-10-26 with W32–W35.** SIX answered all 24 questions on 2026-10-24 (W1–W24) and locked W25–W31 on 2026-10-25. Progress is in `ROADMAP.md`.
 > **This document's one job:** say what Air Wing is and why, record every decision behind it, and define the contract each part of an aircraft follows. Work order and progress live in `ROADMAP.md`, not here. The stock-take that preceded it is summarised in §1.
 
 ## 1. In plain language
@@ -165,6 +165,10 @@ All entries W1–W24 are SIX's picks of 2026-10-24, in round order. "Leaning" is
 | W29 | Runway start at L0 | **Waits for L1.** L0 is a point mass with no gear, so Dogfight starts airborne until Landing Gear L1 exists. The runway is built in slice 1 as scenery and as the AI's landing target | — | Locked |
 | W30 | The jet's art | **Built from a copy of the F-18E model** (`_AIRCRAFT/F-18E/Blender/F-18E.blend`'s import), with no vendor scripts on it (AP8). The FDS F-18E prefab, AerialArcade and the original `.blend` are never modified | — | Locked |
 | W31 | Shared helpers (RNG, fingerprint) | **Air Wing copies General Quarters' pattern, not its code** (no reference to `DeepWater.GeneralQuarters`). Extract a shared core only when a third module needs it (tenets 11 and 14) | — | Locked |
+| W32 | L1 aerodynamics | **NASA TM-107601** (Buttrill, Arbuckle and Hoffler, 1992, *Simulation model of a twin-tail, high performance airplane*): public nonlinear low-speed F/A-18 tables over angle of attack and sideslip, with the inertias. Scaled to the E and flagged AUTHORED; Mach tables wait for L2 (W3) | Same | Locked (SIX, 2026-10-26) |
+| W33 | Departure at L1 | **Physics decides.** The fly-by-wire limits angle of attack and G as the Hornet's does, but the airframe obeys its tables: abused at its corners (low speed, heavy roll at high angle of attack, full pedal) it can stall, spin or depart. Bad piloting crashes (Q5) | Same | Locked (SIX, 2026-10-26) |
+| W34 | Phase 2 order | **Flying first, gear last:** 2a 6-DOF airframe and aero, headless; 2b fly-by-wire; 2c spool time, L1 in the scenes, the budget; 2d landing gear with runway take-off and landing; 2e phase review | Same | Locked (SIX, 2026-10-26) |
+| W35 | Default level in the scenes | **Switch to L1 once its tests pass; L0 stays selectable** on the fidelity sheet | Same | Locked (SIX, 2026-10-26) |
 
 ## 6. Standing constraints
 
@@ -216,8 +220,8 @@ All entries W1–W24 are SIX's picks of 2026-10-24, in round order. "Leaning" is
 | ~~Q2~~ | ~~`RH Aviator`'s asmdef is `RH.Aviator` (namespace `RH.`), while new modules use `DeepWater.*`. Rename it to `DeepWater.Aviator` when the AI stream starts (Consistent, Lamport)?~~ **Answered 2026-10-25 by SIX: `DeepWater.Aviator`.** Done in slice 0 (the asmdef's name and root namespace; it has no scripts yet) | — |
 | ~~Q3~~ | ~~When the blueprint should reach `main`: now (docs only), or with slice 1?~~ **Answered 2026-10-25 by SIX: now.** Brought up to `main` with slice 0 | — |
 | ~~Q4~~ | **Answered 2026-10-25 by SIX: fix all eight**, the AerialArcade file included, plus a local-only guard on `UnityMcpUnlock.cs` that is never committed. Done (ROADMAP slice 0, last item): player scripts compile with 0 errors. *The question was:* ~~Eight files outside Air Wing still stop a player build, so W21's player-build measurement (slice 1e) can't run yet: `AerialArcade/.../F18ControllerEditor.cs` (vendor), `RH Utilities/` ×3, `RH Testing Suite/Core/TestRunner.cs`, `Scripts/Destroyer Scripts/DestroyerEditor.cs`, `_Archive/Carrier_legacy/.../CarrierEditor.cs`, and the local-only `UnityMcpUnlock.cs`. May they be fixed, and how? (Each moves into an `Editor/` folder or gains `#if UNITY_EDITOR`; the vendor file and the unlock file need your word.)~~ | — |
-| Q5 | **The mouse instructor can fly the jet into the sea.** Its lift-on-aim law banks past 90° toward any aim below the horizon and pushes negative G toward an aim behind; it has no sense of height. Measured in slice 1e: aimed at Dogfight's low gates, it meets the sea or the land every time (METHODOLOGY AP25). Add a floor to the instructor: a bank limit while the aim is below the horizon, and a pull-up when the time to impact drops under a few seconds, with the values in `PlayerSeatSettings.asset`? Stick, pad and keys are untouched: they fly the jet as commanded. | S: one item in slice 1e or Phase 2, with tests |
-| Q6 | **A crash ends the flight until you stop and press Play again.** Add a reset (keyboard R, Xbox View) that puts the jet back at the scene's start? It would go into the input log as an event, so replays stay bit-identical. | S |
+| ~~Q5~~ | ~~The mouse instructor can fly the jet into the sea. Add a floor?~~ **Answered 2026-10-26 by SIX: no floor. "Bad piloting should result in crashes."** The instructor stays as it is; README warns mouse pilots (METHODOLOGY AP25) | — |
+| ~~Q6~~ | ~~A crash ends the flight until Stop and Play. Add a reset?~~ **Answered 2026-10-26 by SIX: add it.** Done: keyboard R or the Xbox View button puts the jet back at its start; it travels in the Pilot Inputs (`PilotSwitches.Reset`, momentary), so the log records it and a replay repeats it | — |
 
 ## Change log
 - **2026-10-24** — Stock-take (read-only), then the blueprint locked from the 24-question interview (W1–W24, SIX). Three picks differ from Claude's leaning: W10, W12 and W16. W25–W31 Proposed by Claude. Nothing built.
@@ -225,3 +229,4 @@ All entries W1–W24 are SIX's picks of 2026-10-24, in round order. "Leaning" is
 - **2026-10-25** — Q4 answered by SIX (fix all eight); done, and player scripts compile with 0 errors.
 - **2026-10-25** — Q1 answered by SIX: W25–W31 locked as written. Slice 1a started.
 - **2026-10-25** — Slices 1b–1d done (ROADMAP). Slice 1e: Q5 (the mouse instructor has no floor) and Q6 (a reset after a crash) added.
+- **2026-10-26** — Q5 answered by SIX (no instructor floor: bad piloting crashes) and Q6 (a reset: done). Phase 2 begun: W32–W35 locked by SIX, all as Claude leaned.

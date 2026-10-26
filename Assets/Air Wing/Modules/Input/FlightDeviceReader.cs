@@ -47,6 +47,8 @@ namespace DeepWater.AirWing.Modules.Input
         sealed class Source
         {
             public readonly InputAction Pitch, Roll, Pedals, Flaps, SpeedBrake, Gear;
+            /// <summary>Keyboard R and the Xbox View button; the stick has none bound (its buttons differ by model).</summary>
+            public readonly InputAction Reset;
             public PilotSwitches Pressed;
 
             public Source(InputActionMap map)
@@ -57,6 +59,7 @@ namespace DeepWater.AirWing.Modules.Input
                 Flaps = map.FindAction("Flaps", true);
                 SpeedBrake = map.FindAction("SpeedBrake", true);
                 Gear = map.FindAction("Gear", true);
+                Reset = map.FindAction("Reset", false);
             }
 
             public void Poll()
@@ -65,6 +68,7 @@ namespace DeepWater.AirWing.Modules.Input
                 if (Flaps.WasPressedThisFrame()) Pressed ^= PilotSwitches.FlapsDown;
                 if (SpeedBrake.WasPressedThisFrame()) Pressed ^= PilotSwitches.SpeedBrake;
                 if (Gear.WasPressedThisFrame()) Pressed ^= PilotSwitches.GearDown;
+                if (Reset != null && Reset.WasPressedThisFrame()) Pressed |= PilotSwitches.Reset;   // a press, never undone by a second
             }
         }
 

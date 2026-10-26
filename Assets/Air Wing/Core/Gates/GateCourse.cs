@@ -118,6 +118,9 @@ namespace DeepWater.AirWing.Core.Gates
         /// <summary>Whole laps flown.</summary>
         public int Laps { get; private set; }
 
+        /// <summary>Starts the course again from gate 1 (after a reset). The passes flown so far stay in the record.</summary>
+        public void Restart() => Next = 0;
+
         /// <summary>
         /// Watches one tick of flight, from the state before the tick to the state after it. True when the next gate
         /// was flown; the speed and altitude are taken where the path crossed the gate's plane.

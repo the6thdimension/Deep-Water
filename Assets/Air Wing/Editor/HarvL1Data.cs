@@ -57,6 +57,24 @@ namespace DeepWater.AirWing.Editor
             so.alphaMinDeg = -10f;
             so.alphaMaxDeg = 60f;
             so.meanChordFt = (float)SuperHornetChordFt;
+            // AUTHORED: the drag floor is the L0 polar (this profile's cd0 and K = 1/(pi e AR)).
+            so.dragFloorCd0 = so.cd0;
+            so.dragFloorK = (float)(1.0 / (System.Math.PI * so.oswaldEfficiency * so.spanFt * so.spanFt / so.wingAreaFt2));
+
+            // Flight Controls L1 (slice 2b). AUTHORED gains, tuned in Calibration~/l1_fbw_mirror.py.
+            so.alphaLimitDeg = 30f;
+            so.loadFactorCommandTauS = 0.3f;
+            so.alphaGainPerS = 2.0f;
+            so.loadFactorIntegralDegPerGs = 0.02f * Mathf.Rad2Deg;
+            so.pitchRateBandwidth = 6f;
+            so.rollRateBandwidth = 5f;
+            so.yawRateBandwidth = 3f;
+            so.sideslipGainPerS = 2f;
+            so.sideslipPerPedalDeg = 8f;
+            // PUBLIC: actuators, NASA TM-107601 via Chakraborty, Seiler and Balas 2011, Table 2.
+            so.stabilatorBandwidth = 30f; so.stabilatorRateDegS = 40f; so.stabilatorMinDeg = -24f; so.stabilatorMaxDeg = 10.5f;
+            so.aileronBandwidth = 48f; so.aileronRateDegS = 100f; so.aileronMinDeg = -25f; so.aileronMaxDeg = 45f;
+            so.rudderBandwidth = 40f; so.rudderRateDegS = 61f; so.rudderMinDeg = -30f; so.rudderMaxDeg = 30f;
 
             // AUTHORED scaling: I ∝ m·r². Roll with the span, pitch and yaw with the length, the product with both.
             double weightLb = so.emptyWeightLb + FuelFractionForInertia * so.internalFuelLb;
@@ -81,6 +99,16 @@ namespace DeepWater.AirWing.Editor
                 $"pitch and yaw by length ({SuperHornetLengthFt}/{HornetLengthFt} ft, Navy fact files), the product by both: " +
                 $"Ixx {so.ixxSlugFt2:F0}, Iyy {so.iyySlugFt2:F0}, Izz {so.izzSlugFt2:F0}, Ixz {so.ixzSlugFt2:F0} slug ft2. " +
                 "Fixed at L1; fuel burn moves them at L3.\n" +
+                "dragFloorCd0, dragFloorK: AUTHORED, the L0 polar (cd0 and 1/(pi e AR)) as a floor under the fits' drag, which is " +
+                "almost nil at low alpha (C_D 0.004 at alpha 0; the authors note their low-alpha data are thin).\n" +
+                "Flight Controls L1 (slice 2b, W23): alphaLimitDeg 30, loadFactorCommandTauS 0.3, alphaGainPerS 2, " +
+                "loadFactorIntegralDegPerGs 1.15, pitchRateBandwidth 6, rollRateBandwidth 5, yawRateBandwidth 3, sideslipGainPerS 2, " +
+                "sideslipPerPedalDeg 8: AUTHORED, a nonlinear-dynamic-inversion law after Snell, Enns and Garrard (J. Guidance 15(4), 1992), " +
+                "tuned in Calibration~/l1_fbw_mirror.py against criteria fixed before tuning (ROADMAP slice 2b). " +
+                "stabilatorBandwidth, stabilatorRateDegS, stabilatorMinDeg, stabilatorMaxDeg, aileronBandwidth, aileronRateDegS, " +
+                "aileronMinDeg, aileronMaxDeg, rudderBandwidth, rudderRateDegS, rudderMinDeg, rudderMaxDeg: PUBLIC, the actuators of " +
+                "NASA TM-107601 as Chakraborty, Seiler and Balas 2011 Table 2 gives them (30, 48, 40 rad/s lags; 40, 100, 61 deg/s; " +
+                "-24..10.5, -25..45, -30..30 deg).\n" +
                 "Note: the published f18full.m adds the thrust term of beta-dot with the wrong sign (T cos(alpha) sin(beta)/(mV)); " +
                 "Air Wing derives its motion from body kinematics and does not inherit it (Calibration~/l1_harv_mirror.py).";
             string prov = so.provenance ?? "";

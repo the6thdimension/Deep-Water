@@ -10,6 +10,20 @@ namespace DeepWater.AirWing.Core.State
     }
 
     /// <summary>
+    /// Flight Controls L1's own state (W23): where the surfaces stand and the law's memory. Zero at L0. Kept in the
+    /// aircraft state, not in the part, so the Fix covers it and a reset (Q6) clears it.
+    /// </summary>
+    public struct ControlState
+    {
+        /// <summary>Surface positions, radians, in the HARV sign convention (see <c>ControlSurfaces</c>).</summary>
+        public float StabilatorRad, AileronRad, RudderRad;
+        /// <summary>The G loop's integral, as a pitch-rate command, radians per second.</summary>
+        public float PitchIntegralRadS;
+        /// <summary>The prefiltered G command, g.</summary>
+        public float LoadFactorCommand;
+    }
+
+    /// <summary>
     /// One aircraft's state, the lingua franca of every ladder level (C4): each level reads it, steps it and
     /// writes it back, so an aircraft can change level between runs without a conversion. Fields a level does not
     /// model keep their last value (fuel at L0, for example). SI units throughout (W22); Unity's axes and
@@ -42,5 +56,7 @@ namespace DeepWater.AirWing.Core.State
         public FlightStatus Status;
         /// <summary>Touching a surface through PhysX this tick (L1+). Such ticks are flagged in the Fix (W7).</summary>
         public bool InContact;
+        /// <summary>Flight Controls L1's surfaces and memory (zero at L0).</summary>
+        public ControlState Controls;
     }
 }

@@ -85,10 +85,48 @@ namespace DeepWater.AirWing.ScriptableObjects
         [Tooltip("The polynomials are evaluated with α clamped to this range, degrees.")]
         public float alphaMinDeg = -10f;
         public float alphaMaxDeg = 60f;
+        [Tooltip("Drag floor C_D0 + K·C_L² under the fits (AUTHORED); 0 turns it off.")]
+        public float dragFloorCd0;
+        public float dragFloorK;
+
+        [Header("Flight controls L1 (W23): empty (alpha limit 0) = no L1 law")]
+        public float alphaLimitDeg;
+        [Tooltip("The G command's prefilter, seconds.")]
+        public float loadFactorCommandTauS;
+        [Tooltip("Pitch rate commanded per unit of alpha error, 1/s.")]
+        public float alphaGainPerS;
+        [Tooltip("Alpha command added per g·s of G error, degrees.")]
+        public float loadFactorIntegralDegPerGs;
+        [Tooltip("Bandwidths of the inversion, 1/s.")]
+        public float pitchRateBandwidth;
+        public float rollRateBandwidth;
+        public float yawRateBandwidth;
+        [Tooltip("Yaw rate commanded per unit of sideslip error, 1/s.")]
+        public float sideslipGainPerS;
+        [Tooltip("Sideslip commanded at full pedal, degrees.")]
+        public float sideslipPerPedalDeg;
+        [Tooltip("Actuators: lag bandwidth rad/s, rate deg/s, travel deg (min, max).")]
+        public float stabilatorBandwidth;
+        public float stabilatorRateDegS;
+        public float stabilatorMinDeg;
+        public float stabilatorMaxDeg;
+        public float aileronBandwidth;
+        public float aileronRateDegS;
+        public float aileronMinDeg;
+        public float aileronMaxDeg;
+        public float rudderBandwidth;
+        public float rudderRateDegS;
+        public float rudderMinDeg;
+        public float rudderMaxDeg;
 
         [Header("Provenance (W8)")]
         [TextArea(8, 40)]
         public string provenance = "";
+
+        static ActuatorProfile Actuator(float bandwidth, float rateDegS, float minDeg, float maxDeg) => new ActuatorProfile
+        {
+            BandwidthRadS = bandwidth, RateRadS = rateDegS * Units.DegToRad, MinRad = minDeg * Units.DegToRad, MaxRad = maxDeg * Units.DegToRad,
+        };
 
         public AircraftProfile Bake()
         {
@@ -146,6 +184,26 @@ namespace DeepWater.AirWing.ScriptableObjects
                     IxzKgM2 = (float)(ixzSlugFt2 * Units.SlugFootSquaredToKilogramMetreSquared),
                     AlphaMinRad = alphaMinDeg * Units.DegToRad,
                     AlphaMaxRad = alphaMaxDeg * Units.DegToRad,
+                    DragFloorCD0 = dragFloorCd0,
+                    DragFloorK = dragFloorK,
+                };
+            }
+            if (alphaLimitDeg > 0f)
+            {
+                profile.ControlsL1 = new ControlsL1Profile
+                {
+                    AlphaLimitRad = alphaLimitDeg * Units.DegToRad,
+                    LoadFactorCommandTauS = loadFactorCommandTauS,
+                    AlphaGain = alphaGainPerS,
+                    LoadFactorIntegralGain = loadFactorIntegralDegPerGs * Units.DegToRad,
+                    PitchRateBandwidth = pitchRateBandwidth,
+                    RollRateBandwidth = rollRateBandwidth,
+                    YawRateBandwidth = yawRateBandwidth,
+                    SideslipGain = sideslipGainPerS,
+                    SideslipPerPedalRad = sideslipPerPedalDeg * Units.DegToRad,
+                    Stabilator = Actuator(stabilatorBandwidth, stabilatorRateDegS, stabilatorMinDeg, stabilatorMaxDeg),
+                    Aileron = Actuator(aileronBandwidth, aileronRateDegS, aileronMinDeg, aileronMaxDeg),
+                    Rudder = Actuator(rudderBandwidth, rudderRateDegS, rudderMinDeg, rudderMaxDeg),
                 };
             }
             profile.Validate();

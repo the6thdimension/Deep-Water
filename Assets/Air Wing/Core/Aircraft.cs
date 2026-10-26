@@ -75,7 +75,7 @@ namespace DeepWater.AirWing.Core
             for (int k = 0; k < clock.Substeps; k++)
             {
                 AirData air = Atmosphere.Sample(State.Position.y);
-                ControlDemand demand = Controls.Demand(inputs, State, dt);
+                ControlDemand demand = Controls.Demand(inputs, ref State, air, dt);
                 float thrust = Powerplant.Step(inputs, air, ref State, dt);
                 Airframe.Step(ref State, demand, thrust, air, inputs, dt);
 

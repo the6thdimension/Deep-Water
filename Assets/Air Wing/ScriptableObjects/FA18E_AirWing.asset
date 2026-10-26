@@ -35,6 +35,106 @@ MonoBehaviour:
   rollRateMaxDegS: 150
   loadFactorTimeConstantS: 0.25
   rollTimeConstantS: 0.3
+  cma:
+  - -0.0866
+  - 0.511
+  - -1.2897
+  cmds:
+  - -0.9051
+  - -0.3245
+  - 0.9338
+  cmq:
+  - -4.1186
+  - 10.9921
+  - -68.5641
+  - 64.719
+  cLift:
+  - -0.0204
+  - 5.677
+  - -5.4246
+  - 1.1645
+  cLiftDs:
+  - 0.5725
+  - 0.4055
+  - -2.6975
+  - 2.1852
+  cDrag:
+  - -1.4994
+  - -0.1995
+  - 6.3971
+  - -5.7341
+  - 1.461
+  cDrag0: 1.5036
+  cDragDs:
+  - 0.0366
+  - -0.2739
+  - 4.236
+  - -3.8578
+  cyb:
+  - -0.7344
+  - 0.2654
+  - -0.1926
+  cyda:
+  - -0.1656
+  - -0.2403
+  - 1.5317
+  - -0.85
+  cydr:
+  - 0.2054
+  - 0.4082
+  - -1.6921
+  - 0.9351
+  clb:
+  - -0.0556
+  - -0.4153
+  - -0.362
+  - 2.3843
+  - -1.6196
+  clda:
+  - 0.1424
+  - -0.0516
+  - -0.2646
+  - 0.1989
+  cldr:
+  - 0.0129
+  - 0.0014
+  - 0.0083
+  - -0.0274
+  clp:
+  - -0.354
+  - 0.2377
+  clr:
+  - 0.1983
+  - 0.7804
+  - -1.0871
+  cnb:
+  - 0.0885
+  - 0.0329
+  - -0.3816
+  cnda:
+  - 0.0104
+  - 0.0584
+  - -0.3413
+  - 0.2694
+  cndr:
+  - -0.078
+  - -0.0176
+  - 0.5564
+  - -0.898
+  - 0.3899
+  cnp:
+  - 0.0792
+  - -0.0881
+  cnr:
+  - -0.4326
+  - -0.1307
+  meanChordFt: 12
+  ixxSlugFt2: 40481.516
+  iyySlugFt2: 214447.61
+  izzSlugFt2: 240885.56
+  ixzSlugFt2: -4692.6514
+  alphaMinDeg: -10
+  alphaMaxDeg: 60
   provenance: 'Sources and tags in full: Assets/Air Wing/Calibration~/F18E-SOURCES.md
     (read 2026-10-25).
 
@@ -101,4 +201,33 @@ MonoBehaviour:
 
     VALIDATION, not fitted: maximum speed Mach 1.8+
     (Navy) / Mach 1.6 (Boeing); L0 gives Mach 1.41 at 40,000 ft and 1.54 at sea level
-    (no Mach effects until L2).'
+    (no Mach effects until L2).
+
+
+    --- Airframe L1 (W32) ---
+
+    cma, cmds, cmq,
+    cLift, cLiftDs, cDrag, cDrag0, cDragDs, cyb, cyda, cydr, clb, clda, cldr, clp,
+    clr, cnb, cnda, cndr, cnp, cnr: PUBLIC (W32): the F/A-18 HARV polynomial fits
+    of Chakraborty, Seiler and Balas, J. Guidance 34(1) 2011, Appendix Tables A1-A2,
+    fitted to NASA HARV flight data; checked against the authors'' F18AeroData.mat.
+    Valid for alpha 0-60 deg; alphaMinDeg -10 and alphaMaxDeg 60: AUTHORED, the polynomials
+    held flat outside them. Sideslip enters linearly; no flaps or speed brake in
+    the fits (the L0 increments are used, AUTHORED). Applied to the E''s own wing
+    (500 ft2, 44.9 ft): the E is flown on the A/B''s coefficients, scaled by its
+    reference geometry (AUTHORED, W8).
+
+    meanChordFt 12.0: AUTHORED, the HARV''s
+    11.52 ft times (S_E/S_A)/(b_E/b_A).
+
+    ixxSlugFt2, iyySlugFt2, izzSlugFt2,
+    ixzSlugFt2: AUTHORED, NASA TM-107601 Table 3.5 (33,310 lb: Ixx 23,000, Iyy 151,293,
+    Izz 169,945, Ixz -2,971 slug ft2) scaled as m r2 to the E at 60 % fuel (40721
+    lb, mass x1.2225); roll by span (44.9/37.42 ft), pitch and yaw by length (60.3/56
+    ft, Navy fact files), the product by both: Ixx 40482, Iyy 214448, Izz 240886,
+    Ixz -4693 slug ft2. Fixed at L1; fuel burn moves them at L3.
+
+    Note: the published
+    f18full.m adds the thrust term of beta-dot with the wrong sign (T cos(alpha)
+    sin(beta)/(mV)); Air Wing derives its motion from body kinematics and does not
+    inherit it (Calibration~/l1_harv_mirror.py).'

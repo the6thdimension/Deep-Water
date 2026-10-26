@@ -52,6 +52,40 @@ namespace DeepWater.AirWing.ScriptableObjects
         public float loadFactorTimeConstantS;
         public float rollTimeConstantS;
 
+        [Header("Airframe L1 (W32): polynomials in α (rad), term i times α^i; empty = no L1 data")]
+        public float[] cma = new float[0];
+        public float[] cmds = new float[0];
+        public float[] cmq = new float[0];
+        public float[] cLift = new float[0];
+        public float[] cLiftDs = new float[0];
+        public float[] cDrag = new float[0];
+        public float cDrag0;
+        public float[] cDragDs = new float[0];
+        public float[] cyb = new float[0];
+        public float[] cyda = new float[0];
+        public float[] cydr = new float[0];
+        public float[] clb = new float[0];
+        public float[] clda = new float[0];
+        public float[] cldr = new float[0];
+        public float[] clp = new float[0];
+        public float[] clr = new float[0];
+        public float[] cnb = new float[0];
+        public float[] cnda = new float[0];
+        public float[] cndr = new float[0];
+        public float[] cnp = new float[0];
+        public float[] cnr = new float[0];
+        [Tooltip("Mean aerodynamic chord for the L1 moments, feet.")]
+        public float meanChordFt;
+        [Tooltip("Moments of inertia, slug·ft² (the units NASA quotes).")]
+        public float ixxSlugFt2;
+        public float iyySlugFt2;
+        public float izzSlugFt2;
+        [Tooltip("Product of inertia, slug·ft², signed as NASA TM-107601 signs it.")]
+        public float ixzSlugFt2;
+        [Tooltip("The polynomials are evaluated with α clamped to this range, degrees.")]
+        public float alphaMinDeg = -10f;
+        public float alphaMaxDeg = 60f;
+
         [Header("Provenance (W8)")]
         [TextArea(8, 40)]
         public string provenance = "";
@@ -93,6 +127,27 @@ namespace DeepWater.AirWing.ScriptableObjects
                     RollTimeConstantS = rollTimeConstantS,
                 },
             };
+            if (cma != null && cma.Length > 0)
+            {
+                profile.AirframeL1 = new AirframeL1Profile
+                {
+                    Aero = new AeroPolynomialsL1
+                    {
+                        Cma = cma, Cmds = cmds, Cmq = cmq, CL = cLift, CLds = cLiftDs, CD = cDrag, CD0 = cDrag0, Cdds = cDragDs,
+                        Cyb = cyb, Cyda = cyda, Cydr = cydr, Clb = clb, Clda = clda, Cldr = cldr, Clp = clp, Clr = clr,
+                        Cnb = cnb, Cnda = cnda, Cndr = cndr, Cnp = cnp, Cnr = cnr,
+                    },
+                    ReferenceAreaM2 = profile.Airframe.WingAreaM2,
+                    SpanM = profile.Airframe.SpanM,
+                    ChordM = (float)(meanChordFt * Units.FootToMetre),
+                    IxxKgM2 = (float)(ixxSlugFt2 * Units.SlugFootSquaredToKilogramMetreSquared),
+                    IyyKgM2 = (float)(iyySlugFt2 * Units.SlugFootSquaredToKilogramMetreSquared),
+                    IzzKgM2 = (float)(izzSlugFt2 * Units.SlugFootSquaredToKilogramMetreSquared),
+                    IxzKgM2 = (float)(ixzSlugFt2 * Units.SlugFootSquaredToKilogramMetreSquared),
+                    AlphaMinRad = alphaMinDeg * Units.DegToRad,
+                    AlphaMaxRad = alphaMaxDeg * Units.DegToRad,
+                };
+            }
             profile.Validate();
             return profile;
         }

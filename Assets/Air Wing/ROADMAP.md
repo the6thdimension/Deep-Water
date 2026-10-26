@@ -235,11 +235,27 @@ The gate: the F/A-18E flies at L1 (6-DOF, fly-by-wire, spool time) in Dogfight f
 - [x] Tests: `SeatTests.Reset_IsMomentary_FromAnySource_AndLeavesTheSwitchesAlone`; `SeatTests.AReset_PutsTheJetBackAtItsStart_EvenAfterACrash_AndTheReplayRepeatsIt` (crash from 300 m, reset, 200 ticks more, replayed with no divergence); R and View in `DeviceBindingTests`; `GateCourse.Restart`.
 - *Not verified:* a reset pressed live in Dogfight.
 
-### Slice 2a — Airframe L1: 6-DOF and the NASA tables, headless (W32, W33)
-- [ ] Source: NASA TM-107601's F/A-18 aero tables and inertias, transcribed with page references into `Calibration~/` with a Python mirror (C17), then scaled to the E (AUTHORED, every factor named).
-- [ ] `Core/Airframe/AirframeL1`: a rigid body in body axes; quaternion attitude; Euler's equations with the full inertia (Ixz); forces and moments from the tables over α and β, the surfaces and the body rates; thrust along the body.
-- [ ] `ControlDemand` gains surface deflections; a direct law (stick to surfaces) is enough for 2a's tests. The ladder pairs Airframe L1 only with Flight Controls ≥ L1, and says so when a sheet asks otherwise.
-- [ ] Tests: trim at several speeds and heights; the short-period and Dutch-roll modes against the linearised tables; a stall at Cl_max; energy with thrust and drag off; the Fix bit-identical; the banned-API scan.
+### Slice 2a — Airframe L1: 6-DOF and the HARV model, headless (W32, W33) (done 2026-10-26: 70/70 tests)
+- [x] **Source, found the hard way.** NASA TM-107601 describes the F/A-18 simulation model (structure, geometry, inertia in Table 3.5) but does not print its aero tables; they come from MDC A7247, which is not public. SIX re-decided W32 to the published HARV fits: Chakraborty, Seiler and Balas (*J. Guidance* 2011, Tables A1–A2), checked against the authors' public `F18AeroData.mat` and `f18full.m` (University of Minnesota, `F18Analysis.zip`).
+- [x] `Calibration~/l1_harv_mirror.py` (C17): a line-for-line port of `f18full.m`, dependency-free, with its own trim (Newton) and RK4. At 500 ft/s and 25,000 ft the HARV trims at α 7.614°, stabilator −2.550°, thrust 4,018 lbf.
+- [x] **Found in the published model:** `f18full.m`'s β̇ adds the thrust term T·cosα·sinβ/(mV) where body kinematics (Stevens and Lewis) subtract it. The mirror keeps the authors' line and checks it a second way (`betad_kinematic`); the two differ by exactly 2·T·cosα·sinβ/(mV), to seven digits. Air Wing derives its motion from body kinematics and does not inherit it. V̇ and α̇ agree to every digit.
+- [x] `Core/Profiles/AirframeL1Profile` (the polynomials, reference geometry, inertia, α range) and `Core/Airframe/AirframeL1`:
+  - the six coefficients term for term as the HARV model forms them, with α clamped to −10 … 60° for the polynomials (AUTHORED: the fits hold 0–60°);
+  - wind-axis lift, drag and side force to body axes; Euler's equations with Ixz; thrust along the body; gravity down;
+  - the NASA body frame (x forward, y right, z down) inside, Unity's outside; `BodyRates` holds Unity's local angular velocity, (−q, r, −p);
+  - **the midpoint method**, two force evaluations a substep. Semi-implicit Euler gained 1.2 % of rotational energy in 5 s of torque-free tumbling at 200 Hz; the midpoint method gains 1.7 × 10⁻⁷.
+- [x] `ControlDemand` carries `ControlSurfaces` (stabilator, aileron, rudder, in the HARV's sign convention). Flight Controls L0 sets none, so **Airframe L1 is not registered on the ladder yet**: it pairs with Flight Controls L1 in 2b. Until then the tests reach it directly.
+- [x] The F/A-18E's L1 data: **Deep Water → Air Wing → Apply HARV L1 Data to F-A-18E** writes the polynomials, a mean chord of 12.0 ft (AUTHORED) and an inertia scaled as m·r² from TM-107601's HARV row to the E at 60 % fuel (40,721 lb; roll by span 44.9/37.42 ft, pitch and yaw by length 60.3/56 ft, Navy fact files): Ixx 40,482, Iyy 214,448, Izz 240,886, Ixz −4,693 slug·ft² (AUTHORED). The provenance names every field.
+- [x] Tests (`AirframeL1Tests`, 9; 70/70 in all):
+  - the coefficients at three points equal the mirror's to 2 × 10⁻⁶;
+  - at the mirror's trim every derivative is still (V̇ 7 × 10⁻⁷ ft/s², α̇ and q̇ under 10⁻⁸);
+  - at a skewed state (β 3°, α 10°, p, q, r, φ 20°, all three surfaces, 9,000 lbf) V̇, β̇ (corrected), α̇, ṗ, q̇, ṙ match to 2 × 10⁻⁴ relative;
+  - a stabilator doublet tracks the mirror's RK4 for 3 s to 0.0007 ft/s and 4 × 10⁻⁷ rad;
+  - C_L peaks at 1.698 near 38.2° and falls past it (a stall);
+  - torque-free rotation keeps its angular momentum (7 × 10⁻⁶) and energy (2 × 10⁻⁷);
+  - two runs are bit-identical; the polynomials are held flat outside their range; the E asset carries the paper's numbers.
+- [x] **A trap on the way:** the doublet first missed by 0.08° of α. The cause was the test, not the physics: `(k − 1) · 0.005f` is 0.49999998 at the switch, so a float clock held the −2° one step too long. Scheduled by step index, the miss is 4 × 10⁻⁷ rad (METHODOLOGY AP26).
+- *Known:* the bare HARV is statically unstable in pitch at low α (C_mα +0.51 per radian at α = 0): it needs the fly-by-wire (2b), as the real jet does. Not measured yet: the L1 cost per step (2c's budget).
 
 ### Slice 2b — Flight Controls L1: Hornet-style fly-by-wire (W23, W26)
 - [ ] G-command pitch, roll-rate roll, AoA and G limiters, a yaw damper; structure after NASA's HARV control-law papers, gains AUTHORED. The stick keeps its meaning from L0 (W26).
@@ -277,3 +293,4 @@ Revisit when Phase 3 is done. The questions for SIX are in BLUEPRINT §7.
 - **2026-10-25** — Slice 1d done (d05ae0d): the jet in Unity, the chase camera, the HUD and, at SIX's request, the flight-test scene; 49/49 tests; flown in play with a virtual Xbox pad.
 - **2026-10-25** — Slice 1e done: Dogfight rebuilt in place by its builder, with land, runway 09/27, four gates and the DDG landmark; the old scene and the dead jet archived; the budget met in a player build (2.7 µs per aircraft per step, ×3.6 under); 59/59 tests. Found: the mouse instructor flies into the sea when aimed low (BLUEPRINT Q5), and `RunwayStrip` would have saved as a missing script (fixed as `FlatGround`). Not done: a live Dogfight run from the stick and the mouse. Stopped at SIX's word.
 - **2026-10-26** — SIX: Q6 reset (done, 61/61), Q5 no floor; Phase 2 begun with W32–W35 and slices 2a–2e.
+- **2026-10-26** — Slice 2a done: Airframe L1 on the published HARV model, the midpoint method, the E's L1 data; 70/70 tests. Found: TM-107601 has no aero numbers (W32 re-decided by SIX) and the published f18full.m has a sign slip in β̇.

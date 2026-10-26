@@ -106,12 +106,15 @@ namespace DeepWater.AirWing.Core.Profiles
         public AirframeProfile Airframe;
         public PowerplantProfile Powerplant;
         public ControlsProfile Controls;
+        /// <summary>The L1 airframe's aero model and inertia (W32); unset for a type with no L1 data yet.</summary>
+        public AirframeL1Profile AirframeL1;
 
         public void Validate()
         {
             Airframe.Validate();
             Powerplant.Validate();
             Controls.Validate();
+            if (AirframeL1.IsSet) AirframeL1.Validate();
         }
     }
 }

@@ -14,9 +14,54 @@
 - **Git (SIX, 2026-10-24):** Claude manages git without asking. Verified work is committed, pushed and brought up to `main`, and every branch is kept level; `Guided-Fury` takes it through a PR.
 - **Never pushed:** the archive branch, DAVFX and the MCP unlock script. There are no force pushes.
 
-**Status (2026-10-25): Phase 1 done (slices 0 and 1a–1e), except one item.** The F/A-18E flies at L0 in the rebuilt Dogfight and in the flight-test scene (see `README.md`). The budget is met in a player build. Not done: a live run of Dogfight from the stick and the mouse. Phase 2 (jet L1) started 2026-10-26: W32–W35 locked, the reset (Q6) done; Q5 answered (no instructor floor).
+**Where things stand (2026-10-26):** Phase 1 is finished. Phase 2 is three slices in (2a–2c), and 2d (landing gear) is being built now. Dogfight and the flight-test scene fly the L1 jet.
+
+## DONE — finished and committed
+
+Everything in this table is built, tested and on `main`. The detail behind each row is under *Slice records*, further down.
+
+| Done | What you get | Date | Commit | Tests |
+|---|---|---|---|---|
+| Slice 0 — Clean-up | Legacy aircraft scripts archived with checklists; the player build compiles | 2026-10-25 | 63650de, 0d24231 | — |
+| Slice 1a — Skeleton and contracts | The Air Wing module, Pilot Inputs, seats, the input log, the Fix, the fidelity ladder | 2026-10-25 | 44d5bfd | 19 |
+| Slice 1b — The L0 jet, headless | Atmosphere, a point-mass airframe, engines, controls; the F/A-18E profile from public numbers | 2026-10-25 | 8b34492 | 33 |
+| Slice 1c — Seats and devices | Xbox pad, flight stick, keyboard, mouse aim (the instructor), replay | 2026-10-25 | 75f836e | 45 |
+| Slice 1d — The jet in Unity | The jet in a scene, chase camera, HUD, the flight-test scene | 2026-10-25 | d05ae0d | 49 |
+| Slice 1e — Dogfight rebuilt | Sea, land and runway 09/27, four gates, the DDG landmark; the L0 budget met (2.7 µs) | 2026-10-25 | 22f5a2a0 | 59 |
+| Reset after a crash | R or the Xbox View button restarts the flight (BLUEPRINT Q6) | 2026-10-26 | 608e1288 | 61 |
+| Slice 2a — Airframe L1 | A 6-DOF jet on NASA's F/A-18 HARV flight data | 2026-10-26 | 59c9059c | 70 |
+| Slice 2b — Fly-by-wire L1 | Hornet-style flight controls: G and roll-rate commands, the AoA and G limits | 2026-10-26 | 7c77b0e1 | 82 |
+| Slice 2c — Engines L1, L1 in the scenes | Engine spool; the scenes fly L1; the L1 budget met (17 µs) | 2026-10-26 | 6edafea9 | 87 |
+
+## STILL TO DO
+
+### Being built now
+- **Slice 2d — Landing gear:** wheels on PhysX contacts with spring-damper struts, brakes, nosewheel steering, a runway start, take-off and landing.
+
+### Next in Phase 2
+- **Slice 2e — Phase 2 review:** fly every device at L1 in Dogfight, re-measure the budget, write it up, archive what L1 replaced.
+
+### Left open in finished slices
+- **Fly by hand** in Dogfight from the flight stick and the mouse (slice 1e). SIX has flown it with the pad, and L1 by hand (2026-10-26); the feedback is still to be written in.
+- **Two fly-by-wire targets missed** (slice 2b): G onset 1.2 s against 1.0, and the G limit peaks at 8.08 G against 8.0. They are reported, not fixed.
+- **Not built in the fly-by-wire:** the revised Hornet law's sideslip feedback to the ailerons, the differential stabilator, sensor models.
+
+### Phase 3 — AI pilots (RH Aviator)
+- AI L0: waypoints, wingman formation, return to base with a landing on the Dogfight runway.
+- Switchable seats with a real AI seat.
+- AI L1: fighting for position against another jet. No weapons.
+
+### After Phase 2, in any order
+- The helicopter (its own stream).
+- Airframe L2: Mach effects and ground effect (L1's top speed is not right until then).
+- L3: fuel burn and the centre of gravity moving with it; Powerplant L2–L3.
+
+### Parked
+- **Carrier operations:** waiting until Phase 3 is done (W16).
 
 ---
+
+# Slice records (the detail behind the two lists above)
 
 ## Order of streams
 

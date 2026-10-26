@@ -80,7 +80,7 @@ namespace DeepWater.AirWing.Core.Seats
         readonly double _tickSeconds;
 
         DeviceFrame _frame = DeviceFrame.Idle;
-        bool _frameFresh;
+        bool _frameFresh, _realignAim;
         float _aimYawDeg, _aimPitchDeg;
         PilotSwitches _switches;
 
@@ -131,9 +131,19 @@ namespace DeepWater.AirWing.Core.Seats
             MoveLever(f.Stick);
             MoveLever(f.Gamepad);
             MoveLever(f.Keyboard);
-            _switches ^= f.Stick.Toggles ^ f.Gamepad.Toggles ^ f.Keyboard.Toggles;
+            // Switches latch (each press flips one); Reset is momentary, and any source pressing it resets.
+            PilotSwitches pressed = f.Stick.Toggles | f.Gamepad.Toggles | f.Keyboard.Toggles;
+            bool reset = (pressed & PilotSwitches.Reset) != 0;
+            _switches ^= (f.Stick.Toggles ^ f.Gamepad.Toggles ^ f.Keyboard.Toggles) & ~PilotSwitches.Reset;
+            if (reset) _realignAim = true;
+            else if (_realignAim)
+            {
+                // The tick after a reset: the jet is back at its start, so the mouse aim starts on its new flight path.
+                AimAlongPath(state);
+                _realignAim = false;
+            }
 
-            var inputs = new PilotInputs { Switches = _switches };
+            var inputs = new PilotInputs { Switches = reset ? _switches | PilotSwitches.Reset : _switches };
             float detent = _s.AfterburnerDetent;
             inputs.Afterburner = detent < 1f && Lever >= detent;
             inputs.Throttle = inputs.Afterburner ? 1f : Mathf.Clamp01(Lever / detent);
@@ -167,11 +177,16 @@ namespace DeepWater.AirWing.Core.Seats
             if (f.MouseMoved && Owner != DeviceSource.Mouse)
             {
                 // Start the aim on the flight path, so taking over with the mouse changes nothing until it moves.
-                Vector3 path = state.Velocity.sqrMagnitude > 1f ? state.Velocity.normalized : state.Attitude * Vector3.forward;
-                _aimYawDeg = Mathf.Atan2(path.x, path.z) * Units.RadToDeg;
-                _aimPitchDeg = Mathf.Asin(Mathf.Clamp(path.y, -1f, 1f)) * Units.RadToDeg;
+                AimAlongPath(state);
                 Owner = DeviceSource.Mouse;
             }
+        }
+
+        void AimAlongPath(in AirframeState state)
+        {
+            Vector3 path = state.Velocity.sqrMagnitude > 1f ? state.Velocity.normalized : state.Attitude * Vector3.forward;
+            _aimYawDeg = Mathf.Atan2(path.x, path.z) * Units.RadToDeg;
+            _aimPitchDeg = Mathf.Asin(Mathf.Clamp(path.y, -1f, 1f)) * Units.RadToDeg;
         }
 
         void MoveLever(in DeviceSample s)

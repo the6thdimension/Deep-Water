@@ -51,7 +51,11 @@ namespace DeepWater.AirWing.Modules.Cockpit
 
             GUI.Label(new Rect(0.5f * w - size.x * 0.5f, 30f * s, size.x, size.y), $"HDG {r.HeadingDeg:000}°", _centre);
             if (gates != null && gates.Course != null) Course(gates.Course, s, size);
-            if (r.Crashed) GUI.Label(new Rect(0.5f * w - size.x * 0.5f, 0.45f * h, size.x, size.y * 2f), "CRASHED", _centre);
+            if (r.Crashed)
+            {
+                GUI.Label(new Rect(0.5f * w - size.x * 0.5f, 0.45f * h, size.x, size.y * 2f), "CRASHED", _centre);
+                GUI.Label(new Rect(0.5f * w - size.x, 0.45f * h + 2f * size.y, 2f * size.x, size.y), "R  /  VIEW BUTTON:  RESET", _centre);
+            }
 
             string device = seat != null && _view.Seat == AircraftView.StartSeat.Player ? $"PLAYER · {seat.Owner}" : _view.Seat.ToString().ToUpperInvariant();
             GUI.Label(new Rect(40f * s, h - 3f * size.y, w, size.y), $"SEAT {device}", _left);

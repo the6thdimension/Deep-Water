@@ -32,6 +32,7 @@ namespace DeepWater.AirWing.Modules.World
         Core.Aircraft _aircraft;
         AirframeState _before;
         bool _haveBefore;
+        int _resets;
         LineRenderer[] _rings;
 
         /// <summary>The course being flown (null until Start).</summary>
@@ -58,6 +59,14 @@ namespace DeepWater.AirWing.Modules.World
             if (_aircraft == null && !Find()) return;
 
             AirframeState now = _aircraft.State;
+            if (_aircraft.Resets != _resets)
+            {
+                // The jet is back at its start: the run starts again at gate 1, and the jump is not a path.
+                _resets = _aircraft.Resets;
+                _course.Restart();
+                _haveBefore = false;
+                Paint();
+            }
             if (_haveBefore && _course.Observe(runner.Flight.Tick - 1, _before, now, out GatePass pass))
             {
                 Gate g = _course.Gates[pass.Gate];

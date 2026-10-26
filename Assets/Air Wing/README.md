@@ -19,7 +19,7 @@ Deep Water's aircraft module. It flies the F/A-18E Super Hornet first, with its 
    | 4 | along runway 09/27, heading 270 (a 60 m ring) | 250–350 kt, 300–700 ft |
 
    The gates live in `Examples/Dogfight/Dogfight_Gates.asset`: edit it, then rebuild. Each gate flown is logged in the Console.
-3. Meeting the sea, the land or the runway is a crash at L0; the HUD says `CRASHED`. Stop and press Play to fly again.
+3. Meeting the sea, the land or the runway is a crash at L0; the HUD says `CRASHED`. Press **R** or the Xbox **View** button to start again from the beginning (gate 1).
 
 **The flight-test scene** (`Examples/Scenes/AirWing_FlightTest.unity`): open sea, no course; the jet at 1,500 m and 400 kt. To rebuild it: **Deep Water → Air Wing → Build Flight Test Scene**.
 
@@ -33,6 +33,7 @@ In either scene, fly with whichever device you touch. The last device you move o
 | Throttle | RT up, LT down | `]` up, `[` down | lever |
 | Afterburner | push the throttle past 90 % of the lever | same | lever past 90 % |
 | Flaps / speed brake / gear | Y / X / B | F / B / G | buttons 2 / 3 / 4 |
+| Reset to the start | View | R | — (stick buttons differ by model) |
 | Mouse aim | — | move the mouse: the instructor flies to where you point; any stick or key takes over at once | — |
 
 **At L0 (today) the jet:**

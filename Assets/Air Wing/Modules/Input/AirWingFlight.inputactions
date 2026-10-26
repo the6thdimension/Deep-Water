@@ -71,6 +71,14 @@
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": ""
+                },
+                {
+                    "name": "Reset",
+                    "type": "Button",
+                    "id": "8d844e32-25a6-47b5-a670-e94801d84d28",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
                 }
             ],
             "bindings": [
@@ -227,6 +235,17 @@
                     "action": "Gear",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "095430b6-4578-4103-842b-ef50094f264f",
+                    "path": "<Keyboard>/r",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Reset",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },
@@ -327,6 +346,14 @@
                     "name": "Gear",
                     "type": "Button",
                     "id": "aabb6dda-0117-44ef-aa7d-c09c4bb90f4e",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "Reset",
+                    "type": "Button",
+                    "id": "bb5facd4-81a0-4792-a5d6-84444f5ec41e",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": ""
@@ -440,6 +467,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Gear",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e0a39d07-49d6-4fe8-abd9-0f9360953584",
+                    "path": "<Gamepad>/select",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Reset",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

@@ -14,7 +14,7 @@
 - **Git (SIX, 2026-10-24):** Claude manages git without asking. Verified work is committed, pushed and brought up to `main`, and every branch is kept level; `Guided-Fury` takes it through a PR.
 - **Never pushed:** the archive branch, DAVFX and the MCP unlock script. There are no force pushes.
 
-**Status (2026-10-25): Phase 1 done (slices 0 and 1a–1e), except one item.** The F/A-18E flies at L0 in the rebuilt Dogfight and in the flight-test scene (see `README.md`). The budget is met in a player build. Not done: a live run of Dogfight from the stick and the mouse. SIX said to stop after slice 1e: Phase 2 waits for SIX, and so do BLUEPRINT Q5 (an instructor floor) and Q6 (a reset after a crash).
+**Status (2026-10-25): Phase 1 done (slices 0 and 1a–1e), except one item.** The F/A-18E flies at L0 in the rebuilt Dogfight and in the flight-test scene (see `README.md`). The budget is met in a player build. Not done: a live run of Dogfight from the stick and the mouse. Phase 2 (jet L1) started 2026-10-26: W32–W35 locked, the reset (Q6) done; Q5 answered (no instructor floor).
 
 ---
 
@@ -224,12 +224,38 @@ The gate: the F/A-18E flies in the rebuilt Dogfight at L0, from each device clas
 
 ---
 
-## Phase 2 — Jet L1 (outline)
-- [ ] `Airframe` L1: 6-DOF rigid body with mass, inertia and aerodynamic coefficients from NASA's public F/A-18 data, scaled to the E (AUTHORED, W8).
-- [ ] `FlightControls` L1: Hornet-style fly-by-wire (W23).
-- [ ] `LandingGear` L1: struts, wheels, brakes and nosewheel steering through PhysX contacts (variant B). Runway start (W29), take-off and landing in Dogfight.
-- [ ] `Powerplant` L1: spool time.
-- [ ] Budget ≤ 0.05 ms per aircraft per step (W21).
+## Phase 2 — Jet L1 (W32–W35, locked 2026-10-26)
+
+The gate: the F/A-18E flies at L1 (6-DOF, fly-by-wire, spool time) in Dogfight from each device class, takes off from and lands on runway 09/27, and can depart when abused (W33). Replay stays bit-identical in the air; ground phases are same-machine only (W7). One aircraft costs ≤ 0.05 ms per fixed step in a player build (W21).
+
+### Before Phase 2: reset after a crash (BLUEPRINT Q6) (done 2026-10-26: 61/61 tests)
+- [x] `PilotSwitches.Reset`: momentary, one tick. The aircraft returns to the state it was built with before that tick flies, crashed or not (`Aircraft.Start`, `Aircraft.Resets`). It travels in the Pilot Inputs, so the input log records it.
+- [x] Keyboard **R** and the Xbox **View** button (`AirWingFlight.inputactions`); the stick has none bound, because stick buttons differ by model. Two presses between ticks are still one reset; two sources on one tick still reset.
+- [x] The seat re-aims the mouse along the new flight path; the view and the chase camera snap rather than sweep; the gate course starts again at gate 1 and keeps its record; the HUD shows `R / VIEW BUTTON: RESET` under `CRASHED`.
+- [x] Tests: `SeatTests.Reset_IsMomentary_FromAnySource_AndLeavesTheSwitchesAlone`; `SeatTests.AReset_PutsTheJetBackAtItsStart_EvenAfterACrash_AndTheReplayRepeatsIt` (crash from 300 m, reset, 200 ticks more, replayed with no divergence); R and View in `DeviceBindingTests`; `GateCourse.Restart`.
+- *Not verified:* a reset pressed live in Dogfight.
+
+### Slice 2a — Airframe L1: 6-DOF and the NASA tables, headless (W32, W33)
+- [ ] Source: NASA TM-107601's F/A-18 aero tables and inertias, transcribed with page references into `Calibration~/` with a Python mirror (C17), then scaled to the E (AUTHORED, every factor named).
+- [ ] `Core/Airframe/AirframeL1`: a rigid body in body axes; quaternion attitude; Euler's equations with the full inertia (Ixz); forces and moments from the tables over α and β, the surfaces and the body rates; thrust along the body.
+- [ ] `ControlDemand` gains surface deflections; a direct law (stick to surfaces) is enough for 2a's tests. The ladder pairs Airframe L1 only with Flight Controls ≥ L1, and says so when a sheet asks otherwise.
+- [ ] Tests: trim at several speeds and heights; the short-period and Dutch-roll modes against the linearised tables; a stall at Cl_max; energy with thrust and drag off; the Fix bit-identical; the banned-API scan.
+
+### Slice 2b — Flight Controls L1: Hornet-style fly-by-wire (W23, W26)
+- [ ] G-command pitch, roll-rate roll, AoA and G limiters, a yaw damper; structure after NASA's HARV control-law papers, gains AUTHORED. The stick keeps its meaning from L0 (W26).
+- [ ] Tests: step responses (G and roll rate), the limiters holding, a departure when abused at the corners (W33).
+
+### Slice 2c — Powerplant L1, L1 in the scenes, the budget (W21, W35)
+- [ ] Spool-up and spool-down time constants (AUTHORED from public figures where they exist).
+- [ ] Dogfight and the flight-test scene switch to L1; L0 stays on the sheet. The HUD names the level.
+- [ ] Budget ≤ 0.05 ms per aircraft per step in a player build.
+
+### Slice 2d — Landing Gear L1: runway start, take-off and landing (W4, W29)
+- [ ] Struts, wheels, brakes and nosewheel steering through PhysX contacts (variant B); ground phases flagged in the Fix.
+- [ ] A runway start on 09/27; take-off and landing tests.
+
+### Slice 2e — Phase 2 review
+- [ ] Each device class in Dogfight at L1; the budget; METHODOLOGY; archive what L1 supersedes.
 
 ## Phase 3 — AI pilots (outline; RH Aviator, W5, W17, W18)
 - [ ] RH Aviator Phase 0 (its own roadmap): an AI seat against Air Wing's `ISeat` and `PilotInputs`; named, logged rules (C19).
@@ -250,3 +276,4 @@ Revisit when Phase 3 is done. The questions for SIX are in BLUEPRINT §7.
 - **2026-10-25** — Slice 1c done (75f836e): seats, arbitration, the mouse instructor, replay and the device reader; 45/45 tests.
 - **2026-10-25** — Slice 1d done (d05ae0d): the jet in Unity, the chase camera, the HUD and, at SIX's request, the flight-test scene; 49/49 tests; flown in play with a virtual Xbox pad.
 - **2026-10-25** — Slice 1e done: Dogfight rebuilt in place by its builder, with land, runway 09/27, four gates and the DDG landmark; the old scene and the dead jet archived; the budget met in a player build (2.7 µs per aircraft per step, ×3.6 under); 59/59 tests. Found: the mouse instructor flies into the sea when aimed low (BLUEPRINT Q5), and `RunwayStrip` would have saved as a missing script (fixed as `FlatGround`). Not done: a live Dogfight run from the stick and the mouse. Stopped at SIX's word.
+- **2026-10-26** — SIX: Q6 reset (done, 61/61), Q5 no floor; Phase 2 begun with W32–W35 and slices 2a–2e.

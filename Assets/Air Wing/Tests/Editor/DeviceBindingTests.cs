@@ -117,6 +117,10 @@ namespace DeepWater.AirWing.Tests
             Assert.AreEqual(PilotSwitches.FlapsDown | PilotSwitches.SpeedBrake, f.Keyboard.Toggles, "F flaps, B speed brake, both kept until the tick");
             Assert.AreEqual(PilotSwitches.None, Tick().Keyboard.Toggles, "and handed over once");
 
+            Press(keyboard.rKey); _reader.Poll(); Release(keyboard.rKey);
+            Press(keyboard.rKey); _reader.Poll(); Release(keyboard.rKey);
+            Assert.AreEqual(PilotSwitches.Reset, _reader.Read().Keyboard.Toggles, "R: reset; two presses between ticks are still one reset");
+
             Set(mouse.delta, new Vector2(10f, -4f));
             f = Tick();
             Assert.IsTrue(f.MouseMoved);
@@ -146,6 +150,7 @@ namespace DeepWater.AirWing.Tests
             Release(pad.buttonNorth);
             Assert.AreEqual(PilotSwitches.FlapsDown, f.Gamepad.Toggles, "Y: flaps");
             Press(pad.buttonWest); Assert.AreEqual(PilotSwitches.SpeedBrake, Tick().Gamepad.Toggles, "X: speed brake"); Release(pad.buttonWest);
+            Press(pad.selectButton); Assert.AreEqual(PilotSwitches.Reset, Tick().Gamepad.Toggles, "View: reset"); Release(pad.selectButton);
         }
 
         [Test]

@@ -23,6 +23,7 @@ namespace DeepWater.AirWing.Modules.Cockpit
         [SerializeField] float aimRate = 10f;
 
         AircraftView _view;
+        int _resets;
 
         void LateUpdate()
         {
@@ -35,7 +36,9 @@ namespace DeepWater.AirWing.Modules.Cockpit
                 ? Quaternion.LookRotation(seat.AimDirection, Vector3.up)
                 : Quaternion.LookRotation(jet.forward, jet.up);
             float rate = aiming ? aimRate : followRate;
-            transform.rotation = Quaternion.Slerp(transform.rotation, goal, 1f - Mathf.Exp(-rate * Time.deltaTime));
+            bool reset = _view.Aircraft.Resets != _resets;
+            _resets = _view.Aircraft.Resets;
+            transform.rotation = reset ? goal : Quaternion.Slerp(transform.rotation, goal, 1f - Mathf.Exp(-rate * Time.deltaTime));
             transform.position = jet.position - transform.forward * distanceM + transform.up * heightM;
         }
 

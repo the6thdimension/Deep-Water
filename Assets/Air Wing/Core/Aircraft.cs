@@ -32,6 +32,12 @@ namespace DeepWater.AirWing.Core
 
         public AirframeState State;
 
+        /// <summary>The state the aircraft was built with; <see cref="PilotSwitches.Reset"/> returns it here.</summary>
+        public readonly AirframeState Start;
+
+        /// <summary>How many times the aircraft has been reset (presentation watches it to snap, not sweep).</summary>
+        public int Resets { get; private set; }
+
         /// <summary>The Pilot Inputs of the last tick stepped (for presentation: the HUD and moving surfaces).</summary>
         public PilotInputs LastInputs { get; private set; }
 
@@ -47,16 +53,23 @@ namespace DeepWater.AirWing.Core
             Gear = gear;
             Levels = levels;
             State = start;
+            Start = start;
         }
 
         /// <summary>
         /// One tick: <paramref name="clock"/>'s substeps of atmosphere → flight controls → powerplant → airframe, then
         /// the surface check after each substep. Meeting the surface with no gear that can take it is a crash, and a
-        /// crash freezes the aircraft where it hit (AP23: every terminal verdict gets an end state).
+        /// crash freezes the aircraft where it hit (AP23: every terminal verdict gets an end state). A Reset in the
+        /// inputs puts it back at its start first, crashed or not, and the tick then flies from there.
         /// </summary>
         public void Step(in PilotInputs inputs, float surfaceHeightM, in SubstepClock clock)
         {
             LastInputs = inputs;
+            if (inputs.Has(PilotSwitches.Reset))
+            {
+                State = Start;
+                Resets++;
+            }
             if (State.Status != FlightStatus.Flying) return;
             float dt = (float)clock.SubstepSeconds;
             for (int k = 0; k < clock.Substeps; k++)

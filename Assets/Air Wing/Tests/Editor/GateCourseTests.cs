@@ -82,6 +82,12 @@ namespace DeepWater.AirWing.Tests
             Assert.AreEqual(0, course.Next, "after the last gate the lap starts again");
             Assert.AreEqual(1, course.Laps);
             Assert.AreEqual(2, course.Passes.Count);
+
+            course.Observe(4, At(new Vector3(0f, 1000f, -1f), v), At(new Vector3(0f, 1000f, 1f), v), out _);
+            Assert.AreEqual(1, course.Next);
+            course.Restart();
+            Assert.AreEqual(0, course.Next, "a reset starts the course again at gate 1");
+            Assert.AreEqual(3, course.Passes.Count, "and keeps the record");
         }
 
         [Test]

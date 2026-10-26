@@ -38,7 +38,9 @@ Project rule (CLAUDE.md, methodology C11): profile before claiming a perf win, a
   - A domain reload took 16.3 s throttled and 7.4 s with the process tree opted out. Shader compiling used 5.6 cores throttled and 13 cores opted out.
   - Every Editor number taken while another window has focus is a background number, which includes every MCP-driven session. Say which you measured.
   - Check with `Get-Counter '\Processor(*)\% Processor Time'`: logical 12–19 pinned at 100 % while 0–11 idle means throttled.
-  - The opt-out prototype is `scripts/ecoqos_optout.ps1 -EditorPid <Unity pid> -Log <file>` (BUILD-SPEED-LEDGER round 4).
+  - The project's Full Speed tool (`Assets/Full Speed`, round 5) keeps the Editor's tree opted out; Deep Water > Full Speed > Report shows each process's state. Check it's on before timing anything.
+  - The prototype, for another project or a headless Unity, is `scripts/ecoqos_optout.ps1 -EditorPid <Unity pid> -Log <file>` (round 4).
+- **First play after an Editor start is cold.** In GQ_Range, play entry took 7.4 s the first time and 2.5 s the second (2026-10-25). Discard the first play, as you would a warm-up.
 - **A long-running Editor drifts slower.** Domain reloads went from 38 s in the morning to 46–57 s after 5 h, with no code change. Interleave A and B runs (ABAB), and report n and the range.
 - **Game view resolution changes everything.** A switch to a fixed 2560×1440 between runs cut fps from ≈97 to 32 with no code change. The marker template records the resolution; compare only like with like.
 - **No GPU timestamps outside the render context.** `CommandBuffer.BeginSample` executed from `LateUpdate` via `Graphics.ExecuteCommandBuffer` reports 0; so did a `ProfilingSampler` outside the context. Time GPU work inside `beginContextRendering`. Check `SystemInfo.supportsGpuRecorder`.

@@ -111,14 +111,18 @@
 
 *"SIX" in the "who" column means a Windows or account setting Claude must not change.*
 
-**Where the day stands (Editor in the background, the state every MCP session works in):** domain reload 46.5 → 7.4 s. Private-edit compile 4.7 → 1.2–1.6 s; public-edit compile 13.5 → 3.1–3.4 s. Cold build 1,313 s, with ~5 min of it lost to the efficiency cores.
+**Where the day stands (Editor in the background, the state every MCP session works in):**
+- Domain reload 46.5 → 7.4–7.8 s. Play entry 51 → 0.9 s.
+- Private-edit compile 4.7 → 1.2–1.6 s; public-edit compile 13.5 → 3.1–3.4 s; a legacy-script edit, ready 67 → 11.4 s.
+- Player build after a code change 107 → 54 s. Cold build 1,313 s, with ~5 min of it lost to the efficiency cores (measured before the stripping in round 7).
+- Background builds (E2): a player without touching the Editor, 276 s the first time and 45 s when nothing changed.
 
 ### A. The machine (biggest wins, mostly settings)
 
 | # | What | Gain | Status | Who |
 |---|---|---|---|---|
 | A1 | **Run Unity's process tree at full speed, not on the E-cores.** Windows 11 power throttling holds a background Unity on the 8 efficiency cores | Reload ×2.2 (16.3 → 7.4 s). Shader workers 5.6 → 13 cores. Cold build ~−5 min | measured (reload, cores); estimated (build) | see A1a–d |
-| A1a | Build it in: a first-party Editor tool, "Full Speed". On load it opts `Unity.exe` out, and every few seconds every child process (shader workers, Bee, `csc`, ILPP runner, Burst). Windows-only, no admin, a menu toggle, logged | As A1, automatically, in every session | prototype proven (`ecoqos_optout.ps1`) | Claude |
+| A1a | Build it in: a first-party Editor tool, "Full Speed". On load it opts `Unity.exe` out, and every few seconds every child process (shader workers, Bee, `csc`, ILPP runner, Burst). Windows-only, no admin, a menu toggle, logged | As A1, automatically, in every session | **done** (round 5) | — |
 | A1b | Exempt the executables for good: `powercfg /powerthrottling disable /path "<exe>"` (admin) for `Unity.exe`, `UnityShaderCompiler.exe`, `bee_backend.exe`, `Unity.ILPP.Runner.exe`, `dotnet.exe`, `netcorerun.exe`, and Burst's compiler, under `C:\Program Files\Unity\Hub\Editor\6000.4.11f1\` | As A1, without a tool. Redo after each Unity upgrade | untested | SIX |
 | A1c | Windows power mode "Best performance" while plugged in (Settings > System > Power). Currently Balanced | Less throttling everywhere | untested | SIX |
 | A1d | Keep Unity focused during builds | As A1 for that build | follows from A1 | SIX |
@@ -131,7 +135,7 @@
 
 | # | What | Gain | Status | Who |
 |---|---|---|---|---|
-| B1 | **Enter play mode without a domain reload** (the scene still reloads). Needs about 23 first-party static fields reset at play start, and a test that a seeded run gives the same Fix twice | Play entry ~9 s (est. after A1) → ~2 s | approved (round 5), not built | Claude |
+| B1 | **Enter play mode without a domain reload** (the scene still reloads). Needs about 23 first-party static fields reset at play start, and a test that a seeded run gives the same Fix twice | Play entry 10.1 → 0.9 s | **done** (round 6) | — |
 | B2 | FR2 (Find Reference 2): turn off its auto-refresh, or close its window | −1.4 s after every reload | measured cost | SIX or Claude |
 | B3 | Preferences > General > Interaction Mode: "No Throttling" | May remove the ~7.8 s compile-to-reload floor seen while unfocused | untested | SIX |
 | B4 | Preferences > General > Script Changes While Playing: "Recompile After Finished Playing" | Avoids the play-mode compile freeze (10+ min lost once) | known trap | SIX |
@@ -144,10 +148,10 @@
 |---|---|---|---|---|
 | C1 | Remove Unity Version Control and untrack `.plastic/` | Reload −31 s | **done** (round 1) | — |
 | C2 | First-party asmdefs off auto-reference | Compile ×2.8 (private edit), ×4 (public edit) | **done** (round 2) | — |
-| C3 | Remove unused packages | Fewer of the 215 assemblies per reload | Visual Scripting **done**. ML-Agents, Cesium (also −245 s of compile per cold build), PostProcessing v2 parked | Claude |
-| C4 | Asmdefs inside Obi and HurricaneVR (a vendor change) | Legacy-edit compile 6.6 → ~2.5 s | approved, not built | Claude |
+| C3 | Remove unused packages | Fewer of the 215 assemblies per reload | Visual Scripting **done** (round 3a); Cesium and PostProcessing v2 **done** (round 3b). ML-Agents kept: SENTINAL uses it | — |
+| C4 | Asmdefs inside Obi and HurricaneVR (a vendor change) | Legacy-edit compile 6.6 → ~2.5 s | HurricaneVR removed instead (round 3b), which gave 1.7–2.0 s. Obi: approved, not built | Claude |
 | C5 | **Freeze vendor code into precompiled DLLs** (Obi, HurricaneVR, RootMotion, RCC, NWH): built once, then never recompiled or post-processed | `Assembly-CSharp` 763 → ~90 files; firstpass emptied | untested | SIX decides |
-| C6 | Move unused vendor demo content out of `Assets/` (or into `Name~` folders, which Unity ignores): Obi samples, RCC demo, NWH demo, HurricaneVR examples, VFX Arsenal examples | Less to scan, import, compile and ship. Needs a usage audit first | untested | SIX decides |
+| C6 | Move unused vendor demo content out of `Assets/` (or into `Name~` folders, which Unity ignores): Obi samples, RCC demo, NWH demo, HurricaneVR examples, VFX Arsenal examples | Less to scan, import, compile and ship | **done** for the unused vendors and demo content (round 3b) | — |
 | C7 | Audit every `Resources/` folder (RCC, Obi, NWH, Cesium): all of it ships, and its shaders compile in every build | `resources.assets` packaging took 140 s cold | measured cost | Claude |
 | C8 | Startup hooks per reload: the AI Assistant bridge 1.9 s (vendor; report to Unity), Entities 0.55 s (locked by Reckoning) | Small | measured cost | — |
 
@@ -155,13 +159,13 @@
 
 | # | What | Gain | Status | Who |
 |---|---|---|---|---|
-| D1 | **Burst AOT for one CPU target (AVX2) instead of SSE2 + SSE4.** Burst compiles every job once per target | Burst step ~−50 % (66 s → ~33 s per code-changed build), faster code. Needs an AVX2 CPU (any since 2013) | estimated | Claude |
+| D1 | **Burst AOT for one CPU target (AVX2) instead of SSE2 + SSE4.** Burst compiles every job once per target | Burst step 60.2 → 37.5 s (−38 %) per code-changed build. Needs an AVX2 CPU (any since 2013) | **done** (round 7) | — |
 | D2 | Two build profiles. "Iterate": development build, Burst *Fast Compilation*, one CPU target, one quality level, no compression. "Release": as now | Iteration builds much faster; release unchanged | untested | Claude |
 | D3 | Scripts-only player builds when only code changed (`BuildOptions.BuildScriptsOnly`, development builds) | Skips data packaging | untested | Claude |
 | D4 | **Fewer shader variants**, for cold builds | Lower the 950 s shader phase | Claude, with SIX's look at visuals | |
-| D4a | Turn off ray tracing in "HDRP High Fidelity" if it isn't wanted | `HDRP/Lit`'s DXR passes, ~290 s of compile time | estimated | SIX decides |
+| D4a | Turn off ray tracing in "HDRP High Fidelity" if it isn't wanted | `HDRP/Lit`'s DXR passes, ~290 s of compile time | **done** (round 7); cold-build gain not measured | — |
 | D4b | 6000.4 **Shader Build Settings, keyword declaration overrides**: turn chosen HDRP keywords into runtime branching or material-usage variants, without editing HDRP | `TemporalAA` alone is 1,284 variants and 768 s | untested | Claude |
-| D4c | A logged stripper for shaders HDRP can't render (built-in `Standard`, legacy PostProcessing) | ~100 s of compile time | estimated | Claude |
+| D4c | A logged stripper for shaders HDRP can't render (built-in `Standard`, legacy PostProcessing) | 2,354 variants left out per build, `TemporalAA` (guarded) included | **done** (round 7, Lean Build) | — |
 | D4d | Make the four HDRP assets agree, or ship one quality level in development builds (HDRP compiles the union of their features) | Unknown | untested | SIX decides |
 | D5 | Unity Accelerator (free cache service) for imports and shaders, shared by the laptop and any second checkout | A fresh `Library` or another machine compiles nothing twice | untested | SIX installs; Claude configures |
 | D6 | DXC, the faster shader compiler: 6000.4 has no project switch (only per-pass pragmas inside HDRP). A later Unity adds "Shader Compiler Backend Selection", which needs a DX12-only player | Faster per variant (Unity's docs) | blocked on a Unity upgrade | SIX decides |
@@ -171,10 +175,10 @@
 
 | # | What | Gain | Status | Who |
 |---|---|---|---|---|
-| E1 | **"Full Speed" (A1a), as a project tool.** Unity tooling that manages Windows power throttling for its own process tree | ×2 on everything done in the background | prototype proven | Claude |
-| E2 | **A background cache warmer.** A second checkout (`git worktree`) with its own `Library` builds headless overnight, or when HDRP or shader files change, and feeds Accelerator. The Editor's cold builds become cache hits, and the Editor is never locked by a build | A cold build becomes ~1–2 min | untested; needs D5 | SIX and Claude |
-| E3 | **Slowest-variant-first pre-compile.** Unity compiles one shader at a time, and `HDRP/Lit`'s slowest variants (~48 s each) leave cores idle at the end. Compile them in parallel ahead of the build through `ShaderData.Pass.CompileVariant` | Removes the idle tails (780–900 s, 1,050–1,200 s) | research: unknown whether it fills the build's cache | Claude |
-| E4 | **Hot reload** with open-source FastScriptReload (MIT): apply C# edits without a domain reload, even in play mode | Edit → running ~1 s for supported changes | untested; determinism risk for sim code | SIX decides |
+| E1 | **"Full Speed" (A1a), as a project tool.** Unity tooling that manages Windows power throttling for its own process tree | ×2 on everything done in the background | **done** (round 5) | — |
+| E2 | **A background cache warmer.** A second checkout (`git worktree`) with its own `Library` builds headless overnight, or when HDRP or shader files change, and feeds Accelerator. The Editor's cold builds become cache hits, and the Editor is never locked by a build | The Editor is never locked by a build | **built and measured** (E2 below); the shared cache still needs D5 | SIX installs D5 |
+| E3 | **Slowest-variant-first pre-compile.** Unity compiles one shader at a time, and `HDRP/Lit`'s slowest variants (~48 s each) leave cores idle at the end. Compile them in parallel ahead of the build through `ShaderData.Pass.CompileVariant` | Removes the idle tails (780–900 s, 1,050–1,200 s) | **dead end** (E3 below): the API keeps nothing a build can reuse | — |
+| E4 | **Hot reload** with open-source FastScriptReload (MIT): apply C# edits without a domain reload, even in play mode | Edit → running ~1 s for supported changes | **tried and dropped 2026-10-25:** play entry hung twice (see "E4: FastScriptReload") | — |
 | E5 | `Library/Bee` and `Temp` on a RAM disk or Dev Drive | Small on NVMe | untested | SIX |
 | E6 | Unity on CoreCLR (a future Unity 6.x): domain reloads go away | The reload, entirely | watch item | — |
 
@@ -188,6 +192,11 @@
 - `GuidedFury.Tests.SeekerTests.EndToEnd_L2WithConeSeekerAndProNav_AcquiresAndCloses`
 
 Every round must leave exactly this result.
+
+**Pin after rounds 3b–7 and E2–E4 (2026-10-25 20:55):** ten assemblies (the seven, plus Full Speed, Lean Build and Fast Play), 317 tests. Result: **314 pass, 3 fail, the same three**.
+- The first run had a fourth failure: the same-Fix test. That Editor session had lost the project-wide Input Actions: `InputSystem.actions` was null though `EditorBuildSettings` pointed at `RHMILCOM.inputactions`, so `RangeInput` logged an error.
+- After a domain reload the actions were back. They stayed set over two plays without a reload, enabled in play and disabled between plays. The Fast Play tests then passed 3/3 (40.5 s).
+- Likely cause, not proven: that Editor had started on a package change (FSR's removal), before the asset could load.
 
 ### Round 1: remove Unity Version Control; untrack `.plastic/` (kept)
 
@@ -234,10 +243,35 @@ Every round must leave exactly this result.
 - **Why it could go:** no C# references it, and no scene, prefab or asset references any of its 1,845 asset GUIDs (scanned with `pkg_refs.py`).
 - **Cost of the change:** one full recompile (79 s, 1,381 nodes), then a 19.1 s reload, against 16.2 and 16.4 s just before.
 - **Not A/B'd:** SIX asked to stop A/B-ing small gains and to focus on shader compilation.
-- **Parked (SIX approved them, then redirected):** ML-Agents, Cesium and PostProcessing v2.
+- **Parked (SIX approved them, then redirected):** ML-Agents, Cesium and PostProcessing v2. Cesium and PostProcessing v2 went in round 3b; ML-Agents stays for SENTINAL.
   - ML-Agents: the legacy `SENTINAL.unity` holds 3 `BehaviorParameters`, with no Agent script anywhere.
   - Cesium: `Mapping.unity` and `Assets/CesiumSettings` use it, and its two tileset shaders cost 245 s of compile time in every cold build.
   - PostProcessing v2: NWH's `PostProcessingController.cs` imports it without a guard. The fix is `#if UNITY_POST_PROCESSING_STACK_V2` around the file, plus dropping that stale define.
+
+### Round 3b: remove the vendors nothing uses; archive four legacy scenes (kept)
+
+*Seat: Michael Feathers (The Maintainer): code nobody runs is still code every compile pays for.*
+
+- **Change (SIX's picks), commit `a257e74a`:**
+  - Removed through `AssetDatabase.MoveAssetsToTrash` (the Recycle Bin; git history keeps everything):
+    - vendors: HurricaneVR, HexabodyVR, StreamDeckIntegration, the Input System samples, RootMotion, CesiumSettings, SceneTemplateAssets;
+    - demo content of the kept vendors (NWH, RCC, SensorToolkit, FlightSimLite, VFX Arsenal);
+    - stale `_Recovery` scenes.
+  - Packages: `com.cesium.unity` (and its scoped registry) and `com.unity.postprocessing`. The stale `UNITY_POST_PROCESSING_STACK_V2` define was dropped from every target.
+  - Helo's one RootMotion asset, `Zero Friction.physicMaterial`, moved to `_SCENES/Helo Assets` with its GUID.
+  - OutdoorsScene, Mapping, Rocket and Rocket Man moved to `Assets/_Archive/Scenes_legacy/`, with a README and restore steps.
+  - Kept, because CVN-78 FORD, DDG Engagement, SENTINAL and Helo need them: Obi, NWH, RCC, SensorToolkit, FlightSimLite, ML-Agents, AerialArcade, FDS Assets.
+- **Result (Editor unfocused, Full Speed on):**
+
+| | Before | After |
+|---|---|---|
+| `Assembly-CSharp` | 763 files (97k lines) | 479 files |
+| `Assembly-CSharp-firstpass` | 403 files (79k lines) | 87 files |
+| `Assembly-CSharp-firstpass-Editor` | 93 files | 0 |
+| Legacy one-line edit (`CamRot.cs`), compile | 6.55 s | 1.68, 2.0 s |
+| Legacy edit → ready | 67 s (round 0, throttled) | 11.8, 11.4 s |
+
+- **Behaviour:** one full recompile, 0 errors. In the 10 kept scenes every referenced GUID resolves, except 4 in SENTINAL and Helo that were already missing before today.
 
 ### Instrumented cold player build (2026-10-25 17:18, Editor unfocused)
 
@@ -268,7 +302,7 @@ Every round must leave exactly this result.
   - "~80 % shaders" came from summing per-pass times. It was close, by luck.
   - "~115 s, cores saturated" came from the per-shader maximum. It was wrong.
 
-### Round 4: run the Editor's process tree at full speed (measured; the tool is not built yet)
+### Round 4: run the Editor's process tree at full speed (measured; built as round 5)
 
 *Seat: Brendan Gregg (The Optimizer): the machine was half idle; find out who holds the other half.*
 
@@ -284,3 +318,146 @@ Every round must leave exactly this result.
 - **What it means:** with the Editor in the background, every Editor operation runs on E-cores. That covers compiles, reloads, tests and builds, and every session driving the Editor over MCP.
   - The numbers in rounds 0–3 are background numbers.
   - With the Editor in the foreground, Windows does not throttle it.
+
+### Round 5: the Full Speed tool (kept)
+
+*Seat: Cindy Sridharan (The Observer): a tool that changes how Windows schedules the Editor must say so, process by process.*
+
+- **Change, commit `16632113`:** `Assets/Full Speed` (editor-only, `DeepWater.FullSpeed.Editor`, `autoReferenced: false`).
+  - `ProcessTree`: pure tree logic over a process snapshot, cycle-safe.
+  - `WindowsProcesses`: a Toolhelp32 snapshot, `Get/SetProcessInformation(ProcessPowerThrottling)`, and an AC-power check. Errors come back as Win32 text.
+  - `FullSpeed` (`[InitializeOnLoad]`): a background timer (1 s) sets `Unity.exe` and every descendant to full speed, so children started during a blocking `BuildPlayer` are caught too.
+    - It forgets exited ids. It hands everything back to Windows when turned off, or on battery unless allowed.
+    - It warns once per executable on failure.
+    - Preferences > Deep Water > Full Speed, and Deep Water > Full Speed > Report.
+  - It changes no Windows setting. Each process's switch ends with the process.
+- **Result:** on load it set 39 processes to full speed (`UnityShaderCompiler` ×22, the ILPP runner, Package Manager, the MCP relay…). Domain reload, one each: off 16.2 s, on **7.8 s** (×2.1), matching the round-4 prototype.
+- **Tests:** `DeepWater.FullSpeed.Tests.Editor` 7/7 in 0.8 s: the tree logic, plus round trips against Windows on a real child process.
+
+### Round 6: play mode without a domain reload (kept)
+
+*Seat: Leslie Lamport (The Invariant): same seed, same raid, same tick, the same Fix, or the change doesn't ship.*
+
+- **Change, commit `aab42a66`:**
+  - `ProjectSettings/EditorSettings`: Enter Play Mode Options on, Reload Domain off. The scene still reloads.
+  - `Assets/Fast Play`:
+    - `StaticStateTests` reflects over every first-party runtime assembly (11). A mutable static must be reset by a `[RuntimeInitializeOnLoadMethod(SubsystemRegistration)]` method in its type, or be listed in `Allowed` with its reason. Stateless strategy singletons pass by rule.
+      - The audit found 50 statics: lookup tables nothing writes, registries filled once, deterministic caches, null-checked lazy objects, scratch buffers. None needed a reset.
+    - `SameFixAcrossPlaysTests` plays GQ_Range twice with no reload. It starts the saturation raid at core tick 50 from inside `FixedUpdate` and compares the core's Fix at tick 800.
+    - Deep Water > Fast Play > Reload Domain On Play turns the reload back on, for vendor-heavy legacy scenes whose statics are not audited.
+  - RH Testing Suite `TestRunner`: a play-start reset for its two static events and its results list (legacy `Assembly-CSharp`, outside the audit's reach).
+- **Result (Editor unfocused, Full Speed on):** play entry, GQ_Range: **10.1 s with the reload → 0.9 s without**. It was 51 s at the day's baseline.
+- **Tests:** `DeepWater.FastPlay.Tests.Editor` 3/3, then the same-Fix test again 1/1. Four plays in one domain gave Fix `0B9C4DD82783F5C5` every time, over 767–791 frames, so the core does not depend on frame timing.
+- **Fixed on the way:**
+  - The test first timed out, because an unfocused Editor barely ticks the player loop. It now sets `runInBackground`.
+  - Then the raid start moved with frame timing, so the probe now starts the raid from inside `FixedUpdate`.
+
+### Round 7: Lean Build shader stripping, ray tracing off, Burst AOT for AVX2 only (kept)
+
+*Seat: Brendan Gregg (The Optimizer): don't compile what can never be drawn, or what never runs.*
+
+- **Change (SIX's picks), commit `be8e8f86`:**
+  - `Assets/Lean Build` (editor-only, `DeepWater.LeanBuild.Editor`): an `IPreprocessShaders` stripper driven by `LeanBuildSettings.asset`, with no lists in code. It leaves out:
+    - `Hidden/HDRP/TemporalAA`, only when no camera in the build's scenes uses TAA. This is checked per scene as it builds, and TAA is kept if no scene has been seen yet;
+    - the built-in `Standard` family;
+    - the `Legacy Shaders/`, `Mobile/` and `Nature/` prefixes.
+
+    Each build logs one line, and the full list goes to `Library/LeanBuild/last-build.txt`.
+  - `HDRP High Fidelity.asset`: `supportRayTracing` 1 → 0.
+  - `ProjectSettings/BurstAotSettings_StandaloneWindows.json`: `CpuTargetsX64` 64 (AVX2 only; the default 72 is SSE2 + AVX2). All first-party Burst jobs are `FloatMode.Deterministic`, so no result changes.
+- **Result (Air Wing benchmark scene, each build after a one-line code change, Editor at full speed):**
+
+| | Before | After |
+|---|---|---|
+| Variants left out | 0 | 2,354 (`TemporalAA` 1,284, `Standard` 676, `Standard (Specular setup)` 332, `Legacy Shaders/Diffuse` 30…) |
+| Burst AOT (`GenerateNativePluginsForAssemblies`) | 60.2 s | 37.5 s (−38 %) |
+| Build total | 107 s | 54 s (part of it an incremental script compile) |
+| Player size | 356 MB | 302 MB (with round 3b) |
+
+- **Behaviour:** the AVX2 player runs headless at 2.88 µs per step for 1 aircraft and 2.66 µs per aircraft for 20 (the Air Wing budget is 2.7), with no errors in `Player.log`. Policy tests 3/3.
+- **Not measured:** the cold-build gain from the stripping and from ray tracing off. The only cold build timed came before this round.
+
+### E2: background builds from a mirror (built)
+
+*Seat: Sam Newman (The Decoupler): a player build is a separate job; the Editor should never wait for it.*
+
+- **What it is:**
+  - `Assets/Lean Build/Editor/BackgroundBuild.cs`: the menu Deep Water > Build > Build Active Scene In Background, and the headless entry point `BackgroundBuild.Run` (`-executeMethod`), which writes a report next to the player.
+  - `tools/background-build/bg_build.ps1`:
+    1. Mirrors `Assets`, `Packages` and `ProjectSettings` with `robocopy /MIR` into `<project> BG`, a sibling folder outside the repo. What's on disk is copied, so uncommitted edits and the untracked DAVFX pack come too.
+    2. On the first run, seeds the mirror's `Library` from this project's.
+    3. Runs a headless Unity on the mirror at below-normal priority.
+    4. Copies the player back to `Builds/Background/<stamp>/`, which git ignores.
+  - Guards, because `/MIR` deletes whatever the destination has that the source lacks: the source must be a Unity project, and the mirror must sit outside it.
+  - The seed leaves out `EditorInstance.json` (it would make the mirror think the project is already open), the database lock files, and `Bee` (its build graph holds absolute paths).
+- **Two runs, GQ_Range, Editor not involved:**
+
+| Phase | Run 1 (seeded Library) | Run 2 (nothing changed) |
+|---|---|---|
+| Mirror (7.2 GB) | 17 s | 0 s |
+| Library seed (9.6 GB, no file failed) | 69 s | — |
+| Headless Unity: first refresh | 53.5 s (a re-check, not a reimport) | 17.2 s |
+| Headless Unity: build | 107.9 s (scripts 37.3, scenes 7.2, writing assets 12.0, post-process 42.7) | 17.5 s |
+| **Start to player** | **276 s** | **45 s** |
+
+  - Both runs: 350 MB, 0 errors. Lean Build left out the same 2,354 variants.
+  - The headless Unity has no Hub token, so it logs licensing errors and falls back to the offline license.
+- **Not measured:** a run after a code change. It would add the incremental script compile and Burst AOT, which were 54 s together in round 7.
+- **Found on the way (each cost one failed run):**
+  - Windows PowerShell 5.1 leaves `$PSScriptRoot` empty inside `param()` defaults. The first run resolved the project as `F:\`; robocopy stopped with code 16 and copied nothing. Hence the guards.
+  - `Tee-Object` writes UTF-16 in 5.1, so the script now logs through one UTF-8 helper.
+  - `Start-Process -PassThru` reports no exit code unless the process handle is opened while it runs.
+- **Still open:** Unity Accelerator (D5). SIX installs it; then both projects share one import and shader cache.
+
+### E3: compile the slowest `HDRP/Lit` variants first (dead end)
+
+*Seat: Kent Beck (The Tester): one cheap experiment before building the machinery.*
+
+- **The question:** does `ShaderData.Pass.CompileVariant` leave anything a later player build can reuse? If not, pre-compiling can't fill the build's idle cores.
+- **Where builds keep compiled shaders in 6000.4:**
+  - `Library/ShaderCache/` holds folders for compute, ray-tracing and built-in shaders only.
+  - `ShaderCache.db` (SQLite) holds only shader errors (37 rows).
+  - Regular shaders' bytecode lives inside the built `globalgamemanagers.assets` in `Library/PlayerDataCache`, reused whole when nothing changed.
+- **The experiment:** `HDRP/Lit`, D3D, `StandaloneWindows64`, the same keywords twice. The files under `Library` were listed before and after.
+
+| Variant | 1st compile | 2nd, identical | Persisted |
+|---|---|---|---|
+| `Forward` fragment, 74 KB | 6.31 s | 4.64 s | nothing (only the Editor's `SourceAssetDB` and undo files changed) |
+| `GBuffer` fragment, 6.8 KB | 0.32 s | 0.30 s | nothing |
+
+- **Verdict: FAILED.** The API returns bytecode and keeps nothing, in memory or on disk. A build would compile the same variant again.
+  - What does carry compiled shaders forward: the seeded mirror of E2, and a shared cache (D5).
+  - A side finding: `Forward` refuses a variant without one keyword from each of HDRP's required groups ("Undefined punctual shadow filter algorithm").
+
+### E4: hot reload with FastScriptReload (tried, dropped)
+
+*Seat: Nadia Eghbal (The Resilient): a tool that can hang the Editor, with no timeout and no fallback, costs more than the reload it saves.*
+
+- **What it is:** FastScriptReload 1.8.0 (MIT), added as a git package (`com.handzlikchris.fastscriptreload`, commit `f852ac4f`).
+  - In play mode it compiles each changed file with Roslyn and redirects the old methods to the new ones, with no domain reload.
+  - It compiled cleanly with the project (0 errors).
+- **First load: a modal dialog held the main thread for about 40 minutes.**
+  - Its `[InitializeOnLoad]` code asked about Auto Refresh in a native modal dialog. The MCP bridge went silent until the dialog was answered.
+  - Recorded as trap 13 in the `unity-mcp-workflow` skill.
+  - Auto Refresh was set from Enabled (1) to Enabled Outside Playmode (2), as hot reload needs.
+- **Play entry hung twice, in GQ_Range.** Before FSR, play entry here took 0.9 s (round 6, no domain reload).
+
+| Try | Editor | What the Editor did | Ended |
+|---|---|---|---|
+| 1 (19:54) | The session that installed FSR, just after the dialog | Log stops at "Entering Playmode with Reload Domain disabled". Not Responding; 0.17 s of CPU in 5 s | Killed after ~30 min |
+| 2 (20:29) | A fresh Editor start (FSR loaded with no dialog) | Not Responding from the first sample, every 2 s over 150 s. 10–20 s of CPU per 2 s (5–10 cores) for ~2 min, then 0.05–0.11 s per 2 s, still not responding at 20:36 | Killed |
+
+- **Cause: not diagnosed.**
+  - From outside there is no managed stack.
+  - The second Editor's log never reached `Editor.log`, because a Unity 7 Editor creating another project had taken the file over.
+  - Between the 0.9 s play entries and the hangs, FSR is the only change that runs code at play entry. The other two are the Auto Refresh preference and `BackgroundBuild.cs`, which is a menu item only.
+  - Verdict: **FAILED** in this project (Unity 6000.4.11f1, HDRP 17.4, play mode without a domain reload).
+- **Removed:**
+  - `Packages/manifest.json` and `packages-lock.json` were restored to `perf/build-speed`'s versions.
+  - FSR left no other files and no scripting defines. Its own EditorPrefs remain, unused.
+  - The FSR versions of both files are kept in the session scratchpad.
+  - Auto Refresh was put back to Enabled (1).
+- **After removal (fresh Editor start, GQ_Range):** play entry works again, with no hang.
+  - Timed with a `playModeStateChanged` hook, from the request to `EnteredPlayMode`: **7.4 s** for the first play after the start (cold), **2.5 s** for the second (warm).
+  - The round-6 0.9 s came from a different timer, so these two numbers aren't like for like.
+- **Revisit when:** an FSR release states Unity 6.4 support, or Unity's CoreCLR Editor (E6) makes the question moot.

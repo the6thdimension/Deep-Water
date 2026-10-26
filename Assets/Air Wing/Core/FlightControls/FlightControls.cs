@@ -5,18 +5,50 @@ using DeepWater.AirWing.Core.State;
 
 namespace DeepWater.AirWing.Core.FlightControls
 {
-    /// <summary>What the control law asks the airframe for this substep. The airframe may not be able to give it all.</summary>
+    /// <summary>
+    /// Where the control surfaces stand, radians, in the sign convention of the F/A-18 aero data (W32; NASA TM-107601
+    /// Table 5.2): stabilator positive trailing edge down (nose down); aileron positive rolls right (right wing down);
+    /// rudder positive trailing edge left (nose left). Symmetric stabilator only; no differential tail at L1.
+    /// </summary>
+    public readonly struct ControlSurfaces
+    {
+        public readonly float StabilatorRad;
+        public readonly float AileronRad;
+        public readonly float RudderRad;
+
+        public ControlSurfaces(float stabilatorRad, float aileronRad, float rudderRad)
+        {
+            StabilatorRad = stabilatorRad;
+            AileronRad = aileronRad;
+            RudderRad = rudderRad;
+        }
+    }
+
+    /// <summary>
+    /// What the control law asks the airframe for this substep. The airframe may not be able to give it all. Airframe
+    /// L0 flies the load factor and roll rate; Airframe L1 flies the surfaces, which only Flight Controls L1 sets.
+    /// </summary>
     public readonly struct ControlDemand
     {
         /// <summary>Load factor, g.</summary>
         public readonly float LoadFactor;
         /// <summary>Roll rate about the flight path, radians per second, positive = right wing down.</summary>
         public readonly float RollRateRadS;
+        /// <summary>The surface positions (Airframe L1).</summary>
+        public readonly ControlSurfaces Surfaces;
 
         public ControlDemand(float loadFactor, float rollRateRadS)
         {
             LoadFactor = loadFactor;
             RollRateRadS = rollRateRadS;
+            Surfaces = default;
+        }
+
+        public ControlDemand(in ControlSurfaces surfaces)
+        {
+            LoadFactor = float.NaN;
+            RollRateRadS = float.NaN;
+            Surfaces = surfaces;
         }
     }
 

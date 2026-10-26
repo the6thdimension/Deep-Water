@@ -57,3 +57,21 @@ The mirror `l0_calibration.py` and the C# test `AirframeL0Tests.ServiceCeiling_I
 | Public figure | L0 result | Residual and why |
 |---|---|---|
 | Maximum speed Mach 1.8+ (Navy) / Mach 1.6 (Boeing) | Max level speed Mach 1.41 at 40,000 ft, 1.47 at 36,089 ft, 1.52 at 20,000 ft, 1.54 at sea level | Below both figures at altitude, and too fast at sea level, where the real jet is limited near Mach 1.1 by drag rise and dynamic pressure. Both come from L0 having no Mach effect: no wave drag, and no ram thrust gain. **Known gap until Airframe and Powerplant L2** (BLUEPRINT §4); not tuned away |
+
+## Airframe L1 (slice 2a, W32)
+
+| Number | Value | Tag | Source |
+|---|---|---|---|
+| Aero polynomials (21 sets, 82 terms) | Tables A1–A2 | PUBLIC | Chakraborty, Seiler and Balas, "Applications of linear analysis tools to F/A-18 flight control laws", *J. Guidance, Control, and Dynamics* 34(1), 2011, Appendix; fitted to NASA F/A-18 HARV flight data. Matches the authors' `F18AeroData.mat` to 4 places (University of Minnesota, AerospaceControl V&V software, `F18Analysis.zip`) |
+| HARV weight and inertia | 33,310 lb; Ixx 23,000, Iyy 151,293, Izz 169,945, Ixz −2,971 slug·ft² | PUBLIC | NASA TM-107601 (Buttrill, Arbuckle and Hoffler, 1992), Table 3.5, first row |
+| HARV reference geometry | 400 ft², 37.42 ft, 11.52 ft | PUBLIC | NASA TM-107601, Table 3.4 (as used in `f18_data.m`) |
+| Hornet length | 56 ft | PUBLIC | U.S. Navy F/A-18A-D fact file |
+| Super Hornet length | 60.3 ft | PUBLIC | U.S. Navy F/A-18E/F fact file, 2021 |
+| E mean chord | 12.0 ft | AUTHORED | the HARV's 11.52 ft × (S_E/S_A)/(b_E/b_A) |
+| E inertia | Ixx 40,482, Iyy 214,448, Izz 240,886, Ixz −4,693 slug·ft² | AUTHORED | the HARV row scaled as m·r² to 40,721 lb (60 % fuel): roll by span, pitch and yaw by length, the product by both (`Editor/HarvL1Data.cs`) |
+| α range of the polynomials | −10 … 60° | AUTHORED | the fits hold 0–60°; held flat outside |
+
+**Not public, so not used:** NASA TM-107601's aero tables (they come from McDonnell Douglas report MDC A7247). The W32 lock first named them; SIX re-decided it on 2026-10-26.
+
+**A finding in the source:** the published `f18full.m` has the thrust term of β̇ with the wrong sign (`Calibration~/l1_harv_mirror.py`). Air Wing does not inherit it.
+

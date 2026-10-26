@@ -81,7 +81,7 @@ namespace DeepWater.AirWing.Tests
             Assert.AreEqual(5, a.Levels.Count);
             FidelityResolution airframe = default;
             foreach (var r in a.Levels) if (r.Part == PartKind.Airframe) airframe = r;
-            Assert.IsTrue(airframe.FellBack, "L2 asked, L0 is all that is built");
+            Assert.IsTrue(airframe.FellBack, "L2 asked with Flight Controls L0: Airframe L1 flies only as a pair, so L0");
             Assert.AreEqual(FidelityLevel.L0, airframe.Resolved);
             Assert.IsInstanceOf<AirframeL0>(a.Airframe);
         }

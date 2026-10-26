@@ -73,7 +73,12 @@ namespace DeepWater.AirWing.Core.Simulation
             h = Mix(h, s.FuelKg);
             h = Mix(h, s.EngineSpool);
             h = Mix(h, (int)s.Status);
-            return Mix(h, s.InContact);
+            h = Mix(h, s.InContact);
+            h = Mix(h, s.Controls.StabilatorRad);
+            h = Mix(h, s.Controls.AileronRad);
+            h = Mix(h, s.Controls.RudderRad);
+            h = Mix(h, s.Controls.PitchIntegralRadS);
+            return Mix(h, s.Controls.LoadFactorCommand);
         }
 
         /// <summary>

@@ -135,6 +135,29 @@ MonoBehaviour:
   ixzSlugFt2: -4692.6514
   alphaMinDeg: -10
   alphaMaxDeg: 60
+  dragFloorCd0: 0.025
+  dragFloorK: 0.09868188
+  alphaLimitDeg: 30
+  loadFactorCommandTauS: 0.3
+  alphaGainPerS: 2
+  loadFactorIntegralDegPerGs: 1.1459156
+  pitchRateBandwidth: 6
+  rollRateBandwidth: 5
+  yawRateBandwidth: 3
+  sideslipGainPerS: 2
+  sideslipPerPedalDeg: 8
+  stabilatorBandwidth: 30
+  stabilatorRateDegS: 40
+  stabilatorMinDeg: -24
+  stabilatorMaxDeg: 10.5
+  aileronBandwidth: 48
+  aileronRateDegS: 100
+  aileronMinDeg: -25
+  aileronMaxDeg: 45
+  rudderBandwidth: 40
+  rudderRateDegS: 61
+  rudderMinDeg: -30
+  rudderMaxDeg: 30
   provenance: 'Sources and tags in full: Assets/Air Wing/Calibration~/F18E-SOURCES.md
     (read 2026-10-25).
 
@@ -227,7 +250,23 @@ MonoBehaviour:
     ft, Navy fact files), the product by both: Ixx 40482, Iyy 214448, Izz 240886,
     Ixz -4693 slug ft2. Fixed at L1; fuel burn moves them at L3.
 
-    Note: the published
-    f18full.m adds the thrust term of beta-dot with the wrong sign (T cos(alpha)
-    sin(beta)/(mV)); Air Wing derives its motion from body kinematics and does not
-    inherit it (Calibration~/l1_harv_mirror.py).'
+    dragFloorCd0,
+    dragFloorK: AUTHORED, the L0 polar (cd0 and 1/(pi e AR)) as a floor under the
+    fits'' drag, which is almost nil at low alpha (C_D 0.004 at alpha 0; the authors
+    note their low-alpha data are thin).
+
+    Flight Controls L1 (slice 2b, W23):
+    alphaLimitDeg 30, loadFactorCommandTauS 0.3, alphaGainPerS 2, loadFactorIntegralDegPerGs
+    1.15, pitchRateBandwidth 6, rollRateBandwidth 5, yawRateBandwidth 3, sideslipGainPerS
+    2, sideslipPerPedalDeg 8: AUTHORED, a nonlinear-dynamic-inversion law after Snell,
+    Enns and Garrard (J. Guidance 15(4), 1992), tuned in Calibration~/l1_fbw_mirror.py
+    against criteria fixed before tuning (ROADMAP slice 2b). stabilatorBandwidth,
+    stabilatorRateDegS, stabilatorMinDeg, stabilatorMaxDeg, aileronBandwidth, aileronRateDegS,
+    aileronMinDeg, aileronMaxDeg, rudderBandwidth, rudderRateDegS, rudderMinDeg,
+    rudderMaxDeg: PUBLIC, the actuators of NASA TM-107601 as Chakraborty, Seiler
+    and Balas 2011 Table 2 gives them (30, 48, 40 rad/s lags; 40, 100, 61 deg/s;
+    -24..10.5, -25..45, -30..30 deg).
+
+    Note: the published f18full.m adds the
+    thrust term of beta-dot with the wrong sign (T cos(alpha) sin(beta)/(mV)); Air
+    Wing derives its motion from body kinematics and does not inherit it (Calibration~/l1_harv_mirror.py).'

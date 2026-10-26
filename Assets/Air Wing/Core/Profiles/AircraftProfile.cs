@@ -108,6 +108,11 @@ namespace DeepWater.AirWing.Core.Profiles
         public ControlsProfile Controls;
         /// <summary>The L1 airframe's aero model and inertia (W32); unset for a type with no L1 data yet.</summary>
         public AirframeL1Profile AirframeL1;
+        /// <summary>The L1 fly-by-wire's gains and actuators (W23); unset for a type with no L1 law yet.</summary>
+        public ControlsL1Profile ControlsL1;
+
+        /// <summary>Airframe L1 and Flight Controls L1 come as a pair: one without the other cannot fly.</summary>
+        public bool HasL1 => AirframeL1.IsSet && ControlsL1.IsSet;
 
         public void Validate()
         {
@@ -115,6 +120,7 @@ namespace DeepWater.AirWing.Core.Profiles
             Powerplant.Validate();
             Controls.Validate();
             if (AirframeL1.IsSet) AirframeL1.Validate();
+            if (ControlsL1.IsSet) ControlsL1.Validate();
         }
     }
 }

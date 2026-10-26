@@ -231,3 +231,4 @@ All entries W1–W24 are SIX's picks of 2026-10-24, in round order. "Leaning" is
 - **2026-10-25** — Slices 1b–1d done (ROADMAP). Slice 1e: Q5 (the mouse instructor has no floor) and Q6 (a reset after a crash) added.
 - **2026-10-26** — Q5 answered by SIX (no instructor floor: bad piloting crashes) and Q6 (a reset: done). Phase 2 begun: W32–W35 locked by SIX, all as Claude leaned.
 - **2026-10-26** — W32's source re-decided by SIX: TM-107601 holds no aero numbers, so L1 flies the published HARV flight-data fits. Slice 2a done (ROADMAP).
+- **2026-10-26** — Slice 2b: W23's law realised as nonlinear dynamic inversion commanding α (after Snell, Enns and Garrard 1992, on the HARV model) after a fixed-gain PI law failed; the yaw damper is the sideslip and yaw-rate inversion. The AoA limit is 30° (AUTHORED). Two of its criteria are missed and reported (ROADMAP 2b).

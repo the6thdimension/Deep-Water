@@ -56,6 +56,13 @@ namespace DeepWater.AirWing.Core.Profiles
         /// </summary>
         public float AlphaMinRad;
         public float AlphaMaxRad;
+        /// <summary>
+        /// A drag floor, AUTHORED: L1 uses the larger of the fit's C_D and C_D0 + K·C_L² with these numbers (the L0
+        /// polar). The HARV fits carry almost no drag at low α (C_D 0.004 at α 0; their authors note the low-α data are
+        /// thin), which would let the E trim at 500 kt on 800 lbf. Zero turns the floor off (the pure-HARV tests).
+        /// </summary>
+        public float DragFloorCD0;
+        public float DragFloorK;
 
         public bool IsSet => Aero.Cma != null;
 

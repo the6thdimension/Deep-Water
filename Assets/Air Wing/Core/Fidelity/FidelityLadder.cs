@@ -27,18 +27,21 @@ namespace DeepWater.AirWing.Core.Fidelity
         public readonly PartKind Part;
         public readonly FidelityLevel Requested;
         public readonly FidelityLevel Resolved;
+        /// <summary>Why it fell back, when the reason is not "not built yet" (a pairing rule, missing data).</summary>
+        public readonly string Reason;
 
-        public FidelityResolution(PartKind part, FidelityLevel requested, FidelityLevel resolved)
+        public FidelityResolution(PartKind part, FidelityLevel requested, FidelityLevel resolved, string reason = null)
         {
             Part = part;
             Requested = requested;
             Resolved = resolved;
+            Reason = reason;
         }
 
         public bool FellBack => Resolved != Requested;
 
         public override string ToString() => FellBack
-            ? $"{Part}: {Requested} requested, {Resolved} used (highest built)"
+            ? $"{Part}: {Requested} requested, {Resolved} used ({Reason ?? "highest built"})"
             : $"{Part}: {Resolved}";
     }
 
@@ -67,6 +70,14 @@ namespace DeepWater.AirWing.Core.Fidelity
         }
 
         public bool IsBuilt(FidelityLevel level) => _builders[(int)level] != null;
+
+        /// <summary>Builds exactly <paramref name="level"/> (already resolved), recording the request and the reason.</summary>
+        public TPart BuildAt(FidelityLevel requested, FidelityLevel level, TProfile profile, string reason, out FidelityResolution resolution)
+        {
+            if (_builders[(int)level] == null) throw new InvalidOperationException($"{Part} {level} is not built.");
+            resolution = new FidelityResolution(Part, requested, level, reason);
+            return _builders[(int)level](profile);
+        }
 
         /// <summary>The level a request gets: the highest built level at or below it.</summary>
         public FidelityResolution Resolve(FidelityLevel requested)

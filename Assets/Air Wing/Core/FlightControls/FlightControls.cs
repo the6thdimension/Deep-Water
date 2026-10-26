@@ -1,4 +1,5 @@
 using System;
+using DeepWater.AirWing.Core.Atmosphere;
 using DeepWater.AirWing.Core.Profiles;
 using DeepWater.AirWing.Core.Inputs;
 using DeepWater.AirWing.Core.State;
@@ -55,7 +56,11 @@ namespace DeepWater.AirWing.Core.FlightControls
     /// <summary>The Flight Controls part (BLUEPRINT §4): Pilot Inputs to what the airframe is asked for.</summary>
     public interface IFlightControls
     {
-        ControlDemand Demand(in PilotInputs inputs, in AirframeState state, float dt);
+        /// <summary>
+        /// This substep's demand. <paramref name="state"/> is the aircraft's own: a law with memory (L1's actuators and
+        /// filters) keeps it in <see cref="AirframeState.Controls"/>, so the Fix covers it and a reset clears it.
+        /// </summary>
+        ControlDemand Demand(in PilotInputs inputs, ref AirframeState state, in AirData air, float dt);
     }
 
     /// <summary>
@@ -79,7 +84,7 @@ namespace DeepWater.AirWing.Core.FlightControls
             ? 1f + stickPitch * (_c.LoadFactorMax - 1f)
             : 1f + stickPitch * (1f - _c.LoadFactorMin);
 
-        public ControlDemand Demand(in PilotInputs inputs, in AirframeState state, float dt)
+        public ControlDemand Demand(in PilotInputs inputs, ref AirframeState state, in AirData air, float dt)
         {
             float n = Lag(state.LoadFactor, CommandedLoadFactor(inputs.StickPitch), _c.LoadFactorTimeConstantS, dt);
             float rollNow = -state.BodyRates.z;   // right roll is negative about +Z in Unity's sense

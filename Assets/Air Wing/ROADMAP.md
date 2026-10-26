@@ -257,9 +257,34 @@ The gate: the F/A-18E flies at L1 (6-DOF, fly-by-wire, spool time) in Dogfight f
 - [x] **A trap on the way:** the doublet first missed by 0.08° of α. The cause was the test, not the physics: `(k − 1) · 0.005f` is 0.49999998 at the switch, so a float clock held the −2° one step too long. Scheduled by step index, the miss is 4 × 10⁻⁷ rad (METHODOLOGY AP26).
 - *Known:* the bare HARV is statically unstable in pitch at low α (C_mα +0.51 per radian at α = 0): it needs the fly-by-wire (2b), as the real jet does. Not measured yet: the L1 cost per step (2c's budget).
 
-### Slice 2b — Flight Controls L1: Hornet-style fly-by-wire (W23, W26)
-- [ ] G-command pitch, roll-rate roll, AoA and G limiters, a yaw damper; structure after NASA's HARV control-law papers, gains AUTHORED. The stick keeps its meaning from L0 (W26).
-- [ ] Tests: step responses (G and roll rate), the limiters holding, a departure when abused at the corners (W33).
+### Slice 2b — Flight Controls L1: Hornet-style fly-by-wire (W23, W26, W33) (done 2026-10-26: 82/82 tests; two criteria missed and reported)
+- [x] **Criteria fixed before tuning**, on the F/A-18E's own L1 data (`Calibration~/l1_fbw_mirror.py` measured each first):
+
+  | Case | Criterion | Measured (C#; the mirror agrees to the third decimal) | |
+  |---|---|---|---|
+  | Hands off 10 s, 350 kt, 15,000 ft | \|Δn\| < 0.02 g, \|Δh\| < 30 m | 0.0047 g, 2.3 m | met |
+  | 4 G step, 350 kt | 90 % within 1.0 s; overshoot ≤ 15 % | 1.20 s; 4.16 G (5 %) | **onset missed** |
+  | Full aft stick, 500 kt, 10,000 ft | peak ≤ 8.0 G | 8.08 G | **missed by 1 %** |
+  | Full aft stick, 160 kt | α ≤ 30° + 4° | 32.98° | met |
+  | Half roll stick, 350 kt | p within 10 % at 1 s | 73.3 against 75°/s | met |
+  | Rudder pulse | β after 4 s < 20 % of its peak | 0.26 % | met |
+  | Roll into 60° of bank and pull 2 G | \|β\| < 2° | 1.06° | met |
+
+  The two misses are guarded in the tests at their measured values and named as misses. The binding constraint is the stabilator's 40°/s rate limit (TM-107601): a faster G onset saturates it and overshoots. A stronger G integral holds G better but pushes the limit to 8.8 G.
+- [x] **How the law was found, by elimination:**
+  1. a fixed-gain PI law (G error, pitch-rate damping, gains scheduled on q̄): no set of a 27-point grid met the criteria; the AoA limiter overshot to 42°;
+  2. nonlinear dynamic inversion (NDI) with the G error driving pitch rate: the lateral axis met every criterion at once, but pitch overshot (5.7 G for 4; 13 G at the limit), because G follows pitch rate only through α;
+  3. **NDI commanding α**: invert the lift curve for the α that gives the commanded G, clamp it at the AoA limit, drive pitch rate from the α error about the path's turn rate *with the G the jet has now*. An early version used the commanded G there and spiked α to 47°.
+- [x] `Core/FlightControls/FlightControlsL1`: NDI after Snell, Enns and Garrard (*J. Guidance* 15(4), 1992, designed on this HARV model):
+  - pitch: the stick's L0 G map (W26), prefiltered (0.3 s); α command from the inverted lift curve less the stabilator's lift, plus a slow G integral (0.02 rad/(g·s)), clamped at **30°**; q̇ = 6·(q_cmd − q) inverted for the stabilator;
+  - roll and yaw: p_cmd from the stick (150°/s at full); r_cmd = the coordinated-turn rate + p·tan α + 2·(β − β_cmd), the pedals commanding β (8° at full); both equations inverted together for aileron and rudder (bandwidths 5 and 3/s);
+  - actuators PUBLIC (TM-107601 via the 2011 paper's Table 2): stabilator 30 rad/s, 40°/s, −24 … +10.5°; aileron 48 rad/s, 100°/s, −25 … +45°; rudder 40 rad/s, 61°/s, ±30°.
+- [x] The law's state (surfaces, G integral, prefiltered command) is `AirframeState.Controls`: in the Fix, cleared by a reset. `IFlightControls.Demand` now takes the state by reference and the air data.
+- [x] **The ladder pairs them** (C14): Airframe L1 and Flight Controls L1 build only together and only from a type with L1 data; otherwise both fall back to L0 and the resolution says why (`FidelityResolution.Reason`). `AircraftFactory.LevelStart(profile, sheet, …)` trims an L1 start (α, stabilator) by `AirframeL1.TrimLevel`. Nothing in a scene asks for L1 yet (2c).
+- [x] **Found while tuning: the HARV fits have almost no drag at low α** (C_D 0.004 at α 0; the authors say their low-α data are thin). The E trimmed at 500 kt on 781 lbf. Airframe L1 now takes the larger of the fit and the L0 polar (C_D0 0.025 + K·C_L², AUTHORED, `dragFloorCd0`/`dragFloorK`); at 500 kt and 10,000 ft the trim thrust is 8,334 lbf. The pure-HARV mirror tests run with the floor off.
+- [x] **W33, departure, confirmed:** at 120 kt, idle, 20,000 ft, full aft stick with full pedal and full opposite stick saturates all three surfaces; α reaches 63.6° (limit 30°) and |β| 35.5°, and the jet loses 394 m. At 160 kt the AoA limit holds but, with rudder and aileron saturated, β still reaches 21–30°.
+- [x] Tests (`ControlsL1Tests`, 12; 82/82 in all): the actuator; the pairing and its reasons; the seven criteria; the departure; bit-identical Fix and replay at L1 through the flight core; the E asset carries the law and the floor. Player scripts compile: 0 errors, 81 assemblies.
+- *Not done here:* differential stabilator, the revised law's β and β̇ to the aileron (k_β 0.5, k_β̇ 2), sensors (the law reads the state directly), the speed brake and flaps in the law. The law has not been flown by hand: L1 reaches the scenes in 2c.
 
 ### Slice 2c — Powerplant L1, L1 in the scenes, the budget (W21, W35)
 - [ ] Spool-up and spool-down time constants (AUTHORED from public figures where they exist).
@@ -294,3 +319,4 @@ Revisit when Phase 3 is done. The questions for SIX are in BLUEPRINT §7.
 - **2026-10-25** — Slice 1e done: Dogfight rebuilt in place by its builder, with land, runway 09/27, four gates and the DDG landmark; the old scene and the dead jet archived; the budget met in a player build (2.7 µs per aircraft per step, ×3.6 under); 59/59 tests. Found: the mouse instructor flies into the sea when aimed low (BLUEPRINT Q5), and `RunwayStrip` would have saved as a missing script (fixed as `FlatGround`). Not done: a live Dogfight run from the stick and the mouse. Stopped at SIX's word.
 - **2026-10-26** — SIX: Q6 reset (done, 61/61), Q5 no floor; Phase 2 begun with W32–W35 and slices 2a–2e.
 - **2026-10-26** — Slice 2a done: Airframe L1 on the published HARV model, the midpoint method, the E's L1 data; 70/70 tests. Found: TM-107601 has no aero numbers (W32 re-decided by SIX) and the published f18full.m has a sign slip in β̇.
+- **2026-10-26** — Slice 2b done: Flight Controls L1 by nonlinear dynamic inversion commanding α, paired with Airframe L1 on the ladder; the drag floor; 82/82 tests. Missed and reported: G onset (1.2 s against 1.0) and the G limit (8.08 against 8.0). W33's departure confirmed.

@@ -75,3 +75,13 @@ The mirror `l0_calibration.py` and the C# test `AirframeL0Tests.ServiceCeiling_I
 
 **A finding in the source:** the published `f18full.m` has the thrust term of β̇ with the wrong sign (`Calibration~/l1_harv_mirror.py`). Air Wing does not inherit it.
 
+## Flight Controls L1 (slice 2b, W23)
+
+| Number | Value | Tag | Source |
+|---|---|---|---|
+| Actuators: lag, rate, travel | stabilator 30 rad/s, 40°/s, −24 … +10.5°; aileron 48 rad/s, 100°/s, −25 … +45°; rudder 40 rad/s, 61°/s, ±30° | PUBLIC | NASA TM-107601, as Chakraborty, Seiler and Balas 2011 give it in Table 2 |
+| Law structure | nonlinear dynamic inversion | PUBLIC (method) | Snell, Enns and Garrard, "Nonlinear inversion flight control for a supermaneuverable aircraft", *J. Guidance* 15(4), 1992 |
+| AoA limit | 30° | AUTHORED | |
+| Gains | prefilter 0.3 s; α gain 2/s; G integral 0.02 rad/(g·s); bandwidths 6, 5, 3/s; sideslip gain 2/s; 8° of β at full pedal | AUTHORED | tuned in `l1_fbw_mirror.py` against criteria fixed before tuning (ROADMAP 2b) |
+| Drag floor | C_D0 0.025, K 0.0987 | AUTHORED | the L0 polar of this profile, under the HARV fits' low-α drag |
+

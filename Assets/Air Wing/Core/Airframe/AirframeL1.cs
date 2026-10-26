@@ -101,7 +101,9 @@ namespace DeepWater.AirWing.Core.Airframe
 
             float qS = 0.5f * density * v * v * p.ReferenceAreaM2;
             float cb = Mathf.Cos(beta), sb = Mathf.Sin(beta), ca = Mathf.Cos(alpha), sa = Mathf.Sin(alpha);
-            float cDrag = c.CDrag + extraCD;
+            float cDrag = c.CDrag;
+            if (p.DragFloorCD0 > 0f) cDrag = Mathf.Max(cDrag, p.DragFloorCD0 + p.DragFloorK * c.CLift * c.CLift);
+            cDrag += extraCD;
             // Wind-axis drag and side force, as the HARV model forms them; then wind axes to body (Stevens and Lewis).
             float dragW = qS * (cDrag * cb - c.CY * sb);
             float sideW = qS * (c.CY * cb + cDrag * sb);
@@ -123,6 +125,132 @@ namespace DeepWater.AirWing.Core.Airframe
             float qd = (M + (izz - ixx) * pR * rR + (rR * rR - pR * pR) * ixz) / iyy;
             float rd = (ixz * L + ixx * N + (ixz * (iyy - ixx - izz) * rR + (ixz * ixz + ixx * (ixx - iyy)) * pR) * qR) / den;
             return new Vector3(pd, qd, rd);
+        }
+
+        /// <summary>
+        /// The α on the lift curve's rising branch whose basic C_L (no stabilator, no sideslip) is <paramref name="cl"/>,
+        /// by bisection between the profile's lower α and the curve's peak; clamped at either end. Flight Controls L1
+        /// turns a G command into an α command with it.
+        /// </summary>
+        public static float AlphaForBasicLift(in AirframeL1Profile p, float cl)
+        {
+            float lo = p.AlphaMinRad, hi = LiftPeakAlpha(p);
+            if (cl <= Poly(p.Aero.CL, lo)) return lo;
+            if (cl >= Poly(p.Aero.CL, hi)) return hi;
+            for (int i = 0; i < 32; i++)
+            {
+                float mid = 0.5f * (lo + hi);
+                if (Poly(p.Aero.CL, mid) < cl) lo = mid; else hi = mid;
+            }
+            return 0.5f * (lo + hi);
+        }
+
+        /// <summary>The α where the basic lift curve peaks within the profile's range (a scan at 0.5°; the cubic is smooth).</summary>
+        public static float LiftPeakAlpha(in AirframeL1Profile p)
+        {
+            float best = p.AlphaMinRad, bestCl = float.MinValue;
+            int n = (int)((p.AlphaMaxRad - p.AlphaMinRad) / (0.5f * Units.DegToRad));
+            for (int i = 0; i <= n; i++)
+            {
+                float a = p.AlphaMinRad + i * 0.5f * Units.DegToRad;
+                float cl = Poly(p.Aero.CL, a);
+                if (cl > bestCl) { bestCl = cl; best = a; }
+            }
+            return best;
+        }
+
+        static float ClampAlpha(in AirframeL1Profile p, float a) => a < p.AlphaMinRad ? p.AlphaMinRad : a > p.AlphaMaxRad ? p.AlphaMaxRad : a;
+
+        /// <summary>The stabilator's lift per radian at α.</summary>
+        public static float LiftPerStabilator(in AirframeL1Profile p, float alpha) => Poly(p.Aero.CLds, ClampAlpha(p, alpha));
+
+        /// <summary>The pitching moment without the stabilator at α and pitch rate <paramref name="qR"/>.</summary>
+        public static float PitchMomentFree(in AirframeL1Profile p, float alpha, float qR, float v) =>
+            Poly(p.Aero.Cma, ClampAlpha(p, alpha)) + Poly(p.Aero.Cmq, ClampAlpha(p, alpha)) * qR * p.ChordM / (2f * v);
+
+        /// <summary>The pitching moment per radian of stabilator at α.</summary>
+        public static float PitchMomentPerStabilator(in AirframeL1Profile p, float alpha) => Poly(p.Aero.Cmds, ClampAlpha(p, alpha));
+
+        /// <summary>Rolling and yawing moment coefficients without the aileron and rudder (sideslip and rate terms).</summary>
+        public static void LateralFree(in AirframeL1Profile p, float alpha, float beta, float pR, float rR, float v, out float cl, out float cn)
+        {
+            float a = ClampAlpha(p, alpha), b2v = p.SpanM / (2f * v);
+            cl = Poly(p.Aero.Clb, a) * beta + Poly(p.Aero.Clp, a) * pR * b2v + Poly(p.Aero.Clr, a) * rR * b2v;
+            cn = Poly(p.Aero.Cnb, a) * beta + Poly(p.Aero.Cnp, a) * pR * b2v + Poly(p.Aero.Cnr, a) * rR * b2v;
+        }
+
+        /// <summary>Aileron and rudder effectiveness at α: x = Clδa, y = Clδr, z = Cnδa, w = Cnδr.</summary>
+        public static Vector4 LateralControl(in AirframeL1Profile p, float alpha)
+        {
+            float a = ClampAlpha(p, alpha);
+            return new Vector4(Poly(p.Aero.Clda, a), Poly(p.Aero.Cldr, a), Poly(p.Aero.Cnda, a), Poly(p.Aero.Cndr, a));
+        }
+
+        /// <summary>
+        /// Wings-level, level flight at <paramref name="vMps"/>: the α, stabilator and thrust (newtons) that hold it, by
+        /// Newton's method on u̇, ẇ and q̇ (as the mirrors trim). False if it does not converge.
+        /// </summary>
+        public static bool TrimLevel(in AirframeL1Profile p, float vMps, float density, float massKg,
+                                     out float alpha, out float stabilator, out float thrustN)
+        {
+            double a = 0.08, st = -0.03, t = 0.02 * massKg * G0;
+            for (int it = 0; it < 60; it++)
+            {
+                Vector3 r0 = TrimResidual(p, vMps, density, massKg, (float)a, (float)st, (float)t);
+                const double ha = 1e-4, hs = 1e-4;
+                double ht = 1e-3 * massKg * G0;
+                Vector3 ra = TrimResidual(p, vMps, density, massKg, (float)(a + ha), (float)st, (float)t);
+                Vector3 rs = TrimResidual(p, vMps, density, massKg, (float)a, (float)(st + hs), (float)t);
+                Vector3 rt = TrimResidual(p, vMps, density, massKg, (float)a, (float)st, (float)(t + ht));
+                double[,] j =
+                {
+                    { (ra.x - r0.x) / ha, (rs.x - r0.x) / hs, (rt.x - r0.x) / ht },
+                    { (ra.y - r0.y) / ha, (rs.y - r0.y) / hs, (rt.y - r0.y) / ht },
+                    { (ra.z - r0.z) / ha, (rs.z - r0.z) / hs, (rt.z - r0.z) / ht },
+                };
+                double[] d = Solve3(j, new double[] { -r0.x, -r0.y, -r0.z });
+                if (d == null) break;
+                a += d[0]; st += d[1]; t += d[2];
+                if (Math.Abs(d[0]) < 1e-7 && Math.Abs(d[1]) < 1e-7 && Math.Abs(d[2]) < 1e-2) break;
+            }
+            alpha = (float)a; stabilator = (float)st; thrustN = (float)t;
+            Vector3 res = TrimResidual(p, vMps, density, massKg, alpha, stabilator, thrustN);
+            return !float.IsNaN(alpha) && Math.Abs(res.x) < 1e-3f && Math.Abs(res.y) < 1e-3f && Math.Abs(res.z) < 1e-4f;
+        }
+
+        /// <summary>u̇, ẇ (m/s²) and q̇ (rad/s²) in level flight with the nose α above the horizon.</summary>
+        static Vector3 TrimResidual(in AirframeL1Profile p, float v, float density, float massKg, float alpha, float stab, float thrust)
+        {
+            var uvw = new Vector3(v * Mathf.Cos(alpha), 0f, v * Mathf.Sin(alpha));
+            ForcesAndMoments(p, density, uvw, Vector3.zero, new ControlSurfaces(stab, 0f, 0f), thrust, 0f, 0f,
+                             out Vector3 f, out Vector3 m, out _, out _);
+            return new Vector3(f.x / massKg - G0 * Mathf.Sin(alpha), f.z / massKg + G0 * Mathf.Cos(alpha), m.y / p.IyyKgM2);
+        }
+
+        static double[] Solve3(double[,] a, double[] b)
+        {
+            var m = new double[3, 4];
+            for (int i = 0; i < 3; i++) { for (int k = 0; k < 3; k++) m[i, k] = a[i, k]; m[i, 3] = b[i]; }
+            for (int i = 0; i < 3; i++)
+            {
+                int piv = i;
+                for (int k = i + 1; k < 3; k++) if (Math.Abs(m[k, i]) > Math.Abs(m[piv, i])) piv = k;
+                if (Math.Abs(m[piv, i]) < 1e-12) return null;
+                for (int k = 0; k < 4; k++) { double tmp = m[i, k]; m[i, k] = m[piv, k]; m[piv, k] = tmp; }
+                for (int r = i + 1; r < 3; r++)
+                {
+                    double f = m[r, i] / m[i, i];
+                    for (int k = i; k < 4; k++) m[r, k] -= f * m[i, k];
+                }
+            }
+            var x = new double[3];
+            for (int i = 2; i >= 0; i--)
+            {
+                double s = m[i, 3];
+                for (int k = i + 1; k < 3; k++) s -= m[i, k] * x[k];
+                x[i] = s / m[i, i];
+            }
+            return x;
         }
 
         /// <summary>Unity local (x right, y up, z forward) to the NASA body frame (x forward, y right, z down).</summary>

@@ -64,7 +64,7 @@ namespace DeepWater.AirWing.Modules.Aircraft
             {
                 Transform t = view.transform;
                 float fuel = view.StartFuelFraction * p.Airframe.InternalFuelKg;
-                var start = AircraftFactory.LevelStart(p, t.position, t.eulerAngles.y, view.StartSpeedMps, fuel, view.HoldThrottle);
+                var start = AircraftFactory.LevelStart(p, sheet, t.position, t.eulerAngles.y, view.StartSpeedMps, fuel, view.HoldThrottle);
                 Core.Aircraft aircraft = AircraftFactory.Build(view.AircraftId, p, sheet, start);
                 _core.Add(aircraft, SeatFor(view));
                 view.Bind(aircraft);

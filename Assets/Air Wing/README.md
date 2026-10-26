@@ -36,7 +36,9 @@ In either scene, fly with whichever device you touch. The last device you move o
 | Reset to the start | View | R | — (stick buttons differ by model) |
 | Mouse aim | — | move the mouse: the instructor flies to where you point; any stick or key takes over at once | — |
 
-**At L0 (today) the jet:**
+**The scenes fly L1 (since 2026-10-26):** a six-degree-of-freedom jet on NASA's F/A-18 HARV data with a Hornet-style fly-by-wire. The stick still asks for G and roll rate, but the jet now has inertia, the engines take a few seconds to spool, the AoA limit is 30°, and abused at low speed it can depart. To fly L0 again, set the levels in `ScriptableObjects/FA18E_FidelitySheet.asset` back to L0.
+
+**At L0 the jet (and at L1 too, until slice 2d):**
 - **cannot take off or land**: there is no landing gear until L1, so meeting the sea or a runway is a crash;
 - ignores the pedals: a point mass flies without sideslip;
 - has a top speed that is not right yet (Mach effects come at L2);
@@ -47,12 +49,13 @@ In either scene, fly with whichever device you touch. The last device you move o
 
 ## Performance
 
-The flight core alone (W21's budget: ≤ 10 µs per aircraft per fixed step at L0, in a player). Measured 2026-10-25 with **Deep Water → Air Wing → Build Benchmark Player** and `AirWingBenchmark.exe -batchmode -nographics -airwingBenchOut <file>`; the Editor figure comes from **Benchmark Flight Core (Editor)**.
+The flight core alone (W21's budgets: ≤ 10 µs per aircraft per fixed step at L0, ≤ 50 µs at L1, in a player). Measured 2026-10-25 with **Deep Water → Air Wing → Build Benchmark Player** and `AirWingBenchmark.exe -batchmode -nographics -airwingBenchOut <file>`; the Editor figure comes from **Benchmark Flight Core (Editor)**.
 
 | Where | 1 aircraft | 20 aircraft |
 |---|---|---|
-| Player (Windows, Mono, release; i9-12900H) | 2.7 µs per step | 2.7 µs per aircraft per step |
-| Editor (Debug code) | 8.2–8.8 µs | 8.4–8.7 µs per aircraft |
+| L1, player (Windows, Mono, release; i9-12900H) | 16.6 µs per step | 16.7–17.1 µs per aircraft per step (budget 50) |
+| L0, player | 2.7–3.0 µs per step | 2.7–3.0 µs per aircraft per step (budget 10) |
+| Editor (Debug code) | L1 50 µs, L0 4.5–8.8 µs | L1 44 µs, L0 4.5–8.7 µs per aircraft |
 
 Not included: the sea sample, the views and the HUD. Allocations are not measured by this harness (ROADMAP slice 1e).
 

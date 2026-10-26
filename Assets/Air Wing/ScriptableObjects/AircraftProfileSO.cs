@@ -43,6 +43,13 @@ namespace DeepWater.AirWing.ScriptableObjects
         public float idleThrustFraction;
         [Tooltip("Thrust ∝ σ^x with σ = ρ/ρ₀.")]
         public float thrustLapseExponent;
+        [Tooltip("Powerplant L1: core spool-up and spool-down time constants, seconds (0 = no L1).")]
+        public float spoolUpTauS;
+        public float spoolDownTauS;
+        [Tooltip("Powerplant L1: the afterburner's light and fade time constants, seconds, and the core spool it needs to light.")]
+        public float afterburnerLightTauS;
+        public float afterburnerOffTauS;
+        public float afterburnerMinSpool;
 
         [Header("Flight controls")]
         public float loadFactorMax;
@@ -155,6 +162,11 @@ namespace DeepWater.AirWing.ScriptableObjects
                     MaxThrustPerEngineN = (float)(maxThrustPerEngineLbf * Units.PoundForceToNewton),
                     IdleThrustFraction = idleThrustFraction,
                     ThrustLapseExponent = thrustLapseExponent,
+                    SpoolUpTauS = spoolUpTauS,
+                    SpoolDownTauS = spoolDownTauS,
+                    AfterburnerLightTauS = afterburnerLightTauS,
+                    AfterburnerOffTauS = afterburnerOffTauS,
+                    AfterburnerMinSpool = afterburnerMinSpool,
                 },
                 Controls = new ControlsProfile
                 {

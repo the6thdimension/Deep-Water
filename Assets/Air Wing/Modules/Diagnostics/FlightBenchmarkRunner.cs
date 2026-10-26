@@ -35,8 +35,12 @@ namespace DeepWater.AirWing.Modules.Diagnostics
                 if (profile == null || fidelitySheet == null) throw new InvalidOperationException("assign the aircraft profile and the fidelity sheet");
                 var p = profile.Bake();
                 var sheet = fidelitySheet.Bake();
-                foreach (int n in aircraftCounts)
-                    report.AppendLine("RESULT " + FlightBenchmark.Median(p, sheet, n, warmupTicks, ticks, repeats));
+                // The asset's sheet, then every part at L0, for the A/B (unity-perf-ab).
+                var l0 = new Core.Fidelity.FidelitySheet(Core.Fidelity.FidelityLevel.L0, Core.Fidelity.FidelityLevel.L0, Core.Fidelity.FidelityLevel.L0,
+                                                         Core.Fidelity.FidelityLevel.L0, Core.Fidelity.FidelityLevel.L0, sheet.SubstepsPerTick, 1442);
+                foreach (var s in new[] { sheet, l0 })
+                    foreach (int n in aircraftCounts)
+                        report.AppendLine("RESULT " + FlightBenchmark.Median(p, s, n, warmupTicks, ticks, repeats));
                 report.AppendLine("FINISHED");
             }
             catch (Exception e)

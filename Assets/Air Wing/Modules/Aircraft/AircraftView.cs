@@ -1,5 +1,6 @@
 using UnityEngine;
 using DeepWater.AirWing.Core;
+using DeepWater.AirWing.Core.FlightControls;
 using DeepWater.AirWing.Core.Inputs;
 using DeepWater.AirWing.Core.State;
 using DeepWater.AirWing.ScriptableObjects;
@@ -73,7 +74,7 @@ namespace DeepWater.AirWing.Modules.Aircraft
             float t = interpolate && Time.fixedDeltaTime > 0f ? Mathf.Clamp01((Time.time - Time.fixedTime) / Time.fixedDeltaTime) : 1f;
             transform.SetPositionAndRotation(Vector3.Lerp(_previous.Position, _current.Position, t),
                                              Quaternion.Slerp(_previous.Attitude, _current.Attitude, t));
-            AnimateSurfaces(_aircraft.LastInputs);
+            AnimateSurfaces(_aircraft.LastInputs, _aircraft.Controls is FlightControlsL1 ? (ControlState?)_aircraft.State.Controls : null);
         }
 
         void Apply(in AirframeState s) => transform.SetPositionAndRotation(s.Position, s.Attitude);
@@ -95,7 +96,11 @@ namespace DeepWater.AirWing.Modules.Aircraft
             }
         }
 
-        void AnimateSurfaces(in PilotInputs inputs)
+        /// <summary>
+        /// Moving parts: at L0 they follow the Pilot Inputs; at L1 they follow the actuators (<paramref name="l1"/>),
+        /// each as its deflection over the part's own travel.
+        /// </summary>
+        void AnimateSurfaces(in PilotInputs inputs, ControlState? l1)
         {
             for (int i = 0; i < _surfaces.Length; i++)
             {
@@ -104,10 +109,11 @@ namespace DeepWater.AirWing.Modules.Aircraft
                 float drive;
                 switch (s.driver)
                 {
-                    case SurfaceDriver.Roll: drive = inputs.StickRoll; break;
+                    // At L1 the HARV signs: aileron + rolls right, stabilator + trailing edge down, rudder + trailing edge left.
+                    case SurfaceDriver.Roll: drive = l1.HasValue ? l1.Value.AileronRad * Mathf.Rad2Deg / s.maxAngleDeg : inputs.StickRoll; break;
                     // The model's stabilator axes were set for AerialArcade, whose pitch is positive pushing; ours is positive pulling.
-                    case SurfaceDriver.Pitch: drive = -inputs.StickPitch; break;
-                    case SurfaceDriver.Pedals: drive = inputs.Pedals; break;
+                    case SurfaceDriver.Pitch: drive = l1.HasValue ? l1.Value.StabilatorRad * Mathf.Rad2Deg / s.maxAngleDeg : -inputs.StickPitch; break;
+                    case SurfaceDriver.Pedals: drive = l1.HasValue ? -l1.Value.RudderRad * Mathf.Rad2Deg / s.maxAngleDeg : inputs.Pedals; break;
                     case SurfaceDriver.Flaps: drive = inputs.Has(PilotSwitches.FlapsDown) ? 1f : 0f; break;
                     default: drive = inputs.Has(PilotSwitches.SpeedBrake) ? 1f : 0f; break;
                 }

@@ -286,10 +286,23 @@ The gate: the F/A-18E flies at L1 (6-DOF, fly-by-wire, spool time) in Dogfight f
 - [x] Tests (`ControlsL1Tests`, 12; 82/82 in all): the actuator; the pairing and its reasons; the seven criteria; the departure; bit-identical Fix and replay at L1 through the flight core; the E asset carries the law and the floor. Player scripts compile: 0 errors, 81 assemblies.
 - *Not done here:* differential stabilator, the revised law's β and β̇ to the aileron (k_β 0.5, k_β̇ 2), sensors (the law reads the state directly), the speed brake and flaps in the law. The law has not been flown by hand: L1 reaches the scenes in 2c.
 
-### Slice 2c — Powerplant L1, L1 in the scenes, the budget (W21, W35)
-- [ ] Spool-up and spool-down time constants (AUTHORED from public figures where they exist).
-- [ ] Dogfight and the flight-test scene switch to L1; L0 stays on the sheet. The HUD names the level.
-- [ ] Budget ≤ 0.05 ms per aircraft per step in a player build.
+### Slice 2c — Powerplant L1, L1 in the scenes, the budget (W21, W35) (done 2026-10-26: 87/87 tests; budget met, 17 µs per aircraft per step)
+- [x] `Core/Powerplant/PowerplantL1`: the core spool (idle 0 … military 1) follows the throttle with a first-order lag, 1.2 s up and 0.8 s down; the afterburner lights only above 90 % core spool and fades in over 0.4 s, out over 0.25 s (all AUTHORED: no public F414 spool figures were found). L0's density lapse is kept. `AirframeState.AfterburnerSpool` joins the Fix. Powerplant L1 falls back to L0 when a type has no spool data, and says so.
+- [x] **The scenes fly L1 (W35):** `FA18E_FidelitySheet.asset` asks for Airframe, Flight Controls and Powerplant L1; L0 stays one setting away. Dogfight and the flight-test scene read that sheet, so neither needed a rebuild. `AirWingRunner` starts an L1 jet trimmed (`AircraftFactory.LevelStart(profile, sheet, …)`), and the HUD's level line shows `Airframe: L1 …`. At L1 the moving parts follow the actuators, not the stick.
+- [x] **Seen at runtime, hands off, in Dogfight:** the levels were L1 on all three parts; after 23.6 s the jet held 1.000 G, 37 m above its start, accelerating from 400 to 520 kt on the 89 % throttle; no seat owner, flying.
+- [x] Tests (`PowerplantL1Tests`, 5; 87/87 in all): the spool's lags up and down; the afterburner lights at 2.77 s from idle (2.76 s predicted by the 90 % rule); the fallback without spool data; the scenes' sheet resolves to L1; **the mouse instructor flies the Dogfight start through gate 1 at L1** (22.0 s, 476 kt, 4,983 ft, 5.1 m off centre).
+- [x] **Budget (W21): ≤ 50 µs per aircraft per fixed step at L1, player build, met.** unity-perf-ab, the instrument of slice 1e (Windows, Mono, release; i9-12900H; median of 3; two runs each):
+
+  | | 1 aircraft | 20 aircraft |
+  |---|---|---|
+  | L1, first build | 35.65, 39.43 µs | 35.26, 34.60 µs per aircraft |
+  | **L1, the lift-curve peak cached** | **16.60, 16.62 µs** | **17.14, 16.72 µs per aircraft** (×2.9 under budget) |
+  | L0 (the same build) | 2.85–3.00 µs | 2.82–3.00 µs per aircraft |
+
+  - The first L1 build re-scanned the lift curve for its peak (141 polynomials) on every substep. It depends only on the profile, so the law now finds it once: ×2.2, with every test's numbers unchanged (fidelity pinned).
+  - Editor, Debug code: L1 44–50 µs, L0 4.5 µs (not the budget's instrument). Twenty L1 jets: 0.34 ms a step in the player.
+  - The rebuilt player took 0.6 min with the shader cache warm (16.5 min the first time).
+- *Not verified:* L1 flown by hand from any device; the reset at L1 by hand (it is tested in EditMode). Not built: Mach effects (L2), so L1's top speed is not yet right either.
 
 ### Slice 2d — Landing Gear L1: runway start, take-off and landing (W4, W29)
 - [ ] Struts, wheels, brakes and nosewheel steering through PhysX contacts (variant B); ground phases flagged in the Fix.
@@ -320,3 +333,4 @@ Revisit when Phase 3 is done. The questions for SIX are in BLUEPRINT §7.
 - **2026-10-26** — SIX: Q6 reset (done, 61/61), Q5 no floor; Phase 2 begun with W32–W35 and slices 2a–2e.
 - **2026-10-26** — Slice 2a done: Airframe L1 on the published HARV model, the midpoint method, the E's L1 data; 70/70 tests. Found: TM-107601 has no aero numbers (W32 re-decided by SIX) and the published f18full.m has a sign slip in β̇.
 - **2026-10-26** — Slice 2b done: Flight Controls L1 by nonlinear dynamic inversion commanding α, paired with Airframe L1 on the ladder; the drag floor; 82/82 tests. Missed and reported: G onset (1.2 s against 1.0) and the G limit (8.08 against 8.0). W33's departure confirmed.
+- **2026-10-26** — Slice 2c done: Powerplant L1 (spool), the scenes fly L1, the budget met in a player (17 µs per aircraft per step after caching the lift peak, ×2.2); 87/87 tests.

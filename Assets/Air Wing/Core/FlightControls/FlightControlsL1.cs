@@ -35,6 +35,8 @@ namespace DeepWater.AirWing.Core.FlightControls
         readonly ControlsProfile _c;
         readonly ControlsL1Profile _k;
         readonly AirframeL1Profile _a;
+        /// <summary>The lift curve's peak α: fixed per profile, so found once (slice 2c: it was a 140-point scan every substep).</summary>
+        readonly float _liftPeakAlpha;
 
         public FlightControlsL1(in AircraftProfile profile)
         {
@@ -43,6 +45,7 @@ namespace DeepWater.AirWing.Core.FlightControls
             _c = profile.Controls;
             _k = profile.ControlsL1;
             _a = profile.AirframeL1;
+            _liftPeakAlpha = AirframeL1.LiftPeakAlpha(_a);
         }
 
         /// <summary>The load factor the stick asks for (the L0 map, W26).</summary>
@@ -74,7 +77,7 @@ namespace DeepWater.AirWing.Core.FlightControls
             float en = nf - n;
             float integral = c.PitchIntegralRadS + _k.LoadFactorIntegralGain * en * dt;
             float clReq = qS > 1f ? nf * s.MassKg * G0 / qS - AirframeL1.LiftPerStabilator(_a, a) * c.StabilatorRad : 0f;
-            float alphaCmd = AirframeL1.AlphaForBasicLift(_a, clReq / Mathf.Cos(2f * beta / 3f)) + integral;
+            float alphaCmd = AirframeL1.AlphaForBasicLift(_a, clReq / Mathf.Cos(2f * beta / 3f), _liftPeakAlpha) + integral;
             if (alphaCmd > _k.AlphaLimitRad)
             {
                 alphaCmd = _k.AlphaLimitRad;

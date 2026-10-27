@@ -101,7 +101,16 @@ namespace DeepWater.FullSpeed.Tests
             int gone = _child.Id;
             _child.Dispose();   // our handle would keep the exited process object open
             _child = null;
-            Assert.IsNotNull(WindowsProcesses.SetFullSpeed(gone), "an exited process cannot be set; the error is returned, not swallowed");
+            // Another short-lived handle can keep the exited process object alive a moment longer: Full Speed's own scan
+            // sets this child too, since it descends from Unity. A headless run hit that once (2026-10-27). The error
+            // must come once that handle closes, so allow 2 s for it.
+            string error = null;
+            for (int i = 0; i < 40 && error == null; i++)
+            {
+                error = WindowsProcesses.SetFullSpeed(gone);
+                if (error == null) System.Threading.Thread.Sleep(50);
+            }
+            Assert.IsNotNull(error, "an exited process cannot be set; the error is returned, not swallowed");
         }
     }
 #endif

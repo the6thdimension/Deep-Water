@@ -115,7 +115,7 @@
 - Domain reload 46.5 → 7.4–7.8 s. Play entry 51 → 0.9 s.
 - Private-edit compile 4.7 → 1.2–1.6 s; public-edit compile 13.5 → 3.1–3.4 s; a legacy-script edit, ready 67 → 11.4 s.
 - Player build after a code change 107 → 54 s. Cold build 1,313 s, with ~5 min of it lost to the efficiency cores (measured before the stripping in round 7).
-- Background builds (E2): a player without touching the Editor, 276 s the first time and 45 s when nothing changed.
+- Background builds (E2): a player without touching the Editor, 276 s the first time and 45 s when nothing changed. After a one-line code edit (E5): Release 84 s, Iterate (scripts only) 49 s.
 
 ### A. The machine (biggest wins, mostly settings)
 
@@ -149,7 +149,7 @@
 | C1 | Remove Unity Version Control and untrack `.plastic/` | Reload −31 s | **done** (round 1) | — |
 | C2 | First-party asmdefs off auto-reference | Compile ×2.8 (private edit), ×4 (public edit) | **done** (round 2) | — |
 | C3 | Remove unused packages | Fewer of the 215 assemblies per reload | Visual Scripting **done** (round 3a); Cesium and PostProcessing v2 **done** (round 3b). ML-Agents kept: SENTINAL uses it | — |
-| C4 | Asmdefs inside Obi and HurricaneVR (a vendor change) | Legacy-edit compile 6.6 → ~2.5 s | HurricaneVR removed instead (round 3b), which gave 1.7–2.0 s. Obi: approved, not built | Claude |
+| C4 | Asmdefs inside Obi and HurricaneVR (a vendor change) | Legacy-edit compile 6.6 → ~2.5 s | HurricaneVR removed instead (round 3b), which gave 1.7–2.0 s. Obi **done** (round 8): `Assembly-CSharp` 479 → 109 files | — |
 | C5 | **Freeze vendor code into precompiled DLLs** (Obi, HurricaneVR, RootMotion, RCC, NWH): built once, then never recompiled or post-processed | `Assembly-CSharp` 763 → ~90 files; firstpass emptied | untested | SIX decides |
 | C6 | Move unused vendor demo content out of `Assets/` (or into `Name~` folders, which Unity ignores): Obi samples, RCC demo, NWH demo, HurricaneVR examples, VFX Arsenal examples | Less to scan, import, compile and ship | **done** for the unused vendors and demo content (round 3b) | — |
 | C7 | Audit every `Resources/` folder (RCC, Obi, NWH, Cesium): all of it ships, and its shaders compile in every build | `resources.assets` packaging took 140 s cold | measured cost | Claude |
@@ -160,8 +160,8 @@
 | # | What | Gain | Status | Who |
 |---|---|---|---|---|
 | D1 | **Burst AOT for one CPU target (AVX2) instead of SSE2 + SSE4.** Burst compiles every job once per target | Burst step 60.2 → 37.5 s (−38 %) per code-changed build. Needs an AVX2 CPU (any since 2013) | **done** (round 7) | — |
-| D2 | Two build profiles. "Iterate": development build, Burst *Fast Compilation*, one CPU target, one quality level, no compression. "Release": as now | Iteration builds much faster; release unchanged | untested | Claude |
-| D3 | Scripts-only player builds when only code changed (`BuildOptions.BuildScriptsOnly`, development builds) | Skips data packaging | untested | Claude |
+| D2 | Two build profiles. "Iterate": development build, scripts only when only code changed. "Release": as now. (Burst fast compilation, one quality level and no compression were left out: E5 says why) | After a code edit, a player in 49 s instead of 84 s | **done** (E5) | — |
+| D3 | Scripts-only player builds when only code changed (`BuildOptions.BuildScriptsOnly`, development builds) | Build 39.5 → 19.6 s after a code edit | **done** (E5, the Iterate profile) | — |
 | D4 | **Fewer shader variants**, for cold builds | Lower the 950 s shader phase | Claude, with SIX's look at visuals | |
 | D4a | Turn off ray tracing in "HDRP High Fidelity" if it isn't wanted | `HDRP/Lit`'s DXR passes, ~290 s of compile time | **done** (round 7); cold-build gain not measured | — |
 | D4b | 6000.4 **Shader Build Settings, keyword declaration overrides**: turn chosen HDRP keywords into runtime branching or material-usage variants, without editing HDRP | `TemporalAA` alone is 1,284 variants and 768 s | untested | Claude |
@@ -197,6 +197,10 @@ Every round must leave exactly this result.
 - The first run had a fourth failure: the same-Fix test. That Editor session had lost the project-wide Input Actions: `InputSystem.actions` was null though `EditorBuildSettings` pointed at `RHMILCOM.inputactions`, so `RangeInput` logged an error.
 - After a domain reload the actions were back. They stayed set over two plays without a reload, enabled in play and disabled between plays. The Fast Play tests then passed 3/3 (40.5 s).
 - Likely cause, not proven: that Editor had started on a package change (FSR's removal), before the asset could load.
+
+**Pin after round 8 and E5 (2026-10-27 13:20, `main` at `2afbb624` plus this work):** twelve assemblies (Aviator and Gunnery are new on `main`), 466 tests. Result: **463 pass, 3 fail, the same three**.
+- Another session's headless baseline that morning had five more failures (Air Wing and GQ prefab tests, and one Full Speed test). All of them pass in the Editor run.
+- The Full Speed one was hardened (round 5). The prefab ones come from how the mirror imports models, and weren't investigated here.
 
 ### Round 1: remove Unity Version Control; untrack `.plastic/` (kept)
 
@@ -333,6 +337,8 @@ Every round must leave exactly this result.
   - It changes no Windows setting. Each process's switch ends with the process.
 - **Result:** on load it set 39 processes to full speed (`UnityShaderCompiler` ×22, the ILPP runner, Package Manager, the MCP relay…). Domain reload, one each: off 16.2 s, on **7.8 s** (×2.1), matching the round-4 prototype.
 - **Tests:** `DeepWater.FullSpeed.Tests.Editor` 7/7 in 0.8 s: the tree logic, plus round trips against Windows on a real child process.
+  - 2026-10-27: the exited-process test failed once in another session's headless run. It now allows 2 s for the error to come.
+  - Likely cause, not reproduced: Full Speed's own scan briefly holds a handle to the child, which keeps the exited process alive.
 
 ### Round 6: play mode without a domain reload (kept)
 
@@ -376,6 +382,38 @@ Every round must leave exactly this result.
 
 - **Behaviour:** the AVX2 player runs headless at 2.88 µs per step for 1 aircraft and 2.66 µs per aircraft for 20 (the Air Wing budget is 2.7), with no errors in `Player.log`. Policy tests 3/3.
 - **Not measured:** the cold-build gain from the stripping and from ray tracing off. The only cold build timed came before this round.
+
+### Round 8: Obi in its own assemblies (kept)
+
+*Seat: Michael Feathers (The Maintainer): a vendor that never changes shouldn't be recompiled with every legacy script.*
+
+- **Change (SIX's pick C4; a vendor change SIX approved):** three asmdefs, and no other edit to Obi.
+
+| Asmdef | Covers | References | Auto-referenced |
+|---|---|---|---|
+| `Obi` | `Assets/Obi/Scripts`, 330 files | Burst, Collections, Mathematics; unsafe code allowed | yes: CVN-78's `ArrestingWireController.cs` (in `Assembly-CSharp`) uses `ObiRope` and `ObiRopeCursor` |
+| `Obi.Editor` | `Assets/Obi/Editor`, 76 files | `Obi`; editor only | no |
+| `Obi.Samples` | `Assets/Obi/Samples`, 40 files | `Obi`, `UnityEngine.UI` | no: nothing outside uses a sample class |
+
+  - No version defines. Obi's backends follow the project's define symbols, as before: Standalone defines `OBI_ONI_SUPPORTED`, and the Burst backend stays compiled out (`OBI_BURST` is not defined). An asmdef that added `OBI_BURST` would switch on a solver that's off today.
+- **Result:** `Assembly-CSharp` went from 479 to 109 files. Obi's 446 files compile into their own three assemblies, which an edit to a legacy script no longer recompiles. The one full recompile took 3.28 s (55 Bee nodes).
+- **A/B, the same one-line edit to `CamRot.cs` (legacy `Assembly-CSharp`), Editor unfocused, Full Speed on, the Editor up 24.6 h:**
+
+| Cycle | Compile (Bee) | `Csc`, `Assembly-CSharp` | IL post-processing, `Assembly-CSharp` | Domain reload | Another session's headless tests running |
+|---|---|---|---|---|---|
+| A2 | 1.73 s | 0.75 s | 0.43 s | 21.6 s | yes (started 11:53) |
+| A3 | 1.86 s | 0.81 s | 0.46 s | 21.8 s | yes |
+| B1 (warm-up after the change) | 2.14 s | 1.22 s | 0.25 s | 25.3 s | unknown |
+| B2 | 2.75 s | 1.64 s | 0.35 s | 35.6 s | yes, 8.2 cores |
+| B3 | — | 3.36 s | 0.26 s | — | yes |
+
+  - A1 (3.06 s `Csc`) warmed up the compiler server; it isn't counted.
+- **Verdict: kept on structure, as SIX approved.**
+  - The IL post-processing of `Assembly-CSharp` fell from 0.43–0.46 s to 0.25–0.35 s.
+  - The compile-time gain is **not shown**. The B runs overlapped another session's headless test runs in the background-build mirror, and `Csc` swung 0.75–3.4 s with them. Auto-refresh also raced the marks twice.
+  - Per SIX's "scoped, no waiting" rule, the timing stopped there.
+- **Behaviour:** 0 compile errors. All 115 Unity-object classes resolve to their class in the new assemblies (Obi 52, Obi.Editor 23, Obi.Samples 39, `Assembly-CSharp` 1). The script GUIDs didn't change, so scenes keep their components.
+- **Found on the way:** domain reloads now take 21–36 s, against 7.4 s two days ago. The Editor had been up 24.6 h (the long-session drift in the `unity-perf-ab` skill), and `main` gained 106 commits and several assemblies since. Not investigated here.
 
 ### E2: background builds from a mirror (built)
 
@@ -461,3 +499,55 @@ Every round must leave exactly this result.
   - Timed with a `playModeStateChanged` hook, from the request to `EnteredPlayMode`: **7.4 s** for the first play after the start (cold), **2.5 s** for the second (warm).
   - The round-6 0.9 s came from a different timer, so these two numbers aren't like for like.
 - **Revisit when:** an FSR release states Unity 6.4 support, or Unity's CoreCLR Editor (E6) makes the question moot.
+
+### E5: Release and Iterate profiles, and scripts-only builds (built)
+
+*Seat: Martin Fowler (The Extender): a new kind of build should be a new asset, not a new code path.*
+
+- **What it is (SIX's picks D2 and D3, 2026-10-27):**
+  - `LeanBuildProfile` assets in `Assets/Lean Build/Profiles`:
+    - `Release`: a full build, as a player ships.
+    - `Iterate`: a development build that builds only the scripts when nothing but code changed.
+  - `BuildPlan` and `ChangeSet` (pure, tested): they turn a profile and a change list into a full or a scripts-only build, and say why.
+  - Menu items Deep Water > Build > Build Active Scene In Background (Release) and (Iterate), and `bg_build.ps1 -Profile`.
+  - **Per-profile change lists:**
+    - Each profile keeps the files changed since its own last successful build, in `<mirror>/Library/LeanBuild/pending-<profile>.txt`.
+    - A mirror copy appends to every list, and a build empties only its own. So a Release build in between can't hide a texture change from Iterate.
+    - A file counts as changed only if its content differs (SHA1). Robocopy goes by size and time, and the Editor re-saves settings files with identical content: 10 such files in each run below. Without the hash check, scripts-only would almost never fire.
+  - **Mirror lock:** another session ran headless tests in `Deep Water BG` (2026-10-27). The script now stops while a Unity holds the mirror's `Temp\UnityLockfile`, and these runs used a second mirror, `Deep Water BG2`.
+  - The output is fixed per profile and scene (`Builds/Background/<profile>/<scene>/`), because a scripts-only build patches the last build in place.
+- **Runs, GQ_Range, in `Deep Water BG2`, Editor not involved. Other sessions' edits kept landing in the working tree:**
+
+| Run | What changed since the profile's last build | Plan | Start to player | Build | Scripts | Data | Post-process (Burst) |
+|---|---|---|---|---|---|---|---|
+| R0 Release | first build in a new mirror | full | 631 s | 567.2 s | 60.0 s | 212.2 s | 273.2 s (cold) |
+| I0 Iterate | first Iterate build | full: no earlier build | 260 s | 225.4 s | 128.9 s | 4.8 s | 82.6 s |
+| R1 Release | 1 code edit, 10 settings files | full | 103 s | 73.4 s | 9.8 s | 4.5 s | 51.8 s (48.1) |
+| I1 Iterate | 199 files (another session's archive clean-up) | full: `README.md` is not code | 132 s | 94.8 s | 12.9 s | 4.4 s | 70.5 s |
+| **I2 Iterate** | **1 code edit** | **scripts only** | **49 s** | **19.6 s** | 7.5 s | skipped | 9.5 s (5.0) |
+| R2 Release | 40 files | full | 173 s | 125.4 s | 23.3 s | 5.0 s | 73.4 s (63.3) |
+| **R3 Release** | **1 code edit** | full | **84 s** | **39.5 s** | 10.0 s | 6.8 s | 12.0 s (6.8) |
+
+- **Result:** after a one-line code edit, Iterate gives a player in 49 s against Release's 84 s, start to player. The build itself takes 19.6 s against 39.5 s (×2.0).
+- **Checks:**
+  - Burst ran in the scripts-only build (`bcl.exe`, 5.0 s). It found nothing to recompile, since the edited assembly has no Burst jobs.
+  - Both players run 15 s headless. Each logs the same one exception (no compute shaders under `-nographics`), and the Iterate player logs its development-build markers. That's a start-up check, not a gameplay check.
+  - Tests: `BuildPlanTests` 3/3.
+- **Not built: Burst fast compilation for Iterate.** On a code-only edit Burst took 5.0–6.8 s, so its fast mode has little left to save. Whether it changes results in `FloatMode.Deterministic` jobs is unproven.
+- **Next target, not built:** about 29 s of every run is the headless Unity starting, refreshing and reloading. A Unity kept warm between builds would remove most of it.
+
+### Incident: a package made App UI editor-only, and every player build failed (fixed, 2026-10-27)
+
+*Seat: Nadia Eghbal (The Resilient): a dependency's default must not decide what ships.*
+
+- **Symptom:** the first R0 failed in the player-script compile. GQ_Range's `RangeScreen.cs` and `DamageBoard.cs` gave CS0234: `Unity.AppUI` does not exist. A player build from the Editor would have failed the same way.
+- **Cause:**
+  1. The ML-Agents 2.0.2 → 4.1.0 upgrade that morning (`6459f22b`) brought the Inference Engine (`com.unity.ai.inference`).
+  2. Its model visualizer ships `App UI Settings.asset` with `editorOnly: 1`.
+  3. App UI takes the settings registered in `EditorBuildSettings`, or else the first `AppUISettings` asset it finds, packages included. So it took that one, registered it, and added `APP_UI_EDITOR_ONLY` to the Standalone defines, which strips App UI from players.
+  4. Before the upgrade there was no such asset, and App UI ran on its defaults (`editorOnly` false).
+- **Fix:**
+  - `Assets/Settings/App UI Settings.asset`, with App UI's defaults, registered as `com.unity.dt.app-ui` in `EditorBuildSettings`.
+  - The define removed from Standalone, as App UI does itself on its next delayed call.
+  - `ProjectSettings.asset` is not committed: its only remaining difference from `main`, `SENTIS_ANALYTICS_ENABLED`, comes from the Inference Engine package.
+- **Verified:** R0 and every later build compiled the player scripts, and the Standalone defines no longer list `APP_UI_EDITOR_ONLY`.

@@ -40,6 +40,9 @@ Project rule (CLAUDE.md, methodology C11): profile before claiming a perf win, a
   - Check with `Get-Counter '\Processor(*)\% Processor Time'`: logical 12–19 pinned at 100 % while 0–11 idle means throttled.
   - The project's Full Speed tool (`Assets/Full Speed`, round 5) keeps the Editor's tree opted out; Deep Water > Full Speed > Report shows each process's state. Check it's on before timing anything.
   - The prototype, for another project or a headless Unity, is `scripts/ecoqos_optout.ps1 -EditorPid <Unity pid> -Log <file>` (round 4).
+- **Another session may be building or testing on the same machine** (2026-10-27). Headless EditMode runs in the background-build mirror took 8.2 cores, and an `Assembly-CSharp` compile swung from 0.75 to 3.4 s across both arms of an A/B.
+  - Before each cycle, list the other Unity processes by `-projectPath`, with their cores over 3 s, and record them with the cycle (METHODOLOGY C49).
+  - If quiet cycles can't be had, report the gain as not shown.
 - **First play after an Editor start is cold.** In GQ_Range, play entry took 7.4 s the first time and 2.5 s the second (2026-10-25). Discard the first play, as you would a warm-up.
 - **A long-running Editor drifts slower.** Domain reloads went from 38 s in the morning to 46–57 s after 5 h, with no code change. Interleave A and B runs (ABAB), and report n and the range.
 - **Game view resolution changes everything.** A switch to a fixed 2560×1440 between runs cut fps from ≈97 to 32 with no code change. The marker template records the resolution; compare only like with like.

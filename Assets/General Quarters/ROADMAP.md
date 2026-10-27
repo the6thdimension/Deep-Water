@@ -180,9 +180,12 @@ SIX's picks: G30 effects reused where they fit and built in code where they don'
 ## Element streams (after Phase 1; one level at a time, each with tests)
 
 ### Stream A — Sensors and CIC
-- [ ] Radar L1: radar equation (RCS in dBsm, Pd/Pfa), sea clutter from `SeaConditions`. *Questions prepared 2026-10-27, nothing decided:
-  `RADAR-L1-QUESTIONS.md` (R1–R8, with leanings). RH Radar Suite's pure core (radar equation, Pd, horizon, errors,
-  clutter, α-β, track file; 37 tests) now exists to build on.*
+- [ ] **Radar L1 + Tracks L1** (decided 2026-10-27 by SIX, G61–G68; nothing built). The slice, in order:
+  1. Split RH Radar Suite's pure core into `RHRadarSuite.Core` (engine-free asmdef; the suite's 42 tests still pass) (G61).
+  2. Research a public γ-by-sea-state table; fall back to one AUTHORED γ, flagged (G67).
+  3. One generic S-band radar in SPY-1's role, calibrated to one public detection range, flagged (G62, G63); one
+     dBsm per `TargetKind` (G65); a seeded Swerling 1 draw per look (G66); identity from truth (G68).
+  4. Tracks L1 on the suite's track file, replacing Tracks L0 (G64).
 - [ ] ~~Illuminators L1: three SPG-62 channels gate terminal homing.~~ Moved to Stream B slice B2c (G44, 2026-10-24).
 - [ ] Tracks L1: measurement noise, α-β/Kalman filter, track quality.
 - [ ] TEWA L1: Pk-weighted pairing, shoot-look-shoot.

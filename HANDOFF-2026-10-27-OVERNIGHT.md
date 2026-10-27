@@ -27,7 +27,21 @@ the docs and git current; no missile work.
   avoid each other (23 m at worst).
 - **Nothing was flown by a human.** Everything was tested headless, plus play-mode smokes in Dogfight.
 
-## Decisions waiting for you (priced; five, the doctrine's cap)
+## Decisions: answered by SIX, 2026-10-27 morning
+
+| # | Answer | Where it is recorded |
+|---|---|---|
+| 1 | **A9 declined:** score by position alone. The pointing check is out of `RearCone.Inside`; a test pins it; 135/135 | RH Aviator BLUEPRINT A9, ROADMAP |
+| 2 | **Slice 3f is a go** (A11), spike first. Its pass criterion is judged by *pointed* cone time, since with A9 gone the position score hands equal fights a "winner" from head-on passes (line v line 0 → 6.1 / 5.6 s a fight) | RH Aviator BLUEPRINT A11, ROADMAP |
+| 3 | **Every radar leaning taken:** G61–G68 (split the pure core into `RHRadarSuite.Core`; SPY-1's role only; generic, calibrated, flagged; Tracks L1 with it; one dBsm per kind; seeded Swerling 1; constant-γ from sea state; identity from truth). RS1 = B: legacy LOD modules left as they are. `Assets/RH Radar` struck | GQ BLUEPRINT G61–G68, GQ ROADMAP Stream A, Radar Suite ROADMAP, `Assets/RH Radar/README.md` |
+| 4 | **Red's chase stays capped** (A10): running away is a valid escape | RH Aviator BLUEPRINT A10 |
+| 5 | **The autoroutines are retired**, banners on each file, kill log `.claude/autoroutines/KILLED.md` | `.claude/autoroutines/` |
+
+New, seen in the re-run survey and **not investigated**: the survey's 4 v 4 cases report a closest pass of 0 m and
+1 m. They read the same before the A9 change (so A9 did not cause them), and differ from the final 4 v 4 test's
+146 m. Worth a look before slice 3f.
+
+## Decisions as they were put (kept for the record)
 
 | # | Question | Where | Cost |
 |---|---|---|---|

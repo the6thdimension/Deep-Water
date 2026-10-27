@@ -58,6 +58,29 @@ MonoBehaviour:
   slotClimbDegPerM: 0.03
   slotGPerPathDeg: 0.5
   slotRotationShare: 0.75
+  initialM: 5556
+  initialCaptureM: 150
+  initialKt: 350
+  breakAlongM: 600
+  breakHeightM: 244
+  breakKt: 240
+  downwindOffsetM: 1500
+  downwindHeightM: 183
+  finalTurnAlongM: 1500
+  approachKt: 145
+  gearKt: 250
+  patternBankDeg: 40
+  patternGPerPathDeg: 0.1
+  patternMaxDiveDeg: 6
+  patternFloorAglM: 30
+  glidePathDeg: 3
+  touchdownM: 300
+  flareHeightM: 9
+  flarePathDeg: 0.8
+  finalCarrotM: 300
+  rolloutPedalPerM: 0.05
+  rolloutPedalPerDeg: 0.1
+  bingoFlightTimeS: 0
   provenance: "All AUTHORED (RH Aviator W45; no public source describes a generic
     line pilot), tuned headless against slice 3a's pass criteria (ROADMAP, fixed
     before tuning). Hands: guidanceGain (2, the classic value of the L1 path-following
@@ -75,4 +98,11 @@ MonoBehaviour:
     lostSlotM, slotSpeedLead, slotSpeedBrakeOverKt, slotClimbDegPerM, slotGPerPathDeg,
     slotRotationShare (the last three picked by FormationTests.Sweep, a grid on the
     fixed hold scenario: 0.5 G per degree sits 1.6 times inside where the hold rings,
-    at 0.6 it degrades and at 0.8 it diverges)."
+    at 0.6 it degrades and at 0.8 it diverges). Going home (W41, W47; the shape as
+    the U.S. Navy publicly describes its overhead break, the numbers fitted): initialM,
+    initialCaptureM, initialKt, breakAlongM, breakHeightM (800 ft), breakKt, downwindOffsetM,
+    downwindHeightM (600 ft), finalTurnAlongM, approachKt (145 kt, as Air Wing's
+    landing test), gearKt, patternBankDeg, patternGPerPathDeg, patternMaxDiveDeg,
+    patternFloorAglM, glidePathDeg, touchdownM, flareHeightM, flarePathDeg, finalCarrotM,
+    rolloutPedalPerM, rolloutPedalPerDeg, bingoFlightTimeS (a STAND-IN for bingo
+    fuel until fuel burn exists; 0 = never)."

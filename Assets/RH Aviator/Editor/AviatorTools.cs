@@ -49,6 +49,14 @@ namespace DeepWater.Aviator.Editor
             so.slotRightM = 40f; so.slotBackM = 10f; so.slotUpM = 0f; so.slotLookAheadM = 800f;
             so.slotGainPerS = 0.25f; so.joinDecelMps2 = 1.5f; so.joinOvertakeKt = 150f; so.slotOvertakeKt = 30f; so.joinMinKt = 250f;
             so.inSlotM = 10f; so.inSlotClosureKt = 5f; so.lostSlotM = 150f; so.slotSpeedLead = 2f; so.slotSpeedBrakeOverKt = 8f; so.slotClimbDegPerM = 0.03f; so.slotGPerPathDeg = 0.5f; so.slotRotationShare = 0.75f;
+            // Going home and the break (W41, W47). The shape is the U.S. Navy's overhead break as publicly described
+            // (initial at 800 ft and about 350 kt, a level break to the left, downwind at 600 ft, a descending 180 to a
+            // short final); every number here is AUTHORED to fit this jet and Dogfight's runway.
+            so.initialM = 5556f; so.initialCaptureM = 150f; so.initialKt = 350f; so.breakAlongM = 600f; so.breakHeightM = 244f; so.breakKt = 240f;
+            so.downwindOffsetM = 1500f; so.downwindHeightM = 183f; so.finalTurnAlongM = 1500f;
+            so.approachKt = 145f; so.gearKt = 250f; so.patternBankDeg = 40f; so.patternGPerPathDeg = 0.1f; so.patternMaxDiveDeg = 6f; so.patternFloorAglM = 30f;
+            so.glidePathDeg = 3f; so.touchdownM = 300f; so.flareHeightM = 9f; so.flarePathDeg = 0.8f; so.finalCarrotM = 300f;
+            so.rolloutPedalPerM = 0.05f; so.rolloutPedalPerDeg = 0.1f; so.bingoFlightTimeS = 0f;
             so.provenance =
                 "All AUTHORED (RH Aviator W45; no public source describes a generic line pilot), tuned headless against slice 3a's " +
                 "pass criteria (ROADMAP, fixed before tuning). Hands: guidanceGain (2, the classic value of the L1 path-following law, Park, Deyst and How, AIAA 2004-4900, PUBLIC method), maxBankDeg, rollRatePerBankDeg, climbDegPerM, " +
@@ -59,7 +67,10 @@ namespace DeepWater.Aviator.Editor
                 "Fingertip (W40): slotRightM (40 m, about three of the F/A-18E's 13.6 m wingspans, centre to centre), slotBackM, slotUpM, slotLookAheadM, " +
                 "slotGainPerS, joinDecelMps2 (below what an F/A-18E at idle loses near 400 kt, about 2.3 m/s² in slice 3b's trace, so the plan is flyable), " +
                 "joinOvertakeKt, slotOvertakeKt, joinMinKt, inSlotM, inSlotClosureKt, lostSlotM, slotSpeedLead, slotSpeedBrakeOverKt, slotClimbDegPerM, slotGPerPathDeg, slotRotationShare (the last three picked by FormationTests.Sweep, a grid on the fixed hold scenario: " +
-                "0.5 G per degree sits 1.6 times inside where the hold rings, at 0.6 it degrades and at 0.8 it diverges).";
+                "0.5 G per degree sits 1.6 times inside where the hold rings, at 0.6 it degrades and at 0.8 it diverges). " +
+                "Going home (W41, W47; the shape as the U.S. Navy publicly describes its overhead break, the numbers fitted): initialM, initialCaptureM, initialKt, breakAlongM, breakHeightM (800 ft), breakKt, " +
+                "downwindOffsetM, downwindHeightM (600 ft), finalTurnAlongM, approachKt (145 kt, as Air Wing's landing test), gearKt, patternBankDeg, patternGPerPathDeg, patternMaxDiveDeg, patternFloorAglM, glidePathDeg, touchdownM, flareHeightM, flarePathDeg, finalCarrotM, " +
+                "rolloutPedalPerM, rolloutPedalPerDeg, bingoFlightTimeS (a STAND-IN for bingo fuel until fuel burn exists; 0 = never).";
             EditorUtility.SetDirty(so);
             AssetDatabase.SaveAssets();
             so.Bake();   // throws if anything is out of shape
@@ -82,6 +93,8 @@ namespace DeepWater.Aviator.Editor
             var own = new SerializedObject(Undo.AddComponent<AviatorPilot>(player.gameObject));
             own.FindProperty("profile").objectReferenceValue = AssetDatabase.LoadAssetAtPath<PilotProfileSO>(LinePilotPath);
             own.FindProperty("task").enumValueIndex = (int)AviatorPilot.Task.HoldCourse;
+            var runway = GameObject.Find("Runway 09-27");
+            if (runway != null) own.FindProperty("homeRunway").objectReferenceValue = runway.GetComponent<DeepWater.AirWing.Modules.World.FlatGround>();
             own.ApplyModifiedProperties();
             Debug.Log($"[RH Aviator] The player's jet (aircraft {player.AircraftId}) has an AI pilot too, holding course while the player is elsewhere.");
         }
@@ -119,6 +132,9 @@ namespace DeepWater.Aviator.Editor
             ai.FindProperty("profile").objectReferenceValue = pilot;
             ai.FindProperty("route").objectReferenceValue = route;
             ai.FindProperty("task").enumValueIndex = (int)task;
+            var runway = GameObject.Find("Runway 09-27");
+            if (runway != null) ai.FindProperty("homeRunway").objectReferenceValue = runway.GetComponent<DeepWater.AirWing.Modules.World.FlatGround>();
+            if (Object.FindAnyObjectByType<AviatorOrders>() == null) Undo.AddComponent<AviatorOrders>(new GameObject("RH Aviator Orders"));
             ai.FindProperty("leaderId").intValue = player.AircraftId;
             ai.ApplyModifiedProperties();
             Undo.RegisterCreatedObjectUndo(jet, "Add AI jet");

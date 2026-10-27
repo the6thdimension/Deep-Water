@@ -80,6 +80,32 @@ namespace DeepWater.Aviator.ScriptableObjects
         [Tooltip("How much of the leader's turn and climb is read from its rotation rather than its G, 0 … 1.")]
         [Range(0f, 1f)] public float slotRotationShare;
 
+        [Header("Going home and the break (W41, W47); heights above the runway")]
+        public float initialM;
+        public float initialCaptureM;
+        public float initialKt;
+        public float breakAlongM;
+        public float breakHeightM;
+        public float breakKt;
+        public float downwindOffsetM;
+        public float downwindHeightM;
+        public float finalTurnAlongM;
+        public float approachKt;
+        public float gearKt;
+        public float patternBankDeg;
+        public float patternGPerPathDeg;
+        public float patternMaxDiveDeg;
+        public float patternFloorAglM;
+        public float glidePathDeg;
+        public float touchdownM;
+        public float flareHeightM;
+        public float flarePathDeg;
+        public float finalCarrotM;
+        public float rolloutPedalPerM;
+        public float rolloutPedalPerDeg;
+        [Tooltip("STAND-IN for bingo fuel until fuel burn exists (W47): seconds of flight before going home on its own. 0: never.")]
+        public float bingoFlightTimeS;
+
         [Header("Provenance")]
         [TextArea(4, 20)] public string provenance = "";
 
@@ -101,7 +127,13 @@ namespace DeepWater.Aviator.ScriptableObjects
                 SlotRightM = slotRightM, SlotBackM = slotBackM, SlotUpM = slotUpM, SlotLookAheadM = slotLookAheadM,
                 SlotGainPerS = slotGainPerS, JoinDecelMps2 = joinDecelMps2, JoinOvertakeKt = joinOvertakeKt, SlotOvertakeKt = slotOvertakeKt,
                 JoinMinKt = joinMinKt, InSlotM = inSlotM, InSlotClosureKt = inSlotClosureKt, LostSlotM = lostSlotM,
-                SlotSpeedLead = slotSpeedLead, SlotSpeedBrakeOverKt = slotSpeedBrakeOverKt, SlotClimbDegPerM = slotClimbDegPerM, SlotGPerPathDeg = slotGPerPathDeg, SlotRotationShare = slotRotationShare,
+                SlotSpeedLead = slotSpeedLead, SlotSpeedBrakeOverKt = slotSpeedBrakeOverKt,
+                InitialM = initialM, InitialCaptureM = initialCaptureM, InitialKt = initialKt, BreakAlongM = breakAlongM, BreakHeightM = breakHeightM, BreakKt = breakKt,
+                DownwindOffsetM = downwindOffsetM, DownwindHeightM = downwindHeightM, FinalTurnAlongM = finalTurnAlongM,
+                ApproachKt = approachKt, GearKt = gearKt, PatternBankDeg = patternBankDeg,
+                PatternGPerPathDeg = patternGPerPathDeg, PatternMaxDiveDeg = patternMaxDiveDeg, PatternFloorAglM = patternFloorAglM,
+                GlidePathDeg = glidePathDeg, TouchdownM = touchdownM, FlareHeightM = flareHeightM, FlarePathDeg = flarePathDeg, FinalCarrotM = finalCarrotM,
+                RolloutPedalPerM = rolloutPedalPerM, RolloutPedalPerDeg = rolloutPedalPerDeg, BingoFlightTimeS = bingoFlightTimeS, SlotClimbDegPerM = slotClimbDegPerM, SlotGPerPathDeg = slotGPerPathDeg, SlotRotationShare = slotRotationShare,
             };
             p.Validate();
             return p;

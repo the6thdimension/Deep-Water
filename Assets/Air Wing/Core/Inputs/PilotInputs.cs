@@ -38,6 +38,8 @@ namespace DeepWater.AirWing.Core.Inputs
         public float Throttle;
         /// <summary>Throttle past the afterburner detent.</summary>
         public bool Afterburner;
+        /// <summary>Wheel brakes, held (not a switch): any source holding its brake control brakes.</summary>
+        public bool Brakes;
         public PilotSwitches Switches;
 
         /// <summary>Stick centred, throttle idle, everything off.</summary>
@@ -58,6 +60,7 @@ namespace DeepWater.AirWing.Core.Inputs
                 Pedals = Clamp(Pedals, -1f, 1f, nameof(Pedals)),
                 Throttle = Clamp(Throttle, 0f, 1f, nameof(Throttle)),
                 Afterburner = Afterburner,
+                Brakes = Brakes,
                 Switches = Switches,
             };
         }
@@ -72,7 +75,7 @@ namespace DeepWater.AirWing.Core.Inputs
         // Exact comparison on purpose: the input log and replay compare bit for bit (W28).
         public bool Equals(PilotInputs o) =>
             StickPitch.Equals(o.StickPitch) && StickRoll.Equals(o.StickRoll) && Pedals.Equals(o.Pedals) &&
-            Throttle.Equals(o.Throttle) && Afterburner == o.Afterburner && Switches == o.Switches;
+            Throttle.Equals(o.Throttle) && Afterburner == o.Afterburner && Brakes == o.Brakes && Switches == o.Switches;
 
         public override bool Equals(object obj) => obj is PilotInputs o && Equals(o);
 
@@ -85,11 +88,12 @@ namespace DeepWater.AirWing.Core.Inputs
                 h = h * 31 + Pedals.GetHashCode();
                 h = h * 31 + Throttle.GetHashCode();
                 h = h * 31 + (Afterburner ? 1 : 0);
+                h = h * 31 + (Brakes ? 1 : 0);
                 return h * 31 + (int)Switches;
             }
         }
 
         public override string ToString() => FormattableString.Invariant(
-            $"pitch {StickPitch:+0.00;-0.00} roll {StickRoll:+0.00;-0.00} pedals {Pedals:+0.00;-0.00} throttle {Throttle:0.00}{(Afterburner ? " AB" : "")} [{Switches}]");
+            $"pitch {StickPitch:+0.00;-0.00} roll {StickRoll:+0.00;-0.00} pedals {Pedals:+0.00;-0.00} throttle {Throttle:0.00}{(Afterburner ? " AB" : "")}{(Brakes ? " BRAKES" : "")} [{Switches}]");
     }
 }

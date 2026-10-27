@@ -154,6 +154,33 @@ namespace DeepWater.AirWing.Tests
         }
 
         [Test]
+        public void TheBrakes_SpaceTheDpadDownAndTheTrigger_HeldNotToggled()
+        {
+            var keyboard = InputSystem.AddDevice<Keyboard>();
+            var pad = InputSystem.AddDevice<XInputController>();
+            var stick = (AirWingTestStick)InputSystem.AddDevice<AirWingTestStick>();
+            var trigger = (ButtonControl)stick["trigger"];
+
+            Assert.IsFalse(Tick().Keyboard.Brakes);
+            Press(keyboard.spaceKey);
+            Assert.IsTrue(Tick().Keyboard.Brakes, "Space: brakes");
+            Assert.IsTrue(Tick().Keyboard.Brakes, "held, still braking");
+            Release(keyboard.spaceKey);
+            Assert.IsFalse(Tick().Keyboard.Brakes, "let go, off");
+
+            Press(pad.dpad.down);
+            Assert.IsTrue(Tick().Gamepad.Brakes, "D-pad down: brakes");
+            Release(pad.dpad.down);
+            Assert.IsFalse(Tick().Gamepad.Brakes);
+
+            Press(trigger);
+            DeviceFrame f = Tick();
+            Release(trigger);
+            Assert.IsTrue(f.Stick.Brakes, "the stick's trigger: brakes");
+            Assert.IsFalse(f.Stick.Moved, "braking does not take the stick");
+        }
+
+        [Test]
         public void GenericHidFlightStick()
         {
             var stick = (AirWingTestStick)InputSystem.AddDevice<AirWingTestStick>();

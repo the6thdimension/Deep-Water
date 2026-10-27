@@ -75,6 +75,7 @@ namespace DeepWater.AirWing.Core.Simulation
             h = Mix(h, s.AfterburnerSpool);
             h = Mix(h, (int)s.Status);
             h = Mix(h, s.InContact);
+            h = Mix(h, s.GearDeployed);
             h = Mix(h, s.Controls.StabilatorRad);
             h = Mix(h, s.Controls.AileronRad);
             h = Mix(h, s.Controls.RudderRad);

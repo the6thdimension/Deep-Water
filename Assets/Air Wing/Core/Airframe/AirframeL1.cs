@@ -2,6 +2,7 @@ using System;
 using DeepWater.AirWing.Core.Atmosphere;
 using DeepWater.AirWing.Core.FlightControls;
 using DeepWater.AirWing.Core.Inputs;
+using DeepWater.AirWing.Core.LandingGear;
 using DeepWater.AirWing.Core.Profiles;
 using DeepWater.AirWing.Core.State;
 using UnityEngine;
@@ -38,6 +39,7 @@ namespace DeepWater.AirWing.Core.Airframe
 
         readonly AirframeL1Profile _p;
         readonly AirframeProfile _a;
+        Vector3 _gearForce, _gearMoment;
 
         public AirframeL1(in AirframeProfile airframe, in AirframeL1Profile l1)
         {
@@ -271,10 +273,14 @@ namespace DeepWater.AirWing.Core.Airframe
         /// first order, gained 1.2 % of rotational energy in 5 s of torque-free tumbling at 200 Hz; the midpoint method
         /// gains 1.7e-7 (slice 2a).
         /// </summary>
-        public void Step(ref AirframeState s, in ControlDemand demand, float thrustN, in AirData air, in PilotInputs inputs, float dt)
+        public void Step(ref AirframeState s, in ControlDemand demand, float thrustN, in AirData air, in PilotInputs inputs, float dt,
+                         in GearLoads gear = default, float gearDragCD = 0f)
         {
             float extraCL = inputs.Has(PilotSwitches.FlapsDown) ? _a.FlapsDeltaCLmax : 0f;
-            float extraCD = (inputs.Has(PilotSwitches.FlapsDown) ? _a.FlapsDeltaCD : 0f) + (inputs.Has(PilotSwitches.SpeedBrake) ? _a.SpeedBrakeDeltaCD : 0f);
+            float extraCD = (inputs.Has(PilotSwitches.FlapsDown) ? _a.FlapsDeltaCD : 0f) + (inputs.Has(PilotSwitches.SpeedBrake) ? _a.SpeedBrakeDeltaCD : 0f)
+                          + gearDragCD;
+            _gearForce = gear.ForceNasa;
+            _gearMoment = gear.MomentNasa;
             float h = 0.5f * dt;
 
             Quaternion att0 = s.Attitude;
@@ -302,9 +308,11 @@ namespace DeepWater.AirWing.Core.Airframe
         {
             Vector3 uvw = ToNasa(Quaternion.Inverse(att) * velocity);
             ForcesAndMoments(_p, density, uvw, pqr, surfaces, thrustN, extraCL, extraCD, out Vector3 force, out Vector3 moment, out alpha, out _);
+            bodyFz = force.z;                                    // the aerodynamic (and thrust) normal force: what the fly-by-wire reads as G
+            force += _gearForce;                                 // the gear's, held over the substep
+            moment += _gearMoment;
             accel = att * ToUnity(force) / massKg + Vector3.down * G0;
             angularAccel = AngularAcceleration(_p, moment, pqr);
-            bodyFz = force.z;
         }
 
         /// <summary>The attitude turned by the body rates <paramref name="pqr"/> (NASA frame) held for <paramref name="dt"/>.</summary>

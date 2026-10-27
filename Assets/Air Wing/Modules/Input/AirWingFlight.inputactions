@@ -79,6 +79,14 @@
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": ""
+                },
+                {
+                    "name": "Brakes",
+                    "type": "Button",
+                    "id": "c0af6641-6e65-4fe9-98a6-6671fa507c16",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
                 }
             ],
             "bindings": [
@@ -246,6 +254,17 @@
                     "action": "Reset",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d240cfa2-a2c1-43ee-96d7-60c34fe458bd",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Brakes",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },
@@ -354,6 +373,14 @@
                     "name": "Reset",
                     "type": "Button",
                     "id": "bb5facd4-81a0-4792-a5d6-84444f5ec41e",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "Brakes",
+                    "type": "Button",
+                    "id": "2b0d54ae-f354-4d4d-9b6a-c60bc8c8d6de",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": ""
@@ -480,6 +507,17 @@
                     "action": "Reset",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c3249cea-c41c-4b66-b4e5-89f9ea7daa9a",
+                    "path": "<Gamepad>/dpad/down",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Brakes",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },
@@ -543,6 +581,14 @@
                     "name": "Gear",
                     "type": "Button",
                     "id": "0c55588d-26bb-49d5-840b-754162321a2d",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "Brakes",
+                    "type": "Button",
+                    "id": "4ec0b2b1-7399-40be-b713-ff9f7df9120c",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": ""
@@ -623,6 +669,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Gear",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9317c642-e2e1-42bf-b3da-4b8019c97f12",
+                    "path": "<Joystick>/trigger",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Brakes",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

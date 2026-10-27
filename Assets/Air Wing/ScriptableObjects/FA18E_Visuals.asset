@@ -53,6 +53,7 @@ MonoBehaviour:
     axis: {x: 0, y: 0, z: 1}
     maxAngleDeg: 15
     smoothing: 1
+  modelOffsetM: {x: 0, y: 0, z: 1.6}
   provenance: "Copied 2026-10-25 from Assets/FDS Assets/Aircraft/F-18E.prefab's AerialArcade
     ControlSurface settings (transform names, axes, max angles, smoothing). Rudder
     travel AUTHORED at 30\xB0 (the FDS prefab used 50\xB0). Presentation only; the

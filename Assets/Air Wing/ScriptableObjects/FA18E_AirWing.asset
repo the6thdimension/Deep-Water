@@ -163,6 +163,44 @@ MonoBehaviour:
   rudderRateDegS: 61
   rudderMinDeg: -30
   rudderMaxDeg: 30
+  wheels:
+  - name: nose gear
+    contactPointM: {x: 0, y: -1.71, z: 5.17}
+    travelM: 0.3
+    springNPerM: 188000
+    damperNsPerM: 25000
+    steerable: 1
+    braked: 0
+  - name: left main gear
+    contactPointM: {x: -1.4, y: -1.71, z: -0.74}
+    travelM: 0.3
+    springNPerM: 661000
+    damperNsPerM: 88000
+    steerable: 0
+    braked: 1
+  - name: right main gear
+    contactPointM: {x: 1.4, y: -1.71, z: -0.74}
+    travelM: 0.3
+    springNPerM: 661000
+    damperNsPerM: 88000
+    steerable: 0
+    braked: 1
+  hardPointsM:
+  - {x: 0, y: -1, z: 0}
+  - {x: 0, y: -0.2, z: -6.4}
+  - {x: 0, y: -0.4, z: 10}
+  - {x: -6.8, y: 0, z: -2}
+  - {x: 6.8, y: 0, z: -2}
+  gearMaxSinkRateFtS: 24
+  tyreRollingFriction: 0.02
+  tyreBrakingFriction: 0.5
+  tyreLateralFriction: 0.7
+  tyreSlipSpeedMps: 0.5
+  nosewheelSteerMaxDeg: 20
+  nosewheelSteerFadeStartKt: 40
+  nosewheelSteerFadeEndKt: 80
+  gearTransitTimeS: 4
+  gearDownDeltaCd: 0.02
   provenance: 'Sources and tags in full: Assets/Air Wing/Calibration~/F18E-SOURCES.md
     (read 2026-10-25).
 
@@ -276,6 +314,19 @@ MonoBehaviour:
     and Balas 2011 Table 2 gives them (30, 48, 40 rad/s lags; 40, 100, 61 deg/s;
     -24..10.5, -25..45, -30..30 deg).
 
-    Note: the published f18full.m adds the
-    thrust term of beta-dot with the wrong sign (T cos(alpha) sin(beta)/(mV)); Air
-    Wing derives its motion from body kinematics and does not inherit it (Calibration~/l1_harv_mirror.py).'
+    Landing Gear L1 (slice 2d, W4): wheels
+    (nose 0,-1.71,5.17; mains +-1.40,-1.71,-0.74 m about the centre of mass), travelM
+    0.3, springNPerM 188e3 nose and 661e3 mains, damperNsPerM 25e3 and 88e3 (about
+    half critical), hardPointsM (belly, tail, nose, wingtips): AUTHORED, measured
+    off the F-18E model with its centre of mass 1.6 m aft of the model''s origin;
+    the springs sized so the static weight compresses each strut about half its travel.
+    gearMaxSinkRateFtS 24: AUTHORED, the carrier-landing design sink rate commonly
+    quoted for Navy jets (source not pinned), used here for any landing. tyreRollingFriction
+    0.02, tyreBrakingFriction 0.5, tyreLateralFriction 0.7, tyreSlipSpeedMps 0.5:
+    AUTHORED, textbook dry-concrete tyre values. nosewheelSteerMaxDeg 20, nosewheelSteerFadeStartKt
+    40, nosewheelSteerFadeEndKt 80, gearTransitTimeS 4, gearDownDeltaCd 0.02: AUTHORED.
+
+    Note:
+    the published f18full.m adds the thrust term of beta-dot with the wrong sign
+    (T cos(alpha) sin(beta)/(mV)); Air Wing derives its motion from body kinematics
+    and does not inherit it (Calibration~/l1_harv_mirror.py).'

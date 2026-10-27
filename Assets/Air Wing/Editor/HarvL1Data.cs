@@ -13,6 +13,9 @@ namespace DeepWater.AirWing.Editor
     public static class HarvL1Data
     {
         const string ProfilePath = AirWingBuilders.Root + "/ScriptableObjects/FA18E_AirWing.asset";
+        const string VisualsPath = AirWingBuilders.Root + "/ScriptableObjects/FA18E_Visuals.asset";
+        // AUTHORED: the centre of mass sits 1.6 m aft of the F-18E model's origin (measured off the model's rig, slice 2d).
+        static readonly Vector3 ModelOffsetM = new Vector3(0f, 0f, 1.6f);
         const string Marker = "--- Airframe L1 (W32) ---";
 
         // PUBLIC: NASA TM-107601 (Buttrill, Arbuckle and Hoffler, 1992) Table 3.5, first row: the HARV model's weight and inertia.
@@ -84,6 +87,35 @@ namespace DeepWater.AirWing.Editor
             so.aileronBandwidth = 48f; so.aileronRateDegS = 100f; so.aileronMinDeg = -25f; so.aileronMaxDeg = 45f;
             so.rudderBandwidth = 40f; so.rudderRateDegS = 61f; so.rudderMinDeg = -30f; so.rudderMaxDeg = 30f;
 
+            // Landing Gear L1 (slice 2d, W4). AUTHORED geometry off the model's wheels; the struts sized so the static
+            // load compresses each about half its travel, with the nose taking its moment-arm share (~12 %).
+            so.wheels = new[]
+            {
+                new AircraftProfileSO.Wheel { name = "nose gear", contactPointM = new Vector3(0f, -1.71f, 5.17f), travelM = 0.3f,
+                                              springNPerM = 188e3f, damperNsPerM = 25e3f, steerable = true },
+                new AircraftProfileSO.Wheel { name = "left main gear", contactPointM = new Vector3(-1.40f, -1.71f, -0.74f), travelM = 0.3f,
+                                              springNPerM = 661e3f, damperNsPerM = 88e3f, braked = true },
+                new AircraftProfileSO.Wheel { name = "right main gear", contactPointM = new Vector3(1.40f, -1.71f, -0.74f), travelM = 0.3f,
+                                              springNPerM = 661e3f, damperNsPerM = 88e3f, braked = true },
+            };
+            so.hardPointsM = new[]
+            {
+                new Vector3(0f, -1.0f, 0f),     // belly
+                new Vector3(0f, -0.2f, -6.4f),  // tail (a strike near 15° nose up on the mains)
+                new Vector3(0f, -0.4f, 10.0f),  // nose
+                new Vector3(-6.8f, 0f, -2f), new Vector3(6.8f, 0f, -2f),   // wingtips
+            };
+            so.gearMaxSinkRateFtS = 24f;
+            so.tyreRollingFriction = 0.02f;
+            so.tyreBrakingFriction = 0.5f;
+            so.tyreLateralFriction = 0.7f;
+            so.tyreSlipSpeedMps = 0.5f;
+            so.nosewheelSteerMaxDeg = 20f;
+            so.nosewheelSteerFadeStartKt = 40f;
+            so.nosewheelSteerFadeEndKt = 80f;
+            so.gearTransitTimeS = 4f;
+            so.gearDownDeltaCd = 0.02f;
+
             // AUTHORED scaling: I ∝ m·r². Roll with the span, pitch and yaw with the length, the product with both.
             double weightLb = so.emptyWeightLb + FuelFractionForInertia * so.internalFuelLb;
             double m = weightLb / HarvWeightLb;
@@ -119,6 +151,14 @@ namespace DeepWater.AirWing.Editor
                 "aileronMinDeg, aileronMaxDeg, rudderBandwidth, rudderRateDegS, rudderMinDeg, rudderMaxDeg: PUBLIC, the actuators of " +
                 "NASA TM-107601 as Chakraborty, Seiler and Balas 2011 Table 2 gives them (30, 48, 40 rad/s lags; 40, 100, 61 deg/s; " +
                 "-24..10.5, -25..45, -30..30 deg).\n" +
+                "Landing Gear L1 (slice 2d, W4): wheels (nose 0,-1.71,5.17; mains +-1.40,-1.71,-0.74 m about the centre of mass), " +
+                "travelM 0.3, springNPerM 188e3 nose and 661e3 mains, damperNsPerM 25e3 and 88e3 (about half critical), hardPointsM " +
+                "(belly, tail, nose, wingtips): AUTHORED, measured off the F-18E model with its centre of mass 1.6 m aft of the model's origin; " +
+                "the springs sized so the static weight compresses each strut about half its travel. gearMaxSinkRateFtS 24: AUTHORED, the " +
+                "carrier-landing design sink rate commonly quoted for Navy jets (source not pinned), used here for any landing. " +
+                "tyreRollingFriction 0.02, tyreBrakingFriction 0.5, tyreLateralFriction 0.7, tyreSlipSpeedMps 0.5: AUTHORED, textbook " +
+                "dry-concrete tyre values. nosewheelSteerMaxDeg 20, nosewheelSteerFadeStartKt 40, nosewheelSteerFadeEndKt 80, " +
+                "gearTransitTimeS 4, gearDownDeltaCd 0.02: AUTHORED.\n" +
                 "Note: the published f18full.m adds the thrust term of beta-dot with the wrong sign (T cos(alpha) sin(beta)/(mV)); " +
                 "Air Wing derives its motion from body kinematics and does not inherit it (Calibration~/l1_harv_mirror.py).";
             string prov = so.provenance ?? "";
@@ -126,6 +166,14 @@ namespace DeepWater.AirWing.Editor
             so.provenance = (at >= 0 ? prov.Substring(0, at).TrimEnd() : prov.TrimEnd()) + "\n\n" + paragraph;
 
             EditorUtility.SetDirty(so);
+            var visuals = AssetDatabase.LoadAssetAtPath<AircraftVisualsSO>(VisualsPath);
+            if (visuals != null)
+            {
+                Undo.RecordObject(visuals, "Apply the model offset");
+                visuals.modelOffsetM = ModelOffsetM;
+                EditorUtility.SetDirty(visuals);
+            }
+            else Debug.LogWarning($"[Air Wing] {VisualsPath} not found; the model offset was not applied.");
             AssetDatabase.SaveAssets();
             so.Bake();   // throws if anything is out of shape
             Debug.Log($"[Air Wing] Applied the HARV L1 data to {ProfilePath}: Ixx {so.ixxSlugFt2:F0}, Iyy {so.iyySlugFt2:F0}, Izz {so.izzSlugFt2:F0}, Ixz {so.ixzSlugFt2:F0} slug·ft² at {weightLb:F0} lb.");

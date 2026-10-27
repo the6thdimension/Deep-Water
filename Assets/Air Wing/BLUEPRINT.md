@@ -28,6 +28,7 @@ The F/A-18E Super Hornet comes first (W2); the helicopter follows as its own str
 **Two rules make it fit the rest of Deep Water.**
 1. **An aircraft changes only through Pilot Inputs** (stick, throttle, pedals, switches) issued by a seat. The player's devices, the mouse-aim instructor and the RH Aviator AI pilot all issue the same Pilot Inputs on the fixed tick (W6, C19). A seat can change hands mid-flight, and the record keeps the same shape (W18).
 2. **The flight core is pure C# with its own integrator** (W4). It is deterministic on one machine from day one, with a fingerprint every tick (W7). PhysX is used only for contacts: gear, deck and collisions. This is Reckoning's variant B (`RECKONING-CONCEPT.md`, R35).
+   - *Landing gear (slice 2d, SIX 2026-10-26: "as W4 says but with spring damper struts"):* PhysX raycasts find each wheel's contact, its distance and the ground's normal, through the core's `IContactProbe`. Spring-damper struts in the core turn that into force. No Rigidbody, no WheelCollider.
 
 ## 2. Vocabulary
 

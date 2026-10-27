@@ -41,6 +41,18 @@ namespace DeepWater.AirWing.Core
         /// <summary>The Pilot Inputs of the last tick stepped (for presentation: the HUD and moving surfaces).</summary>
         public PilotInputs LastInputs { get; private set; }
 
+        /// <summary>Why the last flight ended, or null while flying.</summary>
+        public string CrashReason { get; private set; }
+
+        void Crash(string reason)
+        {
+            State.Velocity = Vector3.zero;
+            State.BodyRates = Vector3.zero;
+            State.LoadFactor = 0f;
+            State.Status = FlightStatus.Crashed;
+            CrashReason = reason;
+        }
+
         internal Aircraft(int id, in AircraftProfile profile, IAtmosphere atmosphere, IAirframe airframe, IPowerplant powerplant,
                           IFlightControls controls, ILandingGear gear, IReadOnlyList<FidelityResolution> levels, in AirframeState start)
         {
@@ -62,13 +74,17 @@ namespace DeepWater.AirWing.Core
         /// crash freezes the aircraft where it hit (AP23: every terminal verdict gets an end state). A Reset in the
         /// inputs puts it back at its start first, crashed or not, and the tick then flies from there.
         /// </summary>
-        public void Step(in PilotInputs inputs, float surfaceHeightM, in SubstepClock clock)
+        public void Step(in PilotInputs inputs, float surfaceHeightM, in SubstepClock clock) => Step(inputs, surfaceHeightM, null, clock);
+
+        /// <summary>As above, with the ground's contact probe for the landing gear (null: no wheel ever touches).</summary>
+        public void Step(in PilotInputs inputs, float surfaceHeightM, IContactProbe probe, in SubstepClock clock)
         {
             LastInputs = inputs;
             if (inputs.Has(PilotSwitches.Reset))
             {
                 State = Start;
                 Resets++;
+                CrashReason = null;
             }
             if (State.Status != FlightStatus.Flying) return;
             float dt = (float)clock.SubstepSeconds;
@@ -77,17 +93,18 @@ namespace DeepWater.AirWing.Core
                 AirData air = Atmosphere.Sample(State.Position.y);
                 ControlDemand demand = Controls.Demand(inputs, ref State, air, dt);
                 float thrust = Powerplant.Step(inputs, air, ref State, dt);
-                Airframe.Step(ref State, demand, thrust, air, inputs, dt);
+                GearLoads gear = Gear.Step(ref State, inputs, probe, dt);
+                if (gear.Failure != null) { Crash(gear.Failure); return; }
+                Airframe.Step(ref State, demand, thrust, air, inputs, dt, gear, Gear.DragIncrement(State));
 
-                if (State.Position.y <= surfaceHeightM && !Gear.CanTouchDown)
-                {
-                    State.Position.y = surfaceHeightM;
-                    State.Velocity = Vector3.zero;
-                    State.BodyRates = Vector3.zero;
-                    State.LoadFactor = 0f;
-                    State.Status = FlightStatus.Crashed;
-                    return;
-                }
+                // Any hard point (the centre of mass at L0; belly, tail, nose and wingtips at L1) meeting the surface ends it.
+                foreach (Vector3 hp in Gear.HardPoints)
+                    if (State.Position.y + (State.Attitude * hp).y <= surfaceHeightM)
+                    {
+                        State.Position.y = Mathf.Max(State.Position.y, surfaceHeightM);
+                        Crash(hp == Vector3.zero ? "met the surface" : $"a hard point at {hp} met the surface");
+                        return;
+                    }
             }
         }
     }

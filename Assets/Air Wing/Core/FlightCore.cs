@@ -17,6 +17,7 @@ namespace DeepWater.AirWing.Core
         readonly List<ISeat> _seats = new List<ISeat>();
         readonly List<AircraftRecord> _records = new List<AircraftRecord>();
         readonly ISurfaceTruth _surface;
+        readonly IContactProbe _probe;
 
         public readonly SubstepClock Clock;
         public readonly InputLog Inputs = new InputLog();
@@ -27,10 +28,15 @@ namespace DeepWater.AirWing.Core
 
         public IReadOnlyList<Aircraft> Aircraft => _aircraft;
 
-        public FlightCore(in SubstepClock clock, ISurfaceTruth surface)
+        /// <summary>
+        /// The flight core over <paramref name="surface"/>. The landing gear meets the ground through
+        /// <paramref name="probe"/> (the scenes pass PhysX's); without one it uses the truth feed's level ground.
+        /// </summary>
+        public FlightCore(in SubstepClock clock, ISurfaceTruth surface, IContactProbe probe = null)
         {
             Clock = clock;
             _surface = surface ?? throw new ArgumentNullException(nameof(surface));
+            _probe = probe ?? new SurfaceProbe(surface);
         }
 
         /// <summary>Add an aircraft and the seat that flies it. Ids must rise, so the tick order and the Fix are stable.</summary>
@@ -71,7 +77,7 @@ namespace DeepWater.AirWing.Core
                 ISeat seat = _seats[i];
                 InputEntry entry = Inputs.Append(tick, a.Id, seat.Kind, seat.Issue(tick, a.Id, a.State));
                 float surface = _surface.HeightAt(a.State.Position.x, a.State.Position.z);
-                a.Step(entry.Inputs, surface, Clock);
+                a.Step(entry.Inputs, surface, _probe, Clock);
                 _records.Add(new AircraftRecord(a.Id, a.State));
             }
             Fixes.Append(FlightFix.Of(tick, _records));

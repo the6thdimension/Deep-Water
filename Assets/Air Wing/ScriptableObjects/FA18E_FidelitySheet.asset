@@ -15,7 +15,7 @@ MonoBehaviour:
   airframe: 1
   powerplant: 1
   flightControls: 1
-  landingGear: 0
+  landingGear: 1
   atmosphere: 0
   substepsPerTick: 4
   seed: 1442

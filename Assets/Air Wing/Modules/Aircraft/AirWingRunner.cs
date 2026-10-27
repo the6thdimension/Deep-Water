@@ -57,14 +57,19 @@ namespace DeepWater.AirWing.Modules.Aircraft
                 seaSurface = null;
             }
             var surface = new SceneSurface(seaSurface, FindObjectsByType<FlatGround>(FindObjectsInactive.Exclude), fallbackSurfaceHeightM);
-            _core = new FlightCore(new SubstepClock(Time.fixedDeltaTime, sheet.SubstepsPerTick), surface);
+            _core = new FlightCore(new SubstepClock(Time.fixedDeltaTime, sheet.SubstepsPerTick), surface, new PhysXContactProbe());
 
             _views.AddRange(FindObjectsByType<AircraftView>(FindObjectsInactive.Exclude).OrderBy(v => v.AircraftId));
             foreach (AircraftView view in _views)
             {
                 Transform t = view.transform;
                 float fuel = view.StartFuelFraction * p.Airframe.InternalFuelKg;
-                var start = AircraftFactory.LevelStart(p, sheet, t.position, t.eulerAngles.y, view.StartSpeedMps, fuel, view.HoldThrottle);
+                bool onRunway = view.StartingMode == AircraftView.StartMode.Runway && view.StartRunway != null;
+                var start = onRunway
+                    ? AircraftFactory.GroundStart(p, sheet, view.StartRunway.TakeOffPoint(out float runwayHeading), runwayHeading, fuel)
+                    : AircraftFactory.LevelStart(p, sheet, t.position, t.eulerAngles.y, view.StartSpeedMps, fuel, view.HoldThrottle);
+                if (onRunway && view.Seat == AircraftView.StartSeat.Player && PlayerSeat != null)
+                    PlayerSeat.SetStart(PilotSwitches.GearDown, 0f);   // gear down until the pilot raises it, engines at idle
                 Core.Aircraft aircraft = AircraftFactory.Build(view.AircraftId, p, sheet, start);
                 _core.Add(aircraft, SeatFor(view));
                 view.Bind(aircraft);
@@ -79,6 +84,9 @@ namespace DeepWater.AirWing.Modules.Aircraft
                 if (PlayerSeat != null) return PlayerSeat;
                 Debug.LogWarning($"[Air Wing] aircraft {view.AircraftId} wants the player seat, but none is assigned: it holds its start throttle.", view);
             }
+            // A held jet on the runway waits there: idle, brakes on, gear down.
+            if (view.StartingMode == AircraftView.StartMode.Runway)
+                return new HoldSeat(new PilotInputs { Switches = PilotSwitches.GearDown, Brakes = true });
             return new HoldSeat(new PilotInputs { Throttle = view.HoldThrottle });
         }
 

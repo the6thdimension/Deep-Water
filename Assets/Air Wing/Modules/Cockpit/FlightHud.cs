@@ -55,9 +55,19 @@ namespace DeepWater.AirWing.Modules.Cockpit
             {
                 GUI.Label(new Rect(0.5f * w - size.x * 0.5f, 0.45f * h, size.x, size.y * 2f), "CRASHED", _centre);
                 GUI.Label(new Rect(0.5f * w - size.x, 0.45f * h + 2f * size.y, 2f * size.x, size.y), "R  /  VIEW BUTTON:  RESET", _centre);
+                if (aircraft.CrashReason != null)
+                    GUI.Label(new Rect(0.5f * w - 2f * size.x, 0.45f * h + 3f * size.y, 4f * size.x, size.y), aircraft.CrashReason.ToUpperInvariant(), _centre);
             }
 
             string device = seat != null && _view.Seat == AircraftView.StartSeat.Player ? $"PLAYER · {seat.Owner}" : _view.Seat.ToString().ToUpperInvariant();
+            if (aircraft.Gear is Core.LandingGear.LandingGearL1)
+            {
+                float g = aircraft.State.GearDeployed;
+                string gear = g >= 1f ? "GEAR DOWN" : g <= 0f ? "GEAR UP" : $"GEAR {g * 100f:F0} %";
+                if (aircraft.State.InContact) gear += "  ·  WOW";
+                if (aircraft.LastInputs.Brakes) gear += "  ·  BRAKES";
+                GUI.Label(new Rect(40f * s, h - 4f * size.y, w, size.y), gear, _left);
+            }
             GUI.Label(new Rect(40f * s, h - 3f * size.y, w, size.y), $"SEAT {device}", _left);
             GUI.Label(new Rect(40f * s, h - 2f * size.y, w, size.y), string.Join("  ·  ", aircraft.Levels), _left);
 

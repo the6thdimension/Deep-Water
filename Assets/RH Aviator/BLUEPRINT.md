@@ -1,6 +1,6 @@
 # RH Aviator — blueprint
 
-> **Status: LOCKED BLUEPRINT (W36–W51, SIX 2026-10-26); A1–A6 Proposed (§5.2); nothing built.** The decisions were made in Air Wing's Phase 3 interview and live in Air Wing's register (`Assets/Air Wing/BLUEPRINT.md` §5, W36–W51). This document carries them for the AI side. Progress is in `ROADMAP.md`.
+> **Status: LOCKED BLUEPRINT (W36–W51 and A1–A6, SIX 2026-10-26); slice 3a in progress.** The decisions were made in Air Wing's Phase 3 interview and live in Air Wing's register (`Assets/Air Wing/BLUEPRINT.md` §5, W36–W51). This document carries them for the AI side. Progress is in `ROADMAP.md`.
 > **This document's one job:** say what RH Aviator is and why, how its AI pilot is built, and which decisions bind it. Work order and progress live in `ROADMAP.md`, not here.
 
 ## 1. In plain language
@@ -103,16 +103,16 @@ Air Wing (DeepWater.AirWing) ← RH Aviator (DeepWater.Aviator) ← its tests
 | W50 | **Testing:** headless flights in EditMode against limits fixed before tuning, then one Dogfight smoke per slice |
 | W51 | **Slice 3a:** the AI seat, the hands, the mode machine and the gates |
 
-### 5.2 Proposed (Claude, 2026-10-26; SIX to confirm or change)
+### 5.2 Locked on Claude's proposal (SIX confirmed A1–A6 as written, 2026-10-26)
 
 | # | Decision | Why | Status |
 |---|---|---|---|
-| A1 | **The picture is the previous tick's snapshot**, the same for every pilot | Seats are asked in id order; a live read is biased by one tick between aircraft | Proposed |
-| A2 | **The hands live in Air Wing** (`Core/Seats`, beside `MouseInstructor`, built on its `Steer`) | W37 says the player's autopilot can reuse them; Air Wing must not reference RH Aviator | Proposed |
-| A3 | **The player's "go home" order** reaches an AI pilot through RH Aviator's own scene component and input action, not through Air Wing | Keeps Air Wing ignorant of AI orders (W5); the pick list (W42) shows the result | Proposed |
-| A4 | **An AI cost budget:** ≤ 10 µs per AI pilot per tick in a player build, on top of the flight core, measured with Air Wing's benchmark harness | Air Wing W21's habit; four aircraft must stay well inside a frame | Proposed |
-| A5 | **The old L0–L5 plan is superseded,** its unchecked items struck through with reasons in `ROADMAP.md`: intercept, BVR, countermeasures, strike and tasking fall outside W17 and the safe limits | W49 replaces the ladder; the roadmap rule keeps the record | Proposed |
-| A6 | **The legacy flight code is mined first** for pursuit and throttle heuristics, read-only, into `_notes/legacy-mining.md` | The old Phase 0 item; cheap, and it may save tuning | Proposed |
+| A1 | **The picture is the previous tick's snapshot**, the same for every pilot | Seats are asked in id order; a live read is biased by one tick between aircraft | Locked |
+| A2 | **The hands live in Air Wing** (`Core/Seats`, beside `MouseInstructor`) | W37 says the player's autopilot can reuse them; Air Wing must not reference RH Aviator | Locked. *Refined in slice 3a:* not built on `Steer`, which has no bank limit (Air Wing AP25: it banks past 90° toward a low aim); the hands use a bounded law instead (heading error → bank, flight-path error → G, both capped by the pilot profile) |
+| A3 | **The player's "go home" order** reaches an AI pilot through RH Aviator's own scene component and input action, not through Air Wing | Keeps Air Wing ignorant of AI orders (W5); the pick list (W42) shows the result | Locked |
+| A4 | **An AI cost budget:** ≤ 10 µs per AI pilot per tick in a player build, on top of the flight core, measured with Air Wing's benchmark harness | Air Wing W21's habit; four aircraft must stay well inside a frame | Locked |
+| A5 | **The old L0–L5 plan is superseded,** its unchecked items struck through with reasons in `ROADMAP.md`: intercept, BVR, countermeasures, strike and tasking fall outside W17 and the safe limits | W49 replaces the ladder; the roadmap rule keeps the record | Locked |
+| A6 | **The legacy flight code is mined first** for pursuit and throttle heuristics, read-only, into `_notes/legacy-mining.md` | The old Phase 0 item; cheap, and it may save tuning | Locked |
 
 ## 6. Standing constraints
 
@@ -152,7 +152,8 @@ Air Wing (DeepWater.AirWing) ← RH Aviator (DeepWater.Aviator) ← its tests
 
 | # | Question | Cost |
 |---|---|---|
-| Q1 | Confirm A1–A6 as written, or change any? | A minute; they are Claude's defaults and nothing is built on them yet |
+| ~~Q1~~ | ~~Confirm A1–A6 as written, or change any?~~ **Answered 2026-10-26 by SIX: confirmed as written.** | — |
 
 ## Change log
 - **2026-10-26** — Written from Air Wing's Phase 3 interview (W36–W51, SIX). A1–A6 proposed. Nothing built.
+- **2026-10-26** — SIX confirmed A1–A6 and said go on slice 3a. A2 refined while building: the hands use a bounded law, not the instructor's `Steer` (AP25).

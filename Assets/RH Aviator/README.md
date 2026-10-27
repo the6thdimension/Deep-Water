@@ -1,7 +1,15 @@
 # RH Aviator
 
 The AI pilot. It sits in an Air Wing aircraft's seat and flies it through the same Pilot Inputs the player uses. Follows McMahon
-Pat1: **SO-Profile + Pure-Core + MB-Adapter**. **Read `BLUEPRINT.md` first** (W36–W51, SIX 2026-10-26); progress is in `ROADMAP.md`. Nothing is built yet.
+Pat1: **SO-Profile + Pure-Core + MB-Adapter**. **Read `BLUEPRINT.md` first** (W36–W51, SIX 2026-10-26); progress is in `ROADMAP.md`.
+
+## Try it (slice 3a)
+
+1. Open `Assets/_SCENES/Dogfight.unity`.
+2. **Deep Water → RH Aviator → Add AI Jet to the Open Scene.** An AI F/A-18E appears 80 m right of and behind your jet. The scene is not saved; reload it to take the AI jet out.
+3. Press Play. The AI flies the four gates (about 5.5 minutes, with a go-around at a gate it cannot line up for first time). Each rule it fires prints in the Console as `[RH Aviator] tick … · next gate / go around / back on the line / course flown`.
+
+The line pilot's numbers are in `ScriptableObjects/Pilot_Line.asset` (written by **Apply Line Pilot Profile**, all AUTHORED). The AI's cost: **Build Benchmark Player**, then `Builds/AviatorBenchmark/AviatorBenchmark.exe -batchmode -nographics -aviatorBenchOut <file>` (3–4 µs per pilot per tick, budget 10).
 
 **Assembly:** `DeepWater.Aviator` (namespace `DeepWater.Aviator`). Renamed from `RH.Aviator` on 2026-10-25 by SIX's call (Air Wing BLUEPRINT Q2), so it matches the other `DeepWater.*` modules.
 

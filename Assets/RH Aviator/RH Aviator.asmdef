@@ -2,7 +2,8 @@
     "name": "DeepWater.Aviator",
     "rootNamespace": "DeepWater.Aviator",
     "references": [
-        "RH.Shared"
+        "RH.Shared",
+        "DeepWater.AirWing"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

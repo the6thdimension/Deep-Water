@@ -1,0 +1,19 @@
+{
+    "name": "DeepWater.Aviator.Editor",
+    "rootNamespace": "DeepWater.Aviator.Editor",
+    "references": [
+        "DeepWater.Aviator",
+        "DeepWater.AirWing"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

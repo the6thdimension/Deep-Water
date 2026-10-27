@@ -277,7 +277,7 @@ namespace DeepWater.Aviator.Tests
             for (int i = 1; i <= 4; i++)
             {
                 AirframeState w = core.Find(i).State, lead = core.Find(1).State;
-                Debug.Log(($"[Aviator 3d] 4v4 at the end: aircraft {i} {seats[i].Mode} {seats[i].Pursuit}, {(w.Position - lead.Position).magnitude:F0} m from 1, {w.Velocity.magnitude / Kt:F0} kt, {w.Position.y / Ft:F0} ft; rules after 300 s: " +
+                Debug.Log(($"[Aviator 3d] 4v4 at the end: aircraft {i} {seats[i].Mode} {seats[i].Pursuit}, {(w.Position - lead.Position).magnitude:F0} m from 1, {w.Velocity.magnitude / Kt:F0} kt, {w.Position.y / Ft:F0} ft; throttle {core.Find(i).LastInputs.Throttle:F2} ab {core.Find(i).LastInputs.Afterburner} stick {core.Find(i).LastInputs.StickPitch:F2}/{core.Find(i).LastInputs.StickRoll:F2} aoa {w.AngleOfAttack * Mathf.Rad2Deg:F1} g {w.LoadFactor:F2} bank {FlightPathHands.BankDeg(w):F0}; asks {seats[i].Request.SpeedMps / Kt:F0} kt at {seats[i].Request.AltitudeM / Ft:F0} ft; rules after 300 s: " +
                           string.Join(" | ", logs[i].Firings.Where(f => f.Tick > 300 * 50).Select(f => $"{f.Tick / 50f:F0}s {f.Rule} ({f.Reason})").Take(6))));
             }
             Debug.Log($"[Aviator 3d] 4v4: red left at 300 s; blue's wingmen {(Enumerable.Range(2, 3).All(i => seats[i].Mode == PilotMode.Fingertip) ? "all back in fingertip" : "not all back")} at {core.Tick / 50f:F0} s");

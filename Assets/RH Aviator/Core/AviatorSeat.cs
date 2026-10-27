@@ -227,7 +227,10 @@ namespace DeepWater.Aviator.Core
 
             // Formation flies on its own hands (tighter on height), the pattern's slow legs on hands held to its bank;
             // a change of hands carries the throttle over.
-            FlightPathHands hands = Mode == PilotMode.Join || Mode == PilotMode.Fingertip ? _formationHands
+            // The tight formation hands only near the slot: on a long join they porpoised (slice 3d: 2.2 G wings level,
+            // 28 km behind at 2,000 ft); the route hands fly the way in.
+            bool nearSlot = Mode == PilotMode.Fingertip || (Mode == PilotMode.Join && TryLeader(out AirframeState ld) && (new Slot(ld, _pilot, _slotPosition).Position - state.Position).sqrMagnitude < 500f * 500f);
+            FlightPathHands hands = nearSlot ? _formationHands
                 : Mode == PilotMode.Home && Leg >= PatternLeg.Downwind ? _patternHands
                 : _hands;
             if (hands != _flying && !first) hands.Resume(_core.Find(aircraftId).LastInputs.Throttle);
@@ -372,6 +375,7 @@ namespace DeepWater.Aviator.Core
                 {
                     _leaderId = hunted;
                     _targetId = 0;
+                    _fight.Claim(id, 0);
                     Fire(tick, id, "clear", PilotMode.Join, $"no enemy inside {_pilot.ClearRangeM:F0} m; rejoining aircraft {hunted}");
                     return;
                 }
@@ -386,14 +390,31 @@ namespace DeepWater.Aviator.Core
             {
                 Fire(tick, id, "target gone", PilotMode.Fight, $"aircraft {_targetId} is out of the fight");
                 _targetId = 0;
+                _fight.Claim(id, 0);
                 _hasLastSeen = false;
             }
 
-            // The target: red hunts the player's jet (W52); everyone else the nearest enemy it knows.
+            // The target: red hunts the player's jet (W52); everyone else the nearest enemy it knows that no teammate is
+            // already after, else the nearest (slice 3d smoke: three blue jets all chose the one nearest red and sat in
+            // its cone for three minutes while the other three hunted the player unopposed).
             int want = mine == Side.Red && hunted != 0 && _fight.Enemies(id, hunted) ? hunted : nearest;
+            if (!(mine == Side.Red && hunted != 0))
+            {
+                int free = 0;
+                float freeD = float.MaxValue;
+                for (int i = 0; i < known.Count; i++)
+                {
+                    int other = known[i];
+                    if (!_fight.Enemies(id, other) || _fight.ClaimedBy(other, mine, id) > 0 || !_eyes.TryGet(other, out Contact c)) continue;
+                    float d = (c.GuessPosition(tick, _core.Clock.TickSeconds) - s.Position).magnitude;
+                    if (d < freeD) { freeD = d; free = other; }
+                }
+                if (free != 0) want = free;
+            }
             if (want != _targetId && want != 0)
             {
                 _targetId = want;
+                _fight.Claim(id, want);
                 Fire(tick, id, "engage", PilotMode.Fight, $"after aircraft {want}");
             }
 

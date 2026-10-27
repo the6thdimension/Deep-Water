@@ -19,7 +19,7 @@
 | Done | What you get | Date | Commit | Tests |
 |---|---|---|---|---|
 | Blueprint and roadmap | Phase 3's 16 decisions carried for the AI side; slices 3a–3e with their pass criteria | 2026-10-26 | eaf7280f | — |
-| Slice 3a — the AI seat, the hands and the gates | An AI pilot that flies Dogfight's four gates through the player's own stick: the mode machine with its logged rules, the shared flight-path layer, the line pilot's profile, an "Add AI Jet" menu, the AI budget met | 2026-10-26 | see the change log | 6 here, 4 in Air Wing (117 in all) |
+| Slice 3a — the AI seat, the hands and the gates | An AI pilot that flies Dogfight's four gates through the player's own stick: the mode machine with its logged rules, the shared flight-path layer, the line pilot's profile, an "Add AI Jet" menu, the AI budget met | 2026-10-26 | `92eaaaff` | 6 here, 4 in Air Wing (113 in all) |
 
 ## STILL TO DO
 
@@ -33,7 +33,7 @@
 
 # Slices (Pilot L0, then Pilot L1; W49)
 
-### Slice 3a — the AI seat, the hands and the gates (W36, W37, W39, W44, W51) (done 2026-10-26: all pass criteria met; 117/117 tests in both modules)
+### Slice 3a — the AI seat, the hands and the gates (W36, W37, W39, W44, W51) (done 2026-10-26: all pass criteria met; 113/113 tests in both modules, `92eaaaff`)
 - [x] Mined the legacy flight code (A6), read-only, into `_notes/legacy-mining.md`: **nothing worth carrying.** `AI_FlightController` is MouseFlight's camera rig, `FlightControllerManager` a status-light board, the JMAC agents a homing weapon (out of scope).
 - [x] Air Wing side (A2): **the hands**, `Core/Seats/FlightPathHands`, beside `MouseInstructor`. *Not built on its `Steer`* (A2 refined): `Steer` has no bank limit (Air Wing AP25). The hands fly an aim point at an altitude and a speed:
   - the aim → a sideways acceleration by the **L1 path-following law** (a = k·V²·sin η / L, k = 2, L capped at the turn radius) → a bank, capped;
@@ -145,4 +145,4 @@ Kept for the record. Air Wing now owns the airframe side (W5), and W17, W49 and 
 - **2026-09** — The routine roadmap (Phases 0–6) written; nothing built.
 - **2026-10-25** — `IAircraftActuator` skipped: Air Wing's `ISeat` and `PilotInputs` replace it.
 - **2026-10-26** — Rewritten from Air Wing's Phase 3 interview (W36–W51): slices 3a–3e with pass criteria fixed before tuning; the old plan kept below, superseded (A5). Nothing built.
-- **2026-10-26** — SIX confirmed A1–A6. Slice 3a done: the AI pilot flies Dogfight's four gates through the stick (L1 law hands, sticky go-around, logged rules), 117/117 tests in both modules, the AI budget met (3–4 µs per pilot per tick). Found: an aim point inside the turn orbits for ever (AP31); a look-ahead shorter than the turn radius swings (C41); a float clock moved the watch (AP26).
+- **2026-10-26** — SIX confirmed A1–A6. Slice 3a done: the AI pilot flies Dogfight's four gates through the stick (L1 law hands, sticky go-around, logged rules; `92eaaaff`), 113/113 tests in both modules, the AI budget met (3–4 µs per pilot per tick). Found: an aim point inside the turn orbits for ever (AP31); a look-ahead shorter than the turn radius swings (C41); a float clock moved the watch (AP26).

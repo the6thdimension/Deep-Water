@@ -39,7 +39,7 @@ Everything in this table is built, tested and on `main`. The detail behind each 
 ## STILL TO DO
 
 ### Next
-- **Phase 3 — AI pilots:** slice 3a on SIX's go. The plan and its pass criteria are in `Assets/RH Aviator/ROADMAP.md`; RH Aviator's BLUEPRINT Q1 (confirm A1–A6) is open.
+- **Phase 3 — AI pilots: COMPLETE (2026-10-27).** Next on SIX's word: RH Aviator's A9 (Q3) and the proposed slice 3f (the fight in the vertical); or the helicopter stream (W20); carrier ops stay parked (W16).
 
 ### Left open in finished slices
 - **Fly by hand** from real devices. Every device class is proven live at L1 with virtual devices (slice 2e), and SIX has flown it with the pad and flown L1 by hand (2026-10-26); SIX's L1 feedback is still to be written in. A real VelocityOne, a real mouse, and take-off and landing by hand are not yet flown.
@@ -51,10 +51,11 @@ Everything in this table is built, tested and on `main`. The detail behind each 
   - The 24 ft/s sink limit is AUTHORED: the figure is commonly quoted for Navy jets, but its source is not pinned.
   - The gear animation is AUTHORED off the model (it has no retraction clip). Stowed, a narrow slit stays open between the nose doors, and the struts do not compress on the model.
 
-### Phase 3 — AI pilots (RH Aviator)
-- AI L0: waypoints, wingman formation, return to base with a landing on the Dogfight runway.
-- Switchable seats with a real AI seat.
-- AI L1: fighting for position against another jet. No weapons.
+### ~~Phase 3 — AI pilots (RH Aviator)~~ done 2026-10-27
+- ~~AI L0: waypoints, wingman formation, return to base with a landing on the Dogfight runway.~~ Done (3a–3c).
+- ~~Switchable seats with a real AI seat.~~ Done (3b).
+- ~~AI L1: fighting for position against another jet. No weapons.~~ Done (3d), up to eight aircraft.
+- **The level hold for mouse and keyboard** (W54): done 2026-10-27.
 
 ### After Phase 2, in any order
 - The helicopter (its own stream).
@@ -421,14 +422,14 @@ SIX's picks: contacts as W4 says, with spring-damper struts; a brake button (Spa
   - one aircraft costs ≤ 0.05 ms per fixed step in a player: **met**, 18 µs airborne, 13 µs on the wheels.
 - *Anti-goals for Phase 2, held:* no Mach effects or ground effect (L2); no fuel burn or moving centre of gravity (L3); no AI pilot; no carrier; no weapons; no cockpit view; no helicopter; no vendor code edited; no change to the project's fixed timestep.
 
-## Phase 3 — AI pilots (outline; RH Aviator, W5, W17, W18; interview begun 2026-10-26, W36–W51 locked; tracked in RH Aviator's roadmap, W48)
+## Phase 3 — AI pilots — COMPLETE 2026-10-27 (RH Aviator, W5, W17, W18; W36–W54; tracked in RH Aviator's roadmap, W48)
 The AI work is tracked in `Assets/RH Aviator/BLUEPRINT.md` and `ROADMAP.md` (W48, written 2026-10-26), against W36–W51 here; the pass criteria for each slice are fixed there. Proposed slices, Pilot L0 then Pilot L1 (W49), each tested headless and then smoked in Dogfight (W50):
 - [x] **3a** (W51), done 2026-10-26: RH Aviator's AI seat, the shared flight-path layer (W37), the mode machine with logged rules (W36) on a 4 Hz watch (W44); the AI flies Dogfight's four gates at L1. **Air Wing side:** `Core/Seats/FlightPathHands` (the hands, A2, an L1 path-following law, not the instructor's `Steer`), `FlightCore.Picture` (A1) and `FlightCore.Surface`, `CoreBannedApiTests.Scan` made public; `FlightPathHandsTests` (4). Detail in `Assets/RH Aviator/ROADMAP.md`.
 - [x] **3b** (W40, W42), done 2026-10-27: an AI wingman joins and holds fingertip; the player swaps seats with it mid-flight. **Air Wing side:** `Core/Seats/SeatRoster` (one player seat, each aircraft's own seat, RH Aviator A8), `PlayerSeat.TakeOver`, `ISeatStatus`, the `CycleSeat` action (Tab, the Xbox D-pad right), the chase camera and HUD following the player's aircraft, the HUD's pick list; the hands take feed-forward and `Resume`, and their throttle integral is held to ±1 (RH Aviator AP33); `SeatRosterTests` (4). Detail in `Assets/RH Aviator/ROADMAP.md`.
 - [x] **3c** (W41, W47), done 2026-10-27: the AI goes home on the player's order (RH Aviator's own `AviatorOrders`, A3) or at the bingo stand-in and lands on 09/27 after the overhead break. **Air Wing side:** `FlightPathRequest.Landing` (the ground guard stands down for a landing). Detail in `Assets/RH Aviator/ROADMAP.md`.
 - [x] **3d**, Pilot L1 (W38, W43 at eight, W45, W46, W52, W53), done 2026-10-27: the fight on what each pilot sees, late; rookie, line, ace; red hunts the player; rear-cone scoring. No weapons. **Air Wing side:** `FlightPathRequest.GLimit` and `BankLimitDeg`. Detail in `Assets/RH Aviator/ROADMAP.md`.
 - [x] **W54, the level hold** (SIX 2026-10-27: mouse and keyboard "can't hold level flight"), done 2026-10-27: keyboard or pad centred 0.4 s → the jet flies level on the heading and height it had, on the AI's bounded hands (the instructor first: let go at 121° of bank it dived to −16° and wandered 6,000 ft, AP25); the HUD shows LEVEL HOLD; the mouse aim snaps to the horizon within 2° once the mouse stops; the throttle stays the player's; settings in `PlayerSeatSettings.asset`; `LevelHoldTests` (3): let go at 121° of bank, level in 15 s, then within 10 ft and 0.5° for a minute.
-- [ ] **3e**: Phase 3 review.
+- [x] **3e**: Phase 3 review, done 2026-10-27. **PHASE 3 COMPLETE.** Detail in `Assets/RH Aviator/ROADMAP.md`.
 
 ## Parked: carrier ops (W16)
 Revisit when Phase 3 is done. The questions for SIX are in BLUEPRINT §7.
@@ -457,3 +458,4 @@ Revisit when Phase 3 is done. The questions for SIX are in BLUEPRINT §7.
 - **2026-10-27** — Phase 3 slice 3c done (RH Aviator): going home and the overhead break; Air Wing gains `FlightPathRequest.Landing`; 125/125 tests in both modules.
 - **2026-10-27** — Phase 3 slice 3d done (RH Aviator): the fight at up to eight aircraft; Air Wing gains per-request G and bank limits; 130/130 tests in both modules.
 - **2026-10-27** — W54 done: the level hold for keyboard and pad, the mouse aim's level detent; 134/134 tests in both modules.
+- **2026-10-27** — Phase 3 complete (RH Aviator 3a–3e and W54). Next for Air Wing: on SIX's word (carrier ops are parked, W16; the helicopter is its own stream, W20).

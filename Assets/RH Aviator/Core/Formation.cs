@@ -160,17 +160,22 @@ namespace DeepWater.Aviator.Core
             // aimed on the slot's predicted arc instead: the aim swung with every change in the leader's turn rate and
             // the wingman over-rolled each time, +22° then −15° round the leader's pull, and drifted 11 m across.
             float aheadM = p.SlotLookAheadM + Mathf.Max(0f, along);
-            // Joining slow from below, level off and get the speed back before climbing to the slot (slice 3d: wingmen
-            // rejoining from a fight 2,000 ft below at 160–220 kt hung in a full-afterburner climb and never closed).
-            bool slowBelow = joining && flown < p.JoinMinKt * (float)Units.KnotToMetrePerSecond && slot.Position.y > s.Position.y;
-            if (slowBelow)
+            // Joining from below, the climb to the slot waits for speed: none until 80 kt short of the slot's speed, all
+            // of it by 20 kt short (slice 3d: wingmen rejoining 2,000 ft below at 160–220 kt hung in a full-afterburner
+            // climb; a hard switch at 250 kt cycled between 33° of attack and 0 G; a fade from 250 kt settled at 259 kt
+            // in a 6° climb that ate all the excess thrust, 28 km behind).
+            if (joining && slot.Position.y > s.Position.y)
+            {
+                float shortKt = (slotSpeed - flown) / (float)Units.KnotToMetrePerSecond;
+                float margin = Mathf.Clamp01((80f - shortKt) / 60f);
                 return new FlightPathRequest
                 {
                     AimWorld = slot.Position + slot.Forward * aheadM,
-                    AltitudeM = s.Position.y,
+                    AltitudeM = s.Position.y + margin * (slot.Position.y - s.Position.y),
                     SpeedMps = speed,
                     Switches = switches,
                 };
+            }
             return new FlightPathRequest
             {
                 AimWorld = slot.Position + slot.Forward * aheadM,

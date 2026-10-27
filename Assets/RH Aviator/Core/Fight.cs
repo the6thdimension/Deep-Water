@@ -84,11 +84,26 @@ namespace DeepWater.Aviator.Core
             if (!_seconds.ContainsKey(id)) _seconds[id] = 0.0;
         }
 
+        readonly Dictionary<int, int> _claims = new Dictionary<int, int>();
+
+        /// <summary>Who <paramref name="attacker"/> is after (0: no one), so a side can spread its targets (W53).</summary>
+        public void Claim(int attacker, int target) => _claims[attacker] = target;
+
+        /// <summary>How many of <paramref name="side"/>'s fighters other than <paramref name="except"/> are after <paramref name="target"/>.</summary>
+        public int ClaimedBy(int target, Side side, int except)
+        {
+            int n = 0;
+            foreach (KeyValuePair<int, int> kv in _claims)
+                if (kv.Key != except && kv.Value == target && SideOf(kv.Key) == side) n++;
+            return n;
+        }
+
         /// <summary>Takes a fighter out (it keeps its score): it is no one's enemy from now on.</summary>
         public void Leave(int id)
         {
             _sides.Remove(id);
             _ids.Remove(id);
+            _claims.Remove(id);
         }
 
         public Side SideOf(int id) => _sides.TryGetValue(id, out Side s) ? s : Side.None;

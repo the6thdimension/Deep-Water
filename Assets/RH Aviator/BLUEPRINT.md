@@ -1,6 +1,6 @@
 # RH Aviator — blueprint
 
-> **Status: LOCKED BLUEPRINT (W36–W51 and A1–A6, SIX 2026-10-26; A7–A8, SIX 2026-10-27); slices 3a–3d built; A9 proposed (Q3).** The decisions were made in Air Wing's Phase 3 interview and live in Air Wing's register (`Assets/Air Wing/BLUEPRINT.md` §5, W36–W51). This document carries them for the AI side. Progress is in `ROADMAP.md`.
+> **Status: LOCKED BLUEPRINT (W36–W51 and A1–A6, SIX 2026-10-26; A7–A8, SIX 2026-10-27); Phase 3 complete (3a–3e); A9 proposed (Q3).** The decisions were made in Air Wing's Phase 3 interview and live in Air Wing's register (`Assets/Air Wing/BLUEPRINT.md` §5, W36–W51). This document carries them for the AI side. Progress is in `ROADMAP.md`.
 > **This document's one job:** say what RH Aviator is and why, how its AI pilot is built, and which decisions bind it. Work order and progress live in `ROADMAP.md`, not here.
 
 ## 1. In plain language
@@ -175,3 +175,4 @@ Air Wing (DeepWater.AirWing) ← RH Aviator (DeepWater.Aviator) ← its tests
 - **2026-10-27** — Slice 3b built at SIX's go. A7 (formation flown every tick) and A8 (the seat roster in Air Wing) proposed as Q2. A2 extended: the hands' request may carry feed-forward (bank, roll rate, flight-path angle and rate), zero for a route.
 - **2026-10-27** — SIX confirmed A7 and A8 as written (Q2 closed).
 - **2026-10-27** — Slice 3d built. A9 proposed (Q3): an attacker must point at its target to score.
+- **2026-10-27** — Phase 3 complete. Slice 3f (the fight in the vertical, C44) proposed in the ROADMAP; nothing built.

@@ -171,14 +171,33 @@ moving aircraft.*
 
 *Brookner's phase: "α-β first — it's easy."*
 
-- [ ] **Pure-C# α-β tracker** (`Core/Tracking/AlphaBetaFilter.cs`) with
-  closed-form step-response unit test.
-- [ ] **Track lifecycle:** tentative → confirmed (M-of-N) → coasting → dropped;
-  per-state events; coast prediction through missed scans.
-- [ ] **Gated association:** measurements associate to tracks by predicted-window
-  gating, not GameObject identity (identity kept as LOD1–2 shortcut).
-- [ ] **Track picture API** (Meyer): queryable `IReadOnlyList<RadarTrack>`,
-  `BestTrack(bearing/sector)`, track quality metric — the consumer contract.
+- [x] **Pure-C# α-β tracker** (`Core/Tracking/AlphaBetaFilter.cs`) with
+  closed-form step-response unit test. DONE 2026-10-27: one axis per filter, double precision; gains from
+  Benedict–Bordner, critically damped (both poles at θ) or Kalata's steady-state Kalman pair for a tracking index λ;
+  `Coast` for a missed look; Jury's stability triangle refuses unstable gains. `AlphaBetaFilterTests` (6): the step
+  response equals θ^k(1 − k(1 − θ)) to 1e-12 over 30 updates; a 250 m/s target is held with no lag; Kalata's λ = 1
+  gives α 0.75, β 0.5 (by hand) and λ² = β²/(1 − α) holds; 200,000 seeded noisy updates match the variance-reduction
+  ratio (0.412 for α 0.5) within 3 %.
+- [x] **Track lifecycle:** tentative → confirmed (M-of-N) → coasting → dropped;
+  per-state events; coast prediction through missed scans. DONE 2026-10-27 (`Core/Tracking/TrackFile.cs`): M hits
+  within a tentative track's first N looks or it is dropped the moment it cannot make them; a miss coasts a confirmed
+  track on its filters; a hit in the gate brings it back under the same id; `StateChanged(track, from)`; two-point
+  initiation, then α-β. Settings `TrackFileSettings` (P1), `Textbook` = 2 of 3, 3 misses, 3σ gate, α 0.5.
+- [x] **Gated association:** measurements associate to tracks by predicted-window
+  gating, not GameObject identity (identity kept as LOD1–2 shortcut). DONE 2026-10-27 in the pure core: a gate of
+  3σ√2 plus ½·a_max·t² past the prediction (a one-hit track, with no velocity yet, adds v_max·t); every pair in its
+  gate, nearest first, greedy, ties by track id then plot order (deterministic). *The modules still use identity.*
+  Found: with a 700 m/s initiation gate (~1.5 km after one 2 s look), 2 of 3 confirms false tracks once clutter is
+  denser than about one plot per 40,000 km² per look; a real clutter model (Phase 4) will need a tighter initiation
+  rule (3 of 4, or a speed window from Doppler).
+- [x] **Track picture API** (Meyer): queryable `IReadOnlyList<RadarTrack>`,
+  `BestTrack(bearing/sector)`, track quality metric — the consumer contract. DONE 2026-10-27 in the pure core:
+  `TrackFile.Tracks`, `TryGet`, `BestTrack(origin, bearing, half-width)` (quality, then range), `RadarTrack.Quality` =
+  hits in the last N looks over N (counted, not declared), `PredictAt(t)`. `TrackFileTests` (7): 2 of 3 confirms
+  and drops; coast, reacquire under one id, drop; two jets 2 km apart keep their tracks for 60 looks with the plot
+  order flipping (velocity within 10 m/s); sparse false alarms never confirm over 100 looks; the same inputs give
+  the same file; BestTrack by sector, quality, range and wrapped bearings. *Not wired to the LOD modules or the
+  gizmos yet* (the same wiring decision as Phase 2's).
 - [ ] **Kalman upgrade** (only after α-β baseline is beaten by a named need —
   maneuvering-target coast accuracy is the expected justification).
 - [ ] **Track gizmos:** state-colored track symbols, history trails, gate ellipses,
@@ -230,3 +249,5 @@ moving aircraft.*
 - [ ] `Examples/README.md` and `Prefabs/README.md` describe assets that don't exist —
   Phase 1 and Phase 5 items close them; update the READMEs when they do.
 - **2026-10-27** — Phase 1 tests run at last: 7/7. Phase 2's pure core begun: `Core/Detection/RadarEquation.cs` (the radar equation in dB, the range for a required SNR, Albersheim, North, Swerling 1, the 4/3-Earth horizon, erfc), 8 tests against hand-computed cases and Albersheim's published point; 15/15 in all. Found: the roadmap's "sea-skimmers at 200 km" was off by seven times; the 4/3-Earth horizon for a 20 m mast and a 5 m target is 27.6 km. The modules are untouched (their rewrite waits for SIX).
+- **2026-10-27** — Phase 3 begun: the pure α-β filter (`Core/Tracking/AlphaBetaFilter.cs`), 6 tests; 21/21 in all.
+- **2026-10-27** — Phase 3's pure core: the track file (M of N, coast, reacquire, drop; gated nearest-neighbour association; the track picture with quality and BestTrack), 7 tests; 28/28 in all. Kalman and the gizmos remain; the modules are untouched.

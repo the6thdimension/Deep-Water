@@ -6,7 +6,7 @@ using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
 using DeepWater.GeneralQuarters.Core;
-using DeepWater.GeneralQuarters.Core.Ballistics;
+using DeepWater.Gunnery.Ballistics;
 using DeepWater.GeneralQuarters.Core.Fidelity;
 using DeepWater.GeneralQuarters.Core.Log;
 using DeepWater.GeneralQuarters.Core.Magazine;

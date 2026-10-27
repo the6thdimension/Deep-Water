@@ -11,7 +11,7 @@ using DeepWater.GeneralQuarters.Core.Captain;
 using DeepWater.GeneralQuarters.Core.Cic;
 using DeepWater.GeneralQuarters.Core.DamageControl;
 using DeepWater.GeneralQuarters.Core.Fidelity;
-using DeepWater.GeneralQuarters.Core.Ballistics;
+using DeepWater.Gunnery.Ballistics;
 using DeepWater.GeneralQuarters.Core.Magazine;
 using DeepWater.GeneralQuarters.Core.Orders;
 using DeepWater.GeneralQuarters.Core.Scenario;

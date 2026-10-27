@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
-using DeepWater.GeneralQuarters.Core.Ballistics;
+using DeepWater.Gunnery.Ballistics;
 using DeepWater.GeneralQuarters.Core.Cic;
 using DeepWater.GeneralQuarters.Core.Fidelity;
 using DeepWater.GeneralQuarters.Core.Log;

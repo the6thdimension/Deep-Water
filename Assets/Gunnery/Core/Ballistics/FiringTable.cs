@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace DeepWater.GeneralQuarters.Core.Ballistics
+namespace DeepWater.Gunnery.Ballistics
 {
     /// <summary>A projectile as the point-mass model sees it (G35).</summary>
     [System.Serializable]

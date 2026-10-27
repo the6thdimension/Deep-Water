@@ -32,6 +32,24 @@ namespace RHRadarSuite.Tests
         }
 
         [Test]
+        public void RangeRate_MatchesTheHandComputedCase_AndScatters()
+        {
+            // λ = 0.09993 m, a 10 ms dwell, SNR 20 dB: σ = 0.09993 / (2 × 0.01 × 14.142) = 0.353309 m/s.
+            MeasurementTerms m = Beam();
+            m.DwellS = 0.01;
+            Assert.AreEqual(0.353309, MeasurementErrors.RangeRateSigmaMps(Generic(), m, 20.0), 1e-5);
+            m.RangeRateFloorMps = 1.0;
+            Assert.AreEqual(1.0, MeasurementErrors.RangeRateSigmaMps(Generic(), m, 90.0), 1e-4, "the floor holds");
+            m.RangeRateFloorMps = 0.0;
+            var rng = new Random(5);
+            double s2 = 0.0;
+            for (int i = 0; i < 20000; i++) { double e = MeasurementErrors.MeasureRangeRate(Generic(), m, -250.0, 20.0, rng) + 250.0; s2 += e * e; }
+            Assert.AreEqual(0.353309, Math.Sqrt(s2 / 20000), 0.03 * 0.353309, "20,000 draws within 3 %");
+            m.DwellS = 0.0;
+            Assert.Throws<ArgumentOutOfRangeException>(() => MeasurementErrors.RangeRateSigmaMps(Generic(), m, 20.0), "no dwell, no Doppler");
+        }
+
+        [Test]
         public void TheFloor_AddsInQuadrature_AndHoldsAtHighSnr()
         {
             Assert.AreEqual(Math.Sqrt(10.5992 * 10.5992 + 25.0), MeasurementErrors.RangeSigmaM(Generic(), Beam(floorM: 5.0), 20.0), 1e-3);

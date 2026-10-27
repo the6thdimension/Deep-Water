@@ -244,6 +244,7 @@ Inherited from Reckoning: R2 (everything deterministic eventually), R15 (Watches
 | ~~Q1~~ | ~~Which DDG-51 flight is the model?~~ **Answered 2026-10-23 by the geometry: Flight I/II.** Two CIWS, Mk 141 Harpoon quads aft, Mk 32 torpedo tubes, no hangar; VLS 32 fore and 64 aft. Its textures are named DDG112 (a Flight IIA hull number); the mesh wins. The loadout follows Flight I/II | — |
 | ~~Q2~~ | ~~May Sea State gain a small API to deposit foam and splashes?~~ **Answered 2026-10-24: yes** (G31). | — |
 | Q3 | The peer ship: a mirror DDG, or a different class? | 2 min |
+| Q6 | Radar L1 (Stream A): eight questions, R1–R8, prepared with leanings in `RADAR-L1-QUESTIONS.md` (2026-10-27). R1 (where the physics lives) and R4 (tracks with it) shape the slice | 10 min |
 | ~~Q5~~ | ~~G29: ESSM on SemiAuto or Auto at the start of a run?~~ **Answered 2026-10-24: SemiAuto** (G29 Locked). | — |
 | ~~Q4~~ | ~~Merge path to `main`?~~ **Answered 2026-10-24:** SIX had everything brought up to `main` (4f8149b). `feat/general-quarters` stays the working branch, kept in step with `main`. | — |
 
@@ -257,3 +258,4 @@ Inherited from Reckoning: R2 (everything deterministic eventually), R15 (Watches
 - **2026-10-24** — Reversals (SIX, back to Claude's leaning): G42 drops the vertical boost, G46 puts SM-2 at L2 like ESSM, G48 keeps Block IIIA only. Consequences: G49 moot (no IIIB, no IR seeker, the flag goes), G50 becomes 64 IIIA and 32 ESSM, G47's L3 fallback is unused at L2, G52 loses the L4 bridge. Standing constraint 8 added: safe limits.
 - **2026-10-24** — Stream B started: decisions G34–G41 (SIX), Guns L1 first. Guns L1 built (slice B1); sources in `Calibration~/GUNS-SOURCES.md`.
 - **2026-10-24** — Stream C started with Damage Control L1: decisions G53–G60 (SIX). Seven matched Claude's leaning; G55 did not (SIX picked the Rigidbody's mass and centre of mass over added-weight forces on the probe columns).
+- **2026-10-27** — Q6 added: the Radar L1 questions prepared overnight (`RADAR-L1-QUESTIONS.md`); nothing decided.

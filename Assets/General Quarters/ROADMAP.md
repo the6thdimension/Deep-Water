@@ -180,7 +180,9 @@ SIX's picks: G30 effects reused where they fit and built in code where they don'
 ## Element streams (after Phase 1; one level at a time, each with tests)
 
 ### Stream A — Sensors and CIC
-- [ ] Radar L1: radar equation (RCS in dBsm, Pd/Pfa), sea clutter from `SeaConditions`.
+- [ ] Radar L1: radar equation (RCS in dBsm, Pd/Pfa), sea clutter from `SeaConditions`. *Questions prepared 2026-10-27, nothing decided:
+  `RADAR-L1-QUESTIONS.md` (R1–R8, with leanings). RH Radar Suite's pure core (radar equation, Pd, horizon, errors,
+  clutter, α-β, track file; 37 tests) now exists to build on.*
 - [ ] ~~Illuminators L1: three SPG-62 channels gate terminal homing.~~ Moved to Stream B slice B2c (G44, 2026-10-24).
 - [ ] Tracks L1: measurement noise, α-β/Kalman filter, track quality.
 - [ ] TEWA L1: Pk-weighted pairing, shoot-look-shoot.

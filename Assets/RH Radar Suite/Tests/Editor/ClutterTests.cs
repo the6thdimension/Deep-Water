@@ -53,6 +53,19 @@ namespace RHRadarSuite.Tests
         }
 
         [Test]
+        public void BartonSeaGamma_AndTheBeaufortScale()
+        {
+            // γ = −64 + 6·K_B − 10·log λ (λ in m): Beaufort 4 at 3 GHz (λ 0.09993 m) is −64 + 24 + 10.003 = −29.997 dB (by hand).
+            Assert.AreEqual(-29.997, Clutter.SeaGammaDb(4.0, RadarEquation.WavelengthM(3e9)), 1e-3);
+            Assert.AreEqual(6.0, Clutter.SeaGammaDb(5.0, 0.1) - Clutter.SeaGammaDb(4.0, 0.1), 1e-12, "6 dB per Beaufort force");
+            Assert.AreEqual(10.0, Clutter.SeaGammaDb(4.0, 0.01) - Clutter.SeaGammaDb(4.0, 0.1), 1e-12, "10 dB more per decade shorter wavelength");
+            // v = 0.836·B^1.5: force 4 blows at 6.688 m/s.
+            Assert.AreEqual(4.0, Clutter.BeaufortFromWindSpeed(0.836 * 8.0), 1e-12);
+            Assert.AreEqual(0.0, Clutter.BeaufortFromWindSpeed(0.0));
+            Assert.AreEqual(12.0, Clutter.BeaufortFromWindSpeed(60.0), "held to the scale");
+        }
+
+        [Test]
         public void LookingDown_CostsAnAirborneRadarMoreThanTwentyDb()
         {
             double mast = Clutter.CnrDb(Generic(), Beam(), Sea, 20.0, 4000.0);

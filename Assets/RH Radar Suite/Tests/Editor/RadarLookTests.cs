@@ -94,5 +94,19 @@ namespace RHRadarSuite.Tests
             Assert.Greater(clear.Pd, 0.99, "62 dB of SNR");
             Assert.Less(cluttered.Pd, 0.02, $"SCNR {cluttered.ScnrDb:0.0} dB");
         }
+
+        [Test]
+        public void ClutterImprovement_ComesOffTheClutter_NotTheTarget()
+        {
+            var sea = new SurfaceTerms { GammaDb = -20.0 };   // a test value, not a measured sea
+            var skimmer = new Plot(0, 5, 10000);
+            RadarTerms processed = Generic();
+            processed.ClutterImprovementDb = 30.0;
+            LookResult raw = RadarLook.Look(Generic(), Beam(), Everywhere, sea, Pfa, Mast, skimmer, 0.0, new Random(3));
+            LookResult mti = RadarLook.Look(processed, Beam(), Everywhere, sea, Pfa, Mast, skimmer, 0.0, new Random(3));
+            Assert.AreEqual(raw.SnrDb, mti.SnrDb, 0.0, "the target is untouched");
+            Assert.AreEqual(raw.CnrDb - 30.0, mti.CnrDb, 1e-9);
+            Assert.Greater(mti.Pd, 0.9, $"SCNR {mti.ScnrDb:0.0} dB once 30 dB of clutter is rejected");
+        }
     }
 }

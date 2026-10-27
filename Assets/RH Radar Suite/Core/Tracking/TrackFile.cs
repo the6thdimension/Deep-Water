@@ -60,6 +60,8 @@ namespace RHRadarSuite.Tracking
         public double Quality => (double)PopCount(History & LookMask) / LookCount;
         /// <summary>True once it has two hits, and so a velocity.</summary>
         public bool HasVelocity => Hits >= 2;
+        /// <summary>Which of the last <see cref="TrackFile.Scan"/>'s plots updated or started it (its index in that list); −1 if it missed.</summary>
+        public int LastPlot { get; internal set; }
 
         internal AlphaBetaFilter X, Y, Z;
         internal uint History;          // bit 0 is the latest look: 1 a hit, 0 a miss
@@ -222,6 +224,7 @@ namespace RHRadarSuite.Tracking
                 if (_plotTaken[pair.Plot] || _trackTaken.Contains(pair.TrackId)) continue;
                 _plotTaken[pair.Plot] = true;
                 _trackTaken.Add(pair.TrackId);
+                _tracks[pair.Track].LastPlot = pair.Plot;
                 Hit(_tracks[pair.Track], timeS, plots[pair.Plot]);
             }
 
@@ -234,7 +237,24 @@ namespace RHRadarSuite.Tracking
             for (int ti = _tracks.Count - 1; ti >= 0; ti--)
                 if (_tracks[ti].State == TrackState.Dropped) _tracks.RemoveAt(ti);
             for (int pi = 0; pi < plots.Count; pi++)
-                if (!_plotTaken[pi]) _tracks.Add(new RadarTrack(_nextId++, timeS, plots[pi], _settings.ConfirmLooks) { _filterTimeS = timeS });
+                if (!_plotTaken[pi]) _tracks.Add(new RadarTrack(_nextId++, timeS, plots[pi], _settings.ConfirmLooks) { _filterTimeS = timeS, LastPlot = pi });
+        }
+
+        /// <summary>
+        /// Drop a track now, whatever its state (a kill assessed, say), so its gate stops claiming plots. Raises
+        /// <see cref="StateChanged"/> like any drop. False if no live track has <paramref name="id"/>.
+        /// </summary>
+        public bool Drop(int id)
+        {
+            for (int i = 0; i < _tracks.Count; i++)
+            {
+                if (_tracks[i].Id != id) continue;
+                RadarTrack t = _tracks[i];
+                _tracks.RemoveAt(i);
+                SetState(t, TrackState.Dropped);
+                return true;
+            }
+            return false;
         }
 
         void Hit(RadarTrack t, double timeS, in Plot p)
@@ -278,6 +298,7 @@ namespace RHRadarSuite.Tracking
             t.Misses++;
             t.Looks++;
             t.History <<= 1;
+            t.LastPlot = -1;
 
             switch (t.State)
             {

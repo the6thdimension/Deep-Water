@@ -161,7 +161,13 @@ moving aircraft.*
   beam/sector actually illuminated this scan).
 - [ ] **RCS in dBsm** + signature aspect dependence (front/side/rear lobes, coarse).
 - [ ] **Measurement-frame errors** (Barton): per-axis σ (range/az/el/range-rate)
-  scaling with SNR, applied on *every* update, seeded RNG from profile (P7).
+  scaling with SNR, applied on *every* update, seeded RNG from profile (P7). *The pure core is built (2026-10-27,
+  `Core/Detection/MeasurementErrors.cs`): σ_R = c/(2B√(2·SNR)), σ_θ = θ_B/(k_m√(2·SNR)), each with a floor in quadrature
+  (`MeasurementTerms`); `Measure` draws a noisy plot in range, azimuth and elevation from a seeded generator.
+  `MeasurementErrorTests` (4): 10.599 m and 0.0663° at 20 dB (by hand); 20,000 draws within 3 % of each sigma and
+  unbiased; and the whole pure chain (radar equation → Swerling 1 detection → noisy plots → the track file) holds a
+  closing 0 dBsm jet from 60 km within 60 m and 15 m/s. Range-rate is not built; applying it in the modules waits
+  with the Phase 2 wiring.*
 - [ ] **FixedUpdate sensor stepping** (P2) across all modules; scan timing from
   fixed time.
 - [ ] **Phase-2 EditMode tests:** predicted-vs-simulated detection range for a
@@ -251,3 +257,4 @@ moving aircraft.*
 - **2026-10-27** — Phase 1 tests run at last: 7/7. Phase 2's pure core begun: `Core/Detection/RadarEquation.cs` (the radar equation in dB, the range for a required SNR, Albersheim, North, Swerling 1, the 4/3-Earth horizon, erfc), 8 tests against hand-computed cases and Albersheim's published point; 15/15 in all. Found: the roadmap's "sea-skimmers at 200 km" was off by seven times; the 4/3-Earth horizon for a 20 m mast and a 5 m target is 27.6 km. The modules are untouched (their rewrite waits for SIX).
 - **2026-10-27** — Phase 3 begun: the pure α-β filter (`Core/Tracking/AlphaBetaFilter.cs`), 6 tests; 21/21 in all.
 - **2026-10-27** — Phase 3's pure core: the track file (M of N, coast, reacquire, drop; gated nearest-neighbour association; the track picture with quality and BestTrack), 7 tests; 28/28 in all. Kalman and the gizmos remain; the modules are untouched.
+- **2026-10-27** — Barton's measurement errors in the pure core, and the first end-to-end test of the pure chain (equation, detection, plots, track); 32/32.

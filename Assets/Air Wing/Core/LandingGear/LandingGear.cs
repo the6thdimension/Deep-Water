@@ -37,8 +37,10 @@ namespace DeepWater.AirWing.Core.LandingGear
     /// <summary>Landing Gear L0: none. L0 is airborne only (W29), so the centre of mass meeting any surface is a crash.</summary>
     public sealed class NoLandingGear : ILandingGear
     {
-        static readonly Vector3[] Centre = { Vector3.zero };
-        public Vector3[] HardPoints => Centre;
+        // Per instance, not static: the array is handed out, so a shared one could be changed by a caller and outlive
+        // a play without a domain reload (Fast Play's StaticStateTests).
+        readonly Vector3[] _centre = { Vector3.zero };
+        public Vector3[] HardPoints => _centre;
         public GearLoads Step(ref AirframeState state, in PilotInputs inputs, IContactProbe probe, float dt) => default;
         public float DragIncrement(in AirframeState state) => 0f;
     }

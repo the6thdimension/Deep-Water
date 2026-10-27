@@ -156,6 +156,8 @@ namespace DeepWater.AirWing.Core
                 FuelKg = fuelKg,
                 EngineSpool = throttle,
                 Status = FlightStatus.Flying,
+                Rounds = profile.Gun.IsSet ? profile.Gun.Gun.RoundsCarried : 0,
+                HitPoints = profile.Combat.HitPoints,
             };
         }
     }

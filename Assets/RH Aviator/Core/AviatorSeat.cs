@@ -8,6 +8,7 @@ using DeepWater.AirWing.Core.Profiles;
 using DeepWater.AirWing.Core.Seats;
 using DeepWater.AirWing.Core.Simulation;
 using DeepWater.AirWing.Core.State;
+using DeepWater.Gunnery.Guns;
 
 namespace DeepWater.Aviator.Core
 {
@@ -204,16 +205,35 @@ namespace DeepWater.Aviator.Core
             }
 
             // In a fight the eyes look every tick (the delay is counted in ticks), and the plan follows what they see.
+            bool shootable = false;
             if (_fight != null && Mode != PilotMode.Home && Mode != PilotMode.Landed)
             {
                 _eyes.Look(tick, _core.Picture);
-                if (Mode == PilotMode.Fight && !_breaking && _targetId != 0 && _eyes.TryGet(_targetId, out Contact target) && !_vectored)
+                if (Mode == PilotMode.Fight && _targetId != 0 && _eyes.TryGet(_targetId, out Contact target))
                 {
-                    float floor = _core.Surface.HeightAt(state.Position.x, state.Position.z);
-                    _request = Fighting.Plan(state, target, null, tick, _core.Clock.TickSeconds, floor, _pilot, out _pursuit);
-                    if (_avoiding) _request.AltitudeM = Mathf.Max(_avoidHeight, floor + _pilot.FightFloorM);
+                    // The trigger is judged ten times a second and held between (the miss is a short ballistic flight).
+                    if (tick % TriggerEveryTicks == 0) _shoot = WillHit(aircraftId, state, target, tick);
+                    if (!_breaking && !_vectored)
+                    {
+                        float floor = _core.Surface.HeightAt(state.Position.x, state.Position.z);
+                        _request = Fighting.Plan(state, target, null, tick, _core.Clock.TickSeconds, floor, _pilot, out _pursuit);
+                        // Gun tracking: inside gun range the pilot flies the pipper, not the flight path, onto the target,
+                        // moving its aim and its height by where the burst would miss (the gun points above the path).
+                        // Vertically it asks for the flight-path angle that puts the bore on the lead point (the height
+                        // loop alone porpoised); sideways it moves the aim by the miss.
+                        if (_gunTracking && state.Position.y > floor + _pilot.FightFloorM)
+                        {
+                            _request.AimWorld += new Vector3(_gunAim.x, 0f, _gunAim.z);
+                            _request.AltitudeM = state.Position.y;
+                            _request.PathDeg = _gunPathDeg;
+                            _request.PathRateDegS = 0f;
+                        }
+                        if (_avoiding) _request.AltitudeM = Mathf.Max(_avoidHeight, floor + _pilot.FightFloorM);
+                    }
+                    shootable = true;
                 }
             }
+            if (!shootable) { _shoot = false; _gunTracking = false; }
 
             // Going home is planned every tick too: the flare and the touchdown cannot wait a quarter second.
             if (Mode == PilotMode.Home || Mode == PilotMode.Landed)
@@ -241,7 +261,41 @@ namespace DeepWater.Aviator.Core
             _flying = hands;
 
             float surface = _core.Surface.HeightAt(state.Position.x, state.Position.z);
-            return hands.Fly(_request, state, surface);
+            PilotInputs inputs = hands.Fly(_request, state, surface);
+            inputs.Trigger = _shoot;
+            return inputs;
+        }
+
+        /// <summary>Ticks between trigger judgements (10 Hz at the 50 Hz tick).</summary>
+        public const int TriggerEveryTicks = 5;
+        /// <summary>The steepest flight path gun tracking asks for, degrees.</summary>
+        public const float GunTrackMaxPathDeg = 30f;
+        bool _shoot, _gunTracking;
+        Vector3 _gunAim;
+        float _gunPathDeg;
+
+        /// <summary>
+        /// Trigger discipline (Gunnery K6): would a burst fired now pass within the pilot's <see cref="PilotProfile.TriggerMils"/>
+        /// of where it believes the target will be? Judged on what the pilot sees (the delayed sight carried on), never
+        /// truth, with the same lead sight the player's pipper uses. Not judged: friends near the line of fire.
+        /// </summary>
+        bool WillHit(int id, in AirframeState me, in Contact target, long tick)
+        {
+            _gunTracking = false;
+            if (_pilot.TriggerMils <= 0f || me.Rounds <= 0) return false;
+            GunMount m = _core.Find(id).Profile.Gun;
+            if (!m.IsSet) return false;
+            Vector3 at = target.GuessPosition(tick, _core.Clock.TickSeconds);
+            Vector3 muzzle = me.Position + me.Attitude * m.MuzzleM;
+            float range = (at - muzzle).magnitude;
+            if (range > 1.5f * _pilot.GunRangeM) return false;
+            float miss = LeadSight.MissDistance(m.Gun, muzzle, me.Velocity, me.Attitude * m.BoreBody, at, target.Seen.Velocity, out Vector3 off, out _);
+            if (float.IsInfinity(miss)) return false;
+            _gunAim = off;
+            float horizontal = Mathf.Max(50f, new Vector2(at.x - muzzle.x, at.z - muzzle.z).magnitude);
+            _gunPathDeg = Mathf.Clamp(FlightPathHands.PathDeg(me) + Mathf.Atan2(off.y, horizontal) * Mathf.Rad2Deg, -GunTrackMaxPathDeg, GunTrackMaxPathDeg);
+            _gunTracking = true;
+            return range <= _pilot.GunRangeM && miss <= _pilot.TriggerMils * 1e-3f * range;
         }
 
         /// <summary>One watch: the rules in order, then the mode's plan.</summary>
@@ -519,7 +573,7 @@ namespace DeepWater.Aviator.Core
             {
                 AirframeState o = picture[i].State;
                 Vector3 r = o.Position - s.Position;
-                if (r.sqrMagnitude < 1f || o.Status == FlightStatus.Crashed) continue;   // itself
+                if (r.sqrMagnitude < 1f || o.Status != FlightStatus.Flying) continue;   // itself
                 Vector3 v = o.Velocity - s.Velocity;
                 float t = Mathf.Clamp(-Vector3.Dot(r, v) / Mathf.Max(v.sqrMagnitude, 1e-3f), 0f, _pilot.AvoidS);
                 float miss = (r + v * t).magnitude;
@@ -614,7 +668,7 @@ namespace DeepWater.Aviator.Core
             {
                 if (picture[i].Id != _leaderId) continue;
                 lead = picture[i].State;
-                return lead.Status != FlightStatus.Crashed;
+                return lead.Status == FlightStatus.Flying;
             }
             lead = default;
             return false;

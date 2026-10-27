@@ -3,6 +3,8 @@
     "rootNamespace": "DeepWater.AirWing.Tests",
     "references": [
         "DeepWater.AirWing",
+        "DeepWater.Gunnery",
+        "RH.Shared",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "Unity.InputSystem",

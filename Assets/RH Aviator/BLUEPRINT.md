@@ -127,6 +127,7 @@ Air Wing (DeepWater.AirWing) ← RH Aviator (DeepWater.Aviator) ← its tests
 |---|---|---|---|
 | A9 | **To score, an attacker must also point at its target** within the cone's angle, as well as sit within 30° of its tail inside 1 km (W46) | By position alone, two jets just past a head-on pass each scored 2.7 s in the other's cone while flying apart; with it, the pass scores nothing and the ace's lead in 20 merges is real | ~~Proposed~~ **Declined by SIX 2026-10-27: score by position alone, as W46 reads.** The pointing check is removed from `RearCone.Inside`; the known cost (a head-on pass scores a few seconds each way) is accepted |
 | A10 | **Red's chase stays capped** at its fighting speed plus 150 kt; it does not go to full power after a target that runs | SIX 2026-10-27: running away stays a valid escape. A hands-off player past Mach 1 is not caught | Locked |
+| A12 | **Everyone fires** (SIX 2026-10-27; Gunnery K6): trigger discipline from the profile (`GunRangeM`, `TriggerMils`: rookie 1,400 m and 30 mils, line 900 and 12, ace 800 and 6), judged at 10 Hz on what the pilot sees, with the same lead sight the player's pipper uses. Inside 1.5× its gun range the pilot **flies the pipper, not the flight path**: it asks the hands for the flight-path angle that puts the bore on the lead point, and moves its aim sideways by the miss. Kills score first, rear-cone seconds beside; a jet shot down leaves the fight | Built 2026-10-27. Through the height loop alone the aim porpoised (misses 4–187 m); the asked flight-path angle settles it under 1 m | Locked |
 | A11 | **Build slice 3f, the fight in the vertical** (energy states, nose-high and nose-low turns, the ace spending its G) | SIX 2026-10-27. Equal pilots stalemate in a level fight (C44). Spike first, with pass criteria fixed before building: line v line and ace v line must each produce a winner in some of 20 merges **by pointed cone time** (the A9 measure, kept as a diagnostic in the spike, not the score), without fights sinking to the floor (the yo-yo failure). *Why pointed:* once A9 was removed, the survey's line v line went from 0 s to 6.1 / 5.6 s a fight, a "winner" in all 20 merges, nearly all of it head-on-pass time; the position score alone would pass 3f with nothing built | Locked; not built |
 
 ## 6. Standing constraints
@@ -136,7 +137,7 @@ Air Wing (DeepWater.AirWing) ← RH Aviator (DeepWater.Aviator) ← its tests
 3. **Tuning lives in ScriptableObjects** (P1); AUTHORED values are flagged.
 4. **Vendor code is read-only** (P5); legacy code is read, never edited (A6).
 5. **Safe limits** (SIX, 2026-10-24; Air Wing §6.8 and General Quarters §6.8 apply in full):
-   - **no weapons, no gun solution, no targeting:** the fight is scored by position only (W46);
+   - ~~**no weapons, no gun solution, no targeting:** the fight is scored by position only (W46)~~ *SIX armed the jets 2026-10-27 (Air Wing W55–W57, A12): a game gun and a game pilot's trigger; still no real fire-control code and no real targeting;*
    - **game AI only:** no autopilot, guidance or control code meant to run on real hardware, drones or model aircraft;
    - opponents stay generic; public data only.
    - *How to apply:* check every slice against this list before it is built.
@@ -179,3 +180,4 @@ Air Wing (DeepWater.AirWing) ← RH Aviator (DeepWater.Aviator) ← its tests
 - **2026-10-27** — Slice 3d built. A9 proposed (Q3): an attacker must point at its target to score.
 - **2026-10-27** — Phase 3 complete. Slice 3f (the fight in the vertical, C44) proposed in the ROADMAP; nothing built.
 - **2026-10-27** — SIX answered after the overnight run: A9 declined (position alone; the check removed), A10 red's chase stays capped, A11 slice 3f is a go (spike first). Q3 closed.
+- **2026-10-27** — A12: everyone fires (trigger discipline, gun tracking), kills first. The position-fight tests fly with guns safe (`TriggerMils` 0); the armed fight is `GunFightTests`.

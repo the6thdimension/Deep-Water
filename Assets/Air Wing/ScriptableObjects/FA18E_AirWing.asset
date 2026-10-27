@@ -203,6 +203,19 @@ MonoBehaviour:
   gearDownDeltaCd: 0.02
   strutEndStopFraction: 0.7
   strutEndStopStiffening: 30
+  gunName: M61A2 20 mm
+  gunRoundsPerMinute: 6000
+  gunRoundsCarried: 412
+  gunRoundMassKg: 0.1
+  gunRoundDiameterM: 0.02
+  gunMuzzleVelocityFtS: 3450
+  gunRoundFormFactor: 1
+  gunDispersionMils: 4
+  gunMaxTimeOfFlightS: 3
+  gunMuzzleM: {x: 0, y: 0.5, z: 7.5}
+  gunBoreBody: {x: 0, y: 0.017497322, z: 0.99984694}
+  hitPoints: 10
+  hitRadiusM: 4
   provenance: 'Sources and tags in full: Assets/Air Wing/Calibration~/F18E-SOURCES.md
     (read 2026-10-25).
 
@@ -333,4 +346,18 @@ MonoBehaviour:
 
     Note: the published f18full.m
     adds the thrust term of beta-dot with the wrong sign (T cos(alpha) sin(beta)/(mV));
-    Air Wing derives its motion from body kinematics and does not inherit it (Calibration~/l1_harv_mirror.py).'
+    Air Wing derives its motion from body kinematics and does not inherit it (Calibration~/l1_harv_mirror.py).
+
+
+    ---
+    Gun and combat (Gunnery K4, K5) ---
+
+    gunName M61A2 20 mm; gunRoundsPerMinute
+    6000 and gunRoundsCarried 412: PUBLIC, General Dynamics OTS, F/A-18 E/F 20 mm
+    gun system sheet (4,000 or 6,000 shots a minute; the high rate used). gunMuzzleVelocityFtS
+    3450: SECONDARY, a simulator reference''s figure for PGU-28/B (not pinned for
+    the E/F''s gun). gunRoundMassKg 0.1, gunRoundDiameterM 0.02, gunRoundFormFactor
+    1.0 (on G7), gunDispersionMils 4, gunMaxTimeOfFlightS 3: AUTHORED. gunMuzzleM
+    (0, 0.5, 7.5) and gunBoreBody 1 deg up: AUTHORED off the model. hitPoints 10
+    and hitRadiusM 4: AUTHORED, abstract (Gunnery K5): a hit is one round, ten shoot
+    the jet down.'

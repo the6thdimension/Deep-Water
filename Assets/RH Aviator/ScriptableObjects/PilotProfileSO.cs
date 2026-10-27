@@ -139,6 +139,12 @@ namespace DeepWater.Aviator.ScriptableObjects
         [Tooltip("Collision avoidance on a join with no fight: a jet predicted to pass inside this distance (m), inside the slot spacing (0: none).")]
         public float joinAvoidM;
 
+        [Header("Trigger discipline (Gunnery K6)")]
+        [Tooltip("Fires only inside this range, m.")]
+        public float gunRangeM;
+        [Tooltip("Fires when the burst would pass within this many milliradians of the target (0: never fires).")]
+        public float triggerMils;
+
         [Header("Provenance")]
         [TextArea(4, 20)] public string provenance = "";
 
@@ -169,7 +175,7 @@ namespace DeepWater.Aviator.ScriptableObjects
                 RolloutPedalPerM = rolloutPedalPerM, RolloutPedalPerDeg = rolloutPedalPerDeg, BingoFlightTimeS = bingoFlightTimeS,
                 FieldOfViewDeg = fieldOfViewDeg, ReactionDelayS = reactionDelayS, MemoryS = memoryS, VisualRangeM = visualRangeM,
                 CornerKt = cornerKt, LeadS = leadS, LagS = lagS, LagRangeM = lagRangeM, OvershootClosureKt = overshootClosureKt, LagSlowKt = lagSlowKt,
-                ThreatRangeM = threatRangeM, ThreatConeDeg = threatConeDeg, FightFloorM = fightFloorM, ClearRangeM = clearRangeM, SlowKt = slowKt, TurnMatch = turnMatch, RangeKtPerM = rangeKtPerM, AttackRangeM = attackRangeM, ChaseOverKt = chaseOverKt, AvoidM = avoidM, AvoidS = avoidS, JoinAvoidM = joinAvoidM, SlotClimbDegPerM = slotClimbDegPerM, SlotGPerPathDeg = slotGPerPathDeg, SlotRotationShare = slotRotationShare,
+                ThreatRangeM = threatRangeM, ThreatConeDeg = threatConeDeg, FightFloorM = fightFloorM, ClearRangeM = clearRangeM, SlowKt = slowKt, TurnMatch = turnMatch, RangeKtPerM = rangeKtPerM, AttackRangeM = attackRangeM, ChaseOverKt = chaseOverKt, AvoidM = avoidM, AvoidS = avoidS, JoinAvoidM = joinAvoidM, GunRangeM = gunRangeM, TriggerMils = triggerMils, SlotClimbDegPerM = slotClimbDegPerM, SlotGPerPathDeg = slotGPerPathDeg, SlotRotationShare = slotRotationShare,
             };
             p.Validate();
             return p;

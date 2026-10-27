@@ -39,7 +39,7 @@ namespace DeepWater.Aviator.Core
     {
         public static bool Inside(in AirframeState attacker, in AirframeState target, float coneDeg, float rangeM)
         {
-            if (attacker.Status == FlightStatus.Crashed || target.Status == FlightStatus.Crashed) return false;
+            if (attacker.Status != FlightStatus.Flying || target.Status != FlightStatus.Flying) return false;   // crashed or shot down: out
             Vector3 fromTarget = attacker.Position - target.Position;
             float d = fromTarget.magnitude;
             if (d > rangeM || d < 1f) return false;
@@ -112,6 +112,13 @@ namespace DeepWater.Aviator.Core
         /// <summary>Seconds <paramref name="id"/> has spent in an enemy's rear cone (W46).</summary>
         public double SecondsInCone(int id) => _seconds.TryGetValue(id, out double s) ? s : 0.0;
 
+        readonly Dictionary<Side, int> _kills = new Dictionary<Side, int>();
+        int _killsSeen;
+
+        /// <summary>Enemies a side has shot down (Gunnery K6: kills first). A jet shot by its own side is <see cref="FriendlyKills"/>.</summary>
+        public int SideKills(Side side) => _kills.TryGetValue(side, out int n) ? n : 0;
+        public int FriendlyKills { get; private set; }
+
         /// <summary>A side's total.</summary>
         public double SideSeconds(Side side)
         {
@@ -125,6 +132,16 @@ namespace DeepWater.Aviator.Core
         {
             double dt = Math.Round(core.Clock.TickSeconds, 6);
             long tick = core.Tick - 1;
+            // Kills (Gunnery K6): the flight core logs them; a jet shot down leaves the fight, so no one chases a wreck.
+            for (; _killsSeen < core.Kills.Count; _killsSeen++)
+            {
+                KillRecord k = core.Kills[_killsSeen];
+                Side shooter = _sideEver.TryGetValue(k.ShooterId, out Side ss) ? ss : Side.None;
+                Side victim = _sideEver.TryGetValue(k.VictimId, out Side vs) ? vs : Side.None;
+                if (shooter != Side.None && shooter == victim) FriendlyKills++;
+                else if (shooter != Side.None) _kills[shooter] = SideKills(shooter) + 1;
+                Leave(k.VictimId);
+            }
             IReadOnlyList<Aircraft> all = core.Aircraft;
             for (int i = 0; i < all.Count; i++)
             for (int j = 0; j < all.Count; j++)

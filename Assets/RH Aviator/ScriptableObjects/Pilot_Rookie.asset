@@ -103,6 +103,8 @@ MonoBehaviour:
   avoidM: 100
   avoidS: 3
   joinAvoidM: 25
+  gunRangeM: 1400
+  triggerMils: 30
   provenance: "All AUTHORED (RH Aviator W45; no public source describes a generic
     line pilot), tuned headless against slice 3a's pass criteria (ROADMAP, fixed
     before tuning). Hands: guidanceGain (2, the classic value of the L1 path-following
@@ -134,8 +136,10 @@ MonoBehaviour:
     sense; 0 = none), turnMatch, rangeKtPerM, attackRangeM, chaseOverKt (range control;
     0 = none), avoidM, avoidS (collision avoidance); joinAvoidM (25 m, inside the
     40 m slot spacing: a join with no fight avoids too, after a survey of four-ship
-    joins found crossed joins meeting at 0 m). Rookie, from the line pilot (AUTHORED):
-    maxG 4.5, maxBankDeg 60, fieldOfViewDeg 90, reactionDelayS 1.2, memoryS 4, visualRangeM
-    6000, cornerKt 380 (fights too fast), leadS 0 and lagS 0 (pure pursuit only),
-    threatRangeM 1000, slowKt 0 (no energy sense), turnMatch 0, rangeKtPerM 0 (no
-    range control)."
+    joins found crossed joins meeting at 0 m). Trigger discipline (Gunnery K6): gunRangeM
+    900, triggerMils 12 (a burst that would pass within 12 mils of where the target
+    will be; AUTHORED). Rookie, from the line pilot (AUTHORED): maxG 4.5, maxBankDeg
+    60, fieldOfViewDeg 90, reactionDelayS 1.2, memoryS 4, visualRangeM 6000, cornerKt
+    380 (fights too fast), leadS 0 and lagS 0 (pure pursuit only), threatRangeM 1000,
+    slowKt 0 (no energy sense), turnMatch 0, rangeKtPerM 0 (no range control), gunRangeM
+    1400 and triggerMils 30 (sprays: long and wide)."

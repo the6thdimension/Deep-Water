@@ -66,6 +66,7 @@ namespace DeepWater.Aviator.Editor
             so.threatRangeM = 1500f; so.threatConeDeg = 60f; so.fightFloorM = 300f; so.clearRangeM = 8000f; so.slowKt = 220f; so.turnMatch = 0.7f; so.rangeKtPerM = 0.05f; so.attackRangeM = 600f; so.chaseOverKt = 150f;
             so.avoidM = 100f; so.avoidS = 3f;
             so.joinAvoidM = 25f;
+            so.gunRangeM = 900f; so.triggerMils = 12f;
             so.provenance =
                 "All AUTHORED (RH Aviator W45; no public source describes a generic line pilot), tuned headless against slice 3a's " +
                 "pass criteria (ROADMAP, fixed before tuning). Hands: guidanceGain (2, the classic value of the L1 path-following law, Park, Deyst and How, AIAA 2004-4900, PUBLIC method), maxBankDeg, rollRatePerBankDeg, climbDegPerM, " +
@@ -81,7 +82,7 @@ namespace DeepWater.Aviator.Editor
                 "downwindOffsetM, downwindHeightM (600 ft), finalTurnAlongM, approachKt (145 kt, as Air Wing's landing test), gearKt, patternBankDeg, patternGPerPathDeg, patternMaxDiveDeg, patternFloorAglM, glidePathDeg, touchdownM, flareHeightM, flarePathDeg, finalCarrotM, " +
                 "rolloutPedalPerM, rolloutPedalPerDeg, bingoFlightTimeS (a STAND-IN for bingo fuel until fuel burn exists; 0 = never). " +
                 "The fight (Pilot L1, W38, W45; a game's skill numbers, AUTHORED, not any real pilot's or air force's): fieldOfViewDeg, reactionDelayS, memoryS, visualRangeM, " +
-                "cornerKt, leadS, lagS, lagRangeM, overshootClosureKt, lagSlowKt, threatRangeM, threatConeDeg, fightFloorM, clearRangeM, slowKt (energy sense; 0 = none), turnMatch, rangeKtPerM, attackRangeM, chaseOverKt (range control; 0 = none), avoidM, avoidS (collision avoidance); joinAvoidM (25 m, inside the 40 m slot spacing: a join with no fight avoids too, after a survey of four-ship joins found crossed joins meeting at 0 m).";
+                "cornerKt, leadS, lagS, lagRangeM, overshootClosureKt, lagSlowKt, threatRangeM, threatConeDeg, fightFloorM, clearRangeM, slowKt (energy sense; 0 = none), turnMatch, rangeKtPerM, attackRangeM, chaseOverKt (range control; 0 = none), avoidM, avoidS (collision avoidance); joinAvoidM (25 m, inside the 40 m slot spacing: a join with no fight avoids too, after a survey of four-ship joins found crossed joins meeting at 0 m). Trigger discipline (Gunnery K6): gunRangeM 900, triggerMils 12 (a burst that would pass within 12 mils of where the target will be; AUTHORED).";
             EditorUtility.SetDirty(so);
             AssetDatabase.SaveAssets();
             so.Bake();   // throws if anything is out of shape
@@ -103,13 +104,15 @@ namespace DeepWater.Aviator.Editor
                 so.maxG = 4.5f; so.maxBankDeg = 60f;
                 so.fieldOfViewDeg = 90f; so.reactionDelayS = 1.2f; so.memoryS = 4f; so.visualRangeM = 6000f;
                 so.cornerKt = 380f; so.leadS = 0f; so.lagS = 0f; so.threatRangeM = 1000f; so.slowKt = 0f; so.turnMatch = 0f; so.rangeKtPerM = 0f;
-            }, "Rookie, from the line pilot (AUTHORED): maxG 4.5, maxBankDeg 60, fieldOfViewDeg 90, reactionDelayS 1.2, memoryS 4, visualRangeM 6000, cornerKt 380 (fights too fast), leadS 0 and lagS 0 (pure pursuit only), threatRangeM 1000, slowKt 0 (no energy sense), turnMatch 0, rangeKtPerM 0 (no range control).");
+                so.gunRangeM = 1400f; so.triggerMils = 30f;
+            }, "Rookie, from the line pilot (AUTHORED): maxG 4.5, maxBankDeg 60, fieldOfViewDeg 90, reactionDelayS 1.2, memoryS 4, visualRangeM 6000, cornerKt 380 (fights too fast), leadS 0 and lagS 0 (pure pursuit only), threatRangeM 1000, slowKt 0 (no energy sense), turnMatch 0, rangeKtPerM 0 (no range control), gunRangeM 1400 and triggerMils 30 (sprays: long and wide).");
             Write(AcePilotPath, line, "ace", so =>
             {
                 so.maxG = 7f; so.maxBankDeg = 75f;
                 so.fieldOfViewDeg = 150f; so.reactionDelayS = 0.35f; so.memoryS = 12f; so.visualRangeM = 10000f;
                 so.cornerKt = 320f; so.leadS = 1.2f; so.lagS = 1.2f; so.threatRangeM = 2000f; so.slowKt = 240f; so.turnMatch = 1f;
-            }, "Ace, from the line pilot (AUTHORED): maxG 7 (inside the F/A-18E's 7.5), maxBankDeg 75, fieldOfViewDeg 150, reactionDelayS 0.35, memoryS 12, visualRangeM 10000, cornerKt 320, leadS 1.2, lagS 1.2, threatRangeM 2000, slowKt 240, turnMatch 1.");
+                so.gunRangeM = 800f; so.triggerMils = 6f;
+            }, "Ace, from the line pilot (AUTHORED): maxG 7 (inside the F/A-18E's 7.5), maxBankDeg 75, fieldOfViewDeg 150, reactionDelayS 0.35, memoryS 12, visualRangeM 10000, cornerKt 320, leadS 1.2, lagS 1.2, threatRangeM 2000, slowKt 240, turnMatch 1, gunRangeM 800 and triggerMils 6 (waits for the shot: close and tight).");
         }
 
         static void Write(string path, PilotProfileSO from, string name, System.Action<PilotProfileSO> change, string note)

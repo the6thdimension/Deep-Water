@@ -44,6 +44,37 @@ namespace DeepWater.AirWing.Core
         /// <summary>Why the last flight ended, or null while flying.</summary>
         public string CrashReason { get; private set; }
 
+        /// <summary>Who shot it down (Gunnery K5), or 0.</summary>
+        public int KilledBy { get; private set; }
+
+        /// <summary>
+        /// Shot down (Gunnery K5): it leaves the fight and falls, no longer flown, until it meets the surface and is
+        /// Crashed. Only a flying aircraft can be killed; a reset brings it back.
+        /// </summary>
+        public void Kill(int by, string reason)
+        {
+            if (State.Status != FlightStatus.Flying) return;
+            State.Status = FlightStatus.Killed;
+            State.LoadFactor = 0f;
+            State.BodyRates = Vector3.zero;
+            KilledBy = by;
+            CrashReason = reason;
+        }
+
+        /// <summary>A killed aircraft's fall: gravity and a crude drag that bleeds its speed; the nose follows the path.</summary>
+        void Fall(float surfaceHeightM, float dt)
+        {
+            const float g = 9.80665f, bleedPerS = 0.05f;   // AUTHORED: presentation-grade; a wreck's aero is not modelled
+            State.Velocity = State.Velocity * Mathf.Max(0f, 1f - bleedPerS * dt) + Vector3.down * (g * dt);
+            State.Position += State.Velocity * dt;
+            if (State.Velocity.sqrMagnitude > 1f) State.Attitude = Quaternion.LookRotation(State.Velocity, State.Attitude * Vector3.up);
+            if (State.Position.y <= surfaceHeightM)
+            {
+                State.Position.y = surfaceHeightM;
+                Crash(CrashReason + "; fell and met the surface");
+            }
+        }
+
         void Crash(string reason)
         {
             State.Velocity = Vector3.zero;
@@ -85,9 +116,15 @@ namespace DeepWater.AirWing.Core
                 State = Start;
                 Resets++;
                 CrashReason = null;
+                KilledBy = 0;
+            }
+            float dt = (float)clock.SubstepSeconds;
+            if (State.Status == FlightStatus.Killed)
+            {
+                for (int k = 0; k < clock.Substeps && State.Status == FlightStatus.Killed; k++) Fall(surfaceHeightM, dt);
+                return;
             }
             if (State.Status != FlightStatus.Flying) return;
-            float dt = (float)clock.SubstepSeconds;
             for (int k = 0; k < clock.Substeps; k++)
             {
                 AirData air = Atmosphere.Sample(State.Position.y);

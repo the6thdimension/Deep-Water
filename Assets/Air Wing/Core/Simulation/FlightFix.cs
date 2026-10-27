@@ -80,7 +80,10 @@ namespace DeepWater.AirWing.Core.Simulation
             h = Mix(h, s.Controls.AileronRad);
             h = Mix(h, s.Controls.RudderRad);
             h = Mix(h, s.Controls.PitchIntegralRadS);
-            return Mix(h, s.Controls.LoadFactorCommand);
+            h = Mix(h, s.Controls.LoadFactorCommand);
+            h = Mix(h, s.Rounds);
+            h = Mix(h, s.GunCarry);
+            return Mix(h, s.HitPoints);
         }
 
         /// <summary>

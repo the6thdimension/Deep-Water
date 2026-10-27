@@ -3,6 +3,8 @@
     "rootNamespace": "DeepWater.Aviator.Tests",
     "references": [
         "DeepWater.Aviator",
+        "DeepWater.Gunnery",
+        "RH.Shared",
         "DeepWater.Aviator.Editor",
         "DeepWater.AirWing",
         "DeepWater.AirWing.Tests.Editor",

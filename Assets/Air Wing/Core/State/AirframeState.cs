@@ -7,6 +7,11 @@ namespace DeepWater.AirWing.Core.State
         Flying = 0,
         /// <summary>Met the surface (sea or runway) with no gear to take it. Terminal at L0.</summary>
         Crashed = 1,
+        /// <summary>
+        /// Shot down (Gunnery K5): out of the fight, no longer flown, falling until it meets the surface, where it is
+        /// Crashed. Anything that asks "is it still fighting" asks <c>Status == Flying</c>.
+        /// </summary>
+        Killed = 2,
     }
 
     /// <summary>
@@ -62,5 +67,11 @@ namespace DeepWater.AirWing.Core.State
         public float GearDeployed;
         /// <summary>Flight Controls L1's surfaces and memory (zero at L0).</summary>
         public ControlState Controls;
+        /// <summary>Gun rounds left (Gunnery K4).</summary>
+        public int Rounds;
+        /// <summary>The gun's fractional round carried between ticks, so a rate of fire that is not a whole number of rounds per tick stays exact.</summary>
+        public float GunCarry;
+        /// <summary>Hit points left (Gunnery K5, abstract): one per round that hits; at zero the aircraft is Killed.</summary>
+        public float HitPoints;
     }
 }

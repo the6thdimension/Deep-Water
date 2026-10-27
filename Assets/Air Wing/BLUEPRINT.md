@@ -190,6 +190,9 @@ All entries W1–W24 are SIX's picks of 2026-10-24, in round order. "Leaning" is
 | W52 | Who the opponents fight | **Red hunts the player** (SIX, 2026-10-27): every red jet goes for the jet the player flies; blue's wingmen defend. Scored as W46: seconds with an enemy in the rear cone. No weapons | Team rear-cone scoring, both sides | Locked (SIX, 2026-10-27) |
 | W53 | Blue's wingmen in a fight | **They fight on their own** (Pilot L1): each picks a red jet and fights it, and comes back to fingertip when nothing is near | Same | Locked (SIX, 2026-10-27) |
 | W54 | Mouse and keyboard | **A way to hold level flight**: the jet is hard to fly on mouse and keyboard because, hands off, it drifts, climbs or sinks (SIX, 2026-10-27). The other three candidates (twitchy mouse aim, all-or-nothing keys, mouse and keys fighting) were not chosen | — | Locked (SIX, 2026-10-27) |
+| W55 | Arming the jets (SIX, 2026-10-27: "arm the guns and hard points for the planes") | **The gun now; live air-to-air missiles on the hardpoints next.** Constraint 8 allowed weapons "only if SIX asks, and then abstract"; SIX asked. Round flight is Gunnery's (K1), missiles Guided Fury's, the airframe's part is Air Wing's: the trigger (`PilotInputs.Trigger`), rounds and hit points in the state, the gun's mount in the profile (`GunMount`, `CombatProfile`) | Stores first, missiles later | Locked |
+| W56 | The gun | **Simulated rounds as shot groups plus a lead-computing HUD pipper** (Gunnery K4). The M61A2's public numbers (412 rounds, 6,000 a minute, GD-OTS sheet); the rest AUTHORED in the provenance. Fire: left mouse or left Ctrl, the Xbox A button, stick button 5 (the stick's trigger stays the brakes) | Rounds with a fixed gun cross | Locked |
+| W57 | A hit | **Abstract hit points (10, one per round); at zero the jet is Killed:** out of the fight, no longer flown, it falls until it meets the surface and is Crashed, the kill logged with its shooter (`FlightCore.Kills`) | Same | Locked |
 
 ## 6. Standing constraints
 
@@ -205,7 +208,7 @@ All entries W1–W24 are SIX's picks of 2026-10-24, in round order. "Leaning" is
 8. **Safe limits (SIX, 2026-10-24; General Quarters BLUEPRINT §6.8 applies here in full).** Air Wing is a game simulation at the level of commercial and hobby flight sims, and it stays there. In particular:
    - public, cited data only; a figure that is not public stays AUTHORED;
    - **no flight-control, autopilot or guidance code meant to run on real hardware:** no drones, model aircraft or real actuators. The control law and the AI pilot are game models;
-   - **no aircraft weapons unless SIX asks**, and then only abstract, as in General Quarters;
+   - **no aircraft weapons unless SIX asks**, and then only abstract, as in General Quarters (*SIX asked, 2026-10-27: W55–W57; the gun's sight and the AI's trigger are game models, not fire-control code*);
    - no real-world targeting, no tuning to beat a specific real air defence, and opponents stay generic.
    - *How to apply:* check every slice against this list before it is built. A request that would cross a line is said so plainly and reshaped toward the game side.
 9. **The budget is measured, never assumed** (W21).
@@ -215,7 +218,7 @@ All entries W1–W24 are SIX's picks of 2026-10-24, in round order. "Leaning" is
 | Not in the first pass | Why / revisit when |
 |---|---|
 | **Carrier ops:** launch, trap, the moving deck, wind over the deck, Sea State feeding Carrier Ops' `ISeaStateMotion`, catapults 2–4, a tailhook on the Air Wing jet | W16. **Parked until the AI stream is done.** Questions to ask then: how the deck carries parked aircraft (kinematic Rigidbody or Reckoning), catapult and wire fidelity (constant g or profiled), wind over the deck and the air wake, and Sea State behind `ISeaStateMotion` |
-| Aircraft weapons, countermeasures, sensors (RH Aviator Phases 3–4) | Constraint 8; only if SIX asks |
+| ~~Aircraft weapons~~, countermeasures, sensors (RH Aviator Phases 3–4) | Constraint 8; only if SIX asks. *Weapons asked for 2026-10-27 (W55–W57): the gun built, the IR missile next; no countermeasures this push* |
 | Multi-ship tactics and mission-level AI (RH Aviator Phases 5–6) | After AI L1 |
 | G-induced loss of consciousness (greyout, blackout) | SIX's idea, 2026-10-26: the fly-by-wire's accepted G overshoot could feed it. When the pilot or the cockpit view is modelled |
 | Cockpit view | W11. After the chase camera and HUD prove the numbers |
@@ -255,3 +258,4 @@ All entries W1–W24 are SIX's picks of 2026-10-24, in round order. "Leaning" is
 - **2026-10-26** — W32's source re-decided by SIX: TM-107601 holds no aero numbers, so L1 flies the published HARV flight-data fits. Slice 2a done (ROADMAP).
 - **2026-10-26** — Slice 2b: W23's law realised as nonlinear dynamic inversion commanding α (after Snell, Enns and Garrard 1992, on the HARV model) after a fixed-gain PI law failed; the yaw damper is the sideslip and yaw-rate inversion. The AoA limit is 30° (AUTHORED). Two of its criteria are missed and reported (ROADMAP 2b).
 - **2026-10-27** — SIX: "finish out phase 3", then test dogfights with many aircraft, fix mouse-and-keyboard flying, and run the player with three wingmen against four opponents. W43 re-decided (eight aircraft, a reversal); W52 red hunts the player; W53 wingmen fight on their own; W54 the controls fix is level-flight holding.
+- **2026-10-27** — SIX armed the jets: W55 (the gun now, live missiles next), W56 (rounds as shot groups and a lead-computing pipper), W57 (hit points, then killed and falling). Gun built; round flight lives in the new Gunnery module.

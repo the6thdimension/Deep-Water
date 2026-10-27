@@ -54,6 +54,8 @@ namespace DeepWater.AirWing.Modules.Input
             public readonly InputAction Reset;
             /// <summary>Wheel brakes, held: Space, the Xbox D-pad down, the stick's trigger.</summary>
             public readonly InputAction Brakes;
+            /// <summary>The gun's trigger, held (Gunnery K4): left mouse and left Ctrl, the Xbox A button, stick button 5.</summary>
+            public readonly InputAction Fire;
             public PilotSwitches Pressed;
 
             public Source(InputActionMap map)
@@ -66,6 +68,7 @@ namespace DeepWater.AirWing.Modules.Input
                 Gear = map.FindAction("Gear", true);
                 Reset = map.FindAction("Reset", false);
                 Brakes = map.FindAction("Brakes", false);
+                Fire = map.FindAction("Fire", false);
             }
 
             public void Poll()
@@ -159,6 +162,7 @@ namespace DeepWater.AirWing.Modules.Input
             s.Pedals = Dead(src.Pedals.ReadValue<float>());
             s.Moved = s.StickPitch != 0f || s.StickRoll != 0f || s.Pedals != 0f;
             s.Brakes = src.Brakes != null && src.Brakes.IsPressed();
+            s.Fire = src.Fire != null && src.Fire.IsPressed();
             s.Toggles = src.Pressed;
             src.Pressed = PilotSwitches.None;
             return s;

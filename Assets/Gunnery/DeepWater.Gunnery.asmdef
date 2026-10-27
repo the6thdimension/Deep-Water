@@ -1,7 +1,9 @@
 {
     "name": "DeepWater.Gunnery",
     "rootNamespace": "DeepWater.Gunnery",
-    "references": [],
+    "references": [
+        "RH.Shared"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

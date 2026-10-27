@@ -3,6 +3,7 @@
     "rootNamespace": "DeepWater.Gunnery.Tests",
     "references": [
         "DeepWater.Gunnery",
+        "RH.Shared",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

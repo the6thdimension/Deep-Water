@@ -123,6 +123,12 @@ namespace DeepWater.Aviator.Core
         /// sets it off (0: none).
         /// </summary>
         public float JoinAvoidM;
+        /// <summary>
+        /// Trigger discipline (Gunnery K6): the pilot fires when a burst fired now would pass within
+        /// <see cref="TriggerMils"/> milliradians of where it believes the target will be, inside <see cref="GunRangeM"/>.
+        /// A rookie sprays (wide, long); an ace waits for the shot (tight, close). 0 mils: never fires.
+        /// </summary>
+        public float GunRangeM, TriggerMils;
 
         /// <summary>The hands in the pattern: the route hands, held to the pattern's bank.</summary>
         public HandsSettings PatternHands
@@ -204,6 +210,8 @@ namespace DeepWater.Aviator.Core
             Positive(ClearRangeM, nameof(ClearRangeM));
             if (BingoFlightTimeS < 0f) throw new ArgumentOutOfRangeException(nameof(BingoFlightTimeS), BingoFlightTimeS, "must not be negative (zero: never)");
             if (JoinAvoidM < 0f || JoinAvoidM >= Math.Abs(SlotRightM)) throw new ArgumentOutOfRangeException(nameof(JoinAvoidM), JoinAvoidM, "must be at least 0 and inside the slot spacing, or a jet in its slot would set it off");
+            if (GunRangeM < 0f) throw new ArgumentOutOfRangeException(nameof(GunRangeM), GunRangeM, "must not be negative");
+            if (TriggerMils < 0f) throw new ArgumentOutOfRangeException(nameof(TriggerMils), TriggerMils, "must not be negative (zero: never fires)");
             if (!(LostSlotM > InSlotM)) throw new ArgumentOutOfRangeException(nameof(LostSlotM), LostSlotM, "losing the slot must lie outside being in it");
         }
 

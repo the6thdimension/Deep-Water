@@ -130,7 +130,7 @@ moving aircraft.*
   `Examples/RadarKitExample.unity`: ground tower, picket ship, orbiting patrol
   aircraft (CircleFlyer), five signature targets incl. a stealth drone, a noise
   jammer, and an orbiting bandit.
-- [ ] **Phase-1 EditMode tests — written 2026-09-08, execution PENDING.**
+- [x] **Phase-1 EditMode tests** — written 2026-09-08; **run 2026-10-27: 7/7 pass** (the first run; the bridge had been down when they were written).
   `Tests/Editor/RadarKitPhase1Tests.cs` (7 tests: sector wrap, body-relative
   bearing, FlatForward under pitch/roll, signal-scale calibration, ApplyProfile
   round-trip, idempotent attach, Inspector-module reuse). Whole suite compiles
@@ -142,13 +142,20 @@ moving aircraft.*
 
 *Skolnik's phase. Same architecture, real terms.*
 
-- [ ] **Radar-equation core in pure C#** (P6): `Core/Detection/RadarEquation.cs` —
+- [x] **Radar-equation core in pure C#** (P6): `Core/Detection/RadarEquation.cs` —
   SNR in dB from power, gain, wavelength band, RCS (dBsm), range, losses; unit
-  tested against hand-computed cases.
+  tested against hand-computed cases. DONE 2026-10-27 (`RadarTerms`, `SnrDb`, `RangeForSnrM`;
+  `RadarEquationTests`: a hand case 21.99 dB at 100 km, 40 dB per decade, +10 dB for ten pulses, the
+  inverse 167.8 km for 13 dB). *Not yet wired into the LOD modules* (a rewrite of five legacy modules:
+  waits for SIX's go, CLAUDE.md "confirm before a rewrite beyond the file in front of you").
 - [ ] **Pd/Pfa detection threshold** with noise floor — replace the 0–1 clamped
-  strength cliff; keep a simple Swerling-1-like fluctuation option.
+  strength cliff; keep a simple Swerling-1-like fluctuation option. *The statistics are built
+  (2026-10-27): Albersheim's required SNR (13.11 dB for Pd 0.9, Pfa 1e-6, the published point), North's Pd
+  for a steady target, the exact Swerling 1 Pd. Replacing the modules' cliff waits with the wiring above.*
 - [ ] **Line-of-sight + radar horizon.** Physics raycast masking + 4/3-Earth
-  horizon range check. Surface radars stop seeing sea-skimmers at 200 km.
+  horizon range check. Surface radars stop seeing sea-skimmers at 200 km. *The horizon is built
+  (2026-10-27, `RadarEquation.HorizonM`: a 20 m mast sees a 5 m target to 27.6 km, a 10 km-high jet to 431 km;
+  so "200 km" above was wrong for a sea-skimmer, it is about 28 km).* The raycast masking is not.
 - [ ] **Elevation coverage enforced** from profile (min/max elevation, scan
   pattern respects it); beam gating becomes real (detection only inside the
   beam/sector actually illuminated this scan).
@@ -222,3 +229,4 @@ moving aircraft.*
   the Phase 1 reuse fix lands — ownership must be tracked (created-by-controller flag).
 - [ ] `Examples/README.md` and `Prefabs/README.md` describe assets that don't exist —
   Phase 1 and Phase 5 items close them; update the READMEs when they do.
+- **2026-10-27** — Phase 1 tests run at last: 7/7. Phase 2's pure core begun: `Core/Detection/RadarEquation.cs` (the radar equation in dB, the range for a required SNR, Albersheim, North, Swerling 1, the 4/3-Earth horizon, erfc), 8 tests against hand-computed cases and Albersheim's published point; 15/15 in all. Found: the roadmap's "sea-skimmers at 200 km" was off by seven times; the 4/3-Earth horizon for a 20 m mast and a 5 m target is 27.6 km. The modules are untouched (their rewrite waits for SIX).

@@ -101,3 +101,5 @@ Positions are metres about the centre of mass the core flies (x right, y up, z f
 | Nosewheel steering | ±20°, fading out between 40 and 80 kt | AUTHORED | |
 | Gear transit | 4 s | AUTHORED | |
 | Gear drag | ΔC_D 0.02 | AUTHORED | |
+| Strut end stop | stiffens past 0.7 of travel: + 30 × k × (x − x₀)² / (L − x₀) (10× a linear strut at full travel) | AUTHORED | SIX, 2026-10-26: an oleo's air spring stiffens near full stroke; sized so a hands-off touchdown's nose slap does not bottom the nose strut |
+| Gear animation (presentation) | nose leg 105° forward; mains aft, up and in, wheel flat; doors about their long edges | AUTHORED | solved off the model's geometry (it has no retraction clip); `HarvL1Data.GearRig()` |

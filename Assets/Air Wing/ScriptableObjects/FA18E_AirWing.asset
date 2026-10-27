@@ -201,6 +201,8 @@ MonoBehaviour:
   nosewheelSteerFadeEndKt: 80
   gearTransitTimeS: 4
   gearDownDeltaCd: 0.02
+  strutEndStopFraction: 0.7
+  strutEndStopStiffening: 30
   provenance: 'Sources and tags in full: Assets/Air Wing/Calibration~/F18E-SOURCES.md
     (read 2026-10-25).
 
@@ -325,8 +327,10 @@ MonoBehaviour:
     0.02, tyreBrakingFriction 0.5, tyreLateralFriction 0.7, tyreSlipSpeedMps 0.5:
     AUTHORED, textbook dry-concrete tyre values. nosewheelSteerMaxDeg 20, nosewheelSteerFadeStartKt
     40, nosewheelSteerFadeEndKt 80, gearTransitTimeS 4, gearDownDeltaCd 0.02: AUTHORED.
+    strutEndStopFraction 0.7, strutEndStopStiffening 30: AUTHORED (SIX, 2026-10-26),
+    an oleo''s stiffening air spring near full stroke, sized so a hands-off touchdown''s
+    nose slap does not bottom the nose strut.
 
-    Note:
-    the published f18full.m adds the thrust term of beta-dot with the wrong sign
-    (T cos(alpha) sin(beta)/(mV)); Air Wing derives its motion from body kinematics
-    and does not inherit it (Calibration~/l1_harv_mirror.py).'
+    Note: the published f18full.m
+    adds the thrust term of beta-dot with the wrong sign (T cos(alpha) sin(beta)/(mV));
+    Air Wing derives its motion from body kinematics and does not inherit it (Calibration~/l1_harv_mirror.py).'

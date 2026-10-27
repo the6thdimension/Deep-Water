@@ -41,6 +41,26 @@ namespace DeepWater.AirWing.ScriptableObjects
         }
 
         public Surface[] surfaces = Array.Empty<Surface>();
+
+        /// <summary>One part of the landing gear: a hinge, how far it turns to stow, and when in the retraction.</summary>
+        [Serializable]
+        public struct GearPart
+        {
+            [Tooltip("Name of the transform in the model (searched under the aircraft).")]
+            public string transformName;
+            [Tooltip("Hinge axis in the model's frame (x right, y up, z forward), at rest.")]
+            public Vector3 axis;
+            [Tooltip("Angle about the axis with the gear up, degrees (0 with it down).")]
+            public float stowedAngleDeg;
+            [Tooltip("The part moves while the retraction (0 down … 1 up) runs from start to end.")]
+            [Range(0f, 1f)] public float startFraction;
+            [Range(0f, 1f)] public float endFraction;
+            [Tooltip("Hidden once the gear is fully up (it sits inside a closed bay).")]
+            public bool hideWhenStowed;
+        }
+
+        [Tooltip("The landing gear's moving parts, driven by the core's GearDeployed (Landing Gear L1).")]
+        public GearPart[] gearParts = Array.Empty<GearPart>();
         [Tooltip("Where the model's origin sits relative to the centre of mass the core flies, metres (body frame).")]
         public Vector3 modelOffsetM;
 

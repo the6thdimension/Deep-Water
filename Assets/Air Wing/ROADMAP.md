@@ -33,6 +33,7 @@ Everything in this table is built, tested and on `main`. The detail behind each 
 | Slice 2b — Fly-by-wire L1 | Hornet-style flight controls: G and roll-rate commands, the AoA and G limits | 2026-10-26 | 7c77b0e1 | 82 |
 | Slice 2c — Engines L1, L1 in the scenes | Engine spool; the scenes fly L1; the L1 budget met (17 µs) | 2026-10-26 | 6edafea9 | 87 |
 | Slice 2d — Landing gear L1 | Wheels on spring-damper struts over PhysX contacts, brakes, nosewheel steering, gear up and down, a runway start, take-off and landing; hard and gear-up landings crash | 2026-10-26 | 8343959b | 99 |
+| Slice 2d follow-up — the gear moves; softer struts | The model's gear retracts and extends with the core (legs fold, doors close); the struts stiffen at the end of travel, so a hands-off touchdown survives | 2026-10-26 | see the change log | 103 |
 
 ## STILL TO DO
 
@@ -44,10 +45,9 @@ Everything in this table is built, tested and on `main`. The detail behind each 
 - **Two fly-by-wire targets missed** (slice 2b): G onset 1.2 s against 1.0, and the G limit peaks at 8.08 G against 8.0. They are reported, not fixed.
 - **Not built in the fly-by-wire:** the revised Hornet law's sideslip feedback to the ailerons, the differential stabilator, sensor models.
 - **Landing gear (slice 2d), open:**
-  - **A decision for SIX: a hands-off touchdown breaks the nose gear.** With the stick left neutral, the main gear (behind the centre of mass) slaps the nose down at about 23°/s and the nose strut bottoms out. The pilot has to fly the nose down, as the test pilot does. Keep it (Q5: bad piloting crashes), or soften it with a progressive strut.
-  - The gear does not move on the model: it always shows down (gear animation).
   - Not flown by hand: a runway start, take-off and landing from a real device. They are tested in EditMode and the take-off was seen in play from a scripted seat.
   - The 24 ft/s sink limit is AUTHORED: the figure is commonly quoted for Navy jets, but its source is not pinned.
+  - The gear animation is AUTHORED off the model (it has no retraction clip). Stowed, a narrow slit stays open between the nose doors, and the struts do not compress on the model.
 
 ### Phase 3 — AI pilots (RH Aviator)
 - AI L0: waypoints, wingman formation, return to base with a landing on the Dogfight runway.
@@ -378,6 +378,10 @@ SIX's picks: contacts as W4 says, with spring-damper struts; a brake button (Spa
   | On the ground the core is bit-identical, and the input log replays it | no divergence |
   | The PhysX probe against a box collider | distance to 1e-4 m, the normal, out of reach, off the edge |
 
+- [x] **Follow-up, SIX's asks (2026-10-26):**
+  - *Softer struts:* SIX chose to soften the hands-off touchdown. Each strut now stiffens over its last 30 % of travel, as an oleo's air spring does: past 0.7 of the travel the spring adds 30 × k × (x − x₀)² / (L − x₀), so at full travel a strut pushes 10× a linear one. A hands-off touchdown now survives: the nose slaps at 15.8°/s and its strut takes 86 % of its travel. The 9° dive still breaks the gear, and the firm landing is unchanged (11.9 ft/s, 1,050 m).
+  - *The gear moves on the model:* `GearRig` (Modules/Aircraft) turns 19 parts of the F-18E's gear from the core's `GearDeployed`, interpolated between ticks. The legs fold over the first 75 % of the retraction, and the doors close over the last 30 %; lowering runs it backwards. The model had gear bones but no retraction clip, and the vendor rig named only two parts. So each hinge was solved off the geometry and checked in captures. The nose leg folds forward 105°; each main leg swings aft, up and in to lie its wheel flat in the bay its doors cover; each door turns about its own long edge until it lies over the bay. The legs, braces and door links hide once stowed, behind the closed doors. Values are in `HarvL1Data.GearRig()`, data in `FA18E_Visuals.asset`.
+  - Tests (103/103): the end stop's formula; the hands-off touchdown; every gear part found and gear down equal to the rest pose; with the gear up, nothing visible below the closed doors (lowest −0.86 m in the model's frame, the right inner door's thick skin). Seen in play in Dogfight: the airborne jet starts with its gear stowed; on gear down the doors open, the leg swings, and it ends on the model's rest pose.
 - [x] **Seen at runtime in Dogfight** (Start Mode set to Runway for the run, then the scene reloaded from disk): at idle the jet held its strut compression on the PhysX runway and crept at 3–4 kt (idle thrust beats rolling friction; the brakes hold it). A scripted seat then took off in afterburner: rotation at 150 kt, lift-off near 183 kt, about 470 m from brake release, the gear up above 80 m, climbing out. The player-script compile passes.
 
 ### Slice 2e — Phase 2 review
@@ -408,3 +412,4 @@ Revisit when Phase 3 is done. The questions for SIX are in BLUEPRINT §7.
 - **2026-10-26** — Slice 2c done: Powerplant L1 (spool), the scenes fly L1, the budget met in a player (17 µs per aircraft per step after caching the lift peak, ×2.2); 87/87 tests.
 - **2026-10-26** — Roadmap split into DONE and STILL TO DO at SIX's request (e322f5a7).
 - **2026-10-26** — Slice 2d done (8343959b): Landing Gear L1 on spring-damper struts over PhysX contacts, brakes, nosewheel steering, a runway start, take-off and landing; 99/99 tests. Found and fixed: the sink rate measured along a tilted strut, the flaps missing from the law's lift inversion, the runway start's throttle. Open for SIX: a hands-off touchdown breaks the nose gear.
+- **2026-10-26** — Slice 2d follow-up at SIX's word: the struts stiffen over their last 30 % (a hands-off touchdown survives) and the model's gear retracts and extends with the core (`GearRig`, hinges solved off the geometry); 103/103 tests.

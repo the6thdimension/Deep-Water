@@ -4,7 +4,8 @@
     "references": [
         "RH.Shared",
         "DeepWater.AirWing",
-        "Unity.InputSystem"
+        "Unity.InputSystem",
+        "DeepWater.Gunnery"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

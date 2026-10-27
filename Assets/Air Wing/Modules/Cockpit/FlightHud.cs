@@ -5,6 +5,7 @@ using DeepWater.AirWing.Core.Gates;
 using DeepWater.AirWing.Core.Seats;
 using DeepWater.AirWing.Modules.Aircraft;
 using DeepWater.AirWing.Modules.World;
+using DeepWater.Gunnery.Guns;
 
 namespace DeepWater.AirWing.Modules.Cockpit
 {
@@ -53,6 +54,12 @@ namespace DeepWater.AirWing.Modules.Cockpit
 
             GUI.Label(new Rect(0.5f * w - size.x * 0.5f, 30f * s, size.x, size.y), $"HDG {r.HeadingDeg:000}°", _centre);
             if (gates != null && gates.Course != null) Course(gates.Course, s, size);
+            if (aircraft.State.Status == Core.State.FlightStatus.Killed)
+            {
+                GUI.Label(new Rect(0.5f * w - size.x * 0.5f, 0.45f * h, size.x, size.y * 2f), "SHOT DOWN", _centre);
+                if (aircraft.CrashReason != null)
+                    GUI.Label(new Rect(0.5f * w - 2f * size.x, 0.45f * h + 2f * size.y, 4f * size.x, size.y), aircraft.CrashReason.ToUpperInvariant(), _centre);
+            }
             if (r.Crashed)
             {
                 GUI.Label(new Rect(0.5f * w - size.x * 0.5f, 0.45f * h, size.x, size.y * 2f), "CRASHED", _centre);
@@ -71,6 +78,12 @@ namespace DeepWater.AirWing.Modules.Cockpit
                 if (aircraft.LastInputs.Brakes) gear += "  ·  BRAKES";
                 GUI.Label(new Rect(40f * s, h - 4f * size.y, w, size.y), gear, _left);
             }
+            if (aircraft.Profile.Gun.IsSet || aircraft.Profile.Combat.IsSet)
+            {
+                string gun = aircraft.Profile.Gun.IsSet ? $"GUN {aircraft.State.Rounds}{(aircraft.LastInputs.Trigger && aircraft.State.Rounds > 0 ? "  FIRING" : "")}" : "";
+                string hp = aircraft.Profile.Combat.IsSet ? $"  ·  HP {aircraft.State.HitPoints:F0}/{aircraft.Profile.Combat.HitPoints:F0}" : "";
+                GUI.Label(new Rect(40f * s, h - 5f * size.y, w, size.y), gun + hp, _left);
+            }
             GUI.Label(new Rect(40f * s, h - 3f * size.y, w, size.y), $"SEAT {device}", _left);
             GUI.Label(new Rect(40f * s, h - 2f * size.y, w, size.y), string.Join("  ·  ", aircraft.Levels), _left);
 
@@ -79,8 +92,32 @@ namespace DeepWater.AirWing.Modules.Cockpit
                 Marker(aircraft.State.Position + aircraft.State.Velocity.normalized * 1000f, "-O-", s);
                 if (seat != null && seat.Owner == DeviceSource.Mouse && _view.AircraftId == runner.PlayerAircraftId)
                     Marker(aircraft.State.Position + seat.AimDirection * 1000f, "( )", s);
+                if (aircraft.Profile.Gun.IsSet && aircraft.State.Status == Core.State.FlightStatus.Flying) Pipper(aircraft, s);
             }
             if (runner.Views.Count > 1 && runner.Roster != null) PickList(w, s, size);
+        }
+
+        /// <summary>
+        /// The lead-computing pipper (Gunnery K4): where a round fired now will be at the range of the aircraft nearest
+        /// the bore line (inside 25° and 2,500 m), or at 700 m with none. Put it on where the target will be and fire.
+        /// </summary>
+        void Pipper(Core.Aircraft a, float s)
+        {
+            Core.Profiles.GunMount m = a.Profile.Gun;
+            Vector3 muzzle = a.State.Position + a.State.Attitude * m.MuzzleM, bore = a.State.Attitude * m.BoreBody;
+            float range = 700f, best = Mathf.Cos(25f * Mathf.Deg2Rad);
+            string ranged = "";
+            foreach (Core.Aircraft o in runner.Flight.Aircraft)
+            {
+                if (o.Id == a.Id || o.State.Status != Core.State.FlightStatus.Flying) continue;
+                Vector3 to = o.State.Position - muzzle;
+                float d = to.magnitude;
+                if (d > 2500f || d < 50f) continue;
+                float c = Vector3.Dot(to / d, bore);
+                if (c > best) { best = c; range = d; ranged = $" {o.Id}"; }
+            }
+            if (LeadSight.RoundAt(m.Gun, muzzle, a.State.Velocity, bore, range, out Vector3 at, out _))
+                Marker(at, $"-+-{ranged}", s);
         }
 
         /// <summary>Who flies what (W42), top right: one line per aircraft, the one shown marked; Tab or D-pad right steps on.</summary>
@@ -92,7 +129,8 @@ namespace DeepWater.AirWing.Modules.Cockpit
             {
                 AircraftView v = runner.Views[i];
                 if (v.Aircraft == null) continue;
-                string crashed = v.Aircraft.State.Status == Core.State.FlightStatus.Crashed ? "  ·  CRASHED" : "";
+                string crashed = v.Aircraft.State.Status == Core.State.FlightStatus.Crashed ? "  ·  CRASHED"
+                    : v.Aircraft.State.Status == Core.State.FlightStatus.Killed ? "  ·  SHOT DOWN" : "";
                 string mark = v.AircraftId == _view.AircraftId ? "> " : "";
                 GUI.Label(new Rect(x, y + (i + 1) * size.y, 2f * size.x, size.y), $"{mark}{v.AircraftId}  {runner.Roster.Describe(v.AircraftId)}{crashed}", _right);
             }

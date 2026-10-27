@@ -92,7 +92,7 @@ namespace DeepWater.Aviator.Core
                 int id = seen[i].Id;
                 if (id == _self) continue;
                 AirframeState other = seen[i].State;
-                bool visible = other.Status != FlightStatus.Crashed && (_truth || (haveMe && InView(me, other)));
+                bool visible = other.Status == FlightStatus.Flying && (_truth || (haveMe && InView(me, other)));
                 _contacts.TryGetValue(id, out Contact c);
                 // Never seen and not in view: nothing to remember (slice 3d: storing it made an unseen jet "known").
                 if (!visible && !c.Known) continue;

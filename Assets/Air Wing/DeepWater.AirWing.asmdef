@@ -4,7 +4,9 @@
     "references": [
         "Unity.InputSystem",
         "DeepWater.Sea",
-        "Unity.Mathematics"
+        "Unity.Mathematics",
+        "DeepWater.Gunnery",
+        "RH.Shared"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

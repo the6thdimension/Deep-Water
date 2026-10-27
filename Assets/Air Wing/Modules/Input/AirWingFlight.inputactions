@@ -95,6 +95,14 @@
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": ""
+                },
+                {
+                    "name": "Fire",
+                    "type": "Button",
+                    "id": "a5334d4f-87f4-4875-849d-9a13a60f16d7",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
                 }
             ],
             "bindings": [
@@ -284,6 +292,28 @@
                     "action": "CycleSeat",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1817e837-648b-4fb5-b219-562a9ae83a26",
+                    "path": "<Keyboard>/leftCtrl",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Fire",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6c7127e4-d5aa-4a97-83a5-8956f8091768",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Fire",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },
@@ -408,6 +438,14 @@
                     "name": "CycleSeat",
                     "type": "Button",
                     "id": "262c6777-5528-40b8-aeb3-7c2c70d5e5a3",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "Fire",
+                    "type": "Button",
+                    "id": "ced2f256-11cf-4acb-9f36-9617f9435670",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": ""
@@ -556,6 +594,17 @@
                     "action": "CycleSeat",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1cd2c58e-2d6d-4e61-a798-35ded7e5c2ad",
+                    "path": "<Gamepad>/buttonSouth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Fire",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },
@@ -627,6 +676,14 @@
                     "name": "Brakes",
                     "type": "Button",
                     "id": "4ec0b2b1-7399-40be-b713-ff9f7df9120c",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "Fire",
+                    "type": "Button",
+                    "id": "f516825a-fd2e-4092-8e95-8a61978d57db",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": ""
@@ -718,6 +775,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Brakes",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "efc1776d-50ab-47de-8231-b685c667c316",
+                    "path": "<Joystick>/button5",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Fire",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

@@ -1,7 +1,7 @@
 # Gunnery — blueprint
 
-> **Status: LOCKED (SIX, 2026-10-27).** Slice 1 (the move of General Quarters' ballistics) is built; the aircraft gun
-> is next. Progress is in `ROADMAP.md`.
+> **Status: LOCKED (SIX, 2026-10-27).** Slice 1 (the move of General Quarters' ballistics) and slice 2 (the aircraft
+> gun: rounds in flight, the hit test, the lead sight) are built. Progress is in `ROADMAP.md`.
 > **This document's one job:** say what Gunnery owns and why, and record every decision behind it.
 
 ## 1. In plain language
@@ -46,3 +46,4 @@ mounts, their aiming and their damage; Gunnery owns what happens between the muz
 
 ## Change log
 - **2026-10-27** — Written from SIX's answers (K1–K6). Slice 1: General Quarters' ballistics moved here.
+- **2026-10-27** — Slice 2: `Guns/` (GunProfile, RoundFlight, RoundsInFlight, LeadSight) and the RH Shared `HitReport`; Air Wing and RH Aviator use them.

@@ -33,6 +33,8 @@ namespace DeepWater.AirWing.Core.Seats
         public PilotSwitches Toggles;
         /// <summary>This source's brake control is held (it does not take the stick).</summary>
         public bool Brakes;
+        /// <summary>This source's gun trigger is held (it does not take the stick).</summary>
+        public bool Fire;
 
         public static DeviceSample Idle => new DeviceSample { LeverAbsolute = float.NaN };
     }
@@ -173,6 +175,7 @@ namespace DeepWater.AirWing.Core.Seats
             inputs.Afterburner = detent < 1f && Lever >= detent;
             inputs.Throttle = inputs.Afterburner ? 1f : Mathf.Clamp01(Lever / detent);
             inputs.Brakes = f.Stick.Brakes || f.Gamepad.Brakes || f.Keyboard.Brakes;   // any source's brakes brake
+            inputs.Trigger = f.Stick.Fire || f.Gamepad.Fire || f.Keyboard.Fire;      // and any source's trigger fires
 
             LevelHolding = false;
             switch (Owner)

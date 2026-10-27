@@ -20,7 +20,9 @@ namespace DeepWater.Aviator.Tests
 {
     /// <summary>
     /// Slice 3d (Pilot L1: W38, W43 at eight, W45, W46, W52, W53): the fight, headless, against the pass criteria
-    /// fixed in ROADMAP before building (W50). Every part L1, over a flat sea. No weapons: rear-cone seconds only.
+    /// fixed in ROADMAP before building (W50). Every part L1, over a flat sea. No weapons: rear-cone seconds only, so
+    /// every pilot here flies with its guns safe (<see cref="PilotProfile.TriggerMils"/> 0); the armed fight is
+    /// <c>GunFightTests</c>.
     /// </summary>
     public class FightTests
     {
@@ -32,7 +34,9 @@ namespace DeepWater.Aviator.Tests
         {
             var so = AssetDatabase.LoadAssetAtPath<PilotProfileSO>(path);
             Assert.IsNotNull(so, path + " (Deep Water → RH Aviator → Apply Pilot Profiles)");
-            return so.Bake();
+            PilotProfile p = so.Bake();
+            p.TriggerMils = 0f;   // guns safe: these tests are the position fight (W46)
+            return p;
         }
 
         static AirframeState Start(in AircraftProfile e, Vector3 at, float headingDeg, float kt) =>

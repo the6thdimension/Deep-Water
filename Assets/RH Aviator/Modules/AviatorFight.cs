@@ -82,7 +82,7 @@ namespace DeepWater.Aviator.Modules
                 }
             }
             GUI.Label(new Rect(0.5f * w - 400f * s, 70f * s, 800f * s, 34f * s),
-                      $"REAR CONE  BLUE {_fight.SideSeconds(Side.Blue):F0} S  ·  RED {_fight.SideSeconds(Side.Red):F0} S{state}", _style);
+                      $"KILLS  BLUE {_fight.SideKills(Side.Blue)}  ·  RED {_fight.SideKills(Side.Red)}{(_fight.FriendlyKills > 0 ? $"  ·  FRIENDLY {_fight.FriendlyKills}" : "")}     REAR CONE  BLUE {_fight.SideSeconds(Side.Blue):F0} S  ·  RED {_fight.SideSeconds(Side.Red):F0} S{state}", _style);
         }
     }
 }

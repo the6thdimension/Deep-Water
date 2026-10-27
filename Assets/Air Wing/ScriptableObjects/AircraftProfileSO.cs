@@ -163,6 +163,32 @@ namespace DeepWater.AirWing.ScriptableObjects
         [Tooltip("How much it stiffens: extra force = this × k × (x − x₀)² / (L − x₀). 0 = a linear strut.")]
         public float strutEndStopStiffening;
 
+        [Header("Gun (Gunnery K4; empty name = unarmed)")]
+        public string gunName = "";
+        [Tooltip("Rounds per minute.")]
+        public float gunRoundsPerMinute;
+        public int gunRoundsCarried;
+        public float gunRoundMassKg;
+        [Tooltip("The diameter that flies, m.")]
+        public float gunRoundDiameterM;
+        public float gunMuzzleVelocityFtS;
+        [Tooltip("Drag = this × G7(Mach).")]
+        public float gunRoundFormFactor;
+        [Tooltip("1σ spread of the rounds about the bore line, milliradians.")]
+        public float gunDispersionMils;
+        [Tooltip("Rounds are dropped after this long in flight, s.")]
+        public float gunMaxTimeOfFlightS;
+        [Tooltip("The muzzle, body frame about the centre of mass (Unity axes), m.")]
+        public Vector3 gunMuzzleM;
+        [Tooltip("The bore line, body frame.")]
+        public Vector3 gunBoreBody = Vector3.forward;
+
+        [Header("Combat (Gunnery K5; abstract)")]
+        [Tooltip("Hit points: each round that hits takes one. 0 = rounds pass through it.")]
+        public float hitPoints;
+        [Tooltip("The sphere rounds are tested against, m.")]
+        public float hitRadiusM;
+
         [Header("Provenance (W8)")]
         [TextArea(8, 40)]
         public string provenance = "";
@@ -285,6 +311,28 @@ namespace DeepWater.AirWing.ScriptableObjects
                     EndStopStiffening = strutEndStopStiffening,
                 };
             }
+            if (!string.IsNullOrEmpty(gunName))
+            {
+                profile.Gun = new GunMount
+                {
+                    Gun = new DeepWater.Gunnery.Guns.GunProfile
+                    {
+                        Name = gunName,
+                        Round = new DeepWater.Gunnery.Ballistics.ProjectileData
+                        {
+                            MassKg = gunRoundMassKg, DiameterM = gunRoundDiameterM, FormFactor = gunRoundFormFactor,
+                            MuzzleVelocityMps = (float)(gunMuzzleVelocityFtS * Units.FootToMetre),
+                        },
+                        RoundsPerMinute = gunRoundsPerMinute,
+                        RoundsCarried = gunRoundsCarried,
+                        DispersionMils = gunDispersionMils,
+                        MaxTimeOfFlightS = gunMaxTimeOfFlightS,
+                    },
+                    MuzzleM = gunMuzzleM,
+                    BoreBody = gunBoreBody.normalized,
+                };
+            }
+            if (hitPoints > 0f) profile.Combat = new CombatProfile { HitPoints = hitPoints, HitRadiusM = hitRadiusM };
             profile.Validate();
             return profile;
         }

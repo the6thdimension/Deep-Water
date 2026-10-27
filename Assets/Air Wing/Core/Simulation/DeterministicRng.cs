@@ -26,7 +26,7 @@ namespace DeepWater.AirWing.Core.Simulation
     /// global. Every draw is counted so an outcome can cite its <see cref="ChanceRoot"/>. The pattern is copied from
     /// General Quarters, not referenced (W31).
     /// </summary>
-    public sealed class DeterministicRng
+    public sealed class DeterministicRng : DeepWater.Gunnery.Guns.IUniformSource
     {
         ulong _state;
 

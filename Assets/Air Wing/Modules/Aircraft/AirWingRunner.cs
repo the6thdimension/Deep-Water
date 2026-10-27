@@ -63,7 +63,8 @@ namespace DeepWater.AirWing.Modules.Aircraft
                 seaSurface = null;
             }
             var surface = new SceneSurface(seaSurface, FindObjectsByType<FlatGround>(FindObjectsInactive.Exclude), fallbackSurfaceHeightM);
-            _core = new FlightCore(new SubstepClock(Time.fixedDeltaTime, sheet.SubstepsPerTick), surface, new PhysXContactProbe());
+            _core = new FlightCore(new SubstepClock(Time.fixedDeltaTime, sheet.SubstepsPerTick), surface, new PhysXContactProbe(), sheet.Seed);
+            if (p.Gun.IsSet && FindAnyObjectByType<World.TracerView>() == null) gameObject.AddComponent<World.TracerView>().Use(this);   // the guns show without a scene change
 
             _views.AddRange(FindObjectsByType<AircraftView>(FindObjectsInactive.Exclude).OrderBy(v => v.AircraftId));
             int playerAircraft = 0;

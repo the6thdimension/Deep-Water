@@ -122,6 +122,10 @@ namespace DeepWater.AirWing.Core.Profiles
         public ControlsL1Profile ControlsL1;
         /// <summary>Landing Gear L1's wheels and limits; unset for a type with no gear data.</summary>
         public LandingGearProfile LandingGear;
+        /// <summary>The gun (Gunnery K4); unset for an unarmed type.</summary>
+        public GunMount Gun;
+        /// <summary>Hit points and hit size (Gunnery K5); unset: rounds pass through it.</summary>
+        public CombatProfile Combat;
 
         /// <summary>Airframe L1 and Flight Controls L1 come as a pair: one without the other cannot fly.</summary>
         public bool HasL1 => AirframeL1.IsSet && ControlsL1.IsSet;
@@ -134,6 +138,8 @@ namespace DeepWater.AirWing.Core.Profiles
             if (AirframeL1.IsSet) AirframeL1.Validate();
             if (ControlsL1.IsSet) ControlsL1.Validate();
             if (LandingGear.IsSet) LandingGear.Validate();
+            if (Gun.IsSet) Gun.Validate();
+            if (Combat.IsSet) Combat.Validate();
         }
     }
 }

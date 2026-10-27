@@ -91,7 +91,7 @@ namespace DeepWater.AirWing.Core.Seats
             for (int k = 0; k < all.Count; k++)
             {
                 Aircraft a = all[(start + k) % all.Count];
-                if (a.Id == PlayerAircraftId || a.State.Status == FlightStatus.Crashed) continue;
+                if (a.Id == PlayerAircraftId || a.State.Status != FlightStatus.Flying) continue;
                 TakeSeat(a.Id);
                 break;
             }

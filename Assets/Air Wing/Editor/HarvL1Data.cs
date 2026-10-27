@@ -204,9 +204,16 @@ namespace DeepWater.AirWing.Editor
                 "(SIX, 2026-10-26), an oleo's stiffening air spring near full stroke, sized so a hands-off touchdown's nose slap does not bottom the nose strut.\n" +
                 "Note: the published f18full.m adds the thrust term of beta-dot with the wrong sign (T cos(alpha) sin(beta)/(mV)); " +
                 "Air Wing derives its motion from body kinematics and does not inherit it (Calibration~/l1_harv_mirror.py).";
+            // Replace only this paragraph: later ones (the gun's, GunData) start with their own "--- " marker.
             string prov = so.provenance ?? "";
             int at = prov.IndexOf(Marker, System.StringComparison.Ordinal);
-            so.provenance = (at >= 0 ? prov.Substring(0, at).TrimEnd() : prov.TrimEnd()) + "\n\n" + paragraph;
+            string rest = "";
+            if (at >= 0)
+            {
+                int end = prov.IndexOf("\n--- ", at + Marker.Length, System.StringComparison.Ordinal);
+                if (end >= 0) rest = "\n\n" + prov.Substring(end + 1).TrimEnd();
+            }
+            so.provenance = (at >= 0 ? prov.Substring(0, at).TrimEnd() : prov.TrimEnd()) + "\n\n" + paragraph + rest;
 
             EditorUtility.SetDirty(so);
             var visuals = AssetDatabase.LoadAssetAtPath<AircraftVisualsSO>(VisualsPath);

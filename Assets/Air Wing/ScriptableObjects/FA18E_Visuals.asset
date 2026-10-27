@@ -53,6 +53,121 @@ MonoBehaviour:
     axis: {x: 0, y: 0, z: 1}
     maxAngleDeg: 15
     smoothing: 1
+  gearParts:
+  - transformName: CenterUpLeg
+    axis: {x: 1, y: 0, z: 0}
+    stowedAngleDeg: -105
+    startFraction: 0.05
+    endFraction: 0.75
+    hideWhenStowed: 1
+  - transformName: CenterUpLeg_Aux2.004
+    axis: {x: 1, y: 0, z: 0}
+    stowedAngleDeg: -30
+    startFraction: 0.05
+    endFraction: 0.75
+    hideWhenStowed: 1
+  - transformName: LeftUpLeg
+    axis: {x: 0.1013, y: -0.408, z: -0.9073}
+    stowedAngleDeg: 99.4
+    startFraction: 0.05
+    endFraction: 0.75
+    hideWhenStowed: 1
+  - transformName: RightUpLeg
+    axis: {x: 0.1299, y: 0.4211, z: 0.8977}
+    stowedAngleDeg: 96.6
+    startFraction: 0.05
+    endFraction: 0.75
+    hideWhenStowed: 1
+  - transformName: LeftUpLeg_Aux4.1
+    axis: {x: 1, y: 0, z: 0}
+    stowedAngleDeg: -75
+    startFraction: 0.05
+    endFraction: 0.75
+    hideWhenStowed: 1
+  - transformName: RightUpLeg_Aux4.1
+    axis: {x: 1, y: 0, z: 0}
+    stowedAngleDeg: -90
+    startFraction: 0.05
+    endFraction: 0.75
+    hideWhenStowed: 1
+  - transformName: LeftUpLeg_Aux1.1
+    axis: {x: 1, y: 0, z: 0}
+    stowedAngleDeg: 0
+    startFraction: 0.7
+    endFraction: 1
+    hideWhenStowed: 1
+  - transformName: LeftUpLeg_Aux2.1
+    axis: {x: 1, y: 0, z: 0}
+    stowedAngleDeg: 0
+    startFraction: 0.7
+    endFraction: 1
+    hideWhenStowed: 1
+  - transformName: RightUpLeg_Aux1.1
+    axis: {x: 1, y: 0, z: 0}
+    stowedAngleDeg: 0
+    startFraction: 0.7
+    endFraction: 1
+    hideWhenStowed: 1
+  - transformName: RightUpLeg_Aux2.1
+    axis: {x: 1, y: 0, z: 0}
+    stowedAngleDeg: 0
+    startFraction: 0.7
+    endFraction: 1
+    hideWhenStowed: 1
+  - transformName: CenterUpLeg_Aux9.005
+    axis: {x: -0.001, y: -0.016, z: -1}
+    stowedAngleDeg: -74
+    startFraction: 0.7
+    endFraction: 1
+    hideWhenStowed: 0
+  - transformName: CenterUpLeg_Aux6.003
+    axis: {x: -0.014, y: 0.002, z: 1}
+    stowedAngleDeg: -90
+    startFraction: 0.7
+    endFraction: 1
+    hideWhenStowed: 0
+  - transformName: CenterUpLeg_Aux10.003
+    axis: {x: 0, y: -0.006, z: -1}
+    stowedAngleDeg: 96
+    startFraction: 0.7
+    endFraction: 1
+    hideWhenStowed: 0
+  - transformName: LeftUpLeg_Aux1
+    axis: {x: -0.087, y: -0.005, z: 0.996}
+    stowedAngleDeg: 126
+    startFraction: 0.7
+    endFraction: 1
+    hideWhenStowed: 0
+  - transformName: LeftUpLeg_Aux3
+    axis: {x: -0.003, y: -0.096, z: 0.995}
+    stowedAngleDeg: 93
+    startFraction: 0.7
+    endFraction: 1
+    hideWhenStowed: 0
+  - transformName: LeftUpLeg_Aux2
+    axis: {x: 0.005, y: -0.004, z: 1}
+    stowedAngleDeg: 95
+    startFraction: 0.7
+    endFraction: 1
+    hideWhenStowed: 0
+  - transformName: RightUpLeg_Aux1
+    axis: {x: 0.009, y: -0.003, z: -1}
+    stowedAngleDeg: 102
+    startFraction: 0.7
+    endFraction: 1
+    hideWhenStowed: 0
+  - transformName: RightUpLeg_Aux3
+    axis: {x: 0.006, y: -0.017, z: -1}
+    stowedAngleDeg: 92
+    startFraction: 0.7
+    endFraction: 1
+    hideWhenStowed: 0
+  - transformName: RightUpLeg_Aux2
+    axis: {x: 0.005, y: 0.009, z: -1}
+    stowedAngleDeg: 81
+    startFraction: 0.7
+    endFraction: 1
+    hideWhenStowed: 0
   modelOffsetM: {x: 0, y: 0, z: 1.6}
   provenance: "Copied 2026-10-25 from Assets/FDS Assets/Aircraft/F-18E.prefab's AerialArcade
     ControlSurface settings (transform names, axes, max angles, smoothing). Rudder

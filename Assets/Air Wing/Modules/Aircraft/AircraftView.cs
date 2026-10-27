@@ -40,6 +40,7 @@ namespace DeepWater.AirWing.Modules.Aircraft
         Transform[] _surfaces;
         Vector3[] _restEuler;
         float[] _angles;
+        GearRig _gear;
 
         public int AircraftId => aircraftId;
         public StartSeat Seat => seat;
@@ -61,7 +62,12 @@ namespace DeepWater.AirWing.Modules.Aircraft
             FindSurfaces();
             // The model's origin is not the centre of mass the core flies: place it where the visuals say.
             Transform model = transform.Find("Model");
-            if (model != null && visuals != null) model.localPosition = visuals.modelOffsetM;
+            if (model != null && visuals != null)
+            {
+                model.localPosition = visuals.modelOffsetM;
+                // The gear rig reads its rest pose now, before anything moves it.
+                if (visuals.gearParts.Length > 0) _gear = new GearRig(model, model, visuals.gearParts, this);
+            }
             Apply(_current);
         }
 
@@ -85,6 +91,9 @@ namespace DeepWater.AirWing.Modules.Aircraft
             transform.SetPositionAndRotation(Vector3.Lerp(_previous.Position, _current.Position, t),
                                              Quaternion.Slerp(_previous.Attitude, _current.Attitude, t));
             AnimateSurfaces(_aircraft.LastInputs, _aircraft.Controls is FlightControlsL1 ? (ControlState?)_aircraft.State.Controls : null);
+            // The gear follows the core: down at L0 (no gear part to move it), its transit at Landing Gear L1.
+            if (_gear != null)
+                _gear.Pose(_aircraft.Gear is Core.LandingGear.LandingGearL1 ? Mathf.Lerp(_previous.GearDeployed, _current.GearDeployed, t) : 1f);
         }
 
         void Apply(in AirframeState s) => transform.SetPositionAndRotation(s.Position, s.Attitude);

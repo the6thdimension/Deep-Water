@@ -28,6 +28,44 @@ namespace DeepWater.AirWing.Editor
         const double SuperHornetChordFt = 12.0;
         const double FuelFractionForInertia = 0.6;   // AUTHORED: the HARV row is at 60 % internal fuel; match it
 
+        /// <summary>
+        /// The F-18E model's gear rig (AUTHORED, slice 2d). The model has gear bones but no retraction animation, and the
+        /// vendor rig named only two of its parts, so each hinge was solved off the geometry on 2026-10-26: the nose leg
+        /// folds forward 105° until its wheel clears the closed doors; each main leg swings aft, up and in to put its
+        /// wheel flat in the bay its doors cover; each door turns about its own long edge until it lies flat over the bay.
+        /// Braces and the legs hide once stowed, behind the closed doors.
+        /// </summary>
+        static AircraftVisualsSO.GearPart[] GearRig()
+        {
+            AircraftVisualsSO.GearPart Leg(string n, Vector3 axis, float deg, bool hide = true) =>
+                new AircraftVisualsSO.GearPart { transformName = n, axis = axis, stowedAngleDeg = deg, startFraction = 0.05f, endFraction = 0.75f, hideWhenStowed = hide };
+            AircraftVisualsSO.GearPart Door(string n, Vector3 axis, float deg, bool hide = false) =>
+                new AircraftVisualsSO.GearPart { transformName = n, axis = axis, stowedAngleDeg = deg, startFraction = 0.7f, endFraction = 1f, hideWhenStowed = hide };
+            return new[]
+            {
+                Leg("CenterUpLeg", Vector3.right, -105f),
+                Leg("CenterUpLeg_Aux2.004", Vector3.right, -30f),
+                Leg("LeftUpLeg", new Vector3(0.1013f, -0.4080f, -0.9073f), 99.4f),
+                Leg("RightUpLeg", new Vector3(0.1299f, 0.4211f, 0.8977f), 96.6f),
+                Leg("LeftUpLeg_Aux4.1", Vector3.right, -75f),
+                Leg("RightUpLeg_Aux4.1", Vector3.right, -90f),
+                // The doors' actuator links: they ride on the doors and hide once the doors are shut.
+                Door("LeftUpLeg_Aux1.1", Vector3.right, 0f, hide: true),
+                Door("LeftUpLeg_Aux2.1", Vector3.right, 0f, hide: true),
+                Door("RightUpLeg_Aux1.1", Vector3.right, 0f, hide: true),
+                Door("RightUpLeg_Aux2.1", Vector3.right, 0f, hide: true),
+                Door("CenterUpLeg_Aux9.005", new Vector3(-0.001f, -0.016f, -1.000f), -74f),
+                Door("CenterUpLeg_Aux6.003", new Vector3(-0.014f, 0.002f, 1.000f), -90f),
+                Door("CenterUpLeg_Aux10.003", new Vector3(0.000f, -0.006f, -1.000f), 96f),
+                Door("LeftUpLeg_Aux1", new Vector3(-0.087f, -0.005f, 0.996f), 126f),
+                Door("LeftUpLeg_Aux3", new Vector3(-0.003f, -0.096f, 0.995f), 93f),
+                Door("LeftUpLeg_Aux2", new Vector3(0.005f, -0.004f, 1.000f), 95f),
+                Door("RightUpLeg_Aux1", new Vector3(0.009f, -0.003f, -1.000f), 102f),   // a thicker mesh than its twin: its flattest close
+                Door("RightUpLeg_Aux3", new Vector3(0.006f, -0.017f, -1.000f), 92f),
+                Door("RightUpLeg_Aux2", new Vector3(0.005f, 0.009f, -1.000f), 81f),
+            };
+        }
+
         [MenuItem("Deep Water/Air Wing/Apply HARV L1 Data to F-A-18E")]
         public static void Apply()
         {
@@ -115,6 +153,10 @@ namespace DeepWater.AirWing.Editor
             so.nosewheelSteerFadeEndKt = 80f;
             so.gearTransitTimeS = 4f;
             so.gearDownDeltaCd = 0.02f;
+            // AUTHORED (SIX, 2026-10-26): the struts stiffen over their last 30 % of travel, so a hands-off touchdown's
+            // nose slap is absorbed instead of bottoming the nose strut.
+            so.strutEndStopFraction = 0.7f;
+            so.strutEndStopStiffening = 30f;
 
             // AUTHORED scaling: I ∝ m·r². Roll with the span, pitch and yaw with the length, the product with both.
             double weightLb = so.emptyWeightLb + FuelFractionForInertia * so.internalFuelLb;
@@ -158,7 +200,8 @@ namespace DeepWater.AirWing.Editor
                 "carrier-landing design sink rate commonly quoted for Navy jets (source not pinned), used here for any landing. " +
                 "tyreRollingFriction 0.02, tyreBrakingFriction 0.5, tyreLateralFriction 0.7, tyreSlipSpeedMps 0.5: AUTHORED, textbook " +
                 "dry-concrete tyre values. nosewheelSteerMaxDeg 20, nosewheelSteerFadeStartKt 40, nosewheelSteerFadeEndKt 80, " +
-                "gearTransitTimeS 4, gearDownDeltaCd 0.02: AUTHORED.\n" +
+                "gearTransitTimeS 4, gearDownDeltaCd 0.02: AUTHORED. strutEndStopFraction 0.7, strutEndStopStiffening 30: AUTHORED " +
+                "(SIX, 2026-10-26), an oleo's stiffening air spring near full stroke, sized so a hands-off touchdown's nose slap does not bottom the nose strut.\n" +
                 "Note: the published f18full.m adds the thrust term of beta-dot with the wrong sign (T cos(alpha) sin(beta)/(mV)); " +
                 "Air Wing derives its motion from body kinematics and does not inherit it (Calibration~/l1_harv_mirror.py).";
             string prov = so.provenance ?? "";
@@ -171,6 +214,7 @@ namespace DeepWater.AirWing.Editor
             {
                 Undo.RecordObject(visuals, "Apply the model offset");
                 visuals.modelOffsetM = ModelOffsetM;
+                visuals.gearParts = GearRig();
                 EditorUtility.SetDirty(visuals);
             }
             else Debug.LogWarning($"[Air Wing] {VisualsPath} not found; the model offset was not applied.");

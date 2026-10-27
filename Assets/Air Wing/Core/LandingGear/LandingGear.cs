@@ -65,6 +65,22 @@ namespace DeepWater.AirWing.Core.LandingGear
 
         public float DragIncrement(in AirframeState s) => _p.GearDownDeltaCD * s.GearDeployed;
 
+        /// <summary>
+        /// The strut's spring at compression <paramref name="x"/>: linear, stiffening quadratically past the end-stop
+        /// fraction of its travel (slice 2d: a linear nose strut bottomed out when the mains slapped the nose down).
+        /// </summary>
+        public float Spring(in WheelProfile w, float x)
+        {
+            float f = w.SpringNPerM * x;
+            float x0 = _p.EndStopFraction * w.TravelM;
+            if (_p.EndStopStiffening > 0f && x > x0)
+            {
+                float past = x - x0;
+                f += _p.EndStopStiffening * w.SpringNPerM * past * past / (w.TravelM - x0);
+            }
+            return f;
+        }
+
         public GearLoads Step(ref AirframeState s, in PilotInputs inputs, IContactProbe probe, float dt)
         {
             bool wantDown = inputs.Has(PilotSwitches.GearDown) || s.InContact;   // weight on wheels: it stays down
@@ -95,7 +111,7 @@ namespace DeepWater.AirWing.Core.LandingGear
                 if (sink > _p.MaxSinkRateMps)
                     return new GearLoads(Vector3.zero, Vector3.zero, $"{w.Name} met the ground at {sink:F1} m/s ({sink / 0.3048f:F0} ft/s)");
                 float rate = sink / Mathf.Max(Vector3.Dot(up, ground), 0.2f);    // the strut's compression rate
-                float normal = Mathf.Max(0f, w.SpringNPerM * compression + w.DamperNsPerM * rate);
+                float normal = Mathf.Max(0f, Spring(w, compression) + w.DamperNsPerM * rate);
 
                 // The tyre's directions lie in the ground's plane.
                 Vector3 heading = att * Vector3.forward;

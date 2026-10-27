@@ -158,6 +158,10 @@ namespace DeepWater.AirWing.ScriptableObjects
         public float nosewheelSteerFadeEndKt;
         public float gearTransitTimeS;
         public float gearDownDeltaCd;
+        [Tooltip("The strut stiffens past this fraction of its travel (an oleo's air spring near full stroke).")]
+        public float strutEndStopFraction;
+        [Tooltip("How much it stiffens: extra force = this × k × (x − x₀)² / (L − x₀). 0 = a linear strut.")]
+        public float strutEndStopStiffening;
 
         [Header("Provenance (W8)")]
         [TextArea(8, 40)]
@@ -277,6 +281,8 @@ namespace DeepWater.AirWing.ScriptableObjects
                     SteerFadeEndMps = (float)(nosewheelSteerFadeEndKt * Units.KnotToMetrePerSecond),
                     TransitTimeS = gearTransitTimeS,
                     GearDownDeltaCD = gearDownDeltaCd,
+                    EndStopFraction = strutEndStopFraction,
+                    EndStopStiffening = strutEndStopStiffening,
                 };
             }
             profile.Validate();

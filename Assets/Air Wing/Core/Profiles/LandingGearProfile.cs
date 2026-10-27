@@ -38,6 +38,11 @@ namespace DeepWater.AirWing.Core.Profiles
         public float TransitTimeS;
         /// <summary>Drag of the gear down.</summary>
         public float GearDownDeltaCD;
+        /// <summary>
+        /// The strut's end of travel stiffens, as an oleo's air spring does near full stroke: past this fraction of the
+        /// travel the spring adds <see cref="EndStopStiffening"/> × k × (x − x₀)² / (L − x₀). 0 stiffening = a linear strut.
+        /// </summary>
+        public float EndStopFraction, EndStopStiffening;
 
         public bool IsSet => Wheels != null && Wheels.Length > 0;
 
@@ -60,6 +65,9 @@ namespace DeepWater.AirWing.Core.Profiles
             if (!(SteerFadeEndMps > SteerFadeStartMps)) throw new ArgumentException("landing gear: the steering fade must end above where it starts");
             AirframeProfile.Positive(TransitTimeS, nameof(TransitTimeS));
             AirframeProfile.NonNegative(GearDownDeltaCD, nameof(GearDownDeltaCD));
+            AirframeProfile.NonNegative(EndStopStiffening, nameof(EndStopStiffening));
+            if (EndStopStiffening > 0f && !(EndStopFraction > 0f && EndStopFraction < 1f))
+                throw new ArgumentException("landing gear: the end stop must start inside the travel (0 < EndStopFraction < 1)");
         }
     }
 }

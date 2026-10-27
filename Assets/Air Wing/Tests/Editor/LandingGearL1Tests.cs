@@ -79,9 +79,15 @@ namespace DeepWater.AirWing.Tests
         /// steered onto the path (G through the stick), the speed held with the throttle. On the wheels: idle, the stick
         /// centred, and the brakes if asked.
         /// </summary>
-        static PilotInputs ApproachInputs(in AircraftProfile e, in AirframeState s, float kt, float pathDeg, bool gearDown, bool brakeOnTheGround)
+        static PilotInputs ApproachInputs(in AircraftProfile e, in AirframeState s, float kt, float pathDeg, bool gearDown, bool brakeOnTheGround,
+                                          bool handsOffOnTheWheels = false)
         {
             var i = new PilotInputs { Switches = PilotSwitches.FlapsDown | (gearDown ? PilotSwitches.GearDown : PilotSwitches.None) };
+            if (s.InContact && handsOffOnTheWheels)
+            {
+                i.Brakes = brakeOnTheGround && PitchDeg(s) < 0.5f;   // stick centred, idle: the nose is left to fall
+                return i;
+            }
             if (s.InContact)
             {
                 // On the wheels: idle, and fly the nose down (aft stick against the slap-down the mains give, easing off
@@ -198,6 +204,45 @@ namespace DeepWater.AirWing.Tests
             Assert.Less(end.Velocity.magnitude, 0.5f, "the brakes stop it");
             Assert.Less(rollout, 2500f);
             Assert.Less(maxSide, 2f, "stays on the centreline");
+        }
+
+        [Test]
+        public void AHandsOffTouchdown_TheStrutsEndStopTakesTheNoseSlap()
+        {
+            AircraftProfile e = E();
+            var core = Core(e, Approach(e, 145f, 30f, 3f, true), new StateSeat((tick, s) => ApproachInputs(e, s, 145f, 3f, true, true, handsOffOnTheWheels: true)));
+            var gear = (LandingGearL1)core.Find(1).Gear;
+            WheelProfile nose = e.LandingGear.Wheels[0];
+            float maxNose = 0f, maxNoseRate = 0f;
+            for (int t = 0; t < 6000; t++)
+            {
+                core.Step();
+                AirframeState s = core.Find(1).State;
+                if (s.Status != FlightStatus.Flying) Assert.Fail($"tick {t}: {core.Find(1).CrashReason}");
+                maxNose = Mathf.Max(maxNose, -(s.Position.y + (s.Attitude * nose.ContactPointM).y));
+                if (s.InContact) maxNoseRate = Mathf.Max(maxNoseRate, s.BodyRates.x * R2D);
+                if (s.InContact && s.Velocity.magnitude < 0.5f) break;
+            }
+            float peakLoad = gear.Spring(nose, maxNose) / (e.LandingGear.Wheels[0].SpringNPerM * nose.TravelM);
+            Debug.Log($"[AIRWING GEAR] hands-off touchdown: nose slap {maxNoseRate:F1}°/s, the nose strut took {maxNose / nose.TravelM:P0} of its travel " +
+                      $"(spring at {peakLoad:F2}× a linear strut's full-travel force)");
+            Assert.Less(maxNose, nose.TravelM, "the end stop held: the nose strut did not bottom");
+            Assert.Greater(maxNose, 0.7f * nose.TravelM, "and it took the slap in the stiffening part of its travel");
+            Assert.Less(core.Find(1).State.Velocity.magnitude, 0.5f, "stopped on the brakes");
+        }
+
+        [Test]
+        public void TheEndStop_IsLinearBelowItsStart_AndStiffensPastIt()
+        {
+            AircraftProfile e = E();
+            var gear = new LandingGearL1(e.LandingGear);
+            WheelProfile w = e.LandingGear.Wheels[1];
+            float k = w.SpringNPerM, L = w.TravelM, x0 = e.LandingGear.EndStopFraction * L;
+            Assert.AreEqual(k * 0.5f * L, gear.Spring(w, 0.5f * L), 1e-2f, "static compression is on the linear part");
+            Assert.AreEqual(k * x0, gear.Spring(w, x0), 1e-2f, "continuous where it starts");
+            float full = gear.Spring(w, L);
+            Assert.AreEqual(k * L + e.LandingGear.EndStopStiffening * k * (L - x0), full, 1f, "the formula at full travel");
+            Debug.Log($"[AIRWING GEAR] end stop: at full travel the main strut gives {full / (k * L):F1}× a linear strut's force");
         }
 
         [Test]

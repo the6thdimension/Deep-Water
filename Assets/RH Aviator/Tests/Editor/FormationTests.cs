@@ -243,6 +243,70 @@ namespace DeepWater.Aviator.Tests
             }
         }
 
+        /// <summary>Starts for three wingmen (offsets from the leader: x east, y up, z north), slots 1, 2, 3 in that order.</summary>
+        static readonly (string name, Vector3[] at)[] JoinStarts =
+        {
+            ("echelon behind (the 4 v 4 start)", new[] { new Vector3(60f, 0f, -60f), new Vector3(120f, 0f, -120f), new Vector3(180f, 0f, -180f) }),
+            ("crossed: right-hand jets to left slots", new[] { new Vector3(1500f, 0f, -2000f), new Vector3(-1500f, 0f, -2000f), new Vector3(800f, 0f, -1000f) }),
+            ("stacked in trail", new[] { new Vector3(0f, 0f, -1000f), new Vector3(0f, 0f, -2000f), new Vector3(0f, 0f, -3000f) }),
+            ("abeam both sides, crossed", new[] { new Vector3(2000f, 0f, -300f), new Vector3(-2000f, 0f, -300f), new Vector3(-1000f, 150f, -600f) }),
+        };
+
+        /// <summary>
+        /// Three wingmen join one leader with no fight, from <paramref name="at"/>: the closest any two jets come after the
+        /// first 5 s, when all three were first in fingertip (NaN: never), and how many crashed, over 115 s.
+        /// </summary>
+        static float FourShipJoin(Vector3[] at, out string pair, out float closestAtS, out float allInS, out int crashed)
+        {
+            AircraftProfile e = E();
+            PilotProfile p = Line();
+            float fuel = 0.6f * e.Airframe.InternalFuelKg;
+            var core = new FlightCore(new SubstepClock(0.02f, 4), new FlatSurface(0f));
+            core.Add(AircraftFactory.Build(1, e, L1, AircraftFactory.LevelStart(e, L1, new Vector3(0f, Height, 0f), 0f, LeaderKt * Kt, fuel, 0.7f)), new LeaderSeat(e, p));
+            var seats = new AviatorSeat[3];
+            for (int i = 0; i < 3; i++)
+            {
+                seats[i] = new AviatorSeat(core, e, p, new RuleLog());
+                core.Add(AircraftFactory.Build(i + 2, e, L1, AircraftFactory.LevelStart(e, L1, new Vector3(0f, Height, 0f) + at[i], 0f, LeaderKt * Kt, fuel, 0.7f)), seats[i]);
+                seats[i].JoinOn(i + 2, 1, i + 1);
+            }
+            float closest = float.MaxValue;
+            closestAtS = 0f; allInS = float.NaN; pair = "";
+            while (core.Tick < 115 * TicksPerSecond)
+            {
+                core.Step();
+                float t = core.Tick / (float)TicksPerSecond;
+                if (float.IsNaN(allInS) && seats.All(s => s.Mode == PilotMode.Fingertip)) allInS = t;
+                if (t < 5f) continue;
+                for (int a = 1; a <= 4; a++)
+                    for (int b = a + 1; b <= 4; b++)
+                    {
+                        float d = (core.Find(a).State.Position - core.Find(b).State.Position).magnitude;
+                        if (d < closest) { closest = d; closestAtS = t; pair = $"{a}-{b}"; }
+                    }
+            }
+            crashed = core.Aircraft.Count(a => a.State.Status != FlightStatus.Flying);
+            return closest;
+        }
+
+        /// <summary>
+        /// A join with no fight avoids too (PilotProfile.JoinAvoidM): before it, crossed joins met at 0 m (a survey of these starts,
+        /// 2026-10-27). From each start, no two jets closer than 20 m (an F/A-18E spans 13.6 m), all three in fingertip
+        /// within 90 s, nobody down.
+        /// </summary>
+        [Test]
+        public void FourShipJoins_KeepClearOfEachOther_AndAllReachTheirSlots()
+        {
+            foreach (var (name, at) in JoinStarts)
+            {
+                float closest = FourShipJoin(at, out string pair, out float closestAtS, out float allInS, out int crashed);
+                Debug.Log(FormattableString.Invariant($"[Aviator joins] {name}: closest {closest:F0} m ({pair} at {closestAtS:F0} s); all in fingertip {(float.IsNaN(allInS) ? "never" : allInS.ToString("F0") + " s")}; crashed {crashed}"));
+                Assert.Greater(closest, 20f, $"{name}: closest pass {closest:F0} m ({pair} at {closestAtS:F0} s)");
+                Assert.Less(allInS, 90f, $"{name}: all three in fingertip within 90 s");
+                Assert.AreEqual(0, crashed, name);
+            }
+        }
+
         [Test]
         public void TheFingertipLog_IsTheSameOnTwoRuns()
         {

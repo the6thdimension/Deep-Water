@@ -284,6 +284,11 @@ These are the fixed points around which the methodology orbits. Every principle 
     - Before adding a package, search its source for `DisplayDialog` on `[InitializeOnLoad]` paths, and pre-set the preference it asks about.
     - If one is already open, its buttons can be found and pressed from outside (`EnumChildWindows`, then `BM_CLICK`), but only with the button the user would choose.
 
+- **AP34. A tie-break keyed on a value both parties share.** Two agents resolving a symmetric conflict each break the tie on something they see alike (the leader's id, the world's up), so both pick the same way and the conflict stands.
+  - *Where seen:* RH Aviator's collision avoidance (2026-10-27): level with each other, each wingman compared the other's id with the *leader's* id, so wingmen 2 and 3 both climbed.
+  - *Do instead:* break the tie on something that differs between them and that both can see, such as their own ids (the lower climbs, the higher dives), so the two choices are opposite by construction.
+  - *Related:* the same night's finding that avoidance ran only in a fight, while joins also converge (crossed joins met at 0 m): a safety rule belongs to every mode in which the hazard exists, not the mode where it was first seen.
+
 - **AP33. An integrator clamped closer than the trim is to the operating point.** A P+I loop starts from a trim and limits its integral to a band round it, and the band does not reach the value the plant needs.
   - *Where seen:* RH Aviator slice 3b, 2026-10-27 (`FlightPathHands`). The throttle trimmed at 0.75 with its integral held to ±0.5; at 350 kt and 5,000 ft the jet needs 0.22. The integral sat on its stop, the speed loop settled 1.8 kt slow of its command, and a wingman rode 5–7 m out of its slot for as long as it flew.
   - *Why it fails:* A clamped integral is a proportional loop again, with a steady error of (needed − trim − clamp) ÷ gain. Nothing in the run looks saturated unless you print the integral.
@@ -527,3 +532,4 @@ These are the fixed points around which the methodology orbits. Every principle 
 - **2026-10-27** — RH Aviator slice 3d (the fight). AP32 exercised again: a pursuer on position feedback alone settles at a fixed angle off a turning target; turn matching fixes it.
 - **2026-10-27** — The dogfight survey. Added C44 (a pursuit that holds the target's height cannot spend the G it has).
 - **2026-10-27** — RH Radar Suite overnight (the pure core of Phases 2–4). Added C45 (prove the pure chain end to end before wiring it into legacy code) and C46 (check a plan's numbers against the closed form before building to them).
+- **2026-10-27** — RH Aviator join collisions. Added AP34 (a tie-break keyed on a value both parties share).

@@ -117,6 +117,12 @@ namespace DeepWater.Aviator.Core
         public float RangeKtPerM, AttackRangeM, ChaseOverKt;
         /// <summary>Collision avoidance: another jet predicted to pass inside this distance (metres) within this time (seconds) is avoided.</summary>
         public float AvoidM, AvoidS;
+        /// <summary>
+        /// Collision avoidance on a join with no fight: another jet predicted to pass inside this distance (metres) within
+        /// <see cref="AvoidS"/> is avoided the same way. It must lie inside the slot spacing, so a jet in its slot never
+        /// sets it off (0: none).
+        /// </summary>
+        public float JoinAvoidM;
 
         /// <summary>The hands in the pattern: the route hands, held to the pattern's bank.</summary>
         public HandsSettings PatternHands
@@ -197,6 +203,7 @@ namespace DeepWater.Aviator.Core
             Positive(FightFloorM, nameof(FightFloorM));
             Positive(ClearRangeM, nameof(ClearRangeM));
             if (BingoFlightTimeS < 0f) throw new ArgumentOutOfRangeException(nameof(BingoFlightTimeS), BingoFlightTimeS, "must not be negative (zero: never)");
+            if (JoinAvoidM < 0f || JoinAvoidM >= Math.Abs(SlotRightM)) throw new ArgumentOutOfRangeException(nameof(JoinAvoidM), JoinAvoidM, "must be at least 0 and inside the slot spacing, or a jet in its slot would set it off");
             if (!(LostSlotM > InSlotM)) throw new ArgumentOutOfRangeException(nameof(LostSlotM), LostSlotM, "losing the slot must lie outside being in it");
         }
 

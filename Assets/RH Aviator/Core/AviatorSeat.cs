@@ -198,7 +198,10 @@ namespace DeepWater.Aviator.Core
 
             // Formation is flown off the slot every tick (Formation, W44: the stick every tick).
             if ((Mode == PilotMode.Join || Mode == PilotMode.Fingertip) && TryLeader(out AirframeState lead))
+            {
                 _request = Formation.Plan(new Slot(lead, _pilot, _slotPosition), state, _pilot, Mode == PilotMode.Join);
+                if (_joinAvoiding && Mode == PilotMode.Join) _request.AltitudeM = _avoidHeight;
+            }
 
             // In a fight the eyes look every tick (the delay is counted in ticks), and the plan follows what they see.
             if (_fight != null && Mode != PilotMode.Home && Mode != PilotMode.Landed)
@@ -230,7 +233,8 @@ namespace DeepWater.Aviator.Core
             // The tight formation hands only near the slot: on a long join they porpoised (slice 3d: 2.2 G wings level,
             // 28 km behind at 2,000 ft); the route hands fly the way in.
             bool nearSlot = Mode == PilotMode.Fingertip || (Mode == PilotMode.Join && TryLeader(out AirframeState ld) && (new Slot(ld, _pilot, _slotPosition).Position - state.Position).sqrMagnitude < 500f * 500f);
-            FlightPathHands hands = nearSlot ? _formationHands
+            // Avoiding on a join takes the route hands too: the formation hands climb at half their rate.
+            FlightPathHands hands = nearSlot && !_joinAvoiding ? _formationHands
                 : Mode == PilotMode.Home && Leg >= PatternLeg.Downwind ? _patternHands
                 : _hands;
             if (hands != _flying && !first) hands.Resume(_core.Find(aircraftId).LastInputs.Throttle);
@@ -329,6 +333,15 @@ namespace DeepWater.Aviator.Core
                 Fire(tick, id, "in the slot", PilotMode.Fingertip, $"on aircraft {_leaderId}: {along:F1} m along, {across:F1} m across, {up:F1} m up");
             else if (Mode == PilotMode.Fingertip && Formation.LostTheSlot(slot, s, _pilot))
                 Fire(tick, id, "lost the slot", PilotMode.Join, $"{(slot.Position - s.Position).magnitude:F0} m from it; joining again");
+
+            // Rule "avoid" on a join with no fight (a fight's own rules avoid at their wider distance): crossed joins
+            // met at 0 m before it (FormationTests.FourShipJoins_KeepClearOfEachOther_AndAllReachTheirSlots, 2026-10-27).
+            if (Mode == PilotMode.Join && _fight == null && Avoid(s, id, _pilot.JoinAvoidM, out float avoidDy, out int avoidId))
+            {
+                if (!_joinAvoiding) { _joinAvoiding = true; Fire(tick, id, "avoid", PilotMode.Join, $"aircraft {avoidId} predicted inside {_pilot.JoinAvoidM:F0} m; {(avoidDy > 0f ? "climbing" : "diving")} clear"); }
+                _avoidHeight = s.Position.y + Mathf.Sign(avoidDy) * 3f * _pilot.JoinAvoidM;
+            }
+            else _joinAvoiding = false;
         }
 
         /// <summary>
@@ -426,7 +439,7 @@ namespace DeepWater.Aviator.Core
                 Fire(tick, id, breaking ? "break" : "tail clear", PilotMode.Fight, breaking ? $"aircraft {threatId} at {threatD:F0} m in its rear quarter" : "no threat behind");
             }
             // Collision avoidance: any jet predicted to pass too close, soon, from the picture (a near miss is seen).
-            if (Avoid(s, out float avoidDy, out int avoidId))
+            if (Avoid(s, id, _pilot.AvoidM, out float avoidDy, out int avoidId))
             {
                 if (!_avoiding) { _avoiding = true; Fire(tick, id, "avoid", PilotMode.Fight, $"aircraft {avoidId} predicted inside {_pilot.AvoidM:F0} m; {(avoidDy > 0f ? "climbing" : "diving")} clear"); }
                 _avoidHeight = s.Position.y + Mathf.Sign(avoidDy) * 3f * _pilot.AvoidM;
@@ -489,14 +502,17 @@ namespace DeepWater.Aviator.Core
         }
 
         readonly HashSet<int> _tallied = new HashSet<int>();
-        bool _avoiding;
+        bool _avoiding, _joinAvoiding;
         float _avoidHeight;
 
-        /// <summary>Another jet's closest approach on straight lines, if inside the avoid distance within the avoid time; which way to go.</summary>
-        bool Avoid(in AirframeState s, out float dy, out int with)
+        /// <summary>
+        /// Another jet's closest approach on straight lines, if inside <paramref name="distanceM"/> within the avoid time;
+        /// which way to go (away from where it will be; level with it, the lower id climbs and the higher dives).
+        /// </summary>
+        bool Avoid(in AirframeState s, int id, float distanceM, out float dy, out int with)
         {
             dy = 0f; with = 0;
-            if (_pilot.AvoidM <= 0f) return false;
+            if (distanceM <= 0f) return false;
             var picture = _core.Picture;
             float best = float.MaxValue;
             for (int i = 0; i < picture.Count; i++)
@@ -507,7 +523,7 @@ namespace DeepWater.Aviator.Core
                 Vector3 v = o.Velocity - s.Velocity;
                 float t = Mathf.Clamp(-Vector3.Dot(r, v) / Mathf.Max(v.sqrMagnitude, 1e-3f), 0f, _pilot.AvoidS);
                 float miss = (r + v * t).magnitude;
-                if (miss < _pilot.AvoidM && miss < best) { best = miss; dy = -(r + v * t).y; if (dy == 0f) dy = picture[i].Id > _leaderId ? 1f : -1f; with = picture[i].Id; }
+                if (miss < distanceM && miss < best) { best = miss; dy = -(r + v * t).y; if (dy == 0f) dy = picture[i].Id > id ? 1f : -1f; with = picture[i].Id; }
             }
             return with != 0;
         }

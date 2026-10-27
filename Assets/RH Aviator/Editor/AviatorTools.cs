@@ -65,6 +65,7 @@ namespace DeepWater.Aviator.Editor
             so.cornerKt = 330f; so.leadS = 1f; so.lagS = 1f; so.lagRangeM = 800f; so.overshootClosureKt = 60f; so.lagSlowKt = 40f;
             so.threatRangeM = 1500f; so.threatConeDeg = 60f; so.fightFloorM = 300f; so.clearRangeM = 8000f; so.slowKt = 220f; so.turnMatch = 0.7f; so.rangeKtPerM = 0.05f; so.attackRangeM = 600f; so.chaseOverKt = 150f;
             so.avoidM = 100f; so.avoidS = 3f;
+            so.joinAvoidM = 25f;
             so.provenance =
                 "All AUTHORED (RH Aviator W45; no public source describes a generic line pilot), tuned headless against slice 3a's " +
                 "pass criteria (ROADMAP, fixed before tuning). Hands: guidanceGain (2, the classic value of the L1 path-following law, Park, Deyst and How, AIAA 2004-4900, PUBLIC method), maxBankDeg, rollRatePerBankDeg, climbDegPerM, " +
@@ -80,7 +81,7 @@ namespace DeepWater.Aviator.Editor
                 "downwindOffsetM, downwindHeightM (600 ft), finalTurnAlongM, approachKt (145 kt, as Air Wing's landing test), gearKt, patternBankDeg, patternGPerPathDeg, patternMaxDiveDeg, patternFloorAglM, glidePathDeg, touchdownM, flareHeightM, flarePathDeg, finalCarrotM, " +
                 "rolloutPedalPerM, rolloutPedalPerDeg, bingoFlightTimeS (a STAND-IN for bingo fuel until fuel burn exists; 0 = never). " +
                 "The fight (Pilot L1, W38, W45; a game's skill numbers, AUTHORED, not any real pilot's or air force's): fieldOfViewDeg, reactionDelayS, memoryS, visualRangeM, " +
-                "cornerKt, leadS, lagS, lagRangeM, overshootClosureKt, lagSlowKt, threatRangeM, threatConeDeg, fightFloorM, clearRangeM, slowKt (energy sense; 0 = none), turnMatch, rangeKtPerM, attackRangeM, chaseOverKt (range control; 0 = none), avoidM, avoidS (collision avoidance).";
+                "cornerKt, leadS, lagS, lagRangeM, overshootClosureKt, lagSlowKt, threatRangeM, threatConeDeg, fightFloorM, clearRangeM, slowKt (energy sense; 0 = none), turnMatch, rangeKtPerM, attackRangeM, chaseOverKt (range control; 0 = none), avoidM, avoidS (collision avoidance); joinAvoidM (25 m, inside the 40 m slot spacing: a join with no fight avoids too, after a survey of four-ship joins found crossed joins meeting at 0 m).";
             EditorUtility.SetDirty(so);
             AssetDatabase.SaveAssets();
             so.Bake();   // throws if anything is out of shape

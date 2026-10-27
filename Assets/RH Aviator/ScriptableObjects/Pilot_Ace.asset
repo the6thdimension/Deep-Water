@@ -102,6 +102,7 @@ MonoBehaviour:
   chaseOverKt: 150
   avoidM: 100
   avoidS: 3
+  joinAvoidM: 25
   provenance: "All AUTHORED (RH Aviator W45; no public source describes a generic
     line pilot), tuned headless against slice 3a's pass criteria (ROADMAP, fixed
     before tuning). Hands: guidanceGain (2, the classic value of the L1 path-following
@@ -131,7 +132,9 @@ MonoBehaviour:
     reactionDelayS, memoryS, visualRangeM, cornerKt, leadS, lagS, lagRangeM, overshootClosureKt,
     lagSlowKt, threatRangeM, threatConeDeg, fightFloorM, clearRangeM, slowKt (energy
     sense; 0 = none), turnMatch, rangeKtPerM, attackRangeM, chaseOverKt (range control;
-    0 = none), avoidM, avoidS (collision avoidance). Ace, from the line pilot (AUTHORED):
+    0 = none), avoidM, avoidS (collision avoidance); joinAvoidM (25 m, inside the
+    40 m slot spacing: a join with no fight avoids too, after a survey of four-ship
+    joins found crossed joins meeting at 0 m). Ace, from the line pilot (AUTHORED):
     maxG 7 (inside the F/A-18E's 7.5), maxBankDeg 75, fieldOfViewDeg 150, reactionDelayS
     0.35, memoryS 12, visualRangeM 10000, cornerKt 320, leadS 1.2, lagS 1.2, threatRangeM
     2000, slowKt 240, turnMatch 1."

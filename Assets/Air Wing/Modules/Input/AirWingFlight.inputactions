@@ -87,6 +87,14 @@
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": ""
+                },
+                {
+                    "name": "CycleSeat",
+                    "type": "Button",
+                    "id": "79de958f-9e62-4f32-b229-36b699ca36f7",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
                 }
             ],
             "bindings": [
@@ -265,6 +273,17 @@
                     "action": "Brakes",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "538f1029-ca4a-4442-ab4f-71a4a38157d5",
+                    "path": "<Keyboard>/tab",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CycleSeat",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },
@@ -381,6 +400,14 @@
                     "name": "Brakes",
                     "type": "Button",
                     "id": "2b0d54ae-f354-4d4d-9b6a-c60bc8c8d6de",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "CycleSeat",
+                    "type": "Button",
+                    "id": "262c6777-5528-40b8-aeb3-7c2c70d5e5a3",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": ""
@@ -516,6 +543,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Brakes",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "beb94cb9-4071-40e1-b93b-0f304d76a130",
+                    "path": "<Gamepad>/dpad/right",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CycleSeat",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

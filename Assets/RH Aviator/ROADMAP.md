@@ -12,7 +12,7 @@
 
 **Branch:** `feat/aircraft`, kept level with `main` (CLAUDE.md, Branches), commits through `commit-to-branch`.
 
-**Where things stand (2026-10-26):** slice 3a is done: the AI pilot flies Dogfight's four gates on the L1 jet, headless and in the scene, at 3–4 µs per pilot per tick. Next is slice 3b (formation and seats), on SIX's go.
+**Where things stand (2026-10-27):** slices 3a and 3b are done. The AI flies Dogfight's four gates, joins and holds fingertip on a leader through a turn and a 2 G pull, and the player swaps seats with it mid-flight (Tab, the Xbox D-pad right). A7–A8 wait on SIX (BLUEPRINT Q2). Next is slice 3c (going home and the break), on SIX's go.
 
 ## DONE — finished and committed
 
@@ -20,14 +20,17 @@
 |---|---|---|---|---|
 | Blueprint and roadmap | Phase 3's 16 decisions carried for the AI side; slices 3a–3e with their pass criteria | 2026-10-26 | eaf7280f | — |
 | Slice 3a — the AI seat, the hands and the gates | An AI pilot that flies Dogfight's four gates through the player's own stick: the mode machine with its logged rules, the shared flight-path layer, the line pilot's profile, an "Add AI Jet" menu, the AI budget met | 2026-10-26 | `92eaaaff` | 6 here, 4 in Air Wing (113 in all) |
+| Slice 3b — formation and seats | An AI wingman that joins and holds fingertip on its leader; the seat cycle key and the HUD pick list; the player takes any jet mid-flight and the AI takes it back; an "Add AI Wingman" menu | 2026-10-27 | `a2ae171d` | 4 here, 4 in Air Wing (122 in all) |
 
 ## STILL TO DO
 
 ### Next
-- **Slice 3b — formation and seats** (W40, W42), on SIX's go.
+- **Slice 3c — going home and the break** (W41, W47), on SIX's go.
+- **SIX:** confirm A7–A8 (BLUEPRINT Q2).
 
 ### Left open in finished slices
 - **Slice 3a:** the first approach to gates 2 and 3 goes around once (each 90° turn onto a gate's line does not fit the first try); the course takes about 5.5 minutes. Not flown against a player by hand.
+- **Slice 3b:** the formation gains are tuned on the L1 jet at 5,000 ft and 350 kt; the path gain sits 1.6× inside where the hold rings (METHODOLOGY C42), so another level, weight or speed needs the sweep again. Joining from ahead of the leader is not tested (the wingman slows to 250 kt and lets it pass). The AI budget was not re-measured for formation (slice 3e measures four aircraft). Not yet flown by a human on the wing.
 
 ---
 
@@ -70,11 +73,32 @@
 - [x] Air Wing tests (`FlightPathHandsTests`, 4): the hands hold 400.0 kt, height and track for 30 s; a turn behind stays inside the bank and G caps and comes round; the ground guard keeps it 110 m up when asked for the sea; aircraft 2 sees aircraft 1 where the last tick left it.
 - [x] **Smoke in Dogfight** (play mode, the AI jet added unsaved, the sea and land of the scene, PhysX contacts): it flew all four gates clean, 3, 2, 36 and 12 m off centre, with one go-around at gate 2, and went into HoldCourse at 239 s. The scene was then reloaded from disk.
 
-### Slice 3b — formation and seats (W40, W42)
-- [ ] Join (rendezvous on a leader from anywhere in the picture) and Hold fingertip, about three wingspans out and slightly behind (W40).
-- [ ] Air Wing side: the seat cycle key and pad button, the HUD pick list; the aircraft the player leaves goes to its AI at once (W42, W18).
-- [ ] **Pass criteria, fixed now:** joins from 2 nm behind in ≤ 90 s with no overshoot past the leader; holds the slot within ±10 m along, ±5 m across and ±5 m up through a 30° bank turn and a 2 G pull by the leader; hands back and forth mid-flight with the input log keeping its shape and the Fix continuous.
-- [ ] Smoke: the AI joins on the player's wing in Dogfight; the player swaps seats with it.
+### Slice 3b — formation and seats (W40, W42) (done 2026-10-27: all pass criteria met; 122/122 tests in both modules, `a2ae171d`)
+- [x] Modes **Join** and **Fingertip** (W40) on the order `JoinOn(leader)`; also the orders `FlyRoute` and `HoldCourse`, each logged as a rule. Rules: **in the slot** (inside 10 m on every axis, closing under 5 kt), **lost the slot** (over 150 m), **leader lost** (it crashed). The slot: 40 m right (about three of the F/A-18E's 13.6 m wingspans), 10 m back, level with the leader, in the leader's level frame (`Core/Formation`, `Slot`).
+- [x] The plan is worked out **every tick** from the picture (A7, proposed): the slot's speed plus an overtake (linear near the slot, never more than √(2 a d) at 1.5 m/s², at most 150 kt), with a speed lead and the speed brake past 8 kt over; the aim a look-ahead along the slot's track; the leader's **bank, roll rate, flight-path angle and rate as feed-forward** (AP32), the rates three-quarters from how it is rotating and a quarter from its G. Formation flies its own hands, the route hands with tighter height and path gains (`PilotProfile.FormationHands`).
+- [x] Back from the player (W42): the seat sees the gap in ticks, judges nothing across it, starts the throttle where the player left it (`FlightPathHands.Resume`) and decides at once.
+- [x] Air Wing side (A8, proposed): **`Core/Seats/SeatRoster`**: one player seat and each aircraft's own seat; `Cycle()` steps through the aircraft not crashed, in id order; the jet left goes to its own seat, or holds the player's last inputs. `PlayerSeat.TakeOver` puts the lever at the jet's throttle and keeps its switches. `ISeatStatus` lets a seat describe itself. The **cycle key**: Tab and the Xbox D-pad right (`CycleSeat` in `AirWingFlight.inputactions`), applied between ticks. The **chase camera and the HUD follow the player's aircraft**; the HUD's **pick list** (top right) shows who flies what.
+- [x] Air Wing's hands take optional feed-forward (bank, roll rate, flight-path angle and rate; zero for a route, so slice 3a flies bit for bit as before) and `Resume(throttle)`; the throttle integral is held to ±1, not ±0.5 (AP33).
+- [x] Scene: **Deep Water → RH Aviator → Add AI Wingman to the Open Scene**: an AI jet 600 m behind and 200 m right of the player's, ordered to join its wing, and an AI pilot in the player's jet holding course, so whichever jet the player leaves has someone flying it. Unsaved.
+- [x] **Found and fixed while tuning** (the pass criteria and the leader's manoeuvre stayed as fixed):
+  - The join was planned on 2 m/s² of deceleration; an idle jet near 400 kt loses about 2.3 and less as it slows, the speed loop lagged by 20–30 kt, and the wingman slid **51 m past its leader**. Now 1.5 m/s², a speed lead and the speed brake: the closest it comes is 9.9 m behind.
+  - The throttle integral sat on its ±0.5 stop (trim 0.75, needed 0.22): **5–7 m out of the slot** for good (AP33).
+  - Aimed on the slot's predicted arc, the wingman **over-rolled** with every change in the leader's turn (+22° then −15°) and drifted 11.8 m across; with the leader's bank and roll rate fed forward, 2.3 m. A bank worked out from the turn rate (tan φ = V ψ̇ / g) asked 22° for the leader's 7° in its banked pull: it holds only in a level 1 G turn.
+  - Reading the leader's climb from its G, the wingman fell **10 m behind the pull**; from its rotation alone it pulled 2.6 G for 2.13 and ended 7 m high. Three-quarters rotation, a quarter G.
+  - A 0.3° per metre height gain set up a **porpoise**, −1.7 to +6.5 G. The final gains came from a sweep, 100 runs of the fixed hold scenario (`FormationTests.Sweep`, explicit): 0.03° per metre, 0.5 G per degree, which sits 1.6× inside where the hold rings (C42).
+  - The test leader's turn hands started with a fresh throttle integral and lurched 10 kt: they now pick up the throttle (a test fix).
+- [x] **Pass criteria, met** (headless, every part L1, 5,000 ft, 350 kt, a flat sea):
+
+  | Criterion | Limit | Flown |
+  |---|---|---|
+  | Join from 2 nm behind | ≤ 90 s, never past the leader | in the box at 76.7 s; at most 9.9 m behind the leader |
+  | Hold through a 30° bank turn (leader to 30.8°) and a 2 G pull (leader to 2.14 G), 120–260 s | ±10 m along, ±5 m across, ±5 m up | 6.8 m, 2.3 m, 4.2 m |
+  | Hand the wingman's jet to the player at 100 s and back at 110 s | one entry per aircraft per tick; the Fix continuous | 2 per tick throughout; the worst tick 3.9 mm off its velocities; the throttle 0.187 → 0.187 both ways |
+  | Two runs | the same rule log and Fix | the same |
+
+  - the hold's trace is written to `Temp/aviator_3b_trace.csv` on every run;
+  - Air Wing tests (`SeatRosterTests`, 4): the cycle in id order, wrapping; the jet left goes to its own seat or holds; the player takes over at the jet's throttle; a crashed jet is skipped, and the pick list's words.
+- [x] **Smoke in Dogfight** (play mode, the wingman added unsaved, the scene's sea and land, PhysX contacts): the wingman was in the slot about 36 s after the start and held it to 0.0–0.3 m while the hands-off player jet drifted up to 674 kt (Mach 1.05). At 100 s the seat cycle put the player in the wingman's jet; the player's jet went to its AI, holding course; the pick list read "1 AI · HOLD COURSE", "> 2 YOU". At 115 s the cycle gave it back; the AI was 97 m off the slot and back within 1 m 29 s later, without losing the slot. The scene was then put back from disk and GQ_Range reopened.
 
 ### Slice 3c — going home and the break (W41, W47)
 - [ ] Return on the player's order (A3) or at the bingo stand-in (W47, labelled).
@@ -146,3 +170,4 @@ Kept for the record. Air Wing now owns the airframe side (W5), and W17, W49 and 
 - **2026-10-25** — `IAircraftActuator` skipped: Air Wing's `ISeat` and `PilotInputs` replace it.
 - **2026-10-26** — Rewritten from Air Wing's Phase 3 interview (W36–W51): slices 3a–3e with pass criteria fixed before tuning; the old plan kept below, superseded (A5). Nothing built.
 - **2026-10-26** — SIX confirmed A1–A6. Slice 3a done: the AI pilot flies Dogfight's four gates through the stick (L1 law hands, sticky go-around, logged rules; `92eaaaff`), 113/113 tests in both modules, the AI budget met (3–4 µs per pilot per tick). Found: an aim point inside the turn orbits for ever (AP31); a look-ahead shorter than the turn radius swings (C41); a float clock moved the watch (AP26).
+- **2026-10-27** — Slice 3b done at SIX's go: Join and Fingertip on the leader, the seat cycle and the pick list (Air Wing), 122/122 tests in both modules; the join in 76.7 s, the hold within 6.8 / 2.3 / 4.2 m through a turn and a 2 G pull. A7–A8 proposed (BLUEPRINT Q2). Found: following on position alone is late and overshoots (AP32); a throttle integral clamped short of the cruise setting (AP33); tune by a sweep and ship the margin (C42).

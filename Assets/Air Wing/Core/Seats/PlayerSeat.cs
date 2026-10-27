@@ -178,6 +178,21 @@ namespace DeepWater.AirWing.Core.Seats
             Lever = Mathf.Clamp01(lever);
         }
 
+        /// <summary>
+        /// The player takes over an aircraft in flight (W42): the lever goes to where its throttle was and the switches
+        /// to how it was flown, so nothing changes until the player moves something; the mouse aim starts on its flight
+        /// path. Whoever owned the stick keeps it.
+        /// </summary>
+        public void TakeOver(in AirframeState state, in PilotInputs last)
+        {
+            _switches = last.Switches & ~PilotSwitches.Reset;
+            float detent = _s.AfterburnerDetent;
+            // Military power sits just below the detent: at the detent itself the lever would light the afterburner.
+            Lever = last.Afterburner ? 1f : Mathf.Min(Mathf.Clamp01(last.Throttle) * detent, detent - 1e-4f);
+            AimAlongPath(state);
+            _realignAim = false;
+        }
+
         void ChooseOwner(in DeviceFrame f, in AirframeState state)
         {
             bool stick = f.Stick.Moved, pad = f.Gamepad.Moved, keys = f.Keyboard.Moved;

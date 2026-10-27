@@ -12,6 +12,8 @@ namespace DeepWater.AirWing.Modules.Cockpit
     public sealed class ChaseCamera : MonoBehaviour
     {
         [SerializeField] AirWingRunner runner;
+        [Tooltip("Follow whichever aircraft the player flies (the seat cycle, W42); off, or with no player, follow Aircraft Id.")]
+        [SerializeField] bool followPlayer = true;
         [SerializeField] int aircraftId = 1;
         [Tooltip("Distance behind the jet, metres.")]
         [SerializeField] float distanceM = 26f;
@@ -27,10 +29,10 @@ namespace DeepWater.AirWing.Modules.Cockpit
 
         void LateUpdate()
         {
-            if (_view == null && !Find()) return;
+            if ((_view == null || _view.AircraftId != Target()) && !Find()) return;
             Transform jet = _view.transform;
             PlayerSeat seat = runner.PlayerSeat;
-            bool aiming = seat != null && seat.Owner == DeviceSource.Mouse && _view.Seat == AircraftView.StartSeat.Player;
+            bool aiming = seat != null && seat.Owner == DeviceSource.Mouse && _view.AircraftId == runner.PlayerAircraftId;
 
             Quaternion goal = aiming
                 ? Quaternion.LookRotation(seat.AimDirection, Vector3.up)
@@ -42,12 +44,18 @@ namespace DeepWater.AirWing.Modules.Cockpit
             transform.position = jet.position - transform.forward * distanceM + transform.up * heightM;
         }
 
+        int Target() => followPlayer && runner != null && runner.PlayerAircraftId != 0 ? runner.PlayerAircraftId : aircraftId;
+
+        /// <summary>Finds the aircraft to follow, and snaps behind it (a seat change cuts, it does not swing across the sky).</summary>
         bool Find()
         {
             if (runner == null) return false;
+            int id = Target();
+            _view = null;
             foreach (AircraftView v in runner.Views)
-                if (v.AircraftId == aircraftId && v.Aircraft != null) { _view = v; break; }
+                if (v.AircraftId == id && v.Aircraft != null) { _view = v; break; }
             if (_view == null) return false;
+            _resets = _view.Aircraft.Resets;
             transform.rotation = _view.transform.rotation;
             return true;
         }

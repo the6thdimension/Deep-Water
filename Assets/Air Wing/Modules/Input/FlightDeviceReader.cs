@@ -39,6 +39,9 @@ namespace DeepWater.AirWing.Modules.Input
         readonly ReaderSettings _s;
         readonly Source _keyboard, _gamepad, _stick;
         readonly InputAction _mouseDelta, _keyThrottleUp, _keyThrottleDown, _padThrottleUp, _padThrottleDown, _lever;
+        /// <summary>The seat cycle (W42): Tab and the Xbox D-pad right. Not a Pilot Input: it moves the player, not the jet.</summary>
+        readonly InputAction _keyCycle, _padCycle;
+        int _cyclePresses;
 
         Vector2 _mouseTravel;
         float _lastLever = float.NaN;
@@ -89,6 +92,8 @@ namespace DeepWater.AirWing.Modules.Input
             _padThrottleUp = _actions.FindActionMap(Gamepad, true).FindAction("ThrottleUp", true);
             _padThrottleDown = _actions.FindActionMap(Gamepad, true).FindAction("ThrottleDown", true);
             _lever = _actions.FindActionMap(Stick, true).FindAction("Lever", true);
+            _keyCycle = _actions.FindActionMap(Keyboard, true).FindAction("CycleSeat", true);
+            _padCycle = _actions.FindActionMap(Gamepad, true).FindAction("CycleSeat", true);
             _actions.Enable();
         }
 
@@ -99,6 +104,16 @@ namespace DeepWater.AirWing.Modules.Input
             _gamepad.Poll();
             _stick.Poll();
             _mouseTravel += _mouseDelta.ReadValue<Vector2>();
+            if (_keyCycle.WasPressedThisFrame()) _cyclePresses++;
+            if (_padCycle.WasPressedThisFrame()) _cyclePresses++;
+        }
+
+        /// <summary>Seat-cycle presses gathered since the last call (each steps one aircraft on), then none.</summary>
+        public int TakeCyclePresses()
+        {
+            int n = _cyclePresses;
+            _cyclePresses = 0;
+            return n;
         }
 
         /// <summary>Once per tick: this tick's <see cref="DeviceFrame"/>, and reset what was gathered.</summary>

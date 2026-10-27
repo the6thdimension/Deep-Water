@@ -38,7 +38,19 @@ namespace DeepWater.AirWing.Modules.Input
 
         void FixedUpdate()
         {
-            if (_reader != null) Seat.Submit(_reader.Read());
+            if (_reader == null) return;
+            Seat.Submit(_reader.Read());
+            CyclePresses += _reader.TakeCyclePresses();
+        }
+
+        /// <summary>Seat-cycle presses waiting for the runner (W42); it takes them before the tick.</summary>
+        public int CyclePresses { get; private set; }
+
+        public int TakeCyclePresses()
+        {
+            int n = CyclePresses;
+            CyclePresses = 0;
+            return n;
         }
 
         void OnDestroy() => _reader?.Dispose();

@@ -5,7 +5,7 @@ namespace DeepWater.Aviator.Core
 {
     /// <summary>
     /// How one pilot flies (W45), baked from <c>PilotProfileSO</c> (P1). One brain, different numbers: rookie, line
-    /// and ace are three of these. Slice 3a carries the hands and the route-flying numbers; the fight's (field of view,
+    /// and ace are three of these. Slice 3a carries the hands and the route-flying numbers, slice 3b the formation's; the fight's (field of view,
     /// reaction delay, energy sense) arrive with Pilot L1 (slice 3d).
     /// </summary>
     public struct PilotProfile
@@ -28,6 +28,51 @@ namespace DeepWater.Aviator.Core
         /// <summary>After the course: hold this altitude (m) and speed (kt) on the present heading.</summary>
         public float HoldAltitudeM, HoldKt;
 
+        /// <summary>
+        /// Fingertip (W40): the slot off the leader, metres, in the leader's level frame: to the right (negative: the
+        /// left wing), back and up.
+        /// </summary>
+        public float SlotRightM, SlotBackM, SlotUpM;
+        /// <summary>The wingman aims this far ahead of the slot along its track, metres.</summary>
+        public float SlotLookAheadM;
+        /// <summary>Overtake per metre of along-track gap, (m/s)/m; and the deceleration the pilot counts on to stop it, m/s².</summary>
+        public float SlotGainPerS, JoinDecelMps2;
+        /// <summary>The most overtake while joining, and while in the slot, knots; and the slowest it flies joining from ahead, knots.</summary>
+        public float JoinOvertakeKt, SlotOvertakeKt, JoinMinKt;
+        /// <summary>In the slot: inside this many metres of it on every axis, closing slower than this many knots.</summary>
+        public float InSlotM, InSlotClosureKt;
+        /// <summary>Farther than this from the slot, metres, the wingman has lost it and joins again.</summary>
+        public float LostSlotM;
+        /// <summary>
+        /// Speed lead: the formation asks the hands for its target speed plus this many times the gap between that
+        /// target and the speed it has, so a slow speed loop still makes the closure it needs.
+        /// </summary>
+        public float SlotSpeedLead;
+        /// <summary>Speed brake out in formation when this many knots faster than asked.</summary>
+        public float SlotSpeedBrakeOverKt;
+        /// <summary>
+        /// The formation hands' gains (a wingman holds height tighter than a route): flight-path angle per metre off the
+        /// slot's height, degrees, and G per degree of flight-path error. Everything else is the route hands'.
+        /// </summary>
+        public float SlotClimbDegPerM, SlotGPerPathDeg;
+        /// <summary>
+        /// How much of the leader's turn and climb the wingman reads from its rotation rather than its G, 0 … 1: the
+        /// rotation leads the G at the start of a pull, the G is steadier (slice 3b).
+        /// </summary>
+        public float SlotRotationShare;
+
+        /// <summary>The hands a wingman flies with: the route hands, with the formation's height and path gains.</summary>
+        public HandsSettings FormationHands
+        {
+            get
+            {
+                HandsSettings h = Hands;
+                h.ClimbDegPerM = SlotClimbDegPerM;
+                h.GPerPathDeg = SlotGPerPathDeg;
+                return h;
+            }
+        }
+
         public void Validate()
         {
             if (string.IsNullOrEmpty(Name)) throw new ArgumentException("a pilot profile needs a name");
@@ -43,6 +88,21 @@ namespace DeepWater.Aviator.Core
             Positive(CaptureFraction, nameof(CaptureFraction));
             Positive(CruiseKt, nameof(CruiseKt));
             Positive(HoldKt, nameof(HoldKt));
+            if (SlotRightM == 0f) throw new ArgumentOutOfRangeException(nameof(SlotRightM), 0f, "a slot needs a side (positive right, negative left)");
+            Positive(SlotLookAheadM, nameof(SlotLookAheadM));
+            Positive(SlotGainPerS, nameof(SlotGainPerS));
+            Positive(JoinDecelMps2, nameof(JoinDecelMps2));
+            Positive(JoinOvertakeKt, nameof(JoinOvertakeKt));
+            Positive(SlotOvertakeKt, nameof(SlotOvertakeKt));
+            Positive(JoinMinKt, nameof(JoinMinKt));
+            Positive(InSlotM, nameof(InSlotM));
+            Positive(InSlotClosureKt, nameof(InSlotClosureKt));
+            if (SlotSpeedLead < 0f) throw new ArgumentOutOfRangeException(nameof(SlotSpeedLead), SlotSpeedLead, "must not be negative");
+            Positive(SlotSpeedBrakeOverKt, nameof(SlotSpeedBrakeOverKt));
+            Positive(SlotClimbDegPerM, nameof(SlotClimbDegPerM));
+            Positive(SlotGPerPathDeg, nameof(SlotGPerPathDeg));
+            if (!(SlotRotationShare >= 0f && SlotRotationShare <= 1f)) throw new ArgumentOutOfRangeException(nameof(SlotRotationShare), SlotRotationShare, "must be in [0, 1]");
+            if (!(LostSlotM > InSlotM)) throw new ArgumentOutOfRangeException(nameof(LostSlotM), LostSlotM, "losing the slot must lie outside being in it");
         }
 
         static void Positive(float v, string name)

@@ -9,6 +9,12 @@ Pat1: **SO-Profile + Pure-Core + MB-Adapter**. **Read `BLUEPRINT.md` first** (W3
 2. **Deep Water → RH Aviator → Add AI Jet to the Open Scene.** An AI F/A-18E appears 80 m right of and behind your jet. The scene is not saved; reload it to take the AI jet out.
 3. Press Play. The AI flies the four gates (about 5.5 minutes, with a go-around at a gate it cannot line up for first time). Each rule it fires prints in the Console as `[RH Aviator] tick … · next gate / go around / back on the line / course flown`.
 
+## Try it (slice 3b)
+
+1. Open `Assets/_SCENES/Dogfight.unity`.
+2. **Deep Water → RH Aviator → Add AI Wingman to the Open Scene.** An AI F/A-18E appears 600 m behind and 200 m right of your jet, ordered to join your right wing; your own jet gets an AI pilot too, for when you leave it. Unsaved.
+3. Press Play. The wingman closes and settles into fingertip in about half a minute. **Tab** (or the Xbox **D-pad right**) moves you into the next jet; the pick list, top right, shows who flies what. The jet you leave goes to its AI at once.
+
 The line pilot's numbers are in `ScriptableObjects/Pilot_Line.asset` (written by **Apply Line Pilot Profile**, all AUTHORED). The AI's cost: **Build Benchmark Player**, then `Builds/AviatorBenchmark/AviatorBenchmark.exe -batchmode -nographics -aviatorBenchOut <file>` (3–4 µs per pilot per tick, budget 10).
 
 **Assembly:** `DeepWater.Aviator` (namespace `DeepWater.Aviator`). Renamed from `RH.Aviator` on 2026-10-25 by SIX's call (Air Wing BLUEPRINT Q2), so it matches the other `DeepWater.*` modules.

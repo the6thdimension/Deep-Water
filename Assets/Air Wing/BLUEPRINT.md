@@ -97,6 +97,7 @@ The stick means the same thing at L0 and at L1, so the AI and the instructor don
 - Air Wing defines `ISeat` and `PilotInputs`. RH Aviator implements AI seats against them and references Air Wing; Air Wing never references RH Aviator.
 - The carrier hookup stays in Carrier Ops, through its existing `IRecoveringAircraft` seam (W5). It is parked until the AI stream is done (W16).
 - **Switchable seats:** the player can take or hand back any aircraft mid-flight, and an AI seat flies every empty one.
+- **The seat roster** (`Core/Seats/SeatRoster`, W42, RH Aviator A8): one player seat; each aircraft's own seat, handed over by RH Aviator as a plain `ISeat`, or a `HoldSeat` keeping what the player left. The cycle key (Tab, the Xbox D-pad right) steps the player through the aircraft that have not crashed, in id order, between ticks; the jet left goes to its own seat at once. The player takes over at the jet's throttle and switches, and an AI pilot takes back at the player's throttle, so nothing jumps. The camera and the HUD follow the player's aircraft, and the HUD's pick list shows who flies what.
 
 ### 3.5 Data (W8)
 

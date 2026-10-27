@@ -19,6 +19,8 @@ namespace DeepWater.AirWing.Modules.Cockpit
     public sealed class FlightHud : MonoBehaviour
     {
         [SerializeField] AirWingRunner runner;
+        [Tooltip("Show whichever aircraft the player flies (the seat cycle, W42); off, or with no player, show Aircraft Id.")]
+        [SerializeField] bool followPlayer = true;
         [SerializeField] int aircraftId = 1;
         [SerializeField] Camera viewCamera;
         [Tooltip("Optional: the gate course to show.")]
@@ -30,7 +32,7 @@ namespace DeepWater.AirWing.Modules.Cockpit
 
         void OnGUI()
         {
-            if (_view == null && !Find()) return;
+            if ((_view == null || _view.AircraftId != Target()) && !Find()) return;
             Styles();
             var aircraft = _view.Aircraft;
             AirData air = aircraft.Atmosphere.Sample(aircraft.State.Position.y);
@@ -59,7 +61,7 @@ namespace DeepWater.AirWing.Modules.Cockpit
                     GUI.Label(new Rect(0.5f * w - 2f * size.x, 0.45f * h + 3f * size.y, 4f * size.x, size.y), aircraft.CrashReason.ToUpperInvariant(), _centre);
             }
 
-            string device = seat != null && _view.Seat == AircraftView.StartSeat.Player ? $"PLAYER · {seat.Owner}" : _view.Seat.ToString().ToUpperInvariant();
+            string device = runner.Roster != null ? runner.Roster.Describe(_view.AircraftId) : _view.Seat.ToString().ToUpperInvariant();
             if (aircraft.Gear is Core.LandingGear.LandingGearL1)
             {
                 float g = aircraft.State.GearDeployed;
@@ -74,7 +76,24 @@ namespace DeepWater.AirWing.Modules.Cockpit
             if (viewCamera != null)
             {
                 Marker(aircraft.State.Position + aircraft.State.Velocity.normalized * 1000f, "-O-", s);
-                if (seat != null && seat.Owner == DeviceSource.Mouse) Marker(aircraft.State.Position + seat.AimDirection * 1000f, "( )", s);
+                if (seat != null && seat.Owner == DeviceSource.Mouse && _view.AircraftId == runner.PlayerAircraftId)
+                    Marker(aircraft.State.Position + seat.AimDirection * 1000f, "( )", s);
+            }
+            if (runner.Views.Count > 1 && runner.Roster != null) PickList(w, s, size);
+        }
+
+        /// <summary>Who flies what (W42), top right: one line per aircraft, the one shown marked; Tab or D-pad right steps on.</summary>
+        void PickList(float w, float s, Vector2 size)
+        {
+            float x = w - 40f * s - 2f * size.x, y = 30f * s;
+            GUI.Label(new Rect(x, y, 2f * size.x, size.y), "TAB / D-PAD RIGHT: NEXT SEAT", _right);
+            for (int i = 0; i < runner.Views.Count; i++)
+            {
+                AircraftView v = runner.Views[i];
+                if (v.Aircraft == null) continue;
+                string crashed = v.Aircraft.State.Status == Core.State.FlightStatus.Crashed ? "  ·  CRASHED" : "";
+                string mark = v.AircraftId == _view.AircraftId ? "> " : "";
+                GUI.Label(new Rect(x, y + (i + 1) * size.y, 2f * size.x, size.y), $"{mark}{v.AircraftId}  {runner.Roster.Describe(v.AircraftId)}{crashed}", _right);
             }
         }
 
@@ -120,11 +139,14 @@ namespace DeepWater.AirWing.Modules.Cockpit
             _centre = new GUIStyle(_left) { alignment = TextAnchor.MiddleCenter };
         }
 
+        int Target() => followPlayer && runner != null && runner.PlayerAircraftId != 0 ? runner.PlayerAircraftId : aircraftId;
+
         bool Find()
         {
             if (runner == null) return false;
+            int id = Target();
             foreach (AircraftView v in runner.Views)
-                if (v.AircraftId == aircraftId && v.Aircraft != null) { _view = v; return true; }
+                if (v.AircraftId == id && v.Aircraft != null) { _view = v; return true; }
             return false;
         }
     }

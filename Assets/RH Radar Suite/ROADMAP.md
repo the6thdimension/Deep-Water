@@ -212,7 +212,13 @@ moving aircraft.*
 ## Phase 4 — Environment & electronic warfare
 
 - [ ] **Clutter model:** land/sea clutter floor by grazing geometry (coarse,
-  Barton-style closed form, not per-cell); look-down penalty for airborne radar.
+  Barton-style closed form, not per-cell); look-down penalty for airborne radar. *The pure core is built (2026-10-27,
+  `Core/Detection/Clutter.cs`): constant-γ σ⁰ = γ·sin ψ (γ from the profile or environment, `SurfaceTerms`); the
+  4/3-Earth grazing angle, zero past the horizon; the smaller of the pulse- and beam-limited cell; CNR through the
+  radar equation; SCNR = SNR − 10·log(1 + CNR). `ClutterTests` (4, by hand): at γ −20 dB a 20 m mast sees a 0 dBsm
+  target at 10 km with 62.0 dB SNR but 2.57 dB SCNR; looking down from 3 km costs more than 20 dB of CNR at 4 km.
+  No γ table yet (sea state → γ needs a public source; GQ's `SeaConditions` is the natural input), no Doppler
+  rejection; the modules do not use it.*
 - [ ] **Weather attenuation** hooks (rain rate → dB/km by band).
 - [ ] **Passive detection made honest:** emitters (`RadarEmitter` on transmitting
   radars) so LOD1 detects actual emissions with bearing-only + ambiguous range,
@@ -252,9 +258,12 @@ moving aircraft.*
   Phase 4 replaces it; do not invest in it meanwhile.
 - [ ] `RadarSuiteController.Cleanup` destroys modules it may not have created once
   the Phase 1 reuse fix lands — ownership must be tracked (created-by-controller flag).
-- [ ] `Examples/README.md` and `Prefabs/README.md` describe assets that don't exist —
-  Phase 1 and Phase 5 items close them; update the READMEs when they do.
+- [x] `Examples/README.md` and `Prefabs/README.md` describe assets that don't exist —
+  Phase 1 and Phase 5 items close them; update the READMEs when they do. Corrected 2026-10-27: the Prefabs README
+  now says there are none yet and points at one-click outfitting; the Examples README drops the contact panel that
+  never existed, calls LOD5 a stub, and names the pure core the modules do not use yet.
 - **2026-10-27** — Phase 1 tests run at last: 7/7. Phase 2's pure core begun: `Core/Detection/RadarEquation.cs` (the radar equation in dB, the range for a required SNR, Albersheim, North, Swerling 1, the 4/3-Earth horizon, erfc), 8 tests against hand-computed cases and Albersheim's published point; 15/15 in all. Found: the roadmap's "sea-skimmers at 200 km" was off by seven times; the 4/3-Earth horizon for a 20 m mast and a 5 m target is 27.6 km. The modules are untouched (their rewrite waits for SIX).
 - **2026-10-27** — Phase 3 begun: the pure α-β filter (`Core/Tracking/AlphaBetaFilter.cs`), 6 tests; 21/21 in all.
 - **2026-10-27** — Phase 3's pure core: the track file (M of N, coast, reacquire, drop; gated nearest-neighbour association; the track picture with quality and BestTrack), 7 tests; 28/28 in all. Kalman and the gizmos remain; the modules are untouched.
 - **2026-10-27** — Barton's measurement errors in the pure core, and the first end-to-end test of the pure chain (equation, detection, plots, track); 32/32.
+- **2026-10-27** — Phase 4's coarse surface clutter in the pure core (constant γ, grazing, cell, CNR, SCNR), 4 tests; 36/36. The READMEs no longer describe prefabs and panels that do not exist.

@@ -30,9 +30,9 @@ under `ScriptableObjects/Profiles/`.
 
 ### Key Components
 
-- **Radar Platform**: Contains the RadarSuiteController and all LOD modules
-- **Target Objects**: Various objects with different RadarSignature settings
-- **UI Panel**: Displays information about detected contacts
+- **Radar platforms**: each with a RadarSuiteController, its profile's LOD module and RadarDiagnostics
+- **Target objects**: various objects with different RadarSignature settings
+- *There is no in-scene contact panel yet: contacts show in the Scene view gizmos and the Radar Control Panel window.*
 
 ## Creating Your Own Radar System
 
@@ -49,4 +49,10 @@ To add radar functionality to your own objects:
 - **LOD2 (Basic Radar)**: Simple active radar with range detection
 - **LOD3 (Doppler Radar)**: Adds velocity detection and moving target identification
 - **LOD4 (3D Tracking)**: Full 3D spatial tracking with azimuth and elevation
-- **LOD5 (High-Fidelity)**: Advanced features like SAR/ISAR imaging and detailed clutter modeling
+- **LOD5 (High-Fidelity)**: a stub so far. SAR/ISAR imaging and clutter modelling are not built (ROADMAP Phase 4 replaces this module)
+
+## The pure core (not yet used by the modules)
+
+`Core/Detection` and `Core/Tracking` hold engine-free C# for the radar equation, detection statistics, the radar
+horizon, measurement errors, an α-β filter and a track file (ROADMAP Phases 2–3, 2026-10-27). They are tested
+(`Tests/Editor`) but the LOD modules above do not call them yet.

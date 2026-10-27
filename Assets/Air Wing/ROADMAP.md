@@ -14,7 +14,7 @@
 - **Git (SIX, 2026-10-24):** Claude manages git without asking. Verified work is committed, pushed and brought up to `main`, and every branch is kept level; `Guided-Fury` takes it through a PR.
 - **Never pushed:** the archive branch, DAVFX and the MCP unlock script. There are no force pushes.
 
-**Where things stand (2026-10-26):** Phases 1 and 2 are finished. The F/A-18E flies at L1 in Dogfight from every device class, takes off from and lands on runway 09/27, and costs 18 µs a step in a player against a 50 µs budget. Next is Phase 3 (AI pilots), on SIX's go.
+**Where things stand (2026-10-27):** Phases 1, 2 and 3 are finished. The F/A-18E flies at L1 in Dogfight from every device class, takes off from and lands on runway 09/27, and costs 18 µs a step in a player against a 50 µs budget. The AI pilots (RH Aviator) fly routes, formation, the overhead break and the dogfight at up to eight aircraft; let go of the keyboard or pad and the jet holds level (W54). Next on SIX's word (line 42).
 
 ## DONE — finished and committed
 

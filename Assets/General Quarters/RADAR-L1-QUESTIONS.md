@@ -19,6 +19,11 @@ the BLUEPRINT and can be struck through.
   - Barton's range, angle and range-rate errors, with floors;
   - constant-γ surface clutter (grazing angle, cell, CNR, SCNR);
   - an α-β filter, and a track file (M of N, coast, gating, quality).
+- **A second radar plan exists:** `Assets/RH Radar/` holds only a README, a routine ROADMAP (2026-09, Phase 0
+  unchecked) and an asmdef: a greenfield "SO-Profile + Pure-Core + MB-Adapter" radar module for the autonomous
+  routines, with its own L0–L4 ladder and `RH Shared` contracts (`ITargetTrack`, `ISensorReport`). Nothing in it is
+  built. Two radar plans side by side contradict each other (doctrine: one lock per decision), so R1 now asks which
+  is the home.
 - **The BLUEPRINT's risk line** (§8) already says: "General Quarters owns a pure sensor contract; Radar Suite physics
   ported at radar L1+". The questions below decide how.
 
@@ -26,7 +31,7 @@ the BLUEPRINT and can be struck through.
 
 | # | Question | Options | Claude's leaning |
 |---|---|---|---|
-| R1 | Where does the radar physics live? | **A.** GQ references the `RHRadarSuite` assembly as it is. **B.** Split the suite's pure core (`Core/Detection`, `Core/Tracking`) into its own engine-free assembly, `RHRadarSuite.Core`, that both the suite and GQ reference. **C.** Copy the pure files into GQ and let them diverge | **B.** One implementation and one test suite. A drags the legacy MonoBehaviour modules into GQ's references. C is the doctrine's "copy, don't submodule", but inside one repository two copies of the same equations would drift (doctrine 14: remove a second path) |
+| R1 | Where does the radar physics live? | **A.** GQ references the `RHRadarSuite` assembly as it is. **B.** Split the suite's pure core (`Core/Detection`, `Core/Tracking`) into its own engine-free assembly, `RHRadarSuite.Core`, that both the suite and GQ reference. **C.** Copy the pure files into GQ and let them diverge. **D.** Move the pure core into the empty `RH Radar` module (its plan already asks for a pure core) and retire one of the two radar plans | **B**, and retire the `RH Radar` plan (strike its ROADMAP with a reason). One implementation and one test suite. A drags the legacy MonoBehaviour modules into GQ's references. C would let two copies of the same equations drift (doctrine 14). D is sound too, but it moves tested code to follow an unbuilt plan |
 | R2 | Which radars at L1? | **A.** SPY-1 only: one search-and-track radar. **B.** SPY-1 and a surface-search radar. **C.** Those and a navigation radar | **A.** The SPG-62 illuminators are already Stream B's (G44). One radar end to end first |
 | R3 | Where its numbers come from | **A.** A generic S-band array in SPY-1's role, AUTHORED, calibrated to one public detection-range figure (flagged, as G57 was). **B.** Wholly AUTHORED, no calibration. **C.** Open-literature parameter estimates | **A.** Safe limits (BLUEPRINT constraint 8): public data only, a game radar in the real one's role, no claim about the real system's performance |
 | R4 | Tracks with it? | **A.** Radar L1 feeds Tracks L0 first. **B.** Radar L1 and Tracks L1 (the suite's track file: α-β, M of N, gating) in one slice | **B.** Noisy plots through Tracks L0 would make every track jitter by the measurement error, and fire control reads tracks, never truth |

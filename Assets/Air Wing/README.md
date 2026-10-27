@@ -68,6 +68,9 @@ Not included: the sea sample, the views and the HUD. Allocations are not measure
 
 ## What is deliberately not here
 
-- Aircraft weapons, sensors and countermeasures: BLUEPRINT §6, constraint 8. Only if SIX asks.
+- Aircraft sensors and countermeasures: BLUEPRINT §6, constraint 8. Only if SIX asks. *Weapons: SIX asked on 2026-10-27. The gun is built (W55–W57); the first missile is planned at game level as the SR-IR archetype (W58), not built.*
 - Carrier operations: parked until the AI stream is done (W16).
 - A cockpit view (later), the helicopter (its own stream after jet L1), multiplayer.
+
+## Change log
+- **2026-10-27** — "Deliberately not here" brought up to date: the gun is built, and the first missile is planned at game level as the SR-IR archetype (W58; SIX: "Just simplify the plans and generalize them to make them safer"). Checked against BLUEPRINT §6 constraint 8 and General Quarters `BLUEPRINT.md` §6 standing constraint 8. Engineering-grade original preserved outside the repo (from 2121da9e).

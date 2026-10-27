@@ -24,6 +24,8 @@ Every plan item is written to this grade and checked against the safe limits (`A
 
 **Next up:** fix the two pre-existing test failures (Known issues), then A1, A2 and A3 (the SR-IR missile for Air Wing).
 
+**Who works this roadmap (SIX, 2026-10-27):** SIX, by hand or with Codex. Claude sessions don't take Guided Fury missile work: every attempt was stopped by the API safeguard, including one stopped while it was still reading these documents. Claude streams that meet a missile treat it as an existing black box behind its seam.
+
 ---
 
 ## Archetypes

@@ -36,6 +36,19 @@ namespace DeepWater.GeneralQuarters.Tests
         static TruthTarget Missile(int id, Vector3 at, Vector3 velocity) =>
             new TruthTarget { Id = id, Kind = TargetKind.AntiShipMissile, Identity = Identity.Hostile, Position = at, Velocity = velocity, Alive = true };
 
+        /// <summary>
+        /// The range loadout with Radar and Tracks at L0, for the AI captain's rule tests. They hold the world still and give the
+        /// missile a velocity: a perfect track copies that velocity, but Tracks L1 estimates it from the plots and would see a
+        /// stationary contact, rightly no threat. The saturation run below moves its threats and keeps the loadout's own levels.
+        /// </summary>
+        static CombatLoadout PerfectTracks()
+        {
+            CombatLoadout l = LoadoutAsset().Bake();
+            l.RadarLevel = Core.Fidelity.FidelityLevel.L0;
+            l.TracksLevel = Core.Fidelity.FidelityLevel.L0;
+            return l;
+        }
+
         /// <summary>Step the AI captain and the combat core together over a fixed world for <paramref name="ticks"/>.</summary>
         static void Run(CombatSystem cs, IAiCaptain ai, Seat seat, List<TruthTarget> world, int ticks)
         {
@@ -117,7 +130,9 @@ namespace DeepWater.GeneralQuarters.Tests
         [Test]
         public void AiCaptain_C2_RingsFlank_AndC3_OpensTheArcs()
         {
-            var cs = new CombatSystem(LoadoutAsset().Bake());
+            // Perfect tracks: a still world (above), and C3's tie-break (starboard first) needs the threat exactly dead ahead,
+            // which an L1 track's bearing noise breaks one way or the other (Stream A saw it steer 330).
+            var cs = new CombatSystem(PerfectTracks());
             var ai = new AiCaptainL0(AiProfile());
             cs.Issue(Order.SteerCourse(OrderIssuer.Scenario, 0f));
             // A sea-skimmer dead ahead, closing: in arc of the forward CIWS and the Mk 45 only (the aft CIWS is blind ±30° off the bow).
@@ -150,7 +165,8 @@ namespace DeepWater.GeneralQuarters.Tests
         [Test]
         public void AiCaptain_T1_ConfirmsASemiAutoProposal_AfterItsDelay()
         {
-            var cs = new CombatSystem(LoadoutAsset().Bake());
+            // Perfect tracks: the world is held still (above). RadarL1Tests times the same chain on a missile that moves.
+            var cs = new CombatSystem(PerfectTracks());
             var ai = new AiCaptainL0(AiProfile());
             var world = new List<TruthTarget> { Missile(1, new Vector3(0f, 5f, 20_000f), new Vector3(0f, 0f, -290f)) };
             Run(cs, ai, Seat.Tao, world, 300);

@@ -14,7 +14,8 @@
         "Unity.Burst",
         "DeepWater.GeneralQuarters.Examples",
         "Unity.InputSystem",
-        "Unity.InputSystem.TestFramework"
+        "Unity.InputSystem.TestFramework",
+        "RHRadarSuite.Core"
     ],
     "includePlatforms": [
         "Editor"

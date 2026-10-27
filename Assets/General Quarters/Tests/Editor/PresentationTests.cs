@@ -80,6 +80,8 @@ namespace DeepWater.GeneralQuarters.Tests
             CombatLoadout loadout = AssetDatabase.LoadAssetAtPath<ShipLoadoutSO>(Ddg51CombatData.LoadoutAsset).Bake();
             loadout.GunsLevel = Core.Fidelity.FidelityLevel.L0;   // the slice 5 run this constant pins was at guns L0 (Stream B's L1 has its own test)
             loadout.DamageLevel = Core.Fidelity.FidelityLevel.L0; // and at Damage Control L0 (Stream C's L1 has its own tests)
+            loadout.RadarLevel = Core.Fidelity.FidelityLevel.L0;  // and at Radar and Tracks L0 (Stream A's L1 has its own tests)
+            loadout.TracksLevel = Core.Fidelity.FidelityLevel.L0;
             var cs = new CombatSystem(loadout);
             var ai = new Core.Captain.AiCaptainL0(AssetDatabase.LoadAssetAtPath<AiCaptainProfileSO>(Ddg51CombatData.AiCaptainAsset).Bake());
             var raid = new ScriptedRaid(AssetDatabase.LoadAssetAtPath<RaidScenarioSO>(Ddg51CombatData.RaidDir + "/Raid_Saturation.asset").StartingAt(0), Own);

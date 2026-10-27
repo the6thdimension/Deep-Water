@@ -41,6 +41,23 @@ namespace DeepWater.AirWing.Modules.Diagnostics
                 foreach (var s in new[] { sheet, l0 })
                     foreach (int n in aircraftCounts)
                         report.AppendLine("RESULT " + FlightBenchmark.Median(p, s, n, warmupTicks, ticks, repeats));
+                // On the wheels (slice 2e): the gear in contact every substep, on the truth feed's ground and then on a
+                // PhysX collider as the scenes have it.
+                if (sheet.Level(Core.Fidelity.PartKind.LandingGear) >= Core.Fidelity.FidelityLevel.L1)
+                {
+                    var ground = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    ground.name = "Benchmark Ground";
+                    ground.transform.position = new Vector3(0f, -10f, 0f);
+                    ground.transform.localScale = new Vector3(4000f, 20f, 4000f);   // top face at y = 0
+                    Physics.SyncTransforms();
+                    var physx = new World.PhysXContactProbe();
+                    foreach (int n in aircraftCounts)
+                    {
+                        report.AppendLine("RESULT " + FlightBenchmark.Median(p, sheet, n, warmupTicks, ticks, repeats, onTheGround: true));
+                        report.AppendLine("RESULT " + FlightBenchmark.Median(p, sheet, n, warmupTicks, ticks, repeats, onTheGround: true, probe: physx));
+                    }
+                    Destroy(ground);
+                }
                 report.AppendLine("FINISHED");
             }
             catch (Exception e)

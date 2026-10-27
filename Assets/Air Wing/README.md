@@ -49,6 +49,8 @@ In either scene, fly with whichever device you touch. The last device you move o
 **The gear moves on the model** at Landing Gear L1: the legs fold, then the doors close, over the gear's 4 s transit. At L0 it shows down (there is no gear to move it).
 - **with mouse aim, can be flown into the sea**: the instructor has no sense of height, and pointing low and to the side makes it bank past 90° (BLUEPRINT Q5). Point above a low gate until you are level at its height.
 
+**The keyboard and mouse need the Game view focused** (the Input System's default): click into it before flying. The pad and the stick also work with the Editor in the background.
+
 **Not yet verified on real hardware.** The bindings are proved with virtual devices (EditMode tests, and one play-mode run with a virtual Xbox pad). If the VelocityOne lever reads backwards, tick `invertLever` in `ScriptableObjects/PlayerSeatSettings.asset`. Deadzone, mouse sensitivity, throttle rate, the afterburner detent and the instructor's gains are in the same asset.
 
 ## Performance
@@ -57,8 +59,9 @@ The flight core alone (W21's budgets: ≤ 10 µs per aircraft per fixed step at 
 
 | Where | 1 aircraft | 20 aircraft |
 |---|---|---|
-| L1, player (Windows, Mono, release; i9-12900H) | 16.6 µs per step | 16.7–17.1 µs per aircraft per step (budget 50) |
-| L0, player | 2.7–3.0 µs per step | 2.7–3.0 µs per aircraft per step (budget 10) |
+| L1, player (Windows, Mono, release; i9-12900H), airborne | 17.8–18.2 µs per step | 17.8–18.1 µs per aircraft per step (budget 50) |
+| L1, player, on the wheels on PhysX contacts | 12.9–13.3 µs per step | 13.1–13.8 µs per aircraft per step (budget 50) |
+| L0, player | 3.2–3.3 µs per step | 3.1 µs per aircraft per step (budget 10) |
 | Editor (Debug code) | L1 50 µs, L0 4.5–8.8 µs | L1 44 µs, L0 4.5–8.7 µs per aircraft |
 
 Not included: the sea sample, the views and the HUD. Allocations are not measured by this harness (ROADMAP slice 1e).

@@ -42,16 +42,27 @@ namespace DeepWater.AirWing.Modules.Diagnostics
     /// (the scene's <c>ISeaSurface</c>), the views and the HUD. It does not count allocations:
     /// <c>GC.GetAllocatedBytesForCurrentThread</c> returns 0 in Unity's Mono (measured 2026-10-25 on a 100 kB array);
     /// use the profiler's GC instruments for that.
+    /// <para>The ground case (slice 2e): N aircraft parked on their wheels, 30 m apart, brakes on at half throttle, so
+    /// every wheel is in contact on every substep, which is the landing gear's worst cost. Pass the scene's probe
+    /// (<c>PhysXContactProbe</c> over a collider) to time PhysX's raycasts too.</para>
     /// </summary>
     public static class FlightBenchmark
     {
-        public static BenchmarkResult Run(AircraftProfile profile, FidelitySheet sheet, int aircraft, int warmupTicks, int ticks)
+        public static BenchmarkResult Run(AircraftProfile profile, FidelitySheet sheet, int aircraft, int warmupTicks, int ticks,
+                                          bool onTheGround = false, IContactProbe probe = null)
         {
             if (aircraft < 1 || ticks < 1 || warmupTicks < 0) throw new ArgumentException("at least one aircraft and one tick");
-            var core = new FlightCore(new SubstepClock(Time.fixedDeltaTime > 0f ? Time.fixedDeltaTime : 0.02f, sheet.SubstepsPerTick), new FlatSurface(0f));
+            var core = new FlightCore(new SubstepClock(Time.fixedDeltaTime > 0f ? Time.fixedDeltaTime : 0.02f, sheet.SubstepsPerTick), new FlatSurface(0f), probe);
             float speed = 400f * (float)Units.KnotToMetrePerSecond;
             for (int i = 0; i < aircraft; i++)
             {
+                if (onTheGround)
+                {
+                    var parked = AircraftFactory.GroundStart(profile, sheet, new Vector3(30f * i, 0f, 0f), 0f, 0.6f * profile.Airframe.InternalFuelKg);
+                    core.Add(AircraftFactory.Build(i + 1, profile, sheet, parked),
+                             new HoldSeat(new PilotInputs { Throttle = 0.5f, Brakes = true, Switches = PilotSwitches.GearDown }));
+                    continue;
+                }
                 var start = AircraftFactory.LevelStart(profile, sheet, new Vector3(500f * i, 5000f, 0f), 0f, speed, 0.6f * profile.Airframe.InternalFuelKg, 0.7f);
                 core.Add(AircraftFactory.Build(i + 1, profile, sheet, start), new HoldSeat(new PilotInputs { Throttle = 0.7f }));
             }
@@ -60,14 +71,20 @@ namespace DeepWater.AirWing.Modules.Diagnostics
             var clock = Stopwatch.StartNew();
             for (int t = 0; t < ticks; t++) core.Step();
             clock.Stop();
-            return new BenchmarkResult(aircraft, ticks, sheet.SubstepsPerTick, clock.Elapsed.TotalMilliseconds / ticks, string.Join("; ", core.Find(1).Levels));
+            if (onTheGround)
+                foreach (Core.Aircraft a in core.Aircraft)
+                    if (a.State.Status != Core.State.FlightStatus.Flying || !a.State.InContact)
+                        throw new InvalidOperationException($"aircraft {a.Id} left its wheels in the ground benchmark ({a.CrashReason ?? "airborne"})");
+            string where = onTheGround ? $"on the ground, probe {(probe == null ? "SurfaceProbe" : probe.GetType().Name)}; " : "";
+            return new BenchmarkResult(aircraft, ticks, sheet.SubstepsPerTick, clock.Elapsed.TotalMilliseconds / ticks, where + string.Join("; ", core.Find(1).Levels));
         }
 
         /// <summary>The median of <paramref name="repeats"/> runs by cost per step.</summary>
-        public static BenchmarkResult Median(AircraftProfile profile, FidelitySheet sheet, int aircraft, int warmupTicks, int ticks, int repeats)
+        public static BenchmarkResult Median(AircraftProfile profile, FidelitySheet sheet, int aircraft, int warmupTicks, int ticks, int repeats,
+                                             bool onTheGround = false, IContactProbe probe = null)
         {
             var runs = new BenchmarkResult[Mathf.Max(1, repeats)];
-            for (int i = 0; i < runs.Length; i++) runs[i] = Run(profile, sheet, aircraft, warmupTicks, ticks);
+            for (int i = 0; i < runs.Length; i++) runs[i] = Run(profile, sheet, aircraft, warmupTicks, ticks, onTheGround, probe);
             Array.Sort(runs, (a, b) => a.MsPerStep.CompareTo(b.MsPerStep));
             return runs[runs.Length / 2];
         }

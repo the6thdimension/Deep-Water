@@ -284,6 +284,11 @@ These are the fixed points around which the methodology orbits. Every principle 
     - Before adding a package, search its source for `DisplayDialog` on `[InitializeOnLoad]` paths, and pre-set the preference it asks about.
     - If one is already open, its buttons can be found and pressed from outside (`EnumChildWindows`, then `BM_CLICK`), but only with the button the user would choose.
 
+- **AP30. Driving keyboard and mouse input into an unfocused Editor, and reading the silence as a bug.** A session adds virtual devices in play mode and queues their state while the Editor window is in the background.
+  - *Where seen:* Air Wing slice 2e, 2026-10-26. A virtual Xbox pad and a HID stick took the seat and flew the jet; a virtual keyboard and mouse, queued the same way, did nothing, and the seat never saw them.
+  - *Why it fails:* The Input System's default background behaviour resets and disables devices that cannot run in the background (keyboards, mice) when the application loses focus. Gamepads and joysticks keep working. The bindings were fine: the same keys flew the jet once focus was ignored.
+  - *Do instead:* For a live device check, swap in an in-memory copy of `InputSystem.settings` with `backgroundBehavior = IgnoreFocus` and `editorInputBehaviorInPlayMode = AllDeviceInputAlwaysGoesToGameView`, and restore the original afterwards; never edit the settings asset for a test. Check the pad or stick first: if they work and the keyboard does not, suspect focus before the bindings.
+
 - **AP29. Measuring a contact's closing speed along the part that tilts, not along the surface's normal.** A strut, a probe or a foot measures how fast it closes on the ground along its own axis.
   - *Where seen:* Air Wing slice 2d, 2026-10-26 (`LandingGearL1`). The sink-rate check used the wheel's velocity along the strut. At 8° nose up and 150 kt, the strut axis picked up 77 m/s × sin 8° ≈ 10 m/s of plain forward speed, and every take-off broke the main gear at rotation.
   - *Why it fails:* An axis fixed to the body tilts with its attitude, so it picks up a share of the forward speed. That share grows with speed × tilt, and a ground roll has plenty of both.
@@ -481,3 +486,4 @@ These are the fixed points around which the methodology orbits. Every principle 
 - **2026-10-26** — Air Wing slice 2c. unity-perf-ab A/B in a player build (`Modules/Diagnostics/FlightBenchmark`): caching a per-profile constant the L1 law recomputed every substep (the lift-curve peak) took L1 from 35 to 17 µs per aircraft per step, ×2.2, every test unchanged.
 - **2026-10-26** — Air Wing slice 2d (Landing Gear L1). Added AP29 (a contact's closing speed measured along a tilting strut: every take-off broke the gear at rotation) and C39 (an inversion must add every increment the plant adds: the flaps were missing from the fly-by-wire's lift inversion).
 - **2026-10-26** — Air Wing slice 2d follow-up. Added C40 (solve a rig from its geometry, then pin it with a test that measures the pose).
+- **2026-10-26** — Air Wing slice 2e (Phase 2 review). Added AP30 (keyboard and mouse input into an unfocused Editor reads nothing; pads and sticks still work).

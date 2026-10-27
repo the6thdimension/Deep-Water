@@ -1,6 +1,6 @@
 # Air Wing — blueprint
 
-> **Status: LOCKED BLUEPRINT (W1–W43); Phases 1 and 2 closed (2026-10-26): the F/A-18E flies at L1 from every device class, takes off and lands, and meets its budget. Phase 3 (AI pilots): interview under way, W36–W43 locked.** SIX answered all 24 questions on 2026-10-24 (W1–W24) and locked W25–W31 on 2026-10-25. Progress is in `ROADMAP.md`.
+> **Status: LOCKED BLUEPRINT (W1–W47); Phases 1 and 2 closed (2026-10-26): the F/A-18E flies at L1 from every device class, takes off and lands, and meets its budget. Phase 3 (AI pilots): interview under way, W36–W47 locked.** SIX answered all 24 questions on 2026-10-24 (W1–W24) and locked W25–W31 on 2026-10-25. Progress is in `ROADMAP.md`.
 > **This document's one job:** say what Air Wing is and why, record every decision behind it, and define the contract each part of an aircraft follows. Work order and progress live in `ROADMAP.md`, not here. The stock-take that preceded it is summarised in §1.
 
 ## 1. In plain language
@@ -178,6 +178,10 @@ All entries W1–W24 are SIX's picks of 2026-10-24, in round order. "Leaning" is
 | W41 | How the AI returns and lands | **The overhead break:** run in down the runway at 800 ft, break into a tight level turn, fly downwind with the gear down, turn final and land. *SIX's pick; Claude leaned to a straight-in 3° approach first (the profile the landing tests already fly).* *Mitigation:* the break is built from flight-path segments on the shared layer (W37), with the straight-in final as its last segment, so it can be tested a segment at a time | Straight-in first | Locked (SIX, 2026-10-26) |
 | W42 | Taking and handing back aircraft | **A cycle key and a pick list:** one key (and a pad button) steps the player through the aircraft in the air; the one left goes to its AI pilot at once; a small HUD list shows who flies what (W18) | Same | Locked (SIX, 2026-10-26) |
 | W43 | How many AI aircraft | **Up to four in all:** the player and up to three AI (a wingman, and a pair to fight); about 70 µs of flight core per step at L1 | Same | Locked (SIX, 2026-10-26) |
+| W44 | How often the AI decides | **A 4 Hz watch; the stick every tick:** modes and rules are checked four times a second, timed by the tick count so a replay repeats them; the flight-path layer (W37) works the stick on every 50 Hz tick | Same | Locked (SIX, 2026-10-26) |
+| W45 | The opponent's skill | **Pilot profiles in a ScriptableObject** (rookie, line, ace): reaction delay, field of view, the G it will pull, how well it manages energy. One brain, different numbers | Same | Locked (SIX, 2026-10-26) |
+| W46 | Scoring the fight | **Time in the rear cone:** seconds each jet spends within about 30° of the other's tail and inside about 1 km (W17). On the HUD and logged per fight. No weapons; no gun solution | Same | Locked (SIX, 2026-10-26) |
+| W47 | What sends the AI home | **A command or a fuel line:** the player orders it home (a key, or the pick list, W42), or it goes on its own at its profile's bingo fuel. Fuel burn comes at L3, so until then a flight-time limit stands in, labelled as a stand-in wherever it shows | Same | Locked (SIX, 2026-10-26) |
 
 ## 6. Standing constraints
 

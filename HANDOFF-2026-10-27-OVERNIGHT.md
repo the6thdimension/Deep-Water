@@ -35,7 +35,8 @@ the docs and git current; no missile work.
 | 2 | **Slice 3f, the fight in the vertical:** build it? Equal-skill pilots stalemate today (METHODOLOGY C44) | `Assets/RH Aviator/ROADMAP.md` | 1 min to decide |
 | 3 | **Radar Suite legacy modules:** rewrite the five LOD modules onto the new core, leave them, or retire them later? (Leaning: leave them; General Quarters is the first real user) | `Assets/General Quarters/RADAR-L1-QUESTIONS.md` RS1 | 1 min |
 | 4 | **General Quarters Radar L1:** eight questions, R1–R8, with leanings | `Assets/General Quarters/RADAR-L1-QUESTIONS.md` (BLUEPRINT Q6) | 10 min |
-| 5 | **Red cannot catch a hands-off player past Mach 1:** red chases at most its fighting speed + 150 kt. Let red chase flat out when the target runs? A gameplay call, so not changed | `Assets/RH Aviator/ROADMAP.md`, slice 3d notes | 1 min |
+| 5 | **Two radar plans:** `Assets/RH Radar/` is an empty greenfield module (README, a September routine ROADMAP, an asmdef) beside `RH Radar Suite`, where tonight's core lives. Which is the home? (Leaning: the suite, and strike the `RH Radar` plan with a reason) | `RADAR-L1-QUESTIONS.md` R1 | 1 min |
+| 6 | **Red cannot catch a hands-off player past Mach 1:** red chases at most its fighting speed + 150 kt. Let red chase flat out when the target runs? A gameplay call, so not changed | `Assets/RH Aviator/ROADMAP.md`, slice 3d notes | 1 min |
 
 ## Things to check
 

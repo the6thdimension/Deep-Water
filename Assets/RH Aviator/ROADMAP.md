@@ -12,7 +12,7 @@
 
 **Branch:** `feat/aircraft`, kept level with `main` (CLAUDE.md, Branches), commits through `commit-to-branch`.
 
-**Where things stand (2026-10-27):** slices 3a and 3b are done. The AI flies Dogfight's four gates, joins and holds fingertip on a leader through a turn and a 2 G pull, and the player swaps seats with it mid-flight (Tab, the Xbox D-pad right). A7–A8 wait on SIX (BLUEPRINT Q2). Next is slice 3c (going home and the break), on SIX's go.
+**Where things stand (2026-10-27):** slices 3a and 3b are done. The AI flies Dogfight's four gates, joins and holds fingertip on a leader through a turn and a 2 G pull, and the player swaps seats with it mid-flight (Tab, the Xbox D-pad right). SIX confirmed A7–A8 on 2026-10-27. Next is slice 3c (going home and the break), on SIX's go.
 
 ## DONE — finished and committed
 
@@ -26,7 +26,6 @@
 
 ### Next
 - **Slice 3c — going home and the break** (W41, W47), on SIX's go.
-- **SIX:** confirm A7–A8 (BLUEPRINT Q2).
 
 ### Left open in finished slices
 - **Slice 3a:** the first approach to gates 2 and 3 goes around once (each 90° turn onto a gate's line does not fit the first try); the course takes about 5.5 minutes. Not flown against a player by hand.
@@ -75,9 +74,9 @@
 
 ### Slice 3b — formation and seats (W40, W42) (done 2026-10-27: all pass criteria met; 122/122 tests in both modules, `a2ae171d`)
 - [x] Modes **Join** and **Fingertip** (W40) on the order `JoinOn(leader)`; also the orders `FlyRoute` and `HoldCourse`, each logged as a rule. Rules: **in the slot** (inside 10 m on every axis, closing under 5 kt), **lost the slot** (over 150 m), **leader lost** (it crashed). The slot: 40 m right (about three of the F/A-18E's 13.6 m wingspans), 10 m back, level with the leader, in the leader's level frame (`Core/Formation`, `Slot`).
-- [x] The plan is worked out **every tick** from the picture (A7, proposed): the slot's speed plus an overtake (linear near the slot, never more than √(2 a d) at 1.5 m/s², at most 150 kt), with a speed lead and the speed brake past 8 kt over; the aim a look-ahead along the slot's track; the leader's **bank, roll rate, flight-path angle and rate as feed-forward** (AP32), the rates three-quarters from how it is rotating and a quarter from its G. Formation flies its own hands, the route hands with tighter height and path gains (`PilotProfile.FormationHands`).
+- [x] The plan is worked out **every tick** from the picture (A7, locked): the slot's speed plus an overtake (linear near the slot, never more than √(2 a d) at 1.5 m/s², at most 150 kt), with a speed lead and the speed brake past 8 kt over; the aim a look-ahead along the slot's track; the leader's **bank, roll rate, flight-path angle and rate as feed-forward** (AP32), the rates three-quarters from how it is rotating and a quarter from its G. Formation flies its own hands, the route hands with tighter height and path gains (`PilotProfile.FormationHands`).
 - [x] Back from the player (W42): the seat sees the gap in ticks, judges nothing across it, starts the throttle where the player left it (`FlightPathHands.Resume`) and decides at once.
-- [x] Air Wing side (A8, proposed): **`Core/Seats/SeatRoster`**: one player seat and each aircraft's own seat; `Cycle()` steps through the aircraft not crashed, in id order; the jet left goes to its own seat, or holds the player's last inputs. `PlayerSeat.TakeOver` puts the lever at the jet's throttle and keeps its switches. `ISeatStatus` lets a seat describe itself. The **cycle key**: Tab and the Xbox D-pad right (`CycleSeat` in `AirWingFlight.inputactions`), applied between ticks. The **chase camera and the HUD follow the player's aircraft**; the HUD's **pick list** (top right) shows who flies what.
+- [x] Air Wing side (A8, locked): **`Core/Seats/SeatRoster`**: one player seat and each aircraft's own seat; `Cycle()` steps through the aircraft not crashed, in id order; the jet left goes to its own seat, or holds the player's last inputs. `PlayerSeat.TakeOver` puts the lever at the jet's throttle and keeps its switches. `ISeatStatus` lets a seat describe itself. The **cycle key**: Tab and the Xbox D-pad right (`CycleSeat` in `AirWingFlight.inputactions`), applied between ticks. The **chase camera and the HUD follow the player's aircraft**; the HUD's **pick list** (top right) shows who flies what.
 - [x] Air Wing's hands take optional feed-forward (bank, roll rate, flight-path angle and rate; zero for a route, so slice 3a flies bit for bit as before) and `Resume(throttle)`; the throttle integral is held to ±1, not ±0.5 (AP33).
 - [x] Scene: **Deep Water → RH Aviator → Add AI Wingman to the Open Scene**: an AI jet 600 m behind and 200 m right of the player's, ordered to join its wing, and an AI pilot in the player's jet holding course, so whichever jet the player leaves has someone flying it. Unsaved.
 - [x] **Found and fixed while tuning** (the pass criteria and the leader's manoeuvre stayed as fixed):
@@ -171,3 +170,4 @@ Kept for the record. Air Wing now owns the airframe side (W5), and W17, W49 and 
 - **2026-10-26** — Rewritten from Air Wing's Phase 3 interview (W36–W51): slices 3a–3e with pass criteria fixed before tuning; the old plan kept below, superseded (A5). Nothing built.
 - **2026-10-26** — SIX confirmed A1–A6. Slice 3a done: the AI pilot flies Dogfight's four gates through the stick (L1 law hands, sticky go-around, logged rules; `92eaaaff`), 113/113 tests in both modules, the AI budget met (3–4 µs per pilot per tick). Found: an aim point inside the turn orbits for ever (AP31); a look-ahead shorter than the turn radius swings (C41); a float clock moved the watch (AP26).
 - **2026-10-27** — Slice 3b done at SIX's go: Join and Fingertip on the leader, the seat cycle and the pick list (Air Wing), 122/122 tests in both modules; the join in 76.7 s, the hold within 6.8 / 2.3 / 4.2 m through a turn and a 2 G pull. A7–A8 proposed (BLUEPRINT Q2). Found: following on position alone is late and overshoots (AP32); a throttle integral clamped short of the cruise setting (AP33); tune by a sweep and ship the margin (C42).
+- **2026-10-27** — SIX confirmed A7 (formation flown every tick) and A8 (the seat roster in Air Wing) as written.

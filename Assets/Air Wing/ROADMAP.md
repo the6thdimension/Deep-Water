@@ -14,7 +14,7 @@
 - **Git (SIX, 2026-10-24):** Claude manages git without asking. Verified work is committed, pushed and brought up to `main`, and every branch is kept level; `Guided-Fury` takes it through a PR.
 - **Never pushed:** the archive branch, DAVFX and the MCP unlock script. There are no force pushes.
 
-**Where things stand (2026-10-26):** Phase 1 is finished. Phase 2 is four slices in (2a–2d): the L1 jet flies, takes off and lands. Next is 2e, the Phase 2 review, on SIX's go.
+**Where things stand (2026-10-26):** Phases 1 and 2 are finished. The F/A-18E flies at L1 in Dogfight from every device class, takes off from and lands on runway 09/27, and costs 18 µs a step in a player against a 50 µs budget. Next is Phase 3 (AI pilots), on SIX's go.
 
 ## DONE — finished and committed
 
@@ -33,16 +33,17 @@ Everything in this table is built, tested and on `main`. The detail behind each 
 | Slice 2b — Fly-by-wire L1 | Hornet-style flight controls: G and roll-rate commands, the AoA and G limits | 2026-10-26 | 7c77b0e1 | 82 |
 | Slice 2c — Engines L1, L1 in the scenes | Engine spool; the scenes fly L1; the L1 budget met (17 µs) | 2026-10-26 | 6edafea9 | 87 |
 | Slice 2d — Landing gear L1 | Wheels on spring-damper struts over PhysX contacts, brakes, nosewheel steering, gear up and down, a runway start, take-off and landing; hard and gear-up landings crash | 2026-10-26 | 8343959b | 99 |
+| Slice 2e — Phase 2 review | Every device class flown live at L1 in Dogfight; a landing on runway 09/27 in the scene; the budget re-measured with the gear, in the air and on the wheels; the phase written up | 2026-10-26 | see the change log | 103 |
 | Slice 2d follow-up — the gear moves; softer struts | The model's gear retracts and extends with the core (legs fold, doors close); the struts stiffen at the end of travel, so a hands-off touchdown survives | 2026-10-26 | d9cedd4c | 103 |
 
 ## STILL TO DO
 
-### Next in Phase 2
-- **Slice 2e — Phase 2 review:** fly every device at L1 in Dogfight, re-measure the budget, write it up, archive what L1 replaced.
+### Next
+- **Phase 3 — AI pilots**, on SIX's go (outline below).
 
 ### Left open in finished slices
-- **Fly by hand** in Dogfight from the flight stick and the mouse (slice 1e). SIX has flown it with the pad, and L1 by hand (2026-10-26); the feedback is still to be written in.
-- **Two fly-by-wire targets missed** (slice 2b): G onset 1.2 s against 1.0, and the G limit peaks at 8.08 G against 8.0. They are reported, not fixed.
+- **Fly by hand** from real devices. Every device class is proven live at L1 with virtual devices (slice 2e), and SIX has flown it with the pad and flown L1 by hand (2026-10-26); SIX's L1 feedback is still to be written in. A real VelocityOne, a real mouse, and take-off and landing by hand are not yet flown.
+- **Two fly-by-wire targets missed** (slice 2b): G onset 1.2 s against 1.0, and the G limit peaks at 8.08 G against 8.0 in the test. **Live, a keyboard's instant full pull at about 470 kt reached 8.43 G** (slice 2e). Reported, not fixed.
 - **Not built in the fly-by-wire:** the revised Hornet law's sideslip feedback to the ailerons, the differential stabilator, sensor models.
 - **Landing gear (slice 2d), open:**
   - Not flown by hand: a runway start, take-off and landing from a real device. They are tested in EditMode and the take-off was seen in play from a scripted seat.
@@ -384,8 +385,39 @@ SIX's picks: contacts as W4 says, with spring-damper struts; a brake button (Spa
   - Tests (103/103): the end stop's formula; the hands-off touchdown; every gear part found and gear down equal to the rest pose; with the gear up, nothing visible below the closed doors (lowest −0.86 m in the model's frame, the right inner door's thick skin). Seen in play in Dogfight: the airborne jet starts with its gear stowed; on gear down the doors open, the leg swings, and it ends on the model's rest pose.
 - [x] **Seen at runtime in Dogfight** (Start Mode set to Runway for the run, then the scene reloaded from disk): at idle the jet held its strut compression on the PhysX runway and crept at 3–4 kt (idle thrust beats rolling friction; the brakes hold it). A scripted seat then took off in afterburner: rotation at 150 kt, lift-off near 183 kt, about 470 m from brake release, the gear up above 80 m, climbing out. The player-script compile passes.
 
-### Slice 2e — Phase 2 review
-- [ ] Each device class in Dogfight at L1; the budget; METHODOLOGY; archive what L1 supersedes.
+### Slice 2e — Phase 2 review (done 2026-10-26: 103/103 tests; the gate met, by scripted and virtual pilots)
+- [x] **Every device class, live in Dogfight at L1** (play mode, virtual devices added at runtime, one after another, each held 3 s; C18's live check, the item slice 1e left open):
+
+  | Device | What it did | Seen |
+  |---|---|---|
+  | Xbox pad, left stick right | took the seat (`Gamepad`) | rolled at 150°/s, the L1 roll limit |
+  | HID flight stick, stick back | took the seat from the pad (`Stick`) | pulled 7.5 G |
+  | Keyboard, S then D | took the seat (`Keyboard`) | pulled 8.43 G (a G-limit overshoot, see *Left open*); rolled at 150°/s |
+  | Mouse, moved right | the instructor took the seat (`Mouse`) | flew to the aim |
+  | Keyboard G | flipped the gear switch while the mouse held the seat | gear 75 % down after 3 s |
+
+  - **Found (METHODOLOGY AP30):** with the Editor unfocused, as it is when a session drives it, the virtual keyboard and mouse read nothing; the pad and the stick still worked. The Input System resets keyboards and mice when the application loses focus (its default background behaviour). The keyboard and mouse were rerun with an in-memory copy of the input settings set to ignore focus, restored afterwards; the settings asset was not touched. A player focused on the Game view is not affected.
+- [x] **Take-off and landing on runway 09/27 in Dogfight** (PhysX contacts, scripted seats): take-off seen in slice 2d (lift-off near 183 kt, about 470 m from brake release). Landing: put on a 3° final at 145 kt with gear and flaps down, the pilot held the path and the centreline, touched down at 3.7 m/s (12.2 ft/s against 24), lowered the nose, braked, and stopped 1,048 m on, on the centreline and on the runway.
+- [x] **Budget (W21) re-measured with the gear**, unity-perf-ab's instrument (`FlightBenchmark`, now with a ground case: N jets parked on their wheels, brakes on at half throttle, every wheel in contact on every substep). Player (Windows, Mono, release; i9-12900H; median of 3; two runs):
+
+  | Case | 1 aircraft | 20 aircraft | Budget |
+  |---|---|---|---|
+  | L1, airborne (gear stowed) | 17.84, 18.15 µs | 17.82, 18.13 µs per aircraft | 50: **met** (×2.8) |
+  | L1, on the wheels, PhysX contacts | 13.32, 12.89 µs | 13.79, 13.09 µs per aircraft | 50: **met** |
+  | L1, on the wheels, the truth feed's ground | 10.86, 11.00 µs | 10.61, 10.84 µs per aircraft | 50: **met** |
+  | L0 | 3.27, 3.23 µs | 3.10, 3.14 µs per aircraft | 10: **met** |
+
+  - Against slice 2c, the airborne L1 cost rose from 16.6–17.1 to 17.8–18.2 µs: Landing Gear L1's step (its transit, and the hard-point check over five points instead of one). On the wheels it is cheaper than flying, because the aero is small at low speed; PhysX's twelve raycasts per aircraft per step add about 2.5 µs.
+  - The player rebuilt in 0.1 min (302 MB, 0 errors).
+- [x] **What L1 superseded (C25):** nothing first-party. L1 adds levels and L0 stays one setting away on the fidelity sheet (W35). The vendor's AerialArcade F-18E (`FDS Assets/Aircraft/F-18E.prefab`) is superseded as the jet Air Wing flies, but it stays where it is: `CVN-78 FORD.unity` still uses it, it is vendor content (read-only), and carrier operations are parked until Phase 3 (W16). Revisit it with the carrier stream.
+- [x] METHODOLOGY: AP30 (driving keyboard and mouse input in an unfocused Editor); the unity-mcp-workflow skill gains it as trap 12.
+- [x] *Done when* (the Phase 2 gate):
+  - the F/A-18E flies at L1 in Dogfight from each device class: **met** with virtual devices, live; real devices by hand are left to SIX;
+  - it takes off from and lands on runway 09/27: **met** in the scene, by scripted pilots;
+  - it can depart when abused (W33): **met** (slice 2b: 120 kt at idle, α 63.6°, β 35.5°);
+  - replay is bit-identical in the air and same-machine on the ground (W7): **met** (`ControlsL1Tests.AtL1_TheFlightCore_IsBitIdentical_AndReplays`, `LandingGearL1Tests.OnTheGround_TheCoreIsBitIdentical_AndReplays`);
+  - one aircraft costs ≤ 0.05 ms per fixed step in a player: **met**, 18 µs airborne, 13 µs on the wheels.
+- *Anti-goals for Phase 2, held:* no Mach effects or ground effect (L2); no fuel burn or moving centre of gravity (L3); no AI pilot; no carrier; no weapons; no cockpit view; no helicopter; no vendor code edited; no change to the project's fixed timestep.
 
 ## Phase 3 — AI pilots (outline; RH Aviator, W5, W17, W18)
 - [ ] RH Aviator Phase 0 (its own roadmap): an AI seat against Air Wing's `ISeat` and `PilotInputs`; named, logged rules (C19).
@@ -412,4 +444,5 @@ Revisit when Phase 3 is done. The questions for SIX are in BLUEPRINT §7.
 - **2026-10-26** — Slice 2c done: Powerplant L1 (spool), the scenes fly L1, the budget met in a player (17 µs per aircraft per step after caching the lift peak, ×2.2); 87/87 tests.
 - **2026-10-26** — Roadmap split into DONE and STILL TO DO at SIX's request (e322f5a7).
 - **2026-10-26** — Slice 2d done (8343959b): Landing Gear L1 on spring-damper struts over PhysX contacts, brakes, nosewheel steering, a runway start, take-off and landing; 99/99 tests. Found and fixed: the sink rate measured along a tilted strut, the flaps missing from the law's lift inversion, the runway start's throttle. Open for SIX: a hands-off touchdown breaks the nose gear.
+- **2026-10-26** — Slice 2e done: **Phase 2 complete.** Every device class flown live at L1 in Dogfight; a landing on runway 09/27 in the scene; the budget met with the gear (18 µs airborne, 13 µs on the wheels on PhysX, per aircraft per step in a player); nothing first-party superseded. Found: an unfocused Editor reads no keyboard or mouse (AP30); a keyboard step pull overshoots the G limit to 8.43 G.
 - **2026-10-26** — (d9cedd4c) Slice 2d follow-up at SIX's word: the struts stiffen over their last 30 % (a hands-off touchdown survives) and the model's gear retracts and extends with the core (`GearRig`, hinges solved off the geometry); 103/103 tests.

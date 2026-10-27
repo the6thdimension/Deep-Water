@@ -15,6 +15,7 @@ Paths are relative to this skill folder. The scripts find the project root thems
 | Need | Use |
 |---|---|
 | Wait for an edit to compile, or see why it didn't | `scripts/wait_build.sh mark`, then trigger the compile, then `scripts/wait_build.sh <Assembly> <NewSymbol> [timeout]` |
+| Wait for an edit that adds no new symbol (a changed constant, a moved line) | trigger the compile, then `scripts/wait_artifact.sh <Assembly> <edited file> [timeout]`: BUILT once the Bee artifact is newer than the file, ERRORS, or TIMEOUT |
 | Force Unity to pick up edits | `templates/recompile.cs` as the RunCommand body |
 | Run EditMode tests | delete the old results file from the shell, then `templates/run-tests.cs`, then `scripts/wait_file.sh <out> 300 '^FINISHED'` |
 | Record values per fixed step in play mode | `Unity_ManageEditor Play`, then `templates/play-recorder.cs`, then `scripts/wait_file.sh <csv> 300 '^# end'` |
@@ -100,7 +101,7 @@ Runs C# by compiling a **transient assembly** against the loaded project assembl
    - Symptom: a test run after a change reports exactly the numbers of the run before it.
    - Cause: the `rm` of the results file was chained after a `wait_build.sh` that timed out and went to the background. The `rm` ran late. The shell's wait found the old file and printed it; then the `rm` deleted the new one.
    - Fix: clear the results file in its own command, before the RunCommand that starts the run, never chained after a wait.
-   - Also: the `Library/ScriptAssemblies` DLL keeps its old time when a rebuild is byte-identical, and Unity's auto-refresh often compiles an edit before you ask. To tell whether an edit is in, check the Bee artifact (`Library/Bee/artifacts/*/<Assembly>.dll`) or wait for a new field or method name (trap 9), not the copy's timestamp.
+   - Also: the `Library/ScriptAssemblies` DLL keeps its old time when a rebuild is byte-identical, and Unity's auto-refresh often compiles an edit before you ask. To tell whether an edit is in, check the Bee artifact (`Library/Bee/artifacts/*/<Assembly>.dll`) or wait for a new field or method name (trap 9), not the copy's timestamp. `scripts/wait_artifact.sh` does the artifact check (added 2026-10-27).
 
 ## Play mode & timing
 

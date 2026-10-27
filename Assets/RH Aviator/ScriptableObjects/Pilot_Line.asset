@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7810033db72bb5b4bbcab140233efa52, type: 3}
+  m_Name: Pilot_Line
+  m_EditorClassIdentifier: DeepWater.Aviator::DeepWater.Aviator.ScriptableObjects.PilotProfileSO
+  displayName: line
+  guidanceGain: 2
+  maxBankDeg: 70
+  rollRatePerBankDeg: 2
+  climbDegPerM: 0.06
+  maxClimbDeg: 20
+  maxDiveDeg: 20
+  gPerPathDeg: 0.25
+  maxG: 6
+  throttlePerKt: 0.02
+  throttleTrim: 0.75
+  throttleIntegralPerKtS: 0.004
+  useAfterburner: 1
+  speedBrakeOverKt: 25
+  floorAglM: 100
+  guardLookAheadS: 6
+  guardClimbDeg: 8
+  guardMaxBankDeg: 30
+  leadInM: 3000
+  carrotM: 400
+  carrotTurnRadii: 1
+  throughM: 1000
+  minRunM: 1500
+  captureDeg: 30
+  captureFraction: 0.7
+  cruiseKt: 350
+  bandMarginKt: 60
+  holdAltitudeM: 914
+  holdKt: 350
+  provenance: 'All AUTHORED (RH Aviator W45; no public source describes a generic
+    line pilot), tuned headless against slice 3a''s pass criteria (ROADMAP, fixed
+    before tuning). Hands: guidanceGain (2, the classic value of the L1 path-following
+    law, Park, Deyst and How, AIAA 2004-4900, PUBLIC method), maxBankDeg, rollRatePerBankDeg,
+    climbDegPerM, maxClimbDeg, maxDiveDeg, gPerPathDeg, maxG (below the F/A-18E''s
+    7.5 G limit: a line pilot does not fly at the limit), throttlePerKt, throttleTrim,
+    throttleIntegralPerKtS, speedBrakeOverKt. Ground guard: floorAglM (100 m, about
+    330 ft), guardLookAheadS, guardClimbDeg, guardMaxBankDeg. Route: leadInM, carrotM,
+    carrotTurnRadii, throughM, minRunM, captureDeg, captureFraction, cruiseKt, bandMarginKt.
+    After the course: holdAltitudeM (3,000 ft), holdKt.'

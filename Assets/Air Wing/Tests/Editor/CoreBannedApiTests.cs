@@ -27,14 +27,15 @@ namespace DeepWater.AirWing.Tests
             (@"\bParallel\.|\bTask\.Run\b|\bThreadPool\b", "thread-timing-dependent results"),
         };
 
-        [Test]
-        public void FlightCore_UsesNoBannedApis()
+        /// <summary>
+        /// Scans every C# file under <paramref name="folder"/> for the banned APIs: one line per hit, empty when clean,
+        /// and the number of files read. RH Aviator's tests scan its core with the same rules (its constraint 2).
+        /// </summary>
+        public static string Scan(string folder, out int files)
         {
-            string core = Path.Combine(Application.dataPath, "Air Wing", "Core");
-            Assert.IsTrue(Directory.Exists(core), core);
             var report = new StringBuilder();
-            int files = 0;
-            foreach (string file in Directory.GetFiles(core, "*.cs", SearchOption.AllDirectories).OrderBy(f => f))
+            files = 0;
+            foreach (string file in Directory.GetFiles(folder, "*.cs", SearchOption.AllDirectories).OrderBy(f => f))
             {
                 files++;
                 string code = StripCommentsAndStrings(File.ReadAllText(file));
@@ -45,8 +46,17 @@ namespace DeepWater.AirWing.Tests
                         report.AppendLine($"{Path.GetFileName(file)}:{line}: '{m.Value}' ({why})");
                     }
             }
+            return report.ToString();
+        }
+
+        [Test]
+        public void FlightCore_UsesNoBannedApis()
+        {
+            string core = Path.Combine(Application.dataPath, "Air Wing", "Core");
+            Assert.IsTrue(Directory.Exists(core), core);
+            string report = Scan(core, out int files);
             Assert.Greater(files, 0, "no core files found");
-            Assert.IsEmpty(report.ToString(), "banned APIs in the flight core:\n" + report);
+            Assert.IsEmpty(report, "banned APIs in the flight core:\n" + report);
         }
 
         [Test]

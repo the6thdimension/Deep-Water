@@ -16,6 +16,7 @@ namespace DeepWater.AirWing.Core
         readonly List<Aircraft> _aircraft = new List<Aircraft>();
         readonly List<ISeat> _seats = new List<ISeat>();
         readonly List<AircraftRecord> _records = new List<AircraftRecord>();
+        readonly List<AircraftRecord> _picture = new List<AircraftRecord>();
         readonly ISurfaceTruth _surface;
         readonly IContactProbe _probe;
 
@@ -27,6 +28,16 @@ namespace DeepWater.AirWing.Core
         public long Tick { get; private set; }
 
         public IReadOnlyList<Aircraft> Aircraft => _aircraft;
+
+        /// <summary>
+        /// Every aircraft as the previous tick ended, the same for every seat this tick (RH Aviator A1). Seats are asked
+        /// in id order, so reading <see cref="Aircraft"/> mid-tick would show some aircraft a tick ahead of others; a
+        /// pilot reads this instead. Empty before the first tick.
+        /// </summary>
+        public IReadOnlyList<AircraftRecord> Picture => _picture;
+
+        /// <summary>The truth feed's surface (sea or ground height) under any point.</summary>
+        public ISurfaceTruth Surface => _surface;
 
         /// <summary>
         /// The flight core over <paramref name="surface"/>. The landing gear meets the ground through
@@ -70,6 +81,9 @@ namespace DeepWater.AirWing.Core
         public void Step()
         {
             long tick = Tick;
+            // The picture for this tick: everyone where the last tick left them (A1).
+            _picture.Clear();
+            foreach (Aircraft a in _aircraft) _picture.Add(new AircraftRecord(a.Id, a.State));
             _records.Clear();
             for (int i = 0; i < _aircraft.Count; i++)
             {

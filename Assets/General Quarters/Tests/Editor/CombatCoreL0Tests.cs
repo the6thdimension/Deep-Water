@@ -37,7 +37,7 @@ namespace DeepWater.GeneralQuarters.Tests
                 Target(4, TargetKind.Aircraft, Identity.Hostile, new Vector3(0f, 12000f, 190_000f), Vector3.zero),
             };
             var seen = new List<Detection>();
-            radar.Sweep(Own, world, seen);
+            radar.Sweep(Own, new SeaEnvironment(), world, seen);
             CollectionAssert.AreEquivalent(new[] { 1, 3 }, seen.Select(d => d.TargetId).ToArray());
             Debug.Log($"[GQ] radar horizon for a 5 m sea-skimmer from a 20 m antenna: {horizon / 1000f:0.0} km");
         }
@@ -50,12 +50,12 @@ namespace DeepWater.GeneralQuarters.Tests
             var log = new EngagementLog();
             var tracks = new TrackManagerL0(new TrackProfileData { DropAfterTicks = 10 });
             var d = new List<Detection> { new Detection { TargetId = 77, Kind = TargetKind.Aircraft, Identity = Identity.Hostile, Position = Vector3.one } };
-            tracks.Update(0, d, log);
-            tracks.Update(5, d, log);
+            tracks.Update(0, true, d, log);
+            tracks.Update(5, true, d, log);
             Assert.AreEqual(1, tracks.Tracks.Count);
             Assert.IsTrue(tracks.TryGetByTruth(77, out Track t));
             Assert.AreEqual(1, t.Id);
-            tracks.Update(16, new List<Detection>(), log);
+            tracks.Update(16, true, new List<Detection>(), log);
             Assert.IsFalse(tracks.Tracks[0].Active, "dropped after more than 10 silent ticks");
             Assert.AreEqual(1, log.Count(EventKind.TrackCreated));
             Assert.AreEqual(1, log.Count(EventKind.TrackDropped));
@@ -68,7 +68,7 @@ namespace DeepWater.GeneralQuarters.Tests
         {
             var log = new EngagementLog();
             var tracks = new TrackManagerL0(new TrackProfileData { DropAfterTicks = 100 });
-            tracks.Update(0, new List<Detection>
+            tracks.Update(0, true, new List<Detection>
             {
                 new Detection { TargetId = 1, Kind = TargetKind.AntiShipMissile, Identity = Identity.Hostile, Position = new Vector3(0, 5, 20_000), Velocity = new Vector3(0, 0, -290) },
                 new Detection { TargetId = 2, Kind = TargetKind.AntiShipMissile, Identity = Identity.Hostile, Position = new Vector3(10_000, 5, 0), Velocity = new Vector3(-290, 0, 0) },

@@ -2,13 +2,14 @@
 
 > **This document's one job:** let someone pick General Quarters up cold. What it is, what is proven, the lessons that cost hours, how to run it, and what comes next.
 > Why each piece exists is in `BLUEPRINT.md`; the work order is in `ROADMAP.md`.
-> **Last verified:** 2026-10-25, Unity 6000.4.11f1, HDRP 17.4. At the end of Phase 1: 72/72 General Quarters tests and 49/49 Sea State tests. After Stream B slice B1 (guns L1): 85/85 and 49/49. After Stream C slice C1 (Damage Control L1, flooding): 100/100 and 49/49.
+> **Last verified:** 2026-10-27, Unity 6000.4.11f1, HDRP 17.4. At the end of Phase 1: 72/72 General Quarters tests and 49/49 Sea State tests. After Stream B slice B1 (guns L1): 85/85 and 49/49. After Stream C slice C1 (Damage Control L1, flooding): 100/100 and 49/49. After Stream A (Radar L1 + Tracks L1, 2026-10-27, headless in the background mirror): 113 General Quarters tests, all passing but the hull-prefab check, which fails in the mirror before and after (section 5); 49/49 Sea State; 46/46 RH Radar Suite.
 
 ## 1. What this is
 
 SIX asked for "a living breathing ship with a respectable and modular combat system". General Quarters is that ship: an Arleigh Burke destroyer (DDG-51, Flight I/II) that does the following.
 - She floats on the Sea State sea and steers through an engine room and a helm.
 - Her combat information center (CIC) sees threats, decides and fires: ESSM from the VLS, the Mk 45 gun, two CIWS and two Mk 38s.
+- On the range her radar can miss (Radar L1): the radar equation, sea clutter from the sea state, a seeded detection draw per look and noisy plots. Her tracks are filtered from those plots (Tracks L1), and fire control reads the tracks, never truth.
 - She takes hits and loses systems. Holed below the waterline, she floods: she lists, trims and loses stability as the water spreads, and past the margin she sinks (Damage Control L1).
 
 **Two halves.**
@@ -48,7 +49,12 @@ SIX asked for "a living breathing ship with a respectable and modular combat sys
    - The compartments are cut from the hull's own buoyancy columns, and their water is reckoned the way the buoyancy reckons submersion. So a space open to the sea holds exactly the buoyancy its columns lose, by construction (METHODOLOGY C30). Keep it that way when the hull changes.
    - A first-order damage-stability formula misses what asymmetry (the waterplane's product of inertia) and flare (BM at the sunk draft) switch on. When the gate fails, fix the prediction's physics, not the tolerance (AP22). `flood_predict.py` now has both.
    - A space's level is horizontal in the world. The free-surface effect comes from that, with no formula (C31).
-10. **Blender:**
+10. **Radar L1 + Tracks L1 (Stream A):**
+   - Constant-γ sea clutter (G67) is a model for medium grazing angles. At a 20 m mast's sub-degree grazing it overstates the clutter, and the radar core has no Doppler processing. With γ alone, a sea-skimmer is not seen inside about 18 km from Douglas 3 up; the saturation raid at the range's Douglas 4 lost 20 of 24 that way. An AUTHORED 30 dB clutter improvement fixes it (24 of 24). It is **proposed, not decided** (G70, Q7) and is one number in the loadout (C48).
+   - The peak power is solved, not authored: a 0 dBsm target is seen with Pd 0.5 at 175 nmi (the one public figure, G63). Change the calibration figure, not the power.
+   - Noisy tracks move whatever reads them. Guns L1 lays on the track as it is, so the Mk 45's lay follows each look's noise; smoothing that is Guns L2. The AI captain's 030/330 tie-break and its T1 timing were written on perfect tracks: those tests run at Radar and Tracks L0.
+   - Every look spends the run's own draws, so turning Radar L1 on changes every later chance draw. The golden Fix test pins Radar and Tracks L0, as it does guns and Damage Control L0.
+11. **Blender:**
    - Start Blender's MCP server from its Python console with `bpy.ops.mcp.start()` (port 9876).
    - Never modify the original DDG `.blend` or prefab; work on copies.
    - Export a flat FBX; the Unity builder re-nests it.
@@ -66,6 +72,7 @@ SIX asked for "a living breathing ship with a respectable and modular combat sys
 | Reused vendor effects (`HD_Naval_Explosion`, VFX Arsenal) | **FAILED** | They draw wrong or too small in HDRP (AP20) |
 | Physical controllers on the range | **unverified** | Bindings are proven with virtual devices (C18). SIX has driven her at the conn ("driving feels great"); the range seats have not been tried on hardware |
 | Damage Control L1: 36 spaces cut from the buoyancy columns, orifice flooding with pressed-up spaces, the water on the Rigidbody, holes from Breach Orders and hits, loss counted from reserve buoyancy | **CHAMPION** (the model) | A wing's list matches the closed form to 0.02° in EditMode (4.321° against 4.34°) and in PhysX (4.337°); trim, sinkage and GM within their stated bands. Torricelli to 0.1 %. Seven stations sink her on the same tick twice in EditMode, and 1,400 s after the breach in PhysX, where the lost-ship guard then stops her (AP23). 0.33 ms per step at the worst. **The arrangement is AUTHORED:** deck height, wing breadth, hold uses and leak paths, because DDG-51's is not public |
+| Radar L1 + Tracks L1 (G61–G68): a generic S-band array on RH Radar Suite's core (radar equation, Swerling 1 at Pfa 1e-6, Barton's errors, the 4/3-Earth horizon, constant-γ sea clutter from Sea State), and the suite's track file (2 of 3, α-β, gating) | **ITERATE** | The calibration passes through the public figure exactly. 4,000 seeded looks at the Pd 0.5 range see 0.496. Plots scatter 16.9 m cross-range and 5.1 m down-range at 20 km (predicted 17.5 and 5.0). Track error 12.9 m rms on a closing sea-skimmer. 8 sea-skimmers: 8 killed, as at L0. Saturation at Douglas 4: 24 killed, 0 leaked, 0.064 ms per fixed step; the same Fix twice. **AUTHORED:** every radar number but the calibration range, the RCS per kind and the track-file settings. **Proposed, not decided:** the 30 dB clutter improvement (G70). Not yet seen in play mode by SIX |
 | The hull's GM of 1.5 m | **PROMISING-NOT-PROVEN** | It is AUTHORED. 5415's KG would give 1.2 m and a 9.6° steady heel, still inside Barry's band. Not changed without SIX |
 
 ## 4. What is where
@@ -75,6 +82,8 @@ SIX asked for "a living breathing ship with a respectable and modular combat sys
 | `Core/` | The deterministic combat core: `CombatSystem`, loadout, orders, CIC (radar, tracks, TEWA), magazine (VLS, guns), damage control, helm, engine room, captain, scenario, log |
 | `Modules/Combat/ShipCombat.cs` | Runs the core on every fixed step: the AI captain, the raid, then `CombatSystem.Step` |
 | `Modules/Hull/`, `Modules/Propulsion/` | The hull on Sea State (`ShipHull` carries the flood water's mass), `ShipFlooding` (the water onto the Rigidbody, the sea into Damage Control), and `ShipDrive` (the MMG forces into PhysX) |
+| `Core/Cic/Radar.cs`, `Core/Cic/Tracks.cs` | Radar L0 and L1 (`RadarL1`: the calibration solve, one look per target per sweep); Tracks L0 and L1 (`TrackManagerL1`: the suite's `TrackFile` in the CIC) |
+| `Assets/RH Radar Suite/Core/Detection`, `Core/Tracking` | `RHRadarSuite.Core`, the engine-free radar physics both modules share (G61): radar equation, detection statistics, horizon, clutter (Barton and Ward's sea γ), measurement errors, `RadarLook`, the α-β filter and the track file |
 | `Core/DamageControl/` | L0 hit points; L1 `FloodPlan` (the spaces), `FloodModel` (the water), `FloodHydrostatics` (the damaged GM), `FloodMass` (ship plus water as one body) |
 | `.claude/skills/hull-stability-check/scripts/flood_predict.py` | Closed-form damage stability on the same columns: every space, any bilged set, a part-filled space. The tests' predictions come from it |
 | `Modules/Presentation/` | Effects, mounts, hatches and audio. It reads the log and never writes back |
@@ -94,20 +103,23 @@ SIX asked for "a living breathing ship with a respectable and modular combat sys
   3. Build Combat Effects.
   4. Build Range Scene.
 - **Just drive her:** Deep Water → General Quarters → Drive the DDG.
-- **Tests:** Test Runner → EditMode, assemblies `DeepWater.GeneralQuarters.Tests.Editor` and `DeepWater.Sea.Tests.Editor`. Expect 100 and 49 (about 3 minutes; the sinking test alone takes a minute).
+- **Tests:** Test Runner → EditMode, assemblies `DeepWater.GeneralQuarters.Tests.Editor`, `DeepWater.Sea.Tests.Editor` and `RHRadarSuite.Tests.Editor`. Expect 113, 49 and 46 (about 3 minutes; the sinking test alone takes a minute). In the background mirror `Prefab_IsAssembledFromTheBlenderModel` fails (an empty material slot); it failed there before Stream A too.
+- **Headless tests in the background mirror** (`Deep Water BG`, batchmode `-runTests`): the first run after a code change ran the hull and flooding tests 7 to 19 times slower (cold start; Burst still compiling is the likely cause), and the sinking test hit its 180 s timeout. The same code run again warm took 42.7 s (43.2 s before). Time heavy tests only on a warm run. While a mirror Unity runs, Unity MCP commands can land in it instead of SIX's Editor: check `GetProjectRoot` first.
+- **Radar L1 in numbers:** `RadarL1Tests` logs the calibration, the sea-skimmer's Pd per look by Douglas degree (with and without the clutter improvement), the plot scatter, the track error and the saturation raid three ways. `grep -a "\[GQ\]" Editor.log`.
 - **Flood her:** in the Captain seat, the damage-control card has four breach presets: Wing 06 S (a list), Hold 02 (a trim), Holds 05-07 (she survives), Holds 03-09 (she sinks, in about 24 minutes; use time compression). Clicking one issues real Breach Orders.
 - **Predict a breach:** `python -I .claude/skills/hull-stability-check/scripts/flood_predict.py --bilge "06 wing S"` (or `--list-spaces`, `--water "06 hold=0.5"`).
 - **Commit from the shared checkout:** the `commit-to-branch` skill with `--deny 'UnityMcpUnlock|/DAVFX/'`. HEAD stays where it is.
 
 ## 6. Next steps (in priority order)
 
-1. **Listen to the range.** The synthesised sounds are seeded stand-ins (`SynthClips`); swap in recordings wherever they fall short.
-2. **Choose the first element stream** (`ROADMAP.md`). The candidates:
-   - **Radar L1 and Illuminators L1** (Stream A) would make the SPG-62s matter.
-   - **Guns L1** (Stream B) would make the gun line honest.
+1. **Answer Q7 (G70):** keep Radar L1's 30 dB clutter improvement, set 0 dB, or replace it with Barton and Ward's critical-angle fall-off at Radar L2. Then **watch a raid at Radar L1 on the range** (Douglas 4): tracks forming, coasting and dropping, and the Mk 45's lay.
+2. **Listen to the range.** The synthesised sounds are seeded stand-ins (`SynthClips`); swap in recordings wherever they fall short.
+3. **Choose the next element stream** (`ROADMAP.md`). The candidates:
+   - ~~**Radar L1**~~ done with Tracks L1 (Stream A). Next in Stream A: TEWA L1 (Pk-weighted pairing, shoot-look-shoot) or Radar L2 (beam and energy scheduling). The illuminators are Stream B's (B2c).
+   - ~~**Guns L1**~~ done (slice B1). Guns L2 would smooth the fire-control solution against track noise, which Tracks L1 now makes visible in the Mk 45's lay.
    - ~~**Damage Control L1, flooding** (Stream C)~~ done (slice C1). Next in Stream C: Damage Control L2 (fire and damage-control parties: pumps, plugging, counter-flooding, G58), or Engine Room L1 (the plant).
-3. **The peer ship** (Stream D) needs BLUEPRINT Q3: a mirror DDG or a different class.
-4. **Follow-up outside this module:** the Guided Fury ground detonation still uses the broken `HD_Naval_Explosion`.
+4. **The peer ship** (Stream D) needs BLUEPRINT Q3: a mirror DDG or a different class.
+5. **Follow-up outside this module:** the Guided Fury ground detonation still uses the broken `HD_Naval_Explosion`.
 
 ## 7. Standing preferences
 
@@ -135,3 +147,11 @@ SIX asked for "a living breathing ship with a respectable and modular combat sys
 - **Free surface:** a part-filled space's water runs to the low side as she heels, which costs stability (GM).
 - **Pressed up:** a space filled to its deckhead; its water pushes on through any opening at the pressure behind it.
 - **Reserve buoyancy:** what the hull could still float beyond her weight. When the water aboard uses it all, she sinks.
+- **dBsm:** radar cross-section in decibels against one square metre: how big a target looks to a radar. 0 dBsm is 1 m²; −10 dBsm is 0.1 m².
+- **Pd / Pfa:** the probability of detecting a target in one look, and of a false alarm in a cell where there is none. The radar's threshold is set by Pfa (1 in a million here); Pd then follows from the signal.
+- **Swerling 1:** a target whose echo fluctuates from look to look, so a small target flickers in and out. Pd = Pfa^(1/(1 + SNR)).
+- **Sea clutter, γ:** the sea's own echo. In the constant-γ model the sea's reflectivity is γ times the sine of the grazing angle; rougher seas have a larger γ.
+- **Clutter improvement factor:** how much a radar's processing (MTI or Doppler) lowers clutter against a moving target, in dB.
+- **Plot / track:** a plot is one noisy detection from one look; a track is the CIC's filtered belief about one contact, built from plots.
+- **M of N:** a new track is confirmed once it has M plots in its first N looks (2 of 3 here).
+- **α-β filter:** a tracker that corrects its predicted position by α times the miss and its velocity by β times the miss over the look interval. **Coasting:** a track flying on its prediction after a missed look.

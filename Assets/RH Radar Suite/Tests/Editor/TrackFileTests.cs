@@ -156,6 +156,33 @@ namespace RHRadarSuite.Tests
         }
 
         [Test]
+        public void LastPlot_NamesThePlotEachTrackTook_AndDropRemovesATrackAtOnce()
+        {
+            var log = new List<string>();
+            TrackFile f = NewFile(log);
+            f.Scan(1 * Look, new[] { new Plot(0, 1000, 20000), new Plot(5000, 1000, 20000) });
+            Assert.AreEqual(0, f.Tracks[0].LastPlot);
+            Assert.AreEqual(1, f.Tracks[1].LastPlot);
+            f.Scan(2 * Look, new[] { new Plot(5000, 1000, 19500), new Plot(0, 1000, 19500) });   // the other order
+            Assert.AreEqual(1, f.Tracks[0].LastPlot, "each track names the plot it took, wherever it sat in the list");
+            Assert.AreEqual(0, f.Tracks[1].LastPlot);
+            f.Scan(3 * Look, new[] { new Plot(0, 1000, 19000) });
+            Assert.AreEqual(0, f.Tracks[0].LastPlot);
+            Assert.AreEqual(-1, f.Tracks[1].LastPlot, "a miss");
+
+            log.Clear();
+            Assert.IsTrue(f.Drop(1));
+            CollectionAssert.AreEqual(new[] { "1:Confirmed->Dropped" }, log);
+            Assert.AreEqual(1, f.Tracks.Count);
+            Assert.AreEqual(2, f.Tracks[0].Id);
+            Assert.IsFalse(f.Drop(1), "already gone");
+            // Its gate no longer claims its target's next plot: a new tentative track takes it.
+            f.Scan(4 * Look, new[] { new Plot(0, 1000, 18500) });
+            Assert.AreEqual(3, f.Tracks[1].Id);
+            Assert.AreEqual(TrackState.Tentative, f.Tracks[1].State);
+        }
+
+        [Test]
         public void TimeMustMoveForward_AndNonsenseSettingsAreRefused()
         {
             TrackFile f = NewFile();

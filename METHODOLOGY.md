@@ -284,6 +284,10 @@ These are the fixed points around which the methodology orbits. Every principle 
     - Before adding a package, search its source for `DisplayDialog` on `[InitializeOnLoad]` paths, and pre-set the preference it asks about.
     - If one is already open, its buttons can be found and pressed from outside (`EnumChildWindows`, then `BM_CLICK`), but only with the button the user would choose.
 
+- **AP35. A test fixture that resets global state and does not put it back.** A fixture clears a process-wide setting for isolation (Unity's `InputTestFixture` resets the Input System), and its teardown leaves it cleared. Every test that runs after it in the same session sees a different world, so a test that passes alone fails in the full run.
+  - *Where seen:* Air Wing's `DeviceBindingTests` (2026-10-27): `InputSystem.actions` was null after it, and Fast Play's `TwoPlays_WithoutADomainReload_GiveTheSameFix` failed in the whole-project run (General Quarters' `RangeInput` found no project-wide actions) while passing alone.
+  - *Do instead:* capture the global in setup before the base reset and restore it after the base teardown; and run the whole suite, not one assembly, before calling a run green.
+
 - **AP34. A tie-break keyed on a value both parties share.** Two agents resolving a symmetric conflict each break the tie on something they see alike (the leader's id, the world's up), so both pick the same way and the conflict stands.
   - *Where seen:* RH Aviator's collision avoidance (2026-10-27): level with each other, each wingman compared the other's id with the *leader's* id, so wingmen 2 and 3 both climbed.
   - *Do instead:* break the tie on something that differs between them and that both can see, such as their own ids (the lower climbs, the higher dives), so the two choices are opposite by construction.
@@ -533,3 +537,4 @@ These are the fixed points around which the methodology orbits. Every principle 
 - **2026-10-27** — The dogfight survey. Added C44 (a pursuit that holds the target's height cannot spend the G it has).
 - **2026-10-27** — RH Radar Suite overnight (the pure core of Phases 2–4). Added C45 (prove the pure chain end to end before wiring it into legacy code) and C46 (check a plan's numbers against the closed form before building to them).
 - **2026-10-27** — RH Aviator join collisions. Added AP34 (a tie-break keyed on a value both parties share).
+- **2026-10-27** — The whole-project test run. Added AP35 (a test fixture that resets global state and does not put it back).

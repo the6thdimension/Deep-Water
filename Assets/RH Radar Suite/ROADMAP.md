@@ -251,7 +251,11 @@ moving aircraft.*
 - [ ] **IFF interrogation flow** (uses existing `IFFStatus`) + track classification
   surfaced to consumers.
 - [ ] **Performance pass at scale:** N radars × M targets budget test; batching /
-  Jobs only if the budget test demands it (P4).
+  Jobs only if the budget test demands it (P4). *First baseline, 2026-10-27 (Editor, Debug code, one RunCommand
+  micro-benchmark; not a player figure): `TrackFile.Scan` with 10 / 50 / 200 targets on a 3 km grid, 30 m noise, 500
+  scans after 50 warm-up: 8 / 71 / 745 µs a scan, including making the plots. It grows as targets × plots (the
+  gating tests every pair), so a spatial grid for gating is the first lever if a budget needs it; no heap growth was
+  seen over the 500 scans. No budget is set yet.*
 - [ ] **Snapshot regression harness** mirroring Guided Fury's: canonical seeded
   scenario, golden detection/track statistics, CI gate.
 

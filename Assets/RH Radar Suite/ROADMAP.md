@@ -147,7 +147,10 @@ moving aircraft.*
   tested against hand-computed cases. DONE 2026-10-27 (`RadarTerms`, `SnrDb`, `RangeForSnrM`;
   `RadarEquationTests`: a hand case 21.99 dB at 100 km, 40 dB per decade, +10 dB for ten pulses, the
   inverse 167.8 km for 13 dB). *Not yet wired into the LOD modules* (a rewrite of five legacy modules:
-  waits for SIX's go, CLAUDE.md "confirm before a rewrite beyond the file in front of you").
+  waits for SIX's go, CLAUDE.md "confirm before a rewrite beyond the file in front of you"). **SIX 2026-10-27 (RS1 = B):
+  leave the LOD modules as they are for now;** General Quarters' Radar L1 is the core's first real consumer, then
+  decide between rewriting and retiring them. The pure core moves to its own engine-free asmdef, `RHRadarSuite.Core`
+  (GQ G61); the rival `Assets/RH Radar` plan is struck.
 - [ ] **Pd/Pfa detection threshold** with noise floor — replace the 0–1 clamped
   strength cliff; keep a simple Swerling-1-like fluctuation option. *The statistics are built
   (2026-10-27): Albersheim's required SNR (13.11 dB for Pd 0.9, Pfa 1e-6, the published point), North's Pd
@@ -283,3 +286,4 @@ moving aircraft.*
 - **2026-10-27** — Phase 4's coarse surface clutter in the pure core (constant γ, grazing, cell, CNR, SCNR), 4 tests; 36/36. The READMEs no longer describe prefabs and panels that do not exist.
 - **2026-10-27** — Range-rate accuracy (Doppler) in the pure core; 37/37. METHODOLOGY C45, C46 from this work.
 - **2026-10-27** — One look end to end in the pure core (`RadarLook`, `AspectRcs`, `Coverage`); the Phase 2 test case closed; 42/42.
+- **2026-10-27** — SIX's answers: RS1 = B (the LOD modules stay as they are for now); the pure core splits into `RHRadarSuite.Core` for GQ's Radar L1 (G61); `Assets/RH Radar` struck.

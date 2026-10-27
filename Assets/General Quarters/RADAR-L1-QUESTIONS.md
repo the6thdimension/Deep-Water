@@ -1,4 +1,6 @@
-# Radar L1: questions for SIX
+# ~~Radar L1: questions for SIX~~
+
+> **SUPERSEDED 2026-10-27.** SIX answered every question with the leaning: R1–R8 are G61–G68 in `BLUEPRINT.md`; RS1 = B (leave the legacy modules for now) is in RH Radar Suite's `ROADMAP.md`. Kept for the record.
 
 **PREPARED QUESTIONS. NOTHING DECIDED, NOTHING BUILT.** Written 2026-10-27 (overnight, Claude) so that Stream A's
 first slice can start from one sitting of answers. Each question has Claude's leaning; the leaning is not a decision.

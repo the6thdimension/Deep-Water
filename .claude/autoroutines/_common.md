@@ -1,5 +1,12 @@
 # Autonomous Development Routine — Common Spec
 
+> **RETIRED 2026-10-27 (SIX).** Never ran: no scheduler, no `auto/*` branch, no output since they were imported
+> (2026-09, 8181c10a). As written they would also `git checkout` in the shared checkout, push to branches outside the
+> 2026-10-24 branch table, and point the radar routine at the struck `Assets/RH Radar` plan. Doctrine guard: "a
+> routine without a scheduler is a wish". Kept for the record; do not schedule them as written. A new routine starts
+> from the doctrine's routine-design procedure (worktree, hard gate, revert path, escalation, a real schedule).
+> Kill log: `.claude/autoroutines/KILLED.md`.
+
 This file is loaded by every module-specific routine. It defines the shared loop,
 quality gate, on-failure policy, and commit format.
 

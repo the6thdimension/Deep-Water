@@ -30,10 +30,10 @@ namespace DeepWater.Aviator.Core
     }
 
     /// <summary>
-    /// The rear cone (W46): the attacker inside <c>coneDeg</c> of the target's tail and inside <c>rangeM</c>, and
-    /// pointing at the target within the same angle (A9, proposed in slice 3d: by position alone, two jets just past a
-    /// head-on pass each scored 2.7 s in the other's cone while flying apart). No weapons and no gun solution
-    /// (BLUEPRINT §6.5): scored in seconds.
+    /// The rear cone (W46): the attacker inside <c>coneDeg</c> of the target's tail and inside <c>rangeM</c>, by
+    /// position alone, wherever the attacker points (A9, SIX 2026-10-27: a pointing rule was proposed and declined).
+    /// The known cost: two jets just past a head-on pass each score a few seconds while flying apart. No weapons and
+    /// no gun solution (BLUEPRINT §6.5): scored in seconds.
     /// </summary>
     public static class RearCone
     {
@@ -44,9 +44,7 @@ namespace DeepWater.Aviator.Core
             float d = fromTarget.magnitude;
             if (d > rangeM || d < 1f) return false;
             Vector3 tail = -(target.Velocity.sqrMagnitude > 1f ? target.Velocity.normalized : target.Attitude * Vector3.forward);
-            if (Vector3.Angle(fromTarget, tail) > coneDeg) return false;
-            Vector3 heading = attacker.Velocity.sqrMagnitude > 1f ? attacker.Velocity : attacker.Attitude * Vector3.forward;
-            return Vector3.Angle(heading, -fromTarget) <= coneDeg;
+            return Vector3.Angle(fromTarget, tail) <= coneDeg;
         }
     }
 

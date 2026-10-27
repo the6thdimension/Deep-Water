@@ -26,7 +26,7 @@ Status as of 2026-10-27; each module's ROADMAP is the live record.
 | **Air Wing** | Flight physics: the F/A-18E from point mass to a 6-DOF airframe with fly-by-wire, engines and landing gear; seats for player and AI | Phases 1–3 complete | [BLUEPRINT](Assets/Air%20Wing/BLUEPRINT.md), [ROADMAP](Assets/Air%20Wing/ROADMAP.md), [README](Assets/Air%20Wing/README.md) |
 | **RH Aviator** | The AI pilots: routes, formation, the overhead break and landing, and the dogfight at three skill levels | Phase 3 complete (up to eight aircraft); the fight in the vertical proposed | [BLUEPRINT](Assets/RH%20Aviator/BLUEPRINT.md), [ROADMAP](Assets/RH%20Aviator/ROADMAP.md), [README](Assets/RH%20Aviator/README.md) |
 | **Sea State** | The ocean as one source of truth for rendering and physics: waves, buoyancy, foam | Built and tuned | [README](Assets/Sea%20State/README.md) |
-| **RH Radar Suite** | Radars on any GameObject (LOD modules, profiles, gizmos), plus an engine-free physics core: the radar equation, detection, clutter, measurement errors, tracking | Kit built; the pure core built and tested, not yet used by the modules | [README](Assets/RH%20Radar%20Suite/README.md), [ROADMAP](Assets/RH%20Radar%20Suite/ROADMAP.md) |
+| **RH Radar Suite** | Radars on any GameObject (LOD modules, profiles, gizmos), plus an engine-free physics core: the radar equation, detection, clutter, measurement errors, tracking | Kit built; the pure core built and tested, not yet used by the modules; General Quarters' Radar L1 is its first consumer (G61–G68) | [README](Assets/RH%20Radar%20Suite/README.md), [ROADMAP](Assets/RH%20Radar%20Suite/ROADMAP.md) |
 | **Guided Fury** | The missile framework (guidance, seekers, aero, autopilot, thrust) | Its own branch rules (protected) | [README](Assets/Guided%20Fury/README.md), [ROADMAP](Assets/Guided%20Fury/ROADMAP.md) |
 | **Theatre** | Theatre, METOC and gravity maps | Blueprint locked; nothing built | [BLUEPRINT](Assets/Theatre/BLUEPRINT.md), [ROADMAP](Assets/Theatre/ROADMAP.md) |
 | **Reckoning** | A deterministic simulation core (concept) and its spike | Concept written; spike done; no build | [RECKONING-CONCEPT.md](RECKONING-CONCEPT.md), [SPIKE-REPORT](Assets/Reckoning%20Spike/SPIKE-REPORT.md) |
@@ -34,7 +34,7 @@ Status as of 2026-10-27; each module's ROADMAP is the live record.
 | RH Shared | Cross-module contracts only | | [README](Assets/RH%20Shared/README.md) |
 | RH Testing Suite, RH Utilities | Test framework; scene management and validation | | [Testing](Assets/RH%20Testing%20Suite/README.md), [Utilities](Assets/RH%20Utilities/README.md) |
 | JMAC | Older AI, sensor and decision systems (ATLAS, SAURON, Agents) | Legacy: a starting point, not a template | |
-| RH Radar | A greenfield radar plan for the autonomous routines | Empty (README, ROADMAP, asmdef); overlaps RH Radar Suite, for SIX to settle | [README](Assets/RH%20Radar/README.md) |
+| ~~RH Radar~~ | ~~A greenfield radar plan for the autonomous routines~~ | **Struck 2026-10-27 (SIX, GQ G61):** never built; RH Radar Suite is the radar home | [README](Assets/RH%20Radar/README.md) |
 
 Older controllers live under `Assets/Scripts/`; unused ones are being archived to `_Archive/` as their replacements land.
 

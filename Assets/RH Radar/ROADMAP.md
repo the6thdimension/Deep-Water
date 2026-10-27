@@ -1,5 +1,11 @@
 # RH Radar — Routine Roadmap
 
+> **STRUCK 2026-10-27 (SIX, General Quarters G61).** This greenfield plan was never built (no code; Phase 0
+> unchecked). It duplicated RH Radar Suite, whose engine-free pure core (radar equation, detection, horizon, errors,
+> clutter, tracking; 42 tests) already exists. That core is being split into `RHRadarSuite.Core` for General Quarters
+> and the suite to share. Two radar plans side by side broke "one lock per decision". The folder is kept for the
+> record; build nothing here. To restore it, remove this banner and re-open the decision in GQ's BLUEPRINT.
+
 The autonomous routine reads this file each iteration, picks the topmost unchecked
 item, executes it, runs the verification gate, commits on green, reverts on red.
 

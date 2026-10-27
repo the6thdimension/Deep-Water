@@ -187,6 +187,14 @@ All entries are SIX's picks of 2026-10-23, in round order. Leaning is Claude's r
 | G58 | The crew's response at L1 | **Physics only.** Pumps, shoring, plugging and counter-flooding come with the damage-control parties at L2 | Same | Locked |
 | G59 | HUD and debrief | **A damage-control board on both seats:** a side view and plan of the spaces coloured by fill; list, trim, draft, GM (intact → now), reserve buoyancy and inflow. **A flooding timeline in the debrief:** breaches, spaces flooded, peak list and trim, GM lost, saved or lost, each line with its cause | Same | Locked |
 | G60 | Losing the ship at L1 | **Counted from the flooding:** SINKING when the water aboard leaves less buoyant volume than her weight (reserve buoyancy ≤ 0); CAPSIZED past an AUTHORED heel held for an AUTHORED time. L0 hull hit points still damage systems but no longer decide whether she is lost | Same | Locked |
+| G61 | Radar L1: where the radar physics lives (2026-10-27, Stream A; R1) | **Split the suite's pure core** (`Core/Detection`, `Core/Tracking`) into its own engine-free assembly, `RHRadarSuite.Core`, referenced by both RH Radar Suite and General Quarters. The empty `Assets/RH Radar` plan is struck with a reason | Same | Locked |
+| G62 | Which radars at L1 (R2) | **SPY-1's role only:** one search-and-track radar, end to end. The SPG-62 illuminators stay Stream B's (G44) | Same | Locked |
+| G63 | Where its numbers come from (R3) | **A generic S-band array in SPY-1's role, AUTHORED, calibrated to one public detection-range figure, flagged** (as G57). No claim about the real system's performance (standing constraint 8) | Same | Locked |
+| G64 | Tracks with it (R4) | **Radar L1 and Tracks L1 in one slice:** the suite's track file (α-β, M of N, gating) replaces Tracks L0, so fire control reads smoothed tracks, never truth | Same | Locked |
+| G65 | Target radar cross-section (R5) | **One dBsm per `TargetKind`, AUTHORED.** Aspect lobes wait for the suite's Phase 2 | Same | Locked |
+| G66 | How a look decides "seen" (R6) | **A Swerling 1 Pd draw per look at a fixed Pfa,** from the run's seeded generator, so the Fix replays it (Reckoning R3) | Same | Locked |
+| G67 | Sea clutter (R7) | **Constant-γ, with γ from Sea State's sea state;** finding a public γ-by-sea-state table is the slice's first task. If none holds up, one AUTHORED γ, flagged | Same | Locked |
+| G68 | Identification (R8) | **Identity from truth, as L0.** IFF is its own later step | Same | Locked |
 
 Inherited from Reckoning: R2 (everything deterministic eventually), R15 (Watches), R35 (variant B, Proposed), R36 (banned-API guard, Proposed). General Quarters applies R36 to its core now, as a source-scan test.
 
@@ -244,7 +252,7 @@ Inherited from Reckoning: R2 (everything deterministic eventually), R15 (Watches
 | ~~Q1~~ | ~~Which DDG-51 flight is the model?~~ **Answered 2026-10-23 by the geometry: Flight I/II.** Two CIWS, Mk 141 Harpoon quads aft, Mk 32 torpedo tubes, no hangar; VLS 32 fore and 64 aft. Its textures are named DDG112 (a Flight IIA hull number); the mesh wins. The loadout follows Flight I/II | — |
 | ~~Q2~~ | ~~May Sea State gain a small API to deposit foam and splashes?~~ **Answered 2026-10-24: yes** (G31). | — |
 | Q3 | The peer ship: a mirror DDG, or a different class? | 2 min |
-| Q6 | Radar L1 (Stream A): eight questions, R1–R8, prepared with leanings in `RADAR-L1-QUESTIONS.md` (2026-10-27). R1 (where the physics lives) and R4 (tracks with it) shape the slice | 10 min |
+| ~~Q6~~ | ~~Radar L1 (Stream A): R1–R8 in `RADAR-L1-QUESTIONS.md`.~~ **Answered 2026-10-27 by SIX: every leaning taken** (G61–G68). | — |
 | ~~Q5~~ | ~~G29: ESSM on SemiAuto or Auto at the start of a run?~~ **Answered 2026-10-24: SemiAuto** (G29 Locked). | — |
 | ~~Q4~~ | ~~Merge path to `main`?~~ **Answered 2026-10-24:** SIX had everything brought up to `main` (4f8149b). `feat/general-quarters` stays the working branch, kept in step with `main`. | — |
 
@@ -259,3 +267,4 @@ Inherited from Reckoning: R2 (everything deterministic eventually), R15 (Watches
 - **2026-10-24** — Stream B started: decisions G34–G41 (SIX), Guns L1 first. Guns L1 built (slice B1); sources in `Calibration~/GUNS-SOURCES.md`.
 - **2026-10-24** — Stream C started with Damage Control L1: decisions G53–G60 (SIX). Seven matched Claude's leaning; G55 did not (SIX picked the Rigidbody's mass and centre of mass over added-weight forces on the probe columns).
 - **2026-10-27** — Q6 added: the Radar L1 questions prepared overnight (`RADAR-L1-QUESTIONS.md`); nothing decided.
+- **2026-10-27** — Q6 answered by SIX: Radar L1 decisions G61–G68, all eight matching Claude's leaning. `RADAR-L1-QUESTIONS.md` superseded. Nothing built.

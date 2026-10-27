@@ -27,17 +27,15 @@ the docs and git current; no missile work.
   avoid each other (23 m at worst).
 - **Nothing was flown by a human.** Everything was tested headless, plus play-mode smokes in Dogfight.
 
-## Decisions waiting for you (priced)
+## Decisions waiting for you (priced; five, the doctrine's cap)
 
 | # | Question | Where | Cost |
 |---|---|---|---|
 | 1 | **A9:** does the rear-cone score require the attacker to point at the target? (Proposed: yes) | `Assets/RH Aviator/BLUEPRINT.md` Q3 | 1 min |
 | 2 | **Slice 3f, the fight in the vertical:** build it? Equal-skill pilots stalemate today (METHODOLOGY C44) | `Assets/RH Aviator/ROADMAP.md` | 1 min to decide |
-| 3 | **Radar Suite legacy modules:** rewrite the five LOD modules onto the new core, leave them, or retire them later? (Leaning: leave them; General Quarters is the first real user) | `Assets/General Quarters/RADAR-L1-QUESTIONS.md` RS1 | 1 min |
-| 4 | **General Quarters Radar L1:** eight questions, R1–R8, with leanings | `Assets/General Quarters/RADAR-L1-QUESTIONS.md` (BLUEPRINT Q6) | 10 min |
-| 5 | **Two radar plans:** `Assets/RH Radar/` is an empty greenfield module (README, a September routine ROADMAP, an asmdef) beside `RH Radar Suite`, where tonight's core lives. Which is the home? (Leaning: the suite, and strike the `RH Radar` plan with a reason) | `RADAR-L1-QUESTIONS.md` R1 | 1 min |
-| 6 | **Red cannot catch a hands-off player past Mach 1:** red chases at most its fighting speed + 150 kt. Let red chase flat out when the target runs? A gameplay call, so not changed | `Assets/RH Aviator/ROADMAP.md`, slice 3d notes | 1 min |
-| 7 | **The three autoroutines never ran.** `.claude/autoroutines/` (missile, radar, aviator; imported 2026-09 in 8181c10a) has no scheduled task and no `auto/*` branch exists. As written they would also `git checkout` in the shared checkout, push to branches outside the 2026-10-24 branch table, and point the radar routine at the empty `RH Radar` module. Retire them with a reason, or redesign them? (Leaning: retire; doctrine guard "a routine without a scheduler is a wish") | `.claude/autoroutines/` | 2 min |
+| 3 | **The radar batch**, one sitting in `Assets/General Quarters/RADAR-L1-QUESTIONS.md`: which radar plan is home (`Assets/RH Radar/` is an empty greenfield module beside `RH Radar Suite`, where tonight's core lives; R1), what happens to the suite's five legacy LOD modules (RS1), and General Quarters' Radar L1 (R2–R8). Leanings: the suite is home and the `RH Radar` plan is struck with a reason; leave the legacy modules for now; the rest as written | `RADAR-L1-QUESTIONS.md` (BLUEPRINT Q6) | 12 min |
+| 4 | **Red cannot catch a hands-off player past Mach 1:** red chases at most its fighting speed + 150 kt. Let red chase flat out when the target runs? A gameplay call, so not changed | `Assets/RH Aviator/ROADMAP.md`, slice 3d notes | 1 min |
+| 5 | **The three autoroutines never ran.** `.claude/autoroutines/` (missile, radar, aviator; imported 2026-09 in 8181c10a) has no scheduled task and no `auto/*` branch exists. As written they would also `git checkout` in the shared checkout, push to branches outside the 2026-10-24 branch table, and point the radar routine at the empty `RH Radar` module. Retire them with a reason, or redesign them? (Leaning: retire; doctrine guard "a routine without a scheduler is a wish") | `.claude/autoroutines/` | 2 min |
 
 ## Things to check
 

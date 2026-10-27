@@ -32,7 +32,7 @@ Everything in this table is built, tested and on `main`. The detail behind each 
 | Slice 2a — Airframe L1 | A 6-DOF jet on NASA's F/A-18 HARV flight data | 2026-10-26 | 59c9059c | 70 |
 | Slice 2b — Fly-by-wire L1 | Hornet-style flight controls: G and roll-rate commands, the AoA and G limits | 2026-10-26 | 7c77b0e1 | 82 |
 | Slice 2c — Engines L1, L1 in the scenes | Engine spool; the scenes fly L1; the L1 budget met (17 µs) | 2026-10-26 | 6edafea9 | 87 |
-| Slice 2d — Landing gear L1 | Wheels on spring-damper struts over PhysX contacts, brakes, nosewheel steering, gear up and down, a runway start, take-off and landing; hard and gear-up landings crash | 2026-10-26 | 2d (see the change log) | 99 |
+| Slice 2d — Landing gear L1 | Wheels on spring-damper struts over PhysX contacts, brakes, nosewheel steering, gear up and down, a runway start, take-off and landing; hard and gear-up landings crash | 2026-10-26 | 8343959b | 99 |
 
 ## STILL TO DO
 
@@ -352,7 +352,7 @@ The gate: the F/A-18E flies at L1 (6-DOF, fly-by-wire, spool time) in Dogfight f
   - The rebuilt player took 0.6 min with the shader cache warm (16.5 min the first time).
 - *Not verified:* L1 flown by hand from any device; the reset at L1 by hand (it is tested in EditMode). Not built: Mach effects (L2), so L1's top speed is not yet right either.
 
-### Slice 2d — Landing Gear L1: runway start, take-off and landing (W4, W29) (done 2026-10-26: 99/99 tests; a scripted take-off seen in Dogfight on PhysX)
+### Slice 2d — Landing Gear L1: runway start, take-off and landing (W4, W29) (done 2026-10-26, 8343959b: 99/99 tests; a scripted take-off seen in Dogfight on PhysX)
 SIX's picks: contacts as W4 says, with spring-damper struts; a brake button (Space, Xbox D-pad down, the stick's trigger).
 - [x] **Contacts (W4):** the core asks `IContactProbe` for each wheel: a ray from the top of its strut down the strut axis, answered with the distance and the ground's normal. The scenes answer with PhysX raycasts (`PhysXContactProbe`) against the land's and the runway's colliders; tests and scenes without colliders use the truth feed's level ground (`SurfaceProbe`). The core stays free of the physics engine (the banned-API scan passes).
 - [x] **`LandingGearL1`:** three wheels, each a linear spring and damper along its strut, with 0.3 m of travel. The tyre's rolling, braking and side friction each rise smoothly to μ·N over a 0.5 m/s slip. The pedals steer the nosewheel ±20°, fading out between 40 and 80 kt. The brakes work the mains. The gear comes up or down over 4 s and stays down with weight on the wheels. Gear drag ΔC_D 0.02. A wheel meeting the ground faster than 24 ft/s, or a strut driven through its travel, breaks the gear and ends the flight. Hard points (belly, tail, nose, wingtips) end it if they touch. `GearDeployed` joins the Fix; contact ticks were already flagged.
@@ -407,4 +407,4 @@ Revisit when Phase 3 is done. The questions for SIX are in BLUEPRINT §7.
 - **2026-10-26** — Slice 2b done: Flight Controls L1 by nonlinear dynamic inversion commanding α, paired with Airframe L1 on the ladder; the drag floor; 82/82 tests. Missed and reported: G onset (1.2 s against 1.0) and the G limit (8.08 against 8.0). W33's departure confirmed.
 - **2026-10-26** — Slice 2c done: Powerplant L1 (spool), the scenes fly L1, the budget met in a player (17 µs per aircraft per step after caching the lift peak, ×2.2); 87/87 tests.
 - **2026-10-26** — Roadmap split into DONE and STILL TO DO at SIX's request (e322f5a7).
-- **2026-10-26** — Slice 2d done: Landing Gear L1 on spring-damper struts over PhysX contacts, brakes, nosewheel steering, a runway start, take-off and landing; 99/99 tests. Found and fixed: the sink rate measured along a tilted strut, the flaps missing from the law's lift inversion, the runway start's throttle. Open for SIX: a hands-off touchdown breaks the nose gear.
+- **2026-10-26** — Slice 2d done (8343959b): Landing Gear L1 on spring-damper struts over PhysX contacts, brakes, nosewheel steering, a runway start, take-off and landing; 99/99 tests. Found and fixed: the sink rate measured along a tilted strut, the flaps missing from the law's lift inversion, the runway start's throttle. Open for SIX: a hands-off touchdown breaks the nose gear.

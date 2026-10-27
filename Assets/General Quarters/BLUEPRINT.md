@@ -268,3 +268,4 @@ Inherited from Reckoning: R2 (everything deterministic eventually), R15 (Watches
 - **2026-10-24** — Stream C started with Damage Control L1: decisions G53–G60 (SIX). Seven matched Claude's leaning; G55 did not (SIX picked the Rigidbody's mass and centre of mass over added-weight forces on the probe columns).
 - **2026-10-27** — Q6 added: the Radar L1 questions prepared overnight (`RADAR-L1-QUESTIONS.md`); nothing decided.
 - **2026-10-27** — Q6 answered by SIX: Radar L1 decisions G61–G68, all eight matching Claude's leaning. `RADAR-L1-QUESTIONS.md` superseded. Nothing built.
+- **2026-10-27** — The ballistics (`Core/Ballistics`: Atmosphere, DragCurve, FiringTable, ShotGroup) moved to the new **Gunnery** module (SIX: Gunnery K1); General Quarters references `DeepWater.Gunnery` and keeps its mounts, fire control and orders. Module lines: General Quarters is ships, Air Wing planes, Guided Fury all missile behaviour.

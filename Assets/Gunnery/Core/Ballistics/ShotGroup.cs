@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace DeepWater.GeneralQuarters.Core.Ballistics
+namespace DeepWater.Gunnery.Ballistics
 {
     /// <summary>
     /// The shot-group hit model (G36), in the plane across the line of fire at the target. Rounds land in a

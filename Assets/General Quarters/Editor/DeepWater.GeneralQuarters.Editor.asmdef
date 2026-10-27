@@ -3,6 +3,7 @@
     "rootNamespace": "DeepWater.GeneralQuarters.Editor",
     "references": [
         "DeepWater.GeneralQuarters",
+        "DeepWater.Gunnery",
         "DeepWater.Sea",
         "DeepWater.GeneralQuarters.Examples",
         "GuidedFury",

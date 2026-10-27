@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace DeepWater.GeneralQuarters.Core.Ballistics
+namespace DeepWater.Gunnery.Ballistics
 {
     /// <summary>
     /// The International Standard Atmosphere (ISO 2533): the troposphere to 11 km, the isothermal layer above.

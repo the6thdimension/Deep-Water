@@ -3,6 +3,7 @@
     "rootNamespace": "DeepWater.GeneralQuarters.Tests",
     "references": [
         "DeepWater.GeneralQuarters",
+        "DeepWater.Gunnery",
         "DeepWater.GeneralQuarters.Editor",
         "GuidedFury",
         "UnityEngine.TestRunner",

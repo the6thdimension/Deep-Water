@@ -18,7 +18,7 @@ namespace DeepWater.FastPlay.Tests
     {
         static readonly string[] FirstPartyRuntime =
         {
-            "DeepWater.Sea", "DeepWater.Sea.Hdrp", "DeepWater.GeneralQuarters", "DeepWater.GeneralQuarters.Examples", "DeepWater.AirWing",
+            "DeepWater.Sea", "DeepWater.Sea.Hdrp", "DeepWater.GeneralQuarters", "DeepWater.GeneralQuarters.Examples", "DeepWater.Gunnery", "DeepWater.AirWing",
             "GuidedFury", "CarrierOps", "RHRadarSuite", "RH.Shared", "DeepWater.Input", "DeepWater.Reckoning.Spike",
         };
 
@@ -33,10 +33,10 @@ namespace DeepWater.FastPlay.Tests
             ["DeepWater.GeneralQuarters.Core.EngineRoom.EngineRoomL0.TableSpeedsKn"] = Table,
             ["DeepWater.GeneralQuarters.Core.EngineRoom.EngineRoomL0.TableRuddersDeg"] = Table,
             ["DeepWater.GeneralQuarters.Core.DamageControl.DamageControlL1.ListMarksDeg"] = Table,
-            ["DeepWater.GeneralQuarters.Core.Ballistics.Atmosphere.s_density"] = Table,
-            ["DeepWater.GeneralQuarters.Core.Ballistics.Atmosphere.s_soundSpeed"] = Table,
-            ["DeepWater.GeneralQuarters.Core.Ballistics.DragCurve.Mach"] = Table,
-            ["DeepWater.GeneralQuarters.Core.Ballistics.DragCurve.Cd"] = Table,
+            ["DeepWater.Gunnery.Ballistics.Atmosphere.s_density"] = Table,
+            ["DeepWater.Gunnery.Ballistics.Atmosphere.s_soundSpeed"] = Table,
+            ["DeepWater.Gunnery.Ballistics.DragCurve.Mach"] = Table,
+            ["DeepWater.Gunnery.Ballistics.DragCurve.Cd"] = Table,
             ["DeepWater.GeneralQuarters.Examples.ConnPanel.Ahead"] = Table,
             ["DeepWater.GeneralQuarters.Examples.ConnPanel.AheadLabels"] = Table,
             ["DeepWater.GeneralQuarters.Examples.ConnPanel.Astern"] = Table,
@@ -59,7 +59,7 @@ namespace DeepWater.FastPlay.Tests
             ["DeepWater.AirWing.Core.AircraftFactory.PowerplantLadder"] = "fidelity-ladder registry: filled once by the static constructor, never changed after",
             ["DeepWater.AirWing.Core.AircraftFactory.ControlsLadder"] = "fidelity-ladder registry: filled once by the static constructor, never changed after",
             ["DeepWater.AirWing.Core.AircraftFactory.GearLadder"] = "fidelity-ladder registry: filled once by the static constructor, never changed after",
-            ["DeepWater.GeneralQuarters.Core.Ballistics.FiringTable.s_cache"] = "deterministic cache keyed by every input of the table: a reused entry is the table that would be rebuilt",
+            ["DeepWater.Gunnery.Ballistics.FiringTable.s_cache"] = "deterministic cache keyed by every input of the table: a reused entry is the table that would be rebuilt",
             ["DeepWater.GeneralQuarters.Modules.Presentation.SynthClips.s_Cache"] = "cache of generated clips: a clip destroyed with the last session reads as null and is regenerated (SynthClips.Get)",
             ["DeepWater.Input.Adapters.FlightStickToTestRunner._whitePx"] = "lazily made 1×1 texture: a destroyed one reads as null and is made again",
             ["DeepWater.Sea.Modules.Hdrp.HdrpSeaRenderer.s_FoamGpuSampler"] = "profiler sampler: a name for the profiler, no simulation state",

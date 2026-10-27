@@ -206,7 +206,7 @@ SIX's picks (2026-10-24): G34–G41. Guns L1 first.
   - **In play mode on the range:** the Mk 45 laid and fired with a ballistic solution (12,965 m, 10.7°, 25.4 s time of flight). PhysX roll reached 2.0°/s and showed as 22.8 m of aim error at 13 km.
   - **Finding:** the Phalanx penetrator needs a form factor of 3.25 on the G7 curve, so its drag shape is the least certain number in the slice (`Calibration~/GUNS-SOURCES.md`).
   - **Goldens:** the slice 5 Fix test now pins guns L0, which it was recorded at (C29). Guns L1 has its own determinism test.
-  - **Ballistics (G35, G41):** `Core/Ballistics`:
+  - **Ballistics (G35, G41):** `Core/Ballistics` (moved to `Assets/Gunnery/Core/Ballistics` on 2026-10-27, Gunnery K1):
     - an ISA atmosphere;
     - the BRL G7 drag table times a form factor per projectile, CALIBRATED to its published range;
     - firing tables integrated once per projectile (RK4) and cached, so fire control looks up elevation and time of flight instead of integrating every shot.

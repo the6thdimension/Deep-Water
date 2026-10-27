@@ -1,4 +1,4 @@
-namespace DeepWater.GeneralQuarters.Core.Ballistics
+namespace DeepWater.Gunnery.Ballistics
 {
     /// <summary>
     /// The G7 standard drag function (boat-tailed projectile, 7-calibre ogive): drag coefficient against Mach number.

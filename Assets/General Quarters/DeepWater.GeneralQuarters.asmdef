@@ -3,6 +3,7 @@
     "rootNamespace": "DeepWater.GeneralQuarters",
     "references": [
         "GuidedFury",
+        "DeepWater.Gunnery",
         "DeepWater.Sea",
         "DeepWater.Sea.Hdrp",
         "Unity.Mathematics",

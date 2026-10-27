@@ -158,8 +158,12 @@ moving aircraft.*
   so "200 km" above was wrong for a sea-skimmer, it is about 28 km).* The raycast masking is not.
 - [ ] **Elevation coverage enforced** from profile (min/max elevation, scan
   pattern respects it); beam gating becomes real (detection only inside the
-  beam/sector actually illuminated this scan).
-- [ ] **RCS in dBsm** + signature aspect dependence (front/side/rear lobes, coarse).
+  beam/sector actually illuminated this scan). *The volume check is in the pure core (2026-10-27,
+  `Coverage` in `Core/Detection/RadarLook.cs`: elevation band and azimuth sector, wrapping through north); the scan
+  pattern (which part is lit this instant) is not.*
+- [ ] **RCS in dBsm** + signature aspect dependence (front/side/rear lobes, coarse). *The pure core has it
+  (2026-10-27, `AspectRcs`: nose, beam and tail dBsm, linear in dB by the angle off the nose); `RadarSignature`
+  (legacy, linear m²) does not use it yet.*
 - [ ] **Measurement-frame errors** (Barton): per-axis σ (range/az/el/range-rate)
   scaling with SNR, applied on *every* update, seeded RNG from profile (P7). *The pure core is built (2026-10-27,
   `Core/Detection/MeasurementErrors.cs`): σ_R = c/(2B√(2·SNR)), σ_θ = θ_B/(k_m√(2·SNR)), each with a floor in quadrature
@@ -171,8 +175,13 @@ moving aircraft.*
   Phase 2 wiring.*
 - [ ] **FixedUpdate sensor stepping** (P2) across all modules; scan timing from
   fixed time.
-- [ ] **Phase-2 EditMode tests:** predicted-vs-simulated detection range for a
-  published-style test case; horizon cutoff; error σ statistics over N seeded runs.
+- [x] **Phase-2 EditMode tests:** predicted-vs-simulated detection range for a
+  published-style test case; horizon cutoff; error σ statistics over N seeded runs. DONE 2026-10-27 on the pure
+  core: `RadarLook.Look` (horizon → volume → equation → clutter → Swerling 1 draw → Barton plot, a fixed draw order)
+  and `RadarLookTests` (5): predicted 170.03 km for Pd 0.5 and 105.01 km for Pd 0.9 (generic radar, 0 dBsm, Pfa
+  1e-6), seen 2,024 and 3,582 of 4,000 seeded looks (0.506, 0.896); beyond the horizon nothing, and no random draw
+  spent; a sea-skimmer at 10 km drops from Pd > 0.99 to 0.007 in γ −20 dB clutter. Error σ statistics are in
+  `MeasurementErrorTests`. 42/42. *The LOD modules still do not run any of it.*
 
 ## Phase 3 — Tracks, not dots
 
@@ -269,3 +278,4 @@ moving aircraft.*
 - **2026-10-27** — Barton's measurement errors in the pure core, and the first end-to-end test of the pure chain (equation, detection, plots, track); 32/32.
 - **2026-10-27** — Phase 4's coarse surface clutter in the pure core (constant γ, grazing, cell, CNR, SCNR), 4 tests; 36/36. The READMEs no longer describe prefabs and panels that do not exist.
 - **2026-10-27** — Range-rate accuracy (Doppler) in the pure core; 37/37. METHODOLOGY C45, C46 from this work.
+- **2026-10-27** — One look end to end in the pure core (`RadarLook`, `AspectRcs`, `Coverage`); the Phase 2 test case closed; 42/42.

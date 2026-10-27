@@ -311,6 +311,7 @@ namespace DeepWater.Aviator.Tests
             Assert.IsFalse(RearCone.Inside(Start(e, new Vector3(-600f, 0f, -800f), 0f, 300f), target, 30f, 1000f), "36.9° off the tail");
             Assert.IsFalse(RearCone.Inside(Start(e, new Vector3(0f, 0f, -1200f), 0f, 300f), target, 30f, 1000f), "too far");
             Assert.IsFalse(RearCone.Inside(Start(e, new Vector3(0f, 0f, 800f), 180f, 300f), target, 30f, 1000f), "head on");
+            Assert.IsTrue(RearCone.Inside(Start(e, new Vector3(0f, 0f, -800f), 180f, 300f), target, 30f, 1000f), "astern but flying away still scores (A9 declined: position alone)");
         }
 
         [Test]

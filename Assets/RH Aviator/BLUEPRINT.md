@@ -1,6 +1,6 @@
 # RH Aviator — blueprint
 
-> **Status: LOCKED BLUEPRINT (W36–W51 and A1–A6, SIX 2026-10-26; A7–A8, SIX 2026-10-27); Phase 3 complete (3a–3e); A9 proposed (Q3).** The decisions were made in Air Wing's Phase 3 interview and live in Air Wing's register (`Assets/Air Wing/BLUEPRINT.md` §5, W36–W51). This document carries them for the AI side. Progress is in `ROADMAP.md`.
+> **Status: LOCKED BLUEPRINT (W36–W51 and A1–A6, SIX 2026-10-26; A7–A8, SIX 2026-10-27; A9 declined, A10–A11, SIX 2026-10-27); Phase 3 complete (3a–3e); slice 3f a go (A11).** The decisions were made in Air Wing's Phase 3 interview and live in Air Wing's register (`Assets/Air Wing/BLUEPRINT.md` §5, W36–W51). This document carries them for the AI side. Progress is in `ROADMAP.md`.
 > **This document's one job:** say what RH Aviator is and why, how its AI pilot is built, and which decisions bind it. Work order and progress live in `ROADMAP.md`, not here.
 
 ## 1. In plain language
@@ -121,11 +121,13 @@ Air Wing (DeepWater.AirWing) ← RH Aviator (DeepWater.Aviator) ← its tests
 | A7 | **Formation is flown off the slot on every tick**; the 4 Hz watch still decides the mode (Join, Fingertip) and logs it | At 180 m/s the slot moves 45 m between watches and is held to ±5 m. W44 already gives the stick every tick; keeping the slot is the hands' work. The request also carries the leader's bank, roll rate and flight-path rates as feed-forward (AP32), and formation flies its own hands with tighter height and path gains (`PilotProfile.FormationHands`) | Locked |
 | A8 | **The seat roster lives in Air Wing** (`Core/Seats/SeatRoster`): one player seat, and each aircraft's *own* seat, which RH Aviator hands over as a plain `ISeat`. Without one the aircraft holds what it was last given (`HoldSeat`). An optional `ISeatStatus` lets a seat say what it is doing for the pick list | W42 puts the cycle key and the pick list in Air Wing; W5 keeps Air Wing ignorant of AI; W18 says the AI flies every empty seat | Locked |
 
-### 5.4 Proposed by Claude in slice 3d (Q3)
+### 5.4 Settled by SIX after slice 3d (2026-10-27)
 
 | # | Decision | Why | Status |
 |---|---|---|---|
-| A9 | **To score, an attacker must also point at its target** within the cone's angle, as well as sit within 30° of its tail inside 1 km (W46) | By position alone, two jets just past a head-on pass each scored 2.7 s in the other's cone while flying apart; with it, the pass scores nothing and the ace's lead in 20 merges is real | Proposed; built (reversible: one line in `RearCone.Inside`) |
+| A9 | **To score, an attacker must also point at its target** within the cone's angle, as well as sit within 30° of its tail inside 1 km (W46) | By position alone, two jets just past a head-on pass each scored 2.7 s in the other's cone while flying apart; with it, the pass scores nothing and the ace's lead in 20 merges is real | ~~Proposed~~ **Declined by SIX 2026-10-27: score by position alone, as W46 reads.** The pointing check is removed from `RearCone.Inside`; the known cost (a head-on pass scores a few seconds each way) is accepted |
+| A10 | **Red's chase stays capped** at its fighting speed plus 150 kt; it does not go to full power after a target that runs | SIX 2026-10-27: running away stays a valid escape. A hands-off player past Mach 1 is not caught | Locked |
+| A11 | **Build slice 3f, the fight in the vertical** (energy states, nose-high and nose-low turns, the ace spending its G) | SIX 2026-10-27. Equal pilots stalemate in a level fight (C44). Spike first, with pass criteria fixed before building: line v line and ace v line must each produce a winner in some of 20 merges **by pointed cone time** (the A9 measure, kept as a diagnostic in the spike, not the score), without fights sinking to the floor (the yo-yo failure). *Why pointed:* once A9 was removed, the survey's line v line went from 0 s to 6.1 / 5.6 s a fight, a "winner" in all 20 merges, nearly all of it head-on-pass time; the position score alone would pass 3f with nothing built | Locked; not built |
 
 ## 6. Standing constraints
 
@@ -167,7 +169,7 @@ Air Wing (DeepWater.AirWing) ← RH Aviator (DeepWater.Aviator) ← its tests
 |---|---|---|
 | ~~Q1~~ | ~~Confirm A1–A6 as written, or change any?~~ **Answered 2026-10-26 by SIX: confirmed as written.** | — |
 | ~~Q2~~ | ~~Confirm A7 (formation flown every tick, with feed-forward) and A8 (the seat roster in Air Wing), or change either?~~ **Answered 2026-10-27 by SIX: confirmed as written.** | — |
-| Q3 | Confirm A9 (an attacker must point at its target to score), or score by position alone as W46 reads? | One reply |
+| ~~Q3~~ | ~~Confirm A9, or score by position alone as W46 reads?~~ **Answered 2026-10-27 by SIX: position alone (A9 declined).** | — |
 
 ## Change log
 - **2026-10-26** — Written from Air Wing's Phase 3 interview (W36–W51, SIX). A1–A6 proposed. Nothing built.
@@ -176,3 +178,4 @@ Air Wing (DeepWater.AirWing) ← RH Aviator (DeepWater.Aviator) ← its tests
 - **2026-10-27** — SIX confirmed A7 and A8 as written (Q2 closed).
 - **2026-10-27** — Slice 3d built. A9 proposed (Q3): an attacker must point at its target to score.
 - **2026-10-27** — Phase 3 complete. Slice 3f (the fight in the vertical, C44) proposed in the ROADMAP; nothing built.
+- **2026-10-27** — SIX answered after the overnight run: A9 declined (position alone; the check removed), A10 red's chase stays capped, A11 slice 3f is a go (spike first). Q3 closed.

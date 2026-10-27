@@ -224,27 +224,27 @@ SIX's picks (2026-10-24): G34–G41. Guns L1 first.
   - [x] **Follow-up done (2026-10-24):** at guns L1 the presentation mounts follow the core's lay (`IGunMount.TryGetLay`), so what you see is what fired. L0 keeps its own slew.
     - **Test:** `PresentationTests.MountAnimator_AtGunsL1_ShowsTheCoresLay`. 135/135 with Sea State.
     - **Play mode, Standard raid:** the Mk 45 trained to 79.4°, and the model was never more than 0.13° from the core. The CIWS and Mk 38s did not fire in that raid, so they were checked by the test only.
-- [ ] **VLS L1, SM-2 and the illuminators** (slice B2; SIX's picks G42–G52, with G42, G46 and G48 reversed on 2026-10-24 to Claude's leanings). Each part has its own tests and gate:
-  - [ ] **B2a, Guided Fury (on a branch cut from `Guided-Fury`, G52):**
-    - an SM-2 Block IIIA (RIM-66M-5) profile built by a builder (the `EssmProfileBuilder` pattern), with the Mk 104 dual-thrust motor and public data cited;
-    - it flies at L2, like ESSM (G46);
+- [ ] ~~skipped~~ ~~VLS L1, the long-range SAM and the illuminators (slice B2, G42–G52)~~: superseded by G69 on 2026-10-27 and rewritten below at game level. Real-system detail removed; the old wording is in git at 2121da9e.
+- [ ] **VLS L1, the area SAM and the illuminators** (slice B2 at game level, G69). Every number is AUTHORED. Each part has its own tests and gate:
+  - [ ] **B2a, the area SAM** (Guided Fury `ROADMAP.md` A4, on a branch cut from `Guided-Fury`, G69 h):
+    - the area SAM archetype, written by Guided Fury's archetype builder (its A1) and flown at L2 like the point-defence SAM;
     - Guided Fury's own tests;
-    - VALIDATION of ESSM and SM-2 flyout against published speed and range. At L2, ESSM averaged about 720 m/s over 20 km.
-    - ~~fly L4 headless (the bridge bakes the aero tables)~~: dropped with G46's reversal. ~~Block IIIB profile and IR seeker data~~: dropped with G48's reversal.
-  - [ ] **B2b, VLS L1 (G42, G43):**
-    - per-cell launch sequence (hatch, ignition, clear the cell) and cell scheduling;
-    - the ship's velocity added at launch;
-    - midcourse to a predicted intercept point refreshed at the uplink rate, with limited uplink channels;
-    - the load (G50): 64 IIIA, 32 ESSM;
-    - SM-2 pairs (G51).
-    - ~~The vertical climb and a constrained pitch-over~~: dropped with G42's reversal.
-  - [ ] **B2c, Illuminators L1 (G44, G45):**
-    - three SPG-62s (one forward, two aft) with arcs, slew and settle;
-    - terminal homing claims one for its last seconds, assigned by time to go;
-    - with none free, the missile cannot complete its intercept. ~~IIIB falls back to IR (G49)~~: moot with G48's reversal.
-  - [ ] **B2d, budget (G47):** a `unity-perf-ab` A/B at saturation against 1 ms. At L2 the L3 fallback should not be needed; if it is, the log and HUD say so.
-  - **Gate:** the saturation raid resolves, repeats exactly and fits 1 ms. The debrief explains every missile from launch through uplink to the illuminator and the result.
-- [ ] Harpoon and Tomahawk profiles (Guided Fury Stream A items). Land attack goes against fictional or generic targets only (BLUEPRINT standing constraint 8, safe limits).
+    - *done when:* a headless flyout reaches its authored top speed and flight time within 5 %, and the same seed gives the same flight.
+    - ~~flyout VALIDATION against published performance~~: killed (K1).
+  - [ ] **B2b, VLS L1** (G69 b, c, e, f):
+    - an AUTHORED per-cell launch delay and cell scheduling; the ship's velocity added at launch;
+    - guidance channels: at most an AUTHORED number of missiles guided at once, each one's aim point refreshed at an AUTHORED interval;
+    - the load: 64 area SAMs and 32 point-defence SAMs;
+    - area SAMs in pairs, point-defence SAMs one at a time;
+    - *done when:* the TAO scope shows each missile in flight with its channel, and a launch that waits for a free channel is logged with its reason.
+  - [ ] **B2c, Illuminators L1** (G69 d):
+    - three illuminator channels, one forward and two aft, each with an arc and an AUTHORED slew-and-settle time;
+    - a missile's last seconds claim a free channel that can see the target, assigned by time to go;
+    - with none free, the missile cannot complete its intercept, and the log and the TAO screen say so;
+    - *done when:* in a raid with more than three missiles in their last seconds at once, the player sees missiles waiting for an illuminator, and the same seed gives the same Fix.
+  - [ ] **B2d, budget** (G69 g): a `unity-perf-ab` A/B at saturation against 1 ms. At L2 no fallback should be needed; if one is, the log and HUD say so.
+  - **Gate:** the saturation raid resolves, repeats exactly (the same Fix on two runs) and fits 1 ms. In the debrief the player sees every missile from launch through its guidance channel and illuminator to the result. It resolves the same at any frame rate.
+- [ ] **Anti-ship and land-attack cruise missiles** (Guided Fury archetypes A5 and A6; rewritten 2026-10-27 to archetypes, G69). Land attack goes against fictional or generic targets only (BLUEPRINT standing constraint 8, safe limits).
 
 ### Stream C — The living ship
 SIX's picks (2026-10-24): G53–G60. Damage Control L1 first.
@@ -351,6 +351,14 @@ SIX's picks (2026-10-24): G53–G60. Damage Control L1 first.
 - **2026-10-24** — Slice B2 replanned after SIX reversed G42, G46 and G48 to Claude's leanings. B2a shrinks to one SM-2 Block IIIA profile at L2, B2b loses the vertical boost, B2c loses the IR backup, and the load is 64 IIIA and 32 ESSM. Safe limits recorded as BLUEPRINT standing constraint 8.
 
 - **2026-10-25** — Stream C slice C1 done (84fb04b): Damage Control L1, compartments and flooding (G53–G60). 36 spaces cut from the buoyancy columns, orifice flooding with pressed-up spaces, the water on the Rigidbody, holes from Breach Orders and hits, loss counted from reserve buoyancy, the damage-control board and timeline. The wing's list matches the closed form to 0.02° in EditMode and in PhysX. Seven stations sink her deterministically. 149/149.
+
+- **2026-10-27** — Slice B2 rewritten to game level and made generic (G69; SIX: "Just simplify the plans and generalize them to make them safer"). The old B2 is collapsed to its struck title; the area SAM is an archetype; VLS L1, guidance channels and illuminators are game mechanics with AUTHORED numbers; each part has a gameplay-facing definition of done; the flyout validation against published performance is killed (K1). The cruise-missile line names archetypes. Checked against BLUEPRINT standing constraint 8. Real-system detail removed; the old wording is in git at 2121da9e. No code, asset or test changed.
+
+## Killed
+
+| # | Item | Killed | Reason |
+|---|---|---|---|
+| K1 | Flyout VALIDATION of the SAMs against published performance (old B2a) | 2026-10-27 | Real-system performance tables are out at game level (G69 a). An archetype is checked against its own AUTHORED numbers instead |
 
 ## Skip / fail log
 - **2026-10-24 (Stream C, slice C1): two predictions failed their gate, and both were the prediction's fault** (METHODOLOGY AP22). The wing's trim (13.6 against 11.0 cm) needed the damaged waterplane's product of inertia. The half-full hold's GM (1.83 against 1.69 m) needed BM at the sunk draft, because the DDG flares. Both are fixed in `flood_predict.py`, with the tolerances kept.

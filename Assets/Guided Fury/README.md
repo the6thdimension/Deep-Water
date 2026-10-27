@@ -15,11 +15,13 @@ This is also the first system in the project built to current standards under th
 | L2 | 3DOF + rate limit | + g-limited turn rate, realistic guidance constraints | Most non-hero engagements |
 | L3 | Pseudo-6DOF | + full rigid-body orientation, simplified aero | Close engagements, hero missiles without 6DOF |
 | L4 | Full 6DOF | + aero coefficient tables, autopilot, atmosphere coupling | Hero missile, AAR replay |
-| L5 | HWIL fidelity | + seeker dynamics, INS drift, fuze detector models | R&D, seeker tuning |
+| ~~L5~~ | ~~HWIL fidelity~~ | Killed 2026-10-27 (`ROADMAP.md`, K1). Real-system detail removed | — |
 
-**Current implementation: L0–L4.** L4 adds Mach-aware tabulated aero coefficients (Cd / Cl_α / Cm_α / Cm_δ as AnimationCurves on the SO), control-surface deflection dynamics with rate limits, two-loop autopilot (outer accel→rate, inner rate→fin deflection), pluggable thrust model (constant-boost or boost-sustain). `IAutopilot`, `IAeroModel`, and `IThrustModel` are now orthogonal subsystems — pluggable per missile. L5 (HWIL) still pending.
+**Current implementation: L0–L4.** L4 adds Mach-aware tabulated aero coefficients (Cd / Cl_α / Cm_α / Cm_δ as AnimationCurves on the SO), control-surface deflection dynamics with rate limits, two-loop autopilot (outer accel→rate, inner rate→fin deflection), pluggable thrust model (constant-boost or boost-sustain). `IAutopilot`, `IAeroModel`, and `IThrustModel` are now orthogonal subsystems — pluggable per missile. L5 is killed (2026-10-27): the ladder tops out at L4.
 
-**First authored missile: RIM-162 ESSM.** Real-world reference data baked into a full L4 profile via `Guided Fury → Authored Missiles → Build RIM-162 ESSM Profile`. 280 kg / 3.66 m / Mach 4+ / 50 km range / 50 g pull. Mk 134 single-stage boost (6 s), tabulated aero with transonic Cd spike at M=1.05, SurfaceDeflection autopilot, ProNav guidance, cone seeker (50 km), 10 m proximity fuze with 1 s arm delay. Asset path: `Assets/Guided Fury/Examples/Profiles/RIM-162_ESSM.asset`. Re-running the menu command refreshes authored defaults.
+**What comes next is game level (SIX, 2026-10-27).** New missiles are generic archetypes (SR-IR missile, area SAM, anti-ship cruise missile and others) with AUTHORED numbers, flown at L0–L2, with a seeker that is a cone, a range and a lock chance, and damage that is a lethal radius, a kill chance and hit points. L3, L4 and the profile below stay as built and are not extended. The plan, its kills and the "Stays as built" list are in `ROADMAP.md`.
+
+**First authored missile: RIM-162 ESSM** (stays as built, `ROADMAP.md` S1; in new plans, the point-defence SAM). Real-world reference data baked into a full L4 profile via `Guided Fury → Authored Missiles → Build RIM-162 ESSM Profile`. 280 kg / 3.66 m / Mach 4+ / 50 km range / 50 g pull. Mk 134 single-stage boost (6 s), tabulated aero with transonic Cd spike at M=1.05, SurfaceDeflection autopilot, ProNav guidance, cone seeker (50 km), 10 m proximity fuze with 1 s arm delay. Asset path: `Assets/Guided Fury/Examples/Profiles/RIM-162_ESSM.asset`. Re-running the menu command refreshes authored defaults.
 
 ## Architecture
 
@@ -150,16 +152,16 @@ Open Unity → Window → General → Test Runner → EditMode tab → "Run All"
 
 All tests run without loading a scene. This is the payoff of P6.
 
-## What's intentionally missing in Phase 4
+## What is deliberately not here (rewritten to game level 2026-10-27)
 
-- **Signal-aware seekers** — the cone seeker still doesn't distinguish IR vs radar vs SARH. Phase 5+.
-- **Gimbaled seekers / lock hysteresis** — body-fixed and instant-break-lock for now.
-- **Aero coefficient tables** — L4 (next physics tier). Cd and Cl are scalars; no Mach dependence.
-- **Control surfaces** — L4. The L3 autopilot applies torque directly, pretending the airframe has perfect attitude control.
-- **Extractable IAutopilot interface** — L4 will pull the L3 inline autopilot out into a swappable contract once we have multiple autopilot strategies worth differentiating.
-- **Pooling, effects, damage system beyond IHittable impulses** — Phase 5+.
+The Phase 4 list, brought up to date and down to game level. Real-system detail removed.
+
+- **Seeker signal models and gimbals** — killed (`ROADMAP.md`, K5). A seeker is a cone, a range and a lock chance (ROADMAP A2); its kind (IR or radar) is a label with its own authored numbers. Track-memory coast (`seekerCoastTimeS`) already covers a short loss of lock.
+- **Aero coefficient tables, control surfaces, an extractable `IAutopilot`** — done in Phase 6 (L4). They stay as built and are not extended (ROADMAP S3).
+- **Damage beyond `IHittable` impulses** — planned as abstract damage: a lethal radius, an AUTHORED kill chance per target class, and hit points, sent as RH Shared `HitReport`s (ROADMAP Stream B). No blast or fragmentation model (K6, K7).
+- **Pooling and effects** — not yet.
 - **Mid-flight LOD switching** — Phase 6+ (state struct already supports it).
-- **Authored hero missile profiles** — first one targeted for the post-Phase-4 polish pass.
+- **More authored missiles** — one exists (the point-defence SAM, S1). New ones are archetypes with AUTHORED numbers (ROADMAP Stream A), not real weapons.
 
 ## Methodology cross-references
 
@@ -170,8 +172,11 @@ This module exercises and validates:
 - **P3** (`Core/Modules/SO/Prefabs/Examples` layout) — yes.
 - **P5** (vendor read-only) — no vendor deps.
 - **P6** (pure-C# core + MB adapter) — `MissileEntity` (pure C#) + `MissileBehaviour` (adapter). The EditMode test suite proves the value: every test constructs entities directly without a scene.
-- **P7** (deterministic RNG via SO) — N/A at L0/L1 (no randomness yet); will be exercised at L5.
+- **P7** (deterministic RNG via SO) — N/A at L0/L1 (no randomness yet); will be exercised by the seeker's lock chance and the kill-chance draw (ROADMAP A2, B1).
 - **Pat1** (SO-Profile + Pure-Core + MB-Adapter) — the three-layer pattern.
 - **C4** (universal state struct) — `MissileState`. Round-trip from L0 to L1 demonstrated; promotion to Principle deferred until the full L0→L4 round-trip is proven.
 
 The legacy code archived to `Assets/_Archive/Guided Fury_legacy/` is the diagnosis source for anti-patterns **AP1–AP4** in METHODOLOGY.md. Read it as a counter-example, not a foundation.
+
+## Change log
+- **2026-10-27** — Planned work brought to video-game grade and made generic (SIX: "Just simplify the plans and generalize them to make them safer"). The L5 row is struck (killed); a paragraph says what comes next is archetypes with AUTHORED numbers at L0–L2; "intentionally missing" is rewritten to game level; P7's future use moves from L5 to the lock and kill-chance draws. Checked against the safe limits, General Quarters `BLUEPRINT.md` §6 standing constraint 8. Descriptions of existing code are unchanged. Real-system detail removed; the old wording is in git at 2121da9e.

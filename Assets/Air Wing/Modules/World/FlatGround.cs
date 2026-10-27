@@ -27,6 +27,17 @@ namespace DeepWater.AirWing.Modules.World
             widthM = width;
         }
 
+        /// <summary>
+        /// Where a take-off begins on this strip: 150 m in from its +Z end, on the centreline, facing back down it.
+        /// The heading is returned in degrees (0 = +Z, 90 = +X).
+        /// </summary>
+        public Vector3 TakeOffPoint(out float headingDeg)
+        {
+            Quaternion yaw = Quaternion.Euler(0f, transform.eulerAngles.y, 0f);
+            headingDeg = transform.eulerAngles.y + 180f;
+            return transform.position + yaw * Vector3.forward * (0.5f * lengthM - 150f);
+        }
+
         public bool Contains(float x, float z)
         {
             Vector3 local = Quaternion.Inverse(Quaternion.Euler(0f, transform.eulerAngles.y, 0f)) * new Vector3(x - transform.position.x, 0f, z - transform.position.z);

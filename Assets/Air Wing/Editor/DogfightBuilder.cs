@@ -67,9 +67,12 @@ namespace DeepWater.AirWing.Editor
             AirWingBuilders.Instantiate(AirWingBuilders.SkyPrefabPath);
             SeaStateDirector sea = AirWingBuilders.BuildSea();
 
-            BuildLand(land, runway, marking);
+            FlatGround runwayGround = BuildLand(land, runway, marking);
             BuildLandmark();
             AirWingBuilders.Rig rig = AirWingBuilders.BuildRig(sea, JetStart, 0f);
+            // The runway start is one setting on the jet (W14): Start Mode → Runway. Airborne stays the default.
+            var jetView = Object.FindAnyObjectByType<DeepWater.AirWing.Modules.Aircraft.AircraftView>();
+            if (jetView != null) AirWingBuilders.Set(jetView, "startRunway", runwayGround);
 
             var courseGo = new GameObject("Gate Course");
             var view = courseGo.AddComponent<GateCourseView>();
@@ -85,22 +88,23 @@ namespace DeepWater.AirWing.Editor
                       "one F/A-18E at 5,000 ft and 400 kt heading 000, chase camera, HUD.");
         }
 
-        static void BuildLand(Material land, Material runway, Material marking)
+        static FlatGround BuildLand(Material land, Material runway, Material marking)
         {
             var landGo = new GameObject("Land");
             landGo.transform.position = LandCentre;
             landGo.AddComponent<FlatGround>().SetSize(LandSizeM.y, LandSizeM.x);
-            Block("Ground", landGo.transform, new Vector3(0f, -10f, 0f), new Vector3(LandSizeM.x, 20f, LandSizeM.y), land);
+            Block("Ground", landGo.transform, new Vector3(0f, -10f, 0f), new Vector3(LandSizeM.x, 20f, LandSizeM.y), land, collide: true);
 
             // The runway's length runs along its own +Z; turned to 090 it lies east-west.
             var runwayGo = new GameObject("Runway 09-27");
             runwayGo.transform.SetPositionAndRotation(RunwayCentre, Quaternion.Euler(0f, 90f, 0f));
             runwayGo.AddComponent<FlatGround>().SetSize(RunwayLengthM, RunwayWidthM);
-            Block("Surface", runwayGo.transform, new Vector3(0f, -0.05f, 0f), new Vector3(RunwayWidthM, 0.1f, RunwayLengthM), runway);
+            Block("Surface", runwayGo.transform, new Vector3(0f, -0.05f, 0f), new Vector3(RunwayWidthM, 0.1f, RunwayLengthM), runway, collide: true);
             Block("Centreline", runwayGo.transform, new Vector3(0f, 0.005f, 0f), new Vector3(0.9f, 0.01f, RunwayLengthM - 120f), marking);
             foreach (float end in new[] { -1f, 1f })
                 Block(end < 0f ? "Threshold 09" : "Threshold 27", runwayGo.transform, new Vector3(0f, 0.005f, end * (0.5f * RunwayLengthM - 20f)),
                       new Vector3(RunwayWidthM - 6f, 0.01f, 6f), marking);
+            return runwayGo.GetComponent<FlatGround>();
         }
 
         static void BuildLandmark()
@@ -113,12 +117,15 @@ namespace DeepWater.AirWing.Editor
             foreach (Collider c in ddg.GetComponentsInChildren<Collider>(true)) Object.DestroyImmediate(c);   // still scenery: nothing to hit at L0
         }
 
-        /// <summary>A box with no collider (the truth feed, not PhysX, is the ground at L0).</summary>
-        static void Block(string name, Transform parent, Vector3 localPosition, Vector3 size, Material material)
+        /// <summary>
+        /// A box. The ground boxes keep their colliders: the landing gear finds them by PhysX raycast (W4). The truth
+        /// feed (<see cref="FlatGround"/>) still decides crashes. Markings have no collider.
+        /// </summary>
+        static void Block(string name, Transform parent, Vector3 localPosition, Vector3 size, Material material, bool collide = false)
         {
             var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
             go.name = name;
-            Object.DestroyImmediate(go.GetComponent<Collider>());
+            if (!collide) Object.DestroyImmediate(go.GetComponent<Collider>());
             go.transform.SetParent(parent, false);
             go.transform.localPosition = localPosition;
             go.transform.localScale = size;

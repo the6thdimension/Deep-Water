@@ -41,6 +41,8 @@ namespace DeepWater.AirWing.ScriptableObjects
         }
 
         public Surface[] surfaces = Array.Empty<Surface>();
+        [Tooltip("Where the model's origin sits relative to the centre of mass the core flies, metres (body frame).")]
+        public Vector3 modelOffsetM;
 
         [TextArea(2, 8)] public string provenance = "";
     }

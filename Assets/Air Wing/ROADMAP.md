@@ -14,7 +14,7 @@
 - **Git (SIX, 2026-10-24):** Claude manages git without asking. Verified work is committed, pushed and brought up to `main`, and every branch is kept level; `Guided-Fury` takes it through a PR.
 - **Never pushed:** the archive branch, DAVFX and the MCP unlock script. There are no force pushes.
 
-**Where things stand (2026-10-26):** Phase 1 is finished. Phase 2 is three slices in (2a–2c), and 2d (landing gear) is being built now. Dogfight and the flight-test scene fly the L1 jet.
+**Where things stand (2026-10-26):** Phase 1 is finished. Phase 2 is four slices in (2a–2d): the L1 jet flies, takes off and lands. Next is 2e, the Phase 2 review, on SIX's go.
 
 ## DONE — finished and committed
 
@@ -32,11 +32,9 @@ Everything in this table is built, tested and on `main`. The detail behind each 
 | Slice 2a — Airframe L1 | A 6-DOF jet on NASA's F/A-18 HARV flight data | 2026-10-26 | 59c9059c | 70 |
 | Slice 2b — Fly-by-wire L1 | Hornet-style flight controls: G and roll-rate commands, the AoA and G limits | 2026-10-26 | 7c77b0e1 | 82 |
 | Slice 2c — Engines L1, L1 in the scenes | Engine spool; the scenes fly L1; the L1 budget met (17 µs) | 2026-10-26 | 6edafea9 | 87 |
+| Slice 2d — Landing gear L1 | Wheels on spring-damper struts over PhysX contacts, brakes, nosewheel steering, gear up and down, a runway start, take-off and landing; hard and gear-up landings crash | 2026-10-26 | 2d (see the change log) | 99 |
 
 ## STILL TO DO
-
-### Being built now
-- **Slice 2d — Landing gear:** wheels on PhysX contacts with spring-damper struts, brakes, nosewheel steering, a runway start, take-off and landing.
 
 ### Next in Phase 2
 - **Slice 2e — Phase 2 review:** fly every device at L1 in Dogfight, re-measure the budget, write it up, archive what L1 replaced.
@@ -45,6 +43,11 @@ Everything in this table is built, tested and on `main`. The detail behind each 
 - **Fly by hand** in Dogfight from the flight stick and the mouse (slice 1e). SIX has flown it with the pad, and L1 by hand (2026-10-26); the feedback is still to be written in.
 - **Two fly-by-wire targets missed** (slice 2b): G onset 1.2 s against 1.0, and the G limit peaks at 8.08 G against 8.0. They are reported, not fixed.
 - **Not built in the fly-by-wire:** the revised Hornet law's sideslip feedback to the ailerons, the differential stabilator, sensor models.
+- **Landing gear (slice 2d), open:**
+  - **A decision for SIX: a hands-off touchdown breaks the nose gear.** With the stick left neutral, the main gear (behind the centre of mass) slaps the nose down at about 23°/s and the nose strut bottoms out. The pilot has to fly the nose down, as the test pilot does. Keep it (Q5: bad piloting crashes), or soften it with a progressive strut.
+  - The gear does not move on the model: it always shows down (gear animation).
+  - Not flown by hand: a runway start, take-off and landing from a real device. They are tested in EditMode and the take-off was seen in play from a scripted seat.
+  - The 24 ft/s sink limit is AUTHORED: the figure is commonly quoted for Navy jets, but its source is not pinned.
 
 ### Phase 3 — AI pilots (RH Aviator)
 - AI L0: waypoints, wingman formation, return to base with a landing on the Dogfight runway.
@@ -349,9 +352,33 @@ The gate: the F/A-18E flies at L1 (6-DOF, fly-by-wire, spool time) in Dogfight f
   - The rebuilt player took 0.6 min with the shader cache warm (16.5 min the first time).
 - *Not verified:* L1 flown by hand from any device; the reset at L1 by hand (it is tested in EditMode). Not built: Mach effects (L2), so L1's top speed is not yet right either.
 
-### Slice 2d — Landing Gear L1: runway start, take-off and landing (W4, W29)
-- [ ] Struts, wheels, brakes and nosewheel steering through PhysX contacts (variant B); ground phases flagged in the Fix.
-- [ ] A runway start on 09/27; take-off and landing tests.
+### Slice 2d — Landing Gear L1: runway start, take-off and landing (W4, W29) (done 2026-10-26: 99/99 tests; a scripted take-off seen in Dogfight on PhysX)
+SIX's picks: contacts as W4 says, with spring-damper struts; a brake button (Space, Xbox D-pad down, the stick's trigger).
+- [x] **Contacts (W4):** the core asks `IContactProbe` for each wheel: a ray from the top of its strut down the strut axis, answered with the distance and the ground's normal. The scenes answer with PhysX raycasts (`PhysXContactProbe`) against the land's and the runway's colliders; tests and scenes without colliders use the truth feed's level ground (`SurfaceProbe`). The core stays free of the physics engine (the banned-API scan passes).
+- [x] **`LandingGearL1`:** three wheels, each a linear spring and damper along its strut, with 0.3 m of travel. The tyre's rolling, braking and side friction each rise smoothly to μ·N over a 0.5 m/s slip. The pedals steer the nosewheel ±20°, fading out between 40 and 80 kt. The brakes work the mains. The gear comes up or down over 4 s and stays down with weight on the wheels. Gear drag ΔC_D 0.02. A wheel meeting the ground faster than 24 ft/s, or a strut driven through its travel, breaks the gear and ends the flight. Hard points (belly, tail, nose, wingtips) end it if they touch. `GearDeployed` joins the Fix; contact ticks were already flagged.
+- [x] **Found and fixed while testing:**
+  - The sink rate was first measured along the strut, which tilts with the jet: at 8° nose up and 150 kt it saw 10 m/s of forward speed and broke the gear on every take-off. It is now the tyre's speed along the ground's normal (METHODOLOGY AP29).
+  - Flight Controls L1's lift inversion left out the flaps' ΔC_L, which the airframe adds, so flaps ballooned the jet. The law now subtracts it (METHODOLOGY C39).
+  - The runway start began with the airborne start's throttle lever (0.80, military power), so the jet rolled off on its own. A ground start sets the lever to idle (`PlayerSeat.SetStart`); a held jet on the runway waits with its brakes on.
+- [x] **Ground mode in the fly-by-wire:** on the wheels the stick moves the stabilator directly over its travel, the ailerons get half travel, the rudder follows the pedals, and the G law waits at 1 G.
+- [x] **Runway start (W14: one setting):** the jet's `AircraftView` has **Start Mode** (Airborne by default, or Runway) and its runway. `AircraftFactory.GroundStart` puts it 150 m in from the runway's end, at its static strut compression, gear down, engines at idle. Dogfight's builder keeps colliders on the land and the runway (markings have none) and gives the jet runway 09-27.
+- [x] **The F/A-18E's gear data** (`HarvL1Data`; all AUTHORED, listed in F18E-SOURCES): wheel positions off the model, with the centre of mass 1.6 m aft of the model's origin (`AircraftVisualsSO.modelOffsetM`); springs sized so the static weight takes about half the travel; dampers about half critical.
+- [x] **HUD:** `GEAR DOWN / UP / nn %`, `WOW` (weight on wheels) and `BRAKES`; after a crash, why.
+- [x] **Tests** (`LandingGearL1Tests`, 10; one brake-binding test; one seat test; 99/99 in all):
+
+  | Test | Measured |
+  |---|---|
+  | A ground start settles | at rest in 10 s, level (−0.11°), the nose takes 13.5 % of the weight, the struts carry 100.0 % |
+  | Take-off in afterburner, rotating at 150 kt | lift-off 441 m from brake release at 181 kt; 9.7° on the wheels at most (a tail strike is about 15°) |
+  | Landing on a 3° path, flaps down | touchdown at 3.6 m/s (11.9 ft/s against 24); the brakes stop it in 1,049 m; on the centreline |
+  | A 9° dive onto the runway | the gear breaks: nose gear at 11.4 m/s (37 ft/s) |
+  | A gear-up landing | the belly hard point meets the runway: a crash |
+  | Gear transit and the weight-on-wheels lock | half down at 2 s, down at 4 s, up again in 4 s; it will not come up on the ground |
+  | Nosewheel steering at 17 kt, full right pedal | turns right, 7.1° in the first second, 202° in 8 s |
+  | On the ground the core is bit-identical, and the input log replays it | no divergence |
+  | The PhysX probe against a box collider | distance to 1e-4 m, the normal, out of reach, off the edge |
+
+- [x] **Seen at runtime in Dogfight** (Start Mode set to Runway for the run, then the scene reloaded from disk): at idle the jet held its strut compression on the PhysX runway and crept at 3–4 kt (idle thrust beats rolling friction; the brakes hold it). A scripted seat then took off in afterburner: rotation at 150 kt, lift-off near 183 kt, about 470 m from brake release, the gear up above 80 m, climbing out. The player-script compile passes.
 
 ### Slice 2e — Phase 2 review
 - [ ] Each device class in Dogfight at L1; the budget; METHODOLOGY; archive what L1 supersedes.
@@ -379,3 +406,5 @@ Revisit when Phase 3 is done. The questions for SIX are in BLUEPRINT §7.
 - **2026-10-26** — Slice 2a done: Airframe L1 on the published HARV model, the midpoint method, the E's L1 data; 70/70 tests. Found: TM-107601 has no aero numbers (W32 re-decided by SIX) and the published f18full.m has a sign slip in β̇.
 - **2026-10-26** — Slice 2b done: Flight Controls L1 by nonlinear dynamic inversion commanding α, paired with Airframe L1 on the ladder; the drag floor; 82/82 tests. Missed and reported: G onset (1.2 s against 1.0) and the G limit (8.08 against 8.0). W33's departure confirmed.
 - **2026-10-26** — Slice 2c done: Powerplant L1 (spool), the scenes fly L1, the budget met in a player (17 µs per aircraft per step after caching the lift peak, ×2.2); 87/87 tests.
+- **2026-10-26** — Roadmap split into DONE and STILL TO DO at SIX's request (e322f5a7).
+- **2026-10-26** — Slice 2d done: Landing Gear L1 on spring-damper struts over PhysX contacts, brakes, nosewheel steering, a runway start, take-off and landing; 99/99 tests. Found and fixed: the sink rate measured along a tilted strut, the flaps missing from the law's lift inversion, the runway start's throttle. Open for SIX: a hands-off touchdown breaks the nose gear.

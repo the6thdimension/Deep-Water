@@ -157,6 +157,18 @@ namespace DeepWater.AirWing.Tests
         }
 
         [Test]
+        public void ARunwayStart_HoldsTheGearDown_WithTheLeverAtIdle()
+        {
+            var seat = new PlayerSeat(Settings, Tick, startLever: 0.8f);   // the scenes' airborne cruise lever
+            seat.SetStart(PilotSwitches.GearDown | PilotSwitches.Reset, 0f);
+            PilotInputs i = Issue(seat, Frame(), Level());
+            Assert.AreEqual(0f, i.Throttle, "idle: the jet must not roll off on its own (slice 2d)");
+            Assert.IsFalse(i.Afterburner);
+            Assert.IsTrue(i.Has(PilotSwitches.GearDown));
+            Assert.IsFalse(i.Has(PilotSwitches.Reset), "a start never carries a reset");
+        }
+
+        [Test]
         public void AReset_PutsTheJetBackAtItsStart_EvenAfterACrash_AndTheReplayRepeatsIt()
         {
             AircraftProfile p = F18E();

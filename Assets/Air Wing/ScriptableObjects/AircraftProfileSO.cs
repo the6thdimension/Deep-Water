@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using DeepWater.AirWing.Core;
 using DeepWater.AirWing.Core.Profiles;
@@ -126,6 +127,38 @@ namespace DeepWater.AirWing.ScriptableObjects
         public float rudderMinDeg;
         public float rudderMaxDeg;
 
+        /// <summary>One wheel and its strut, as the Inspector shows it (SI: the gear has no public figures in other units).</summary>
+        [Serializable]
+        public struct Wheel
+        {
+            public string name;
+            [Tooltip("The tyre's lowest point at full extension, metres, about the centre of mass (x right, y up, z forward).")]
+            public Vector3 contactPointM;
+            public float travelM;
+            public float springNPerM;
+            public float damperNsPerM;
+            public bool steerable;
+            public bool braked;
+        }
+
+        [Header("Landing gear L1 (W4, slice 2d): no wheels = no gear data")]
+        public Wheel[] wheels = new Wheel[0];
+        [Tooltip("Points that end the flight if they touch: belly, tail, nose, wingtips. Metres, about the centre of mass.")]
+        public Vector3[] hardPointsM = new Vector3[0];
+        [Tooltip("A wheel meeting the ground faster than this breaks the gear, ft/s.")]
+        public float gearMaxSinkRateFtS;
+        public float tyreRollingFriction;
+        public float tyreBrakingFriction;
+        public float tyreLateralFriction;
+        [Tooltip("The slip speed at which tyre friction saturates, m/s.")]
+        public float tyreSlipSpeedMps;
+        [Tooltip("Nosewheel steering at full pedal, degrees, fading out between these ground speeds, knots.")]
+        public float nosewheelSteerMaxDeg;
+        public float nosewheelSteerFadeStartKt;
+        public float nosewheelSteerFadeEndKt;
+        public float gearTransitTimeS;
+        public float gearDownDeltaCd;
+
         [Header("Provenance (W8)")]
         [TextArea(8, 40)]
         public string provenance = "";
@@ -216,6 +249,34 @@ namespace DeepWater.AirWing.ScriptableObjects
                     Stabilator = Actuator(stabilatorBandwidth, stabilatorRateDegS, stabilatorMinDeg, stabilatorMaxDeg),
                     Aileron = Actuator(aileronBandwidth, aileronRateDegS, aileronMinDeg, aileronMaxDeg),
                     Rudder = Actuator(rudderBandwidth, rudderRateDegS, rudderMinDeg, rudderMaxDeg),
+                };
+            }
+            if (wheels != null && wheels.Length > 0)
+            {
+                var baked = new WheelProfile[wheels.Length];
+                for (int i = 0; i < wheels.Length; i++)
+                {
+                    Wheel w = wheels[i];
+                    baked[i] = new WheelProfile
+                    {
+                        Name = w.name, ContactPointM = w.contactPointM, TravelM = w.travelM, SpringNPerM = w.springNPerM,
+                        DamperNsPerM = w.damperNsPerM, Steerable = w.steerable, Braked = w.braked,
+                    };
+                }
+                profile.LandingGear = new LandingGearProfile
+                {
+                    Wheels = baked,
+                    HardPointsM = (Vector3[])hardPointsM.Clone(),
+                    MaxSinkRateMps = (float)(gearMaxSinkRateFtS * Units.FootToMetre),
+                    RollingFriction = tyreRollingFriction,
+                    BrakingFriction = tyreBrakingFriction,
+                    LateralFriction = tyreLateralFriction,
+                    SlipSpeedMps = tyreSlipSpeedMps,
+                    SteerMaxRad = nosewheelSteerMaxDeg * Units.DegToRad,
+                    SteerFadeStartMps = (float)(nosewheelSteerFadeStartKt * Units.KnotToMetrePerSecond),
+                    SteerFadeEndMps = (float)(nosewheelSteerFadeEndKt * Units.KnotToMetrePerSecond),
+                    TransitTimeS = gearTransitTimeS,
+                    GearDownDeltaCD = gearDownDeltaCd,
                 };
             }
             profile.Validate();

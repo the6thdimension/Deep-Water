@@ -16,10 +16,15 @@ namespace DeepWater.AirWing.Modules.Aircraft
     public sealed class AircraftView : MonoBehaviour
     {
         public enum StartSeat { Player, Hold }
+        /// <summary>Airborne at this transform, or on a runway's take-off point (Landing Gear L1).</summary>
+        public enum StartMode { Airborne, Runway }
 
         [Header("Start (read once, at the start of a run)")]
         [SerializeField] int aircraftId = 1;
         [SerializeField] StartSeat seat = StartSeat.Player;
+        [Tooltip("Airborne here, or on the runway below (needs Landing Gear L1 on the fidelity sheet).")]
+        [SerializeField] StartMode startMode = StartMode.Airborne;
+        [SerializeField] World.FlatGround startRunway;
         [Tooltip("Start speed, knots true airspeed (W22).")]
         [SerializeField] float startSpeedKt = 400f;
         [Range(0f, 1f)] [SerializeField] float startFuelFraction = 0.5f;
@@ -38,6 +43,8 @@ namespace DeepWater.AirWing.Modules.Aircraft
 
         public int AircraftId => aircraftId;
         public StartSeat Seat => seat;
+        public StartMode StartingMode => startMode;
+        public World.FlatGround StartRunway => startRunway;
         public float StartSpeedMps => startSpeedKt * (float)Units.KnotToMetrePerSecond;
         public float StartFuelFraction => startFuelFraction;
         public float HoldThrottle => holdThrottle;
@@ -52,6 +59,9 @@ namespace DeepWater.AirWing.Modules.Aircraft
             _aircraft = aircraft;
             _previous = _current = aircraft.State;
             FindSurfaces();
+            // The model's origin is not the centre of mass the core flies: place it where the visuals say.
+            Transform model = transform.Find("Model");
+            if (model != null && visuals != null) model.localPosition = visuals.modelOffsetM;
             Apply(_current);
         }
 

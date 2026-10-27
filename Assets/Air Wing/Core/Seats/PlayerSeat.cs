@@ -30,6 +30,8 @@ namespace DeepWater.AirWing.Core.Seats
         public float LeverRate;
         /// <summary>Switch toggles pressed this tick (each press flips that switch).</summary>
         public PilotSwitches Toggles;
+        /// <summary>This source's brake control is held (it does not take the stick).</summary>
+        public bool Brakes;
 
         public static DeviceSample Idle => new DeviceSample { LeverAbsolute = float.NaN };
     }
@@ -147,6 +149,7 @@ namespace DeepWater.AirWing.Core.Seats
             float detent = _s.AfterburnerDetent;
             inputs.Afterburner = detent < 1f && Lever >= detent;
             inputs.Throttle = inputs.Afterburner ? 1f : Mathf.Clamp01(Lever / detent);
+            inputs.Brakes = f.Stick.Brakes || f.Gamepad.Brakes || f.Keyboard.Brakes;   // any source's brakes brake
 
             switch (Owner)
             {
@@ -163,6 +166,16 @@ namespace DeepWater.AirWing.Core.Seats
                 case DeviceSource.Keyboard: Axes(f.Keyboard, ref inputs); break;
             }
             return inputs;
+        }
+
+        /// <summary>
+        /// Sets the switches and the lever for a start that differs from the seat's own: a ground start holds the gear
+        /// down with the lever at idle (slice 2d: the airborne start's lever rolled the jet down the runway on its own).
+        /// </summary>
+        public void SetStart(PilotSwitches switches, float lever)
+        {
+            _switches = switches & ~PilotSwitches.Reset;
+            Lever = Mathf.Clamp01(lever);
         }
 
         void ChooseOwner(in DeviceFrame f, in AirframeState state)

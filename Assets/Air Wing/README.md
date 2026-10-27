@@ -33,16 +33,20 @@ In either scene, fly with whichever device you touch. The last device you move o
 | Throttle | RT up, LT down | `]` up, `[` down | lever |
 | Afterburner | push the throttle past 90 % of the lever | same | lever past 90 % |
 | Flaps / speed brake / gear | Y / X / B | F / B / G | buttons 2 / 3 / 4 |
+| Wheel brakes (hold) | D-pad down | Space | trigger |
 | Reset to the start | View | R | — (stick buttons differ by model) |
 | Mouse aim | — | move the mouse: the instructor flies to where you point; any stick or key takes over at once | — |
 
 **The scenes fly L1 (since 2026-10-26):** a six-degree-of-freedom jet on NASA's F/A-18 HARV data with a Hornet-style fly-by-wire. The stick still asks for G and roll rate, but the jet now has inertia, the engines take a few seconds to spool, the AoA limit is 30°, and abused at low speed it can depart. To fly L0 again, set the levels in `ScriptableObjects/FA18E_FidelitySheet.asset` back to L0.
 
-**At L0 the jet (and at L1 too, until slice 2d):**
-- **cannot take off or land**: there is no landing gear until L1, so meeting the sea or a runway is a crash;
+**Take-off and landing (Landing Gear L1, since 2026-10-26).** In Dogfight, select the jet and set **Start Mode** to **Runway** to start on runway 09-27 with the gear down and the engines at idle. Throttle up, rotate at about 150 kt, raise the gear (B / G / button 4). To land, lower the gear and the flaps, fly a shallow approach (under 24 ft/s of sink at touchdown), then **fly the nose down onto the runway**: a neutral stick lets the main gear slap the nose down hard enough to break the nose gear. Hold the brakes to stop. Hard landings, gear-up landings and tail strikes are crashes. The HUD shows the gear, `WOW` (weight on wheels) and `BRAKES`, and after a crash, why.
+
+**At L0 the jet:**
+- **cannot take off or land**: there is no landing gear at L0, so meeting the sea or a runway is a crash;
 - ignores the pedals: a point mass flies without sideslip;
-- has a top speed that is not right yet (Mach effects come at L2);
-- shows its gear down in flight (the model's rest pose; gear animation comes with Landing Gear L1);
+- has a top speed that is not right yet (Mach effects come at L2; L1 too).
+
+**At either level** the model shows its gear down in flight (its rest pose; the gear is not animated yet).
 - **with mouse aim, can be flown into the sea**: the instructor has no sense of height, and pointing low and to the side makes it bank past 90° (BLUEPRINT Q5). Point above a low gate until you are level at its height.
 
 **Not yet verified on real hardware.** The bindings are proved with virtual devices (EditMode tests, and one play-mode run with a virtual Xbox pad). If the VelocityOne lever reads backwards, tick `invertLever` in `ScriptableObjects/PlayerSeatSettings.asset`. Deadzone, mouse sensitivity, throttle rate, the afterburner detent and the instructor's gains are in the same asset.

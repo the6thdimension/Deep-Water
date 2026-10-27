@@ -36,8 +36,9 @@ namespace DeepWater.AirWing.Core
             .Register(FidelityLevel.L0, p => new FlightControlsL0(p.Controls))                     // slice 1b
             .Register(FidelityLevel.L1, p => new FlightControlsL1(p));                             // slice 2b
 
-        static readonly PartLadder<NoProfile, ILandingGear> GearLadder = new PartLadder<NoProfile, ILandingGear>(PartKind.LandingGear)
-            .Register(FidelityLevel.L0, _ => new NoLandingGear());                                 // slice 1b (none)
+        static readonly PartLadder<AircraftProfile, ILandingGear> GearLadder = new PartLadder<AircraftProfile, ILandingGear>(PartKind.LandingGear)
+            .Register(FidelityLevel.L0, _ => new NoLandingGear())                                  // slice 1b (none)
+            .Register(FidelityLevel.L1, p => new LandingGearL1(p.LandingGear));                    // slice 2d
 
         public static Aircraft Build(int id, in AircraftProfile profile, in FidelitySheet sheet, in AirframeState start)
         {
@@ -52,7 +53,8 @@ namespace DeepWater.AirWing.Core
             if (ppLevel >= FidelityLevel.L1 && !profile.Powerplant.HasSpool) { ppLevel = FidelityLevel.L0; ppReason = $"{profile.Name} has no spool data"; }
             IPowerplant powerplant = PowerplantLadder.BuildAt(ppRequested, ppLevel, profile.Powerplant, ppReason, out var r2); levels.Add(r2);
             IFlightControls controls = ControlsLadder.BuildAt(sheet.Level(PartKind.FlightControls), controlsLevel, profile, pairing, out var r3); levels.Add(r3);
-            ILandingGear gear = GearLadder.Build(sheet.Level(PartKind.LandingGear), default, out var r4); levels.Add(r4);
+            ResolveGear(profile, sheet, airframeLevel, out FidelityLevel gearLevel, out string gearReason);
+            ILandingGear gear = GearLadder.BuildAt(sheet.Level(PartKind.LandingGear), gearLevel, profile, gearReason, out var r4); levels.Add(r4);
             return new Aircraft(id, profile, atmosphere, airframe, powerplant, controls, gear, levels, start);
         }
 
@@ -77,6 +79,39 @@ namespace DeepWater.AirWing.Core
                 return;
             }
             airframe = controls = FidelityLevel.L0;
+        }
+
+        /// <summary>Landing Gear L1 needs the type's gear data and the L1 airframe (the struts push on a rigid body).</summary>
+        static void ResolveGear(in AircraftProfile profile, in FidelitySheet sheet, FidelityLevel airframe, out FidelityLevel level, out string reason)
+        {
+            level = GearLadder.Resolve(sheet.Level(PartKind.LandingGear)).Resolved;
+            reason = null;
+            if (level < FidelityLevel.L1) return;
+            if (!profile.LandingGear.IsSet) reason = $"{profile.Name} has no landing gear data";
+            else if (airframe < FidelityLevel.L1) reason = "Landing Gear L1 needs Airframe L1";
+            if (reason != null) level = FidelityLevel.L0;
+        }
+
+        /// <summary>
+        /// A start on the ground at <paramref name="groundPoint"/> (the surface under the centre of mass), heading
+        /// <paramref name="headingDeg"/>: at rest, the gear down and locked, the struts near their static compression, the
+        /// engines at idle. Needs Landing Gear L1 on <paramref name="sheet"/>. The seat must hold the gear-down switch, or
+        /// the gear's weight-on-wheels lock is all that keeps it down.
+        /// </summary>
+        public static AirframeState GroundStart(in AircraftProfile profile, in FidelitySheet sheet, Vector3 groundPoint, float headingDeg, float fuelKg)
+        {
+            ResolveAirframeAndControls(profile, sheet, out FidelityLevel airframe, out _, out _);
+            ResolveGear(profile, sheet, airframe, out FidelityLevel gear, out string reason);
+            if (gear < FidelityLevel.L1) throw new InvalidOperationException($"{profile.Name}: a ground start needs Landing Gear L1 ({reason ?? "the sheet asks for L0"})");
+            AirframeState s = LevelStart(profile, groundPoint, headingDeg, 0f, fuelKg, 0f);
+            // The centre of mass above the ground: the wheels' depth, less the static compression of a strut sharing the weight.
+            float springs = 0f, depth = 0f;
+            foreach (WheelProfile w in profile.LandingGear.Wheels) { springs += w.SpringNPerM; depth = Mathf.Max(depth, -w.ContactPointM.y); }
+            s.Position = groundPoint + Vector3.up * (depth - s.MassKg * Units.StandardGravity / springs);
+            s.GearDeployed = 1f;
+            s.InContact = true;
+            s.Controls = new ControlState { LoadFactorCommand = 1f };
+            return s;
         }
 
         /// <summary>

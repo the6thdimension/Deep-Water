@@ -37,6 +37,8 @@ namespace DeepWater.AirWing.Core.FlightControls
         readonly AirframeL1Profile _a;
         /// <summary>The lift curve's peak α: fixed per profile, so found once (slice 2c: it was a 140-point scan every substep).</summary>
         readonly float _liftPeakAlpha;
+        /// <summary>The flaps' lift, which the airframe adds (slice 2d: the inversion left it out, so flaps ballooned).</summary>
+        readonly float _flapsDeltaCL;
 
         public FlightControlsL1(in AircraftProfile profile)
         {
@@ -46,6 +48,7 @@ namespace DeepWater.AirWing.Core.FlightControls
             _k = profile.ControlsL1;
             _a = profile.AirframeL1;
             _liftPeakAlpha = AirframeL1.LiftPeakAlpha(_a);
+            _flapsDeltaCL = profile.Airframe.FlapsDeltaCLmax;
         }
 
         /// <summary>The load factor the stick asks for (the L0 map, W26).</summary>
@@ -60,6 +63,8 @@ namespace DeepWater.AirWing.Core.FlightControls
             Vector3 uvw = AirframeL1.ToNasa(Quaternion.Inverse(att) * s.Velocity);
             float v = uvw.magnitude;
             if (v < MinSpeedMps) return Hold(ref c, dt);
+
+            if (s.InContact) return Ground(inputs, ref c, dt);
 
             Vector3 pqr = AirframeL1.RatesToNasa(s.BodyRates);
             float p = pqr.x, q = pqr.y, r = pqr.z;
@@ -77,6 +82,7 @@ namespace DeepWater.AirWing.Core.FlightControls
             float en = nf - n;
             float integral = c.PitchIntegralRadS + _k.LoadFactorIntegralGain * en * dt;
             float clReq = qS > 1f ? nf * s.MassKg * G0 / qS - AirframeL1.LiftPerStabilator(_a, a) * c.StabilatorRad : 0f;
+            if (inputs.Has(PilotSwitches.FlapsDown)) clReq -= _flapsDeltaCL;
             float alphaCmd = AirframeL1.AlphaForBasicLift(_a, clReq / Mathf.Cos(2f * beta / 3f), _liftPeakAlpha) + integral;
             if (alphaCmd > _k.AlphaLimitRad)
             {
@@ -127,6 +133,22 @@ namespace DeepWater.AirWing.Core.FlightControls
             c.RudderRad = Actuate(c.RudderRad, rudCmd, _k.Rudder, dt);
             c.PitchIntegralRadS = integral;
             c.LoadFactorCommand = nf;
+            return new ControlDemand(new ControlSurfaces(c.StabilatorRad, c.AileronRad, c.RudderRad));
+        }
+
+        /// <summary>
+        /// Weight on wheels: the law runs direct, as the Hornet's take-off mode does. The stick moves the stabilator over
+        /// its travel (aft stick, trailing edge up) and the ailerons over half theirs; the pedals move the rudders (and
+        /// steer the nosewheel, in the gear). The G loop waits at 1 g for the lift-off.
+        /// </summary>
+        ControlDemand Ground(in PilotInputs i, ref ControlState c, float dt)
+        {
+            float stab = i.StickPitch >= 0f ? i.StickPitch * _k.Stabilator.MinRad : -i.StickPitch * _k.Stabilator.MaxRad;
+            c.StabilatorRad = Actuate(c.StabilatorRad, stab, _k.Stabilator, dt);
+            c.AileronRad = Actuate(c.AileronRad, i.StickRoll * 0.5f * _k.Aileron.MaxRad, _k.Aileron, dt);
+            c.RudderRad = Actuate(c.RudderRad, -i.Pedals * _k.Rudder.MaxRad, _k.Rudder, dt);
+            c.PitchIntegralRadS = 0f;
+            c.LoadFactorCommand = 1f;
             return new ControlDemand(new ControlSurfaces(c.StabilatorRad, c.AileronRad, c.RudderRad));
         }
 

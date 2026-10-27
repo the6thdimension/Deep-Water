@@ -58,6 +58,8 @@ namespace DeepWater.AirWing.Core.State
         public FlightStatus Status;
         /// <summary>Touching a surface through PhysX this tick (L1+). Such ticks are flagged in the Fix (W7).</summary>
         public bool InContact;
+        /// <summary>The landing gear, 0 (up) … 1 (down and locked); Landing Gear L1.</summary>
+        public float GearDeployed;
         /// <summary>Flight Controls L1's surfaces and memory (zero at L0).</summary>
         public ControlState Controls;
     }

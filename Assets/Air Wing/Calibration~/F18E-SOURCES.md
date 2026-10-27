@@ -85,3 +85,19 @@ The mirror `l0_calibration.py` and the C# test `AirframeL0Tests.ServiceCeiling_I
 | Gains | prefilter 0.3 s; α gain 2/s; G integral 0.02 rad/(g·s); bandwidths 6, 5, 3/s; sideslip gain 2/s; 8° of β at full pedal | AUTHORED | tuned in `l1_fbw_mirror.py` against criteria fixed before tuning (ROADMAP 2b) |
 | Drag floor | C_D0 0.025, K 0.0987 | AUTHORED | the L0 polar of this profile, under the HARV fits' low-α drag |
 
+## Landing Gear L1 (slice 2d, W4)
+
+Positions are metres about the centre of mass the core flies (x right, y up, z forward). The centre of mass sits 1.6 m aft of the F-18E model's origin (`AircraftVisualsSO.modelOffsetM`, AUTHORED off the model's rig).
+
+| Number | Value | Tag | Source |
+|---|---|---|---|
+| Wheels (tyre bottom, fully extended) | nose (0, −1.71, 5.17); mains (±1.40, −1.71, −0.74) | AUTHORED | measured off the F-18E model |
+| Strut travel | 0.3 m | AUTHORED | |
+| Springs | nose 188 kN/m, mains 661 kN/m | AUTHORED | sized so the static weight (18.5 t at 60 % fuel) compresses each strut about half its travel; the nose takes its moment-arm share (measured 13.5 %) |
+| Dampers | nose 25 kN·s/m, mains 88 kN·s/m | AUTHORED | about half critical |
+| Hard points | belly (0, −1.0, 0), tail (0, −0.2, −6.4), nose (0, −0.4, 10.0), wingtips (±6.8, 0, −2) | AUTHORED | off the model; the tail gives a strike near 15° nose up on the mains |
+| Sink limit | 24 ft/s | AUTHORED | the carrier-landing design sink rate commonly quoted for Navy jets; its source is not pinned |
+| Tyre friction | rolling 0.02, braking 0.5, side 0.7; saturating over 0.5 m/s of slip | AUTHORED | textbook dry-concrete values |
+| Nosewheel steering | ±20°, fading out between 40 and 80 kt | AUTHORED | |
+| Gear transit | 4 s | AUTHORED | |
+| Gear drag | ΔC_D 0.02 | AUTHORED | |

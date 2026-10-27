@@ -171,8 +171,13 @@ moving aircraft.*
 
 *Brookner's phase: "α-β first — it's easy."*
 
-- [ ] **Pure-C# α-β tracker** (`Core/Tracking/AlphaBetaFilter.cs`) with
-  closed-form step-response unit test.
+- [x] **Pure-C# α-β tracker** (`Core/Tracking/AlphaBetaFilter.cs`) with
+  closed-form step-response unit test. DONE 2026-10-27: one axis per filter, double precision; gains from
+  Benedict–Bordner, critically damped (both poles at θ) or Kalata's steady-state Kalman pair for a tracking index λ;
+  `Coast` for a missed look; Jury's stability triangle refuses unstable gains. `AlphaBetaFilterTests` (6): the step
+  response equals θ^k(1 − k(1 − θ)) to 1e-12 over 30 updates; a 250 m/s target is held with no lag; Kalata's λ = 1
+  gives α 0.75, β 0.5 (by hand) and λ² = β²/(1 − α) holds; 200,000 seeded noisy updates match the variance-reduction
+  ratio (0.412 for α 0.5) within 3 %.
 - [ ] **Track lifecycle:** tentative → confirmed (M-of-N) → coasting → dropped;
   per-state events; coast prediction through missed scans.
 - [ ] **Gated association:** measurements associate to tracks by predicted-window
@@ -230,3 +235,4 @@ moving aircraft.*
 - [ ] `Examples/README.md` and `Prefabs/README.md` describe assets that don't exist —
   Phase 1 and Phase 5 items close them; update the READMEs when they do.
 - **2026-10-27** — Phase 1 tests run at last: 7/7. Phase 2's pure core begun: `Core/Detection/RadarEquation.cs` (the radar equation in dB, the range for a required SNR, Albersheim, North, Swerling 1, the 4/3-Earth horizon, erfc), 8 tests against hand-computed cases and Albersheim's published point; 15/15 in all. Found: the roadmap's "sea-skimmers at 200 km" was off by seven times; the 4/3-Earth horizon for a 20 m mast and a 5 m target is 27.6 km. The modules are untouched (their rewrite waits for SIX).
+- **2026-10-27** — Phase 3 begun: the pure α-β filter (`Core/Tracking/AlphaBetaFilter.cs`), 6 tests; 21/21 in all.

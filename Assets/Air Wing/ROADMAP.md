@@ -39,7 +39,7 @@ Everything in this table is built, tested and on `main`. The detail behind each 
 ## STILL TO DO
 
 ### Next
-- **Phase 3 — AI pilots**, on SIX's go (outline below).
+- **Phase 3 — AI pilots:** slice 3a on SIX's go. The plan and its pass criteria are in `Assets/RH Aviator/ROADMAP.md`; RH Aviator's BLUEPRINT Q1 (confirm A1–A6) is open.
 
 ### Left open in finished slices
 - **Fly by hand** from real devices. Every device class is proven live at L1 with virtual devices (slice 2e), and SIX has flown it with the pad and flown L1 by hand (2026-10-26); SIX's L1 feedback is still to be written in. A real VelocityOne, a real mouse, and take-off and landing by hand are not yet flown.
@@ -422,7 +422,7 @@ SIX's picks: contacts as W4 says, with spring-damper struts; a brake button (Spa
 - *Anti-goals for Phase 2, held:* no Mach effects or ground effect (L2); no fuel burn or moving centre of gravity (L3); no AI pilot; no carrier; no weapons; no cockpit view; no helicopter; no vendor code edited; no change to the project's fixed timestep.
 
 ## Phase 3 — AI pilots (outline; RH Aviator, W5, W17, W18; interview begun 2026-10-26, W36–W51 locked; tracked in RH Aviator's roadmap, W48)
-The AI work is tracked in `Assets/RH Aviator/` (its blueprint and roadmap, W48), against W36–W51 here. Proposed slices, Pilot L0 then Pilot L1 (W49), each tested headless and then smoked in Dogfight (W50):
+The AI work is tracked in `Assets/RH Aviator/BLUEPRINT.md` and `ROADMAP.md` (W48, written 2026-10-26), against W36–W51 here; the pass criteria for each slice are fixed there. Proposed slices, Pilot L0 then Pilot L1 (W49), each tested headless and then smoked in Dogfight (W50):
 - [ ] **3a** (W51): RH Aviator's AI seat, the shared flight-path layer (W37), the mode machine with logged rules (W36) on a 4 Hz watch (W44); the AI flies Dogfight's four gates at L1.
 - [ ] **3b**: join and hold fingertip on the player's wing (W40). Air Wing side: the seat cycle key and the HUD pick list (W42).
 - [ ] **3c**: going home on command or at the bingo stand-in (W47); the overhead break and the landing on runway 09/27 (W41).

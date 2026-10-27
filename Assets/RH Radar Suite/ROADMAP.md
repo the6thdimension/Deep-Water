@@ -166,8 +166,9 @@ moving aircraft.*
   (`MeasurementTerms`); `Measure` draws a noisy plot in range, azimuth and elevation from a seeded generator.
   `MeasurementErrorTests` (4): 10.599 m and 0.0663° at 20 dB (by hand); 20,000 draws within 3 % of each sigma and
   unbiased; and the whole pure chain (radar equation → Swerling 1 detection → noisy plots → the track file) holds a
-  closing 0 dBsm jet from 60 km within 60 m and 15 m/s. Range-rate is not built; applying it in the modules waits
-  with the Phase 2 wiring.*
+  closing 0 dBsm jet from 60 km within 60 m and 15 m/s. Range-rate added the same night: σ_ṙ = λ/(2T√(2·SNR)) over a dwell T,
+  with a floor (0.3533 m/s for a 10 ms dwell at 20 dB, by hand; 37/37). Applying it in the modules waits with the
+  Phase 2 wiring.*
 - [ ] **FixedUpdate sensor stepping** (P2) across all modules; scan timing from
   fixed time.
 - [ ] **Phase-2 EditMode tests:** predicted-vs-simulated detection range for a
@@ -267,3 +268,4 @@ moving aircraft.*
 - **2026-10-27** — Phase 3's pure core: the track file (M of N, coast, reacquire, drop; gated nearest-neighbour association; the track picture with quality and BestTrack), 7 tests; 28/28 in all. Kalman and the gizmos remain; the modules are untouched.
 - **2026-10-27** — Barton's measurement errors in the pure core, and the first end-to-end test of the pure chain (equation, detection, plots, track); 32/32.
 - **2026-10-27** — Phase 4's coarse surface clutter in the pure core (constant γ, grazing, cell, CNR, SCNR), 4 tests; 36/36. The READMEs no longer describe prefabs and panels that do not exist.
+- **2026-10-27** — Range-rate accuracy (Doppler) in the pure core; 37/37. METHODOLOGY C45, C46 from this work.

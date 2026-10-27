@@ -15,6 +15,10 @@ namespace RHRadarSuite.Detection
         public double MonopulseSlope;
         /// <summary>The errors that do not shrink with SNR (alignment, multipath, quantisation), one sigma, added in quadrature.</summary>
         public double RangeFloorM, AngleFloorDeg;
+        /// <summary>Coherent processing interval, seconds: how long one Doppler measurement integrates (0: no Doppler).</summary>
+        public double DwellS;
+        /// <summary>The range-rate error that does not shrink with SNR, one sigma, m/s.</summary>
+        public double RangeRateFloorMps;
     }
 
     /// <summary>
@@ -22,6 +26,7 @@ namespace RHRadarSuite.Detection
     /// <list type="bullet">
     /// <item>σ_R = c / (2B √(2·SNR)), the range error of a matched filter of bandwidth B.</item>
     /// <item>σ_θ = θ_B / (k_m √(2·SNR)), the monopulse angle error for a beamwidth θ_B.</item>
+    /// <item>σ_ṙ = λ / (2·T √(2·SNR)), the range-rate error of a Doppler measurement integrated over T.</item>
     /// </list>
     /// Each adds its floor in quadrature, so a strong target is accurate but never perfect. <see cref="Measure"/> turns a
     /// truth into one noisy <see cref="Plot"/> with a seeded generator (P7).
@@ -34,6 +39,17 @@ namespace RHRadarSuite.Detection
             double thermal = RadarEquation.SpeedOfLight / (2.0 * r.BandwidthHz * Math.Sqrt(2.0 * RadarEquation.FromDb(snrDb)));
             return Math.Sqrt(thermal * thermal + m.RangeFloorM * m.RangeFloorM);
         }
+
+        public static double RangeRateSigmaMps(in RadarTerms r, in MeasurementTerms m, double snrDb)
+        {
+            if (!(m.DwellS > 0.0)) throw new ArgumentOutOfRangeException(nameof(m.DwellS), m.DwellS, "a Doppler measurement needs a positive dwell");
+            double thermal = RadarEquation.WavelengthM(r.FrequencyHz) / (2.0 * m.DwellS * Math.Sqrt(2.0 * RadarEquation.FromDb(snrDb)));
+            return Math.Sqrt(thermal * thermal + m.RangeRateFloorMps * m.RangeRateFloorMps);
+        }
+
+        /// <summary>One noisy range rate (positive opening) for a true <paramref name="rangeRateMps"/>, drawn from <paramref name="rng"/>.</summary>
+        public static double MeasureRangeRate(in RadarTerms r, in MeasurementTerms m, double rangeRateMps, double snrDb, Random rng) =>
+            rangeRateMps + RangeRateSigmaMps(r, m, snrDb) * Gaussian(rng);
 
         public static double AzimuthSigmaDeg(in MeasurementTerms m, double snrDb) => AngleSigmaDeg(m.AzimuthBeamwidthDeg, m, snrDb);
         public static double ElevationSigmaDeg(in MeasurementTerms m, double snrDb) => AngleSigmaDeg(m.ElevationBeamwidthDeg, m, snrDb);

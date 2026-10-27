@@ -1,6 +1,6 @@
 # Air Wing — blueprint
 
-> **Status: LOCKED BLUEPRINT (W1–W39); Phases 1 and 2 closed (2026-10-26): the F/A-18E flies at L1 from every device class, takes off and lands, and meets its budget. Phase 3 (AI pilots): interview begun, W36–W39 locked.** SIX answered all 24 questions on 2026-10-24 (W1–W24) and locked W25–W31 on 2026-10-25. Progress is in `ROADMAP.md`.
+> **Status: LOCKED BLUEPRINT (W1–W43); Phases 1 and 2 closed (2026-10-26): the F/A-18E flies at L1 from every device class, takes off and lands, and meets its budget. Phase 3 (AI pilots): interview under way, W36–W43 locked.** SIX answered all 24 questions on 2026-10-24 (W1–W24) and locked W25–W31 on 2026-10-25. Progress is in `ROADMAP.md`.
 > **This document's one job:** say what Air Wing is and why, record every decision behind it, and define the contract each part of an aircraft follows. Work order and progress live in `ROADMAP.md`, not here. The stock-take that preceded it is summarised in §1.
 
 ## 1. In plain language
@@ -174,6 +174,10 @@ All entries W1–W24 are SIX's picks of 2026-10-24, in round order. "Leaning" is
 | W37 | How the AI works the stick | **A shared flight-path layer:** every behaviour asks for a flight path (an aim point, or heading, altitude and speed); one layer flies it with stick and throttle, like the mouse instructor. Tuned once; an autopilot for the player can reuse it | Same | Locked (SIX, 2026-10-26) |
 | W38 | What the AI knows | **Truth at L0; limits for the fight:** at L0 it reads other aircraft's true state. At L1 it sees only inside a field of view, with a reaction delay. Sensors later | Same | Locked (SIX, 2026-10-26) |
 | W39 | Where the first AI slice flies | **Dogfight's gate course:** the AI flies the four gates, which already score speed and altitude; then it joins on the player's wing | Same | Locked (SIX, 2026-10-26) |
+| W40 | Formation | **Fingertip first:** one shape, off the leader's wing about three wingspans out and slightly behind; trail and line abreast once that holds steady | Same | Locked (SIX, 2026-10-26) |
+| W41 | How the AI returns and lands | **The overhead break:** run in down the runway at 800 ft, break into a tight level turn, fly downwind with the gear down, turn final and land. *SIX's pick; Claude leaned to a straight-in 3° approach first (the profile the landing tests already fly).* *Mitigation:* the break is built from flight-path segments on the shared layer (W37), with the straight-in final as its last segment, so it can be tested a segment at a time | Straight-in first | Locked (SIX, 2026-10-26) |
+| W42 | Taking and handing back aircraft | **A cycle key and a pick list:** one key (and a pad button) steps the player through the aircraft in the air; the one left goes to its AI pilot at once; a small HUD list shows who flies what (W18) | Same | Locked (SIX, 2026-10-26) |
+| W43 | How many AI aircraft | **Up to four in all:** the player and up to three AI (a wingman, and a pair to fight); about 70 µs of flight core per step at L1 | Same | Locked (SIX, 2026-10-26) |
 
 ## 6. Standing constraints
 

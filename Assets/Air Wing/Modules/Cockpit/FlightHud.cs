@@ -62,6 +62,7 @@ namespace DeepWater.AirWing.Modules.Cockpit
             }
 
             string device = runner.Roster != null ? runner.Roster.Describe(_view.AircraftId) : _view.Seat.ToString().ToUpperInvariant();
+            if (seat != null && _view.AircraftId == runner.PlayerAircraftId && seat.LevelHolding) device += "  ·  LEVEL HOLD";
             if (aircraft.Gear is Core.LandingGear.LandingGearL1)
             {
                 float g = aircraft.State.GearDeployed;

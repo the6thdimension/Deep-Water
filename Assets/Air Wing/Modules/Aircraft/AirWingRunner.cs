@@ -53,6 +53,7 @@ namespace DeepWater.AirWing.Modules.Aircraft
             }
             AircraftProfile p = profile.Bake();
             FidelitySheet sheet = fidelitySheet.Bake();
+            PlayerSeat?.UseControls(p.Controls);   // the level hold's stick map (W54)
             ISeaSurface seaSurface = sea as ISeaSurface;
             if (sea != null && seaSurface == null)
                 Debug.LogError($"[Air Wing] {sea.name} is not a Sea State surface (ISeaSurface); using the flat fallback.", this);

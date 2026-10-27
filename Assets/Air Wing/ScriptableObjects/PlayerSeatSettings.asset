@@ -22,3 +22,10 @@ MonoBehaviour:
   rollGain: 2.5
   pitchGain: 4
   wingsLevelBlendDeg: 5
+  levelHoldDelayS: 0.4
+  aimLevelDetentDeg: 2
+  holdMaxBankDeg: 45
+  holdMaxG: 3
+  holdClimbDegPerM: 0.06
+  holdMaxPathDeg: 10
+  holdGPerPathDeg: 0.2

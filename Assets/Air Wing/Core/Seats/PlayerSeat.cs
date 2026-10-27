@@ -1,5 +1,6 @@
 using System;
 using DeepWater.AirWing.Core.Inputs;
+using DeepWater.AirWing.Core.Profiles;
 using DeepWater.AirWing.Core.State;
 using UnityEngine;
 
@@ -59,6 +60,16 @@ namespace DeepWater.AirWing.Core.Seats
         /// <summary>Lever position of the afterburner detent: below it the throttle runs idle → military; at or above it, afterburner.</summary>
         public float AfterburnerDetent;
         public InstructorSettings Instructor;
+        /// <summary>
+        /// Level hold (W54, SIX 2026-10-27: "can't hold level flight" on mouse and keyboard): with the keyboard or the
+        /// pad flying and its stick centred this long (seconds), the instructor holds the jet level on the heading it had
+        /// when the keys were let go. Zero: off (the stick stays centred, as a real stick does).
+        /// </summary>
+        public float LevelHoldDelayS;
+        /// <summary>Mouse aim within this angle of the horizon snaps to level once the mouse stops (degrees; 0: off).</summary>
+        public float AimLevelDetentDeg;
+        /// <summary>The level hold's hands (the AI's bounded law, A2): its bank and G limits and gains. The throttle stays the player's.</summary>
+        public HandsSettings Hold;
     }
 
     /// <summary>
@@ -83,6 +94,9 @@ namespace DeepWater.AirWing.Core.Seats
 
         DeviceFrame _frame = DeviceFrame.Idle;
         bool _frameFresh, _realignAim;
+        int _centredTicks;
+        float _holdYawDeg, _holdHeightM;
+        FlightPathHands _holdHands;
         float _aimYawDeg, _aimPitchDeg;
         PilotSwitches _switches;
 
@@ -93,6 +107,15 @@ namespace DeepWater.AirWing.Core.Seats
 
         /// <summary>The throttle lever, 0 … 1 (the afterburner detent sits at <see cref="PlayerSeatSettings.AfterburnerDetent"/>).</summary>
         public float Lever { get; private set; }
+
+        /// <summary>
+        /// The aircraft's stick map, for the level hold's hands (W54). The runner passes it when it builds the jets;
+        /// without it the hold stays off.
+        /// </summary>
+        public void UseControls(in ControlsProfile controls) => _holdHands = new FlightPathHands(_s.Hold, controls, _tickSeconds);
+
+        /// <summary>True while the level hold flies the jet (W54); the HUD shows it.</summary>
+        public bool LevelHolding { get; private set; }
 
         /// <summary>The mouse aim direction, world space (meaningful while <see cref="Owner"/> is <see cref="DeviceSource.Mouse"/>).</summary>
         public Vector3 AimDirection => Quaternion.Euler(-_aimPitchDeg, _aimYawDeg, 0f) * Vector3.forward;
@@ -151,6 +174,7 @@ namespace DeepWater.AirWing.Core.Seats
             inputs.Throttle = inputs.Afterburner ? 1f : Mathf.Clamp01(Lever / detent);
             inputs.Brakes = f.Stick.Brakes || f.Gamepad.Brakes || f.Keyboard.Brakes;   // any source's brakes brake
 
+            LevelHolding = false;
             switch (Owner)
             {
                 case DeviceSource.Mouse:
@@ -159,13 +183,51 @@ namespace DeepWater.AirWing.Core.Seats
                         _aimYawDeg += f.AimYawDeg;
                         _aimPitchDeg = Mathf.Clamp(_aimPitchDeg + f.AimPitchDeg, -89f, 89f);
                     }
+                    // The detent: an aim left near the horizon is the horizon (W54).
+                    else if (_s.AimLevelDetentDeg > 0f && Mathf.Abs(_aimPitchDeg) < _s.AimLevelDetentDeg) _aimPitchDeg = 0f;
                     _instructor.Steer(AimDirection, state, out inputs.StickPitch, out inputs.StickRoll);
                     break;
                 case DeviceSource.Stick: Axes(f.Stick, ref inputs); break;
-                case DeviceSource.Gamepad: Axes(f.Gamepad, ref inputs); break;
-                case DeviceSource.Keyboard: Axes(f.Keyboard, ref inputs); break;
+                case DeviceSource.Gamepad: HandsOffOr(f.Gamepad, state, ref inputs); break;
+                case DeviceSource.Keyboard: HandsOffOr(f.Keyboard, state, ref inputs); break;
             }
             return inputs;
+        }
+
+        /// <summary>
+        /// The keyboard's or the pad's axes, or, centred long enough, the level hold (W54): the instructor flies the
+        /// level line of the heading the jet had when the stick was let go, so the jet neither drifts nor sinks.
+        /// </summary>
+        void HandsOffOr(in DeviceSample s, in AirframeState state, ref PilotInputs inputs)
+        {
+            bool centred = s.StickPitch == 0f && s.StickRoll == 0f && s.Pedals == 0f;
+            if (!centred || _s.LevelHoldDelayS <= 0f || _holdHands == null || state.InContact)
+            {
+                _centredTicks = 0;
+                Axes(s, ref inputs);
+                return;
+            }
+            _centredTicks++;
+            if (_centredTicks * _tickSeconds < _s.LevelHoldDelayS) { Axes(s, ref inputs); return; }
+            if (_centredTicks * _tickSeconds - _tickSeconds < _s.LevelHoldDelayS)
+            {
+                // The moment it takes over: hold the present track and height. (Slice W54's first try steered the
+                // instructor at a level aim; let go at 121° of bank it dived to −16° and wandered 6,000 ft: its pursuit
+                // has no bank limit, Air Wing AP25. The hands are the bounded law.)
+                Vector3 v = state.Velocity.sqrMagnitude > 1f ? state.Velocity : state.Attitude * Vector3.forward;
+                _holdYawDeg = Mathf.Atan2(v.x, v.z) * Units.RadToDeg;
+                _holdHeightM = state.Position.y;
+            }
+            LevelHolding = true;
+            var hold = new FlightPathRequest
+            {
+                AimWorld = state.Position + Quaternion.Euler(0f, _holdYawDeg, 0f) * Vector3.forward * 10000f,
+                AltitudeM = _holdHeightM,
+                SpeedMps = state.Velocity.magnitude,   // unused: the throttle stays the player's lever
+            };
+            PilotInputs h = _holdHands.Fly(hold, state, float.NegativeInfinity);
+            inputs.StickPitch = h.StickPitch;
+            inputs.StickRoll = h.StickRoll;
         }
 
         /// <summary>

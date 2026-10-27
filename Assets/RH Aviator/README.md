@@ -1,8 +1,7 @@
 # RH Aviator
 
-Greenfield AI aircraft module. Drives any airframe (vendor F-18, fixed-wing, helo)
-through an actuator contract — no tight coupling to any one vehicle. Follows McMahon
-Pat1: **SO-Profile + Pure-Core + MB-Adapter**.
+The AI pilot. It sits in an Air Wing aircraft's seat and flies it through the same Pilot Inputs the player uses. Follows McMahon
+Pat1: **SO-Profile + Pure-Core + MB-Adapter**. **Read `BLUEPRINT.md` first** (W36–W51, SIX 2026-10-26); progress is in `ROADMAP.md`. Nothing is built yet.
 
 **Assembly:** `DeepWater.Aviator` (namespace `DeepWater.Aviator`). Renamed from `RH.Aviator` on 2026-10-25 by SIX's call (Air Wing BLUEPRINT Q2), so it matches the other `DeepWater.*` modules.
 
@@ -12,39 +11,36 @@ Pat1: **SO-Profile + Pure-Core + MB-Adapter**.
 
 ```
 RH Aviator/
-  Core/              — interfaces, AviatorEntity, decision logic (BT / FSM / utility)
-  Modules/           — pluggable: roles (CAP, intercept, strike), tactics, formations
-  ScriptableObjects/ — AircraftProfileSO, DoctrineSO, RoleProfileSO
-  Prefabs/           — assembled AI aircraft
-  Examples/          — demo scenes (1v1, 2v2, BVR)
+  Core/              — pure C#: the AI seat, the brain (modes, named rules, the rule log), the picture, formation and pattern geometry, fight scoring
+  Modules/           — scene adapters: placing AI seats in Dogfight, the go-home order
+  ScriptableObjects/ — PilotProfileSO (rookie, line, ace), routes
+  Prefabs/           — (none planned: the jet is Air Wing's)
+  Examples/          — Dogfight AI: the gates, formation, the break, 1v1
   Tests/Editor/      — colocated tests
 ```
 
-## Fidelity / capability ladder
+## The ladder (W49)
 
-| Tier | Name | What it models |
+| Level | What the pilot does | Knows |
 |---|---|---|
-| L0 | Waypoint follower | Fly a path. No combat. Baseline. |
-| L1 | Single-target intercept | Acquire a track, run intercept geometry, RTB on bingo. |
-| L2 | Air-combat maneuvering (ACM) | Energy management, lag/lead pursuit, gun snapshots. |
-| L3 | BVR + countermeasures | Long-range missile shots, notch maneuver, chaff/flare. |
-| L4 | Multi-ship tactics | Wingman / element / division roles, mutual support. |
-| L5 | Mission-level AI | Role-driven strike packages, SEAD coordination, JFACC tasking. |
+| **Pilot L0** | Navigate a route (Dogfight's gates first), join and hold fingertip, go home, fly the overhead break, land | the truth |
+| **Pilot L1** | Fight for position, scored by time in the other jet's rear cone. No weapons | its field of view, after a reaction delay |
+
+The old six-tier table (intercept, ACM with guns, BVR, multi-ship, mission AI) is superseded; its items are struck through with reasons in `ROADMAP.md` (BLUEPRINT A5).
 
 ## Contracts
 
-- **Consumes:** `RH.Shared.Contracts.ISensorReport` (track input — radar, IRST, datalink).
-- **Produces:** Implements `RH.Shared.Contracts.IThreat` (the AI aircraft IS a threat to enemies).
-- **Output to airframe:** ~~`IAircraftActuator` (defined in `Core/Contracts/`) — pitch/roll/yaw/throttle
-  command surface. Vendor F-18 wrapper, AerialArcade adapter, etc. all implement this.~~
-  **Superseded 2026-10-25** by Air Wing's `ISeat` and `PilotInputs` (stick, throttle, pedals, switches; Air Wing W5, W6).
+- **Output to the aircraft:** Air Wing's `ISeat` and `PilotInputs` (stick, throttle, pedals, switches; Air Wing W5, W6). The AI never writes an aircraft's state.
+- **References:** `DeepWater.AirWing` (from slice 3a) and `RH.Shared`. **Air Wing never references RH Aviator.**
+- **Later:** sensor input through `RH.Shared.Contracts.ISensorReport` (W38: after Pilot L1).
+- ~~`IAircraftActuator`~~ superseded 2026-10-25 by Air Wing's `ISeat` and `PilotInputs`.
 
 ## Why this is decoupled from the actual flight model
 
 The flight model (Air Wing's first-party ladder; formerly the AerialArcade F-18E, Flight Sim Lite) is **not** part of
-this module. RH Aviator decides *what* to fly (target intercept, formation hold);
-the actuator implements *how* (control surfaces). Lets us swap airframes without
-re-authoring the AI.
+this module. RH Aviator decides *what* to fly (a gate, a formation slot, the break, a fight);
+the hands turn that into stick and throttle, and Air Wing's flight controls move the surfaces. The stick means
+the same at every Air Wing level, so an aircraft can move up a level without re-authoring the AI.
 
 ## Legacy fragments
 
@@ -52,6 +48,4 @@ re-authoring the AI.
 - `Assets/_Archive/FighterJet Scripts_legacy/FlightControllerManager.cs` (archived 2026-10-25, Air Wing slice 0)
 - `Assets/JMAC/Agents/{SimpleHomingMissile, SimpleDamageable, WeaponSystem}.cs`
 
-The routine mines these for domain knowledge (intercept geometry, throttle curves)
-during Phase 0, then leaves them in place — they're consumers of the eventual
-`IAircraftActuator`, not part of RH Aviator core.
+Slice 3a mines these read-only for pursuit, throttle and turn heuristics (BLUEPRINT A6) and leaves them in place.

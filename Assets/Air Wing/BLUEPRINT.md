@@ -1,6 +1,6 @@
 # Air Wing — blueprint
 
-> **Status: LOCKED BLUEPRINT (W1–W51); Phases 1 and 2 closed (2026-10-26): the F/A-18E flies at L1 from every device class, takes off and lands, and meets its budget. Phase 3 (AI pilots): interview under way, W36–W51 locked; the interview is complete.** SIX answered all 24 questions on 2026-10-24 (W1–W24) and locked W25–W31 on 2026-10-25. Progress is in `ROADMAP.md`.
+> **Status: LOCKED BLUEPRINT (W1–W51); Phases 1 and 2 closed (2026-10-26): the F/A-18E flies at L1 from every device class, takes off and lands, and meets its budget. Phase 3 (AI pilots): interview complete, W36–W51 locked; the AI side is carried in `Assets/RH Aviator/BLUEPRINT.md` (W48), with A1–A6 proposed there.** SIX answered all 24 questions on 2026-10-24 (W1–W24) and locked W25–W31 on 2026-10-25. Progress is in `ROADMAP.md`.
 > **This document's one job:** say what Air Wing is and why, record every decision behind it, and define the contract each part of an aircraft follows. Work order and progress live in `ROADMAP.md`, not here. The stock-take that preceded it is summarised in §1.
 
 ## 1. In plain language

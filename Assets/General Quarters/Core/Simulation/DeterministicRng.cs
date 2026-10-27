@@ -52,9 +52,6 @@ namespace DeepWater.GeneralQuarters.Core.Simulation
         /// <summary>Uniform in [0, 1), 24 bits of resolution (exactly representable as a float).</summary>
         public float NextFloat01() => (NextULong() >> 40) * (1f / 16777216f);
 
-        /// <summary>Uniform in [0, 1), 53 bits of resolution (exactly representable as a double). One draw.</summary>
-        public double NextDouble01() => (NextULong() >> 11) * (1.0 / 9007199254740992.0);
-
         /// <summary>True with probability <paramref name="p"/>; <paramref name="root"/> names the draw.</summary>
         public bool Chance(float p, out ChanceRoot root)
         {

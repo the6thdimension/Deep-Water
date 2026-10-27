@@ -7,8 +7,7 @@
         "DeepWater.Sea",
         "DeepWater.Sea.Hdrp",
         "Unity.Mathematics",
-        "Unity.Collections",
-        "RHRadarSuite.Core"
+        "Unity.Collections"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

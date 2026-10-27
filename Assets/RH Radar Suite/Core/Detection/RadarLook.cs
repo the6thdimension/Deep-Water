@@ -68,7 +68,6 @@ namespace RHRadarSuite.Detection
         public bool AboveHorizon;
         /// <summary>False: outside the searched volume (nothing else was computed).</summary>
         public bool InCoverage;
-        /// <summary>CnrDb is the clutter left after the radar's improvement factor (<see cref="RadarTerms.ClutterImprovementDb"/>).</summary>
         public double RangeM, RcsDbsm, SnrDb, CnrDb, ScnrDb, Pd;
         public bool Detected;
         /// <summary>The noisy measurement, when <see cref="Detected"/>.</summary>
@@ -96,8 +95,7 @@ namespace RHRadarSuite.Detection
 
             result.RcsDbsm = rcsDbsm;
             result.SnrDb = RadarEquation.SnrDb(r, rcsDbsm, result.RangeM);
-            // The clutter left after the radar's own processing (its improvement factor; 0 leaves it as the model gives it).
-            result.CnrDb = sea.HasValue ? Clutter.CnrDb(r, m, sea.Value, radar.Y, result.RangeM) - r.ClutterImprovementDb : double.NegativeInfinity;
+            result.CnrDb = sea.HasValue ? Clutter.CnrDb(r, m, sea.Value, radar.Y, result.RangeM) : double.NegativeInfinity;
             result.ScnrDb = Clutter.ScnrDb(result.SnrDb, result.CnrDb);
             result.Pd = RadarEquation.PdSwerling1(result.ScnrDb, pfa);
             result.Detected = rng.NextDouble() < result.Pd;

@@ -54,11 +54,6 @@ namespace DeepWater.GeneralQuarters.Core
         public IReadOnlyList<FidelityResolution> Fidelity => _fidelity;
         /// <summary>What the conn has ordered, as standing state; the Helm element steers by it.</summary>
         public HelmCommand Helm { get; private set; } = HelmCommand.Stopped(0f);
-        /// <summary>
-        /// The sea the sensors see (the truth feed's environment, BLUEPRINT §3.1): the host sets it from Sea State before
-        /// stepping. Calm by default. Radar L1 takes its sea clutter from it (G67).
-        /// </summary>
-        public SeaEnvironment Sea { get; set; }
 
         public CombatSystem(CombatLoadout loadout)
         {
@@ -66,12 +61,8 @@ namespace DeepWater.GeneralQuarters.Core
             _clock.TickSeconds = loadout.TickSeconds;
             _rng = new DeterministicRng(loadout.Seed);
 
-            _radar = SensorFactory.CreateRadar(loadout.RadarLevel, loadout.Radar, _rng, out FidelityResolution r); Note(r);
-            Tracks = TrackFactory.Create(loadout.TracksLevel, loadout.Tracks, loadout.TickSeconds, out r); Note(r);
-            if (_radar.Level >= FidelityLevel.L1 && Tracks.Level == FidelityLevel.L0)
-                Log.Add(0, EventKind.Note, "Fidelity ladder",
-                    "Radar L1 with Tracks L0: tracks copy noisy plots and carry no velocity (G64 pairs Radar L1 with Tracks L1)",
-                    root: RootKind.Scenario);
+            _radar = SensorFactory.CreateRadar(loadout.RadarLevel, loadout.Radar, out FidelityResolution r); Note(r);
+            Tracks = TrackFactory.Create(loadout.TracksLevel, loadout.Tracks, out r); Note(r);
             Tewa = TewaFactory.Create(loadout.TewaLevel, loadout.Tewa, out r); Note(r);
             Vls = VlsFactory.Create(loadout.VlsLevel, loadout.Vls, _clock, out r); Note(r);
             _guns = new IGunMount[loadout.Guns.Length];
@@ -116,13 +107,12 @@ namespace DeepWater.GeneralQuarters.Core
             Orders.Drain(tick, _due);
             for (int i = 0; i < _due.Count; i++) Apply(_due[i]);
 
-            // 2. Sensors: a look is due on the radar's Watch; a radar that is offline or out of action looks and sees nothing.
+            // 2. Sensors
             _detections.Clear();
-            bool look = _radar.Watch.IsDue(tick);
-            if (look && _radar.Online && !DamageControl.OutOfAction) _radar.Sweep(own, Sea, world, _detections);
+            if (_radar.Online && !DamageControl.OutOfAction && _radar.Watch.IsDue(tick)) _radar.Sweep(own, world, _detections);
 
             // 3. Tracks
-            Tracks.Update(tick, look, _detections, Log);
+            Tracks.Update(tick, _detections, Log);
 
             // 4. TEWA
             if (!DamageControl.OutOfAction && tick % Tewa.EvaluatePeriodTicks == 0)

@@ -23,12 +23,6 @@ namespace RHRadarSuite.Detection
         public double LossesDb;
         /// <summary>Pulses integrated coherently per look (1: a single pulse).</summary>
         public int PulsesIntegrated;
-        /// <summary>
-        /// Clutter improvement factor, dB (positive): how far the radar's MTI or Doppler processing lowers surface clutter
-        /// relative to a moving target (Skolnik, the MTI improvement factor). 0: no processing, clutter as the constant-γ
-        /// model gives it. <see cref="RadarLook"/> takes it off the clutter-to-noise ratio.
-        /// </summary>
-        public double ClutterImprovementDb;
     }
 
     /// <summary>
@@ -94,22 +88,6 @@ namespace RHRadarSuite.Detection
 
         /// <summary>Swerling 1, one look: Pd = Pfa^(1/(1+SNR)), exact.</summary>
         public static double PdSwerling1(double snrDb, double pfa) => Math.Pow(pfa, 1.0 / (1.0 + FromDb(snrDb)));
-
-        /// <summary>The inverse of <see cref="PdSwerling1"/>: the SNR, dB, that gives <paramref name="pd"/> at <paramref name="pfa"/> in one look, exact.</summary>
-        public static double RequiredSnrSwerling1Db(double pd, double pfa)
-        {
-            if (!(pd > pfa && pd < 1.0)) throw new ArgumentOutOfRangeException(nameof(pd), pd, "Pfa < Pd < 1");
-            if (!(pfa > 0.0 && pfa < 1.0)) throw new ArgumentOutOfRangeException(nameof(pfa), pfa, "0 < Pfa < 1");
-            return ToDb(Math.Log(pfa) / Math.Log(pd) - 1.0);
-        }
-
-        /// <summary>
-        /// The peak power, watts, at which <paramref name="r"/>'s other terms give <paramref name="requiredSnrDb"/> on a target of
-        /// <paramref name="rcsDbsm"/> at <paramref name="rangeM"/>: how a radar is calibrated to one published range figure
-        /// (SNR is linear in power, so one solve, no iteration).
-        /// </summary>
-        public static double PeakPowerForSnrW(in RadarTerms r, double rcsDbsm, double rangeM, double requiredSnrDb) =>
-            r.PeakPowerW * FromDb(requiredSnrDb - SnrDb(r, rcsDbsm, rangeM));
 
         /// <summary>
         /// The radar horizon, metres: the farthest a target at <paramref name="targetHeightM"/> can be seen from an

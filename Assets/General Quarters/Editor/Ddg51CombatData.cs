@@ -170,65 +170,9 @@ namespace DeepWater.GeneralQuarters.Editor
                 "SCENARIO DEFAULTS: ROE weapons tight; ESSM semi-automatic (TEWA proposes, the TAO confirms), guns automatic, CIWS automatic (G14).\n" +
                 DamageControlL1Provenance;
             ApplyDamageControl(so);
-            ApplyRadarL1(so);
             EditorUtility.SetDirty(so);
             return so;
         }
-
-        /// <summary>
-        /// Radar L1 and Tracks L1 (Stream A, G61-G68): the levels and their data. Public so the values can be applied to the
-        /// loadout asset without rebuilding everything, and so tests build the same radar the range runs.
-        /// </summary>
-        public static void ApplyRadarL1(ShipLoadoutSO so)
-        {
-            so.radarLevel = FidelityLevel.L1;
-            so.tracksLevel = FidelityLevel.L1;
-            so.radar.L1 = RadarL1();
-            so.tracks.L1 = TracksL1();
-            if (!so.provenance.Contains("RADAR L1")) so.provenance += "\n" + RadarL1Provenance;
-            EditorUtility.SetDirty(so);
-        }
-
-        /// <summary>The generic S-band array in SPY-1's role (G62, G63, G65-G67). Every number is AUTHORED but the calibration range.</summary>
-        public static RadarL1Data RadarL1() => new RadarL1Data
-        {
-            FrequencyGHz = 3.0f, GainDbi = 40f, BandwidthMHz = 1f, NoiseFigureDb = 3f, LossesDb = 6f, PulsesIntegrated = 1,
-            AzimuthBeamwidthDeg = 1.7f, ElevationBeamwidthDeg = 1.7f, MonopulseSlope = 1.6f, RangeFloorM = 5f, AngleFloorDeg = 0.05f,
-            MinElevationDeg = -5f, MaxElevationDeg = 90f, Pfa = 1e-6f,
-            ClutterImprovementDb = 30f,
-            CalibrationRangeM = 175f * 1852f, CalibrationRcsDbsm = 0f, CalibrationPd = 0.5f,
-            UnknownRcsDbsm = 0f, AircraftRcsDbsm = 5f, AntiShipMissileRcsDbsm = -10f, SurfaceShipRcsDbsm = 30f,
-        };
-
-        /// <summary>The suite's track file as the CIC runs it (G64). AUTHORED.</summary>
-        public static TrackL1Data TracksL1() => new TrackL1Data
-        {
-            ConfirmHits = 2, ConfirmLooks = 3, DropAfterMisses = 4,
-            MeasurementSigmaM = 150f, GateSigmas = 3f, MaxSpeedMps = 1000f, MaxAccelMps2 = 100f, Alpha = 0.5f,
-        };
-
-        public const string RadarL1Provenance =
-            "RADAR L1 (G61-G68, Stream A): one generic S-band search-and-track array in SPY-1's role. Every number is AUTHORED except one public " +
-            "range figure, and nothing here claims anything about the real radar (standing constraint 8). The physics is RH Radar Suite's pure core " +
-            "(RHRadarSuite.Core): the radar equation, a Swerling 1 detection draw per look at Pfa 1e-6 from the run's seed, Barton's range and angle " +
-            "errors, the 4/3-Earth horizon and constant-γ sea clutter. 3.0 GHz, 40 dBi, 1 MHz (150 m range cells), noise figure 3 dB, losses 6 dB, " +
-            "one pulse per look, 1.7° beams, monopulse slope 1.6, error floors 5 m and 0.05°, searching -5° to 90° all round, a look every 0.5 s " +
-            "(AUTHORED). CALIBRATION (G63): the peak power is not authored but solved, so that a 0 dBsm target is seen with Pd 0.5 in one look at " +
-            "324.1 km. 175 nmi is the range Friedman gives for SPY-1 (The Naval Institute Guide to World Naval Weapon Systems, 5th ed., 2006, " +
-            "pp. 316-317, as cited by Wikipedia's AN/SPY-1 article, read 2026-10-27). FLAGGED: which target and which Pd that figure means is not " +
-            "public; pairing it with 0 dBsm at Pd 0.5 is AUTHORED. The instrumented range (185 km, above) still caps what is reported. " +
-            "RCS (G65), one figure per kind: aircraft 5 dBsm, anti-ship missile -10 dBsm, surface ship 30 dBsm, unknown 0 dBsm (AUTHORED; the " +
-            "same figures the raids give their threats). SEA CLUTTER (G67): γ = -64 + 6·K_B - 10·log λ, the mean sea-clutter model of Barton and " +
-            "Ward, Handbook of Radar Measurements (Artech House, 1985), pp. 137-148, as quoted in US patent 7,796,082 B2. λ is taken in metres " +
-            "(FLAGGED: the patent gives no unit; metres matches the plateau level of the empirical sea models). K_B is the Beaufort force of " +
-            "Sea State's wind for the degree (NATO STANAG 4194 means) by v = 0.836·B^1.5. At 3 GHz, Douglas 0-6: -54, -45, -36, -29, -23, -17, " +
-            "-5 dB; the formula grows without limit beyond that, outside any sea it was fitted to. CLUTTER IMPROVEMENT 30 dB: PROPOSED, not in " +
-            "G61-G68 (BLUEPRINT G70), AUTHORED. Constant-γ is a medium-grazing-angle model that overstates the clutter a ship's radar sees at " +
-            "sub-degree grazing, and the core has no Doppler processing; at 0 dB (G67 to the letter) a -10 dBsm sea-skimmer is not seen inside " +
-            "about 18 km from Douglas 3 up. IDENTITY (G68): from truth, as at L0.\n" +
-            "TRACKS L1 (G64): RH Radar Suite's track file. Confirmed on 2 plots in the first 3 looks; dropped after 4 looks without a plot (2 s); " +
-            "gate 3 sigma of 150 m plus the manoeuvre allowance (a one-plot track 1,000 m/s, a track with a velocity 100 m/s²); α 0.5 with " +
-            "Benedict-Bordner β (AUTHORED).";
 
         /// <summary>
         /// The range's scripted breaches (G57), the cases Damage Control L1's tests are gated on: one wing (list), one bow hold

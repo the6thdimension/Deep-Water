@@ -150,10 +150,7 @@ moving aircraft.*
   waits for SIX's go, CLAUDE.md "confirm before a rewrite beyond the file in front of you"). **SIX 2026-10-27 (RS1 = B):
   leave the LOD modules as they are for now;** General Quarters' Radar L1 is the core's first real consumer, then
   decide between rewriting and retiring them. The pure core moves to its own engine-free asmdef, `RHRadarSuite.Core`
-  (GQ G61); the rival `Assets/RH Radar` plan is struck. **Done 2026-10-27:** `Core/Detection/RHRadarSuite.Core.asmdef`
-  (`noEngineReferences`, so the compiler refuses any UnityEngine use) with `Core/Tracking` joined by an `.asmref`; the
-  suite, its tests and General Quarters reference it. **First consumer: GQ Radar L1 + Tracks L1** (G62–G68), which runs
-  `RadarLook` and `TrackFile` on every look of the range's destroyer.
+  (GQ G61); the rival `Assets/RH Radar` plan is struck.
 - [ ] **Pd/Pfa detection threshold** with noise floor — replace the 0–1 clamped
   strength cliff; keep a simple Swerling-1-like fluctuation option. *The statistics are built
   (2026-10-27): Albersheim's required SNR (13.11 dB for Pd 0.9, Pfa 1e-6, the published point), North's Pd
@@ -233,12 +230,8 @@ moving aircraft.*
   4/3-Earth grazing angle, zero past the horizon; the smaller of the pulse- and beam-limited cell; CNR through the
   radar equation; SCNR = SNR − 10·log(1 + CNR). `ClutterTests` (4, by hand): at γ −20 dB a 20 m mast sees a 0 dBsm
   target at 10 km with 62.0 dB SNR but 2.57 dB SCNR; looking down from 3 km costs more than 20 dB of CNR at 4 km.
-  ~~No γ table yet~~ **The sea's γ, 2026-10-27 (GQ G67):** `Clutter.SeaGammaDb` = −64 + 6·K_B − 10·log λ, Barton and
-  Ward's mean sea-clutter model (Handbook of Radar Measurements, 1985, pp. 137–148, as quoted in US patent 7,796,082 B2;
-  λ in metres, unit flagged as not confirmed against the handbook), and `BeaufortFromWindSpeed` (v = 0.836·B^1.5).
-  A plateau-region model: it overstates sub-degree clutter. Doppler rejection is now one number,
-  `RadarTerms.ClutterImprovementDb` (0 by default: no processing), taken off the CNR in `RadarLook` (GQ's proposed G70
-  sets 30 dB). The modules do not use any of it.*
+  No γ table yet (sea state → γ needs a public source; GQ's `SeaConditions` is the natural input), no Doppler
+  rejection; the modules do not use it.*
 - [ ] **Weather attenuation** hooks (rain rate → dB/km by band).
 - [ ] **Passive detection made honest:** emitters (`RadarEmitter` on transmitting
   radars) so LOD1 detects actual emissions with bearing-only + ambiguous range,
@@ -294,4 +287,3 @@ moving aircraft.*
 - **2026-10-27** — Range-rate accuracy (Doppler) in the pure core; 37/37. METHODOLOGY C45, C46 from this work.
 - **2026-10-27** — One look end to end in the pure core (`RadarLook`, `AspectRcs`, `Coverage`); the Phase 2 test case closed; 42/42.
 - **2026-10-27** — SIX's answers: RS1 = B (the LOD modules stay as they are for now); the pure core splits into `RHRadarSuite.Core` for GQ's Radar L1 (G61); `Assets/RH Radar` struck.
-- **2026-10-27** — `RHRadarSuite.Core` split out (engine-free asmdef plus an asmref for `Core/Tracking`). Added for its first consumer, General Quarters' Radar L1 + Tracks L1: the exact Swerling 1 inverse and the calibration solve (`RequiredSnrSwerling1Db`, `PeakPowerForSnrW`), Barton and Ward's sea γ and the Beaufort relation, the clutter improvement factor (0 by default), `RadarTrack.LastPlot` (which plot updated a track) and `TrackFile.Drop` (kill assessment). 4 tests; 46/46. The LOD modules are untouched (RS1 = B).

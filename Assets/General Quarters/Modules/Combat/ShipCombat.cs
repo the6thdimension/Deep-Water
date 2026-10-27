@@ -14,8 +14,6 @@ using DeepWater.GeneralQuarters.Core.Scenario;
 using DeepWater.GeneralQuarters.Core.World;
 using DeepWater.GeneralQuarters.Modules.Propulsion;
 using DeepWater.GeneralQuarters.ScriptableObjects;
-using DeepWater.Sea.Core;
-using DeepWater.Sea.Modules.Buoyancy;
 using Debug = UnityEngine.Debug;
 
 namespace DeepWater.GeneralQuarters.Modules.Combat
@@ -42,9 +40,6 @@ namespace DeepWater.GeneralQuarters.Modules.Combat
 
         ShipDrive _drive;
         Rigidbody _body;
-        BuoyantBody _buoyant;
-        SeaStateDirector _sea;
-        bool _noSeaNoted;
         CombatLoadout _baked;
         readonly List<TruthTarget> _world = new List<TruthTarget>();
         readonly List<ShipHit> _hits = new List<ShipHit>();
@@ -120,7 +115,6 @@ namespace DeepWater.GeneralQuarters.Modules.Combat
             _runKills.Clear();
             _resolvedRaised = false;
             _propulsionLostNoted = false;
-            _noSeaNoted = false;
             Cost.Clear();
             Run++;
 
@@ -135,7 +129,6 @@ namespace DeepWater.GeneralQuarters.Modules.Combat
         {
             _drive = GetComponent<ShipDrive>();
             _body = GetComponent<Rigidbody>();
-            _buoyant = GetComponent<BuoyantBody>();
             if (loadout == null || aiCaptainProfile == null)
             {
                 Debug.LogError($"[ShipCombat] '{name}' needs a loadout and an AI captain profile; the combat system is off.", this);
@@ -163,7 +156,6 @@ namespace DeepWater.GeneralQuarters.Modules.Combat
                 if (Raid != null) Raid.Step(Combat.Tick, Combat.TickSeconds, own, _world, _hits);
                 else _world.Clear();
 
-                Combat.Sea = ReadSea();
                 _kills.Clear();
                 long coreStarted = Stopwatch.GetTimestamp();
                 using (CoreMarker.Auto()) Combat.Step(own, _world, _hits, _kills);
@@ -221,27 +213,6 @@ namespace DeepWater.GeneralQuarters.Modules.Combat
                 RollRateDps = -w.z,
                 PitchRateDps = -w.x,
             };
-        }
-
-        /// <summary>
-        /// The sea the radar sees (G67): Sea State's conditions, through the director the hull floats on. Without one the
-        /// core keeps a calm sea, and the log says so once.
-        /// </summary>
-        SeaEnvironment ReadSea()
-        {
-            if (_sea == null && _buoyant != null && _buoyant.System != null) _sea = _buoyant.System.Sea;
-            if (_sea == null || !_sea.IsReady)
-            {
-                if (!_noSeaNoted)
-                {
-                    _noSeaNoted = true;
-                    Combat.Log.Add(Combat.Tick, EventKind.Note, "Range (Sea State → radar)",
-                        "no Sea State director under the hull: the radar sees a calm sea", root: RootKind.Scenario);
-                }
-                return default;
-            }
-            SeaConditions c = _sea.Conditions;
-            return new SeaEnvironment { DouglasSea = c.DouglasSea, WindSpeedMps = c.WindSpeedMs };
         }
 
         static float Ms(long from, long to) => (float)((to - from) * 1000.0 / Stopwatch.Frequency);

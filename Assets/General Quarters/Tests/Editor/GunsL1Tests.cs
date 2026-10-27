@@ -277,12 +277,7 @@ namespace DeepWater.GeneralQuarters.Tests
         {
             // The Standard raid with the real loadout: the Mk 45 may change target when one is killed, but it must not drop
             // a target and pick it up again moments later (the jitter SIX saw, 2026-10-24: 48 drops, 86 train reversals).
-            // At Radar and Tracks L0, the levels this was pinned at: guns L1 lays on the track as it is, so L1's track noise
-            // moves the lay look to look (measured in RadarL1Tests; smoothing it is Guns L2's fire-control item).
-            CombatLoadout loadout = AssetDatabase.LoadAssetAtPath<ShipLoadoutSO>(Ddg51CombatData.LoadoutAsset).Bake();
-            loadout.RadarLevel = FidelityLevel.L0;
-            loadout.TracksLevel = FidelityLevel.L0;
-            var cs = new CombatSystem(loadout);
+            var cs = new CombatSystem(AssetDatabase.LoadAssetAtPath<ShipLoadoutSO>(Ddg51CombatData.LoadoutAsset).Bake());
             var ai = new Core.Captain.AiCaptainL0(AssetDatabase.LoadAssetAtPath<AiCaptainProfileSO>(Ddg51CombatData.AiCaptainAsset).Bake());
             var raid = new ScriptedRaid(AssetDatabase.LoadAssetAtPath<RaidScenarioSO>(Ddg51CombatData.RaidDir + "/Raid_Standard.asset").StartingAt(0), Own);
             var truth = new List<TruthTarget>();

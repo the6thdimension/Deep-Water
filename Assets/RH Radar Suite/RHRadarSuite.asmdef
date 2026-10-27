@@ -1,9 +1,7 @@
 {
     "name": "RHRadarSuite",
     "rootNamespace": "RHRadarSuite",
-    "references": [
-        "RHRadarSuite.Core"
-    ],
+    "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

@@ -3,7 +3,6 @@
     "rootNamespace": "RHRadarSuite.Tests",
     "references": [
         "RHRadarSuite",
-        "RHRadarSuite.Core",
         "RHRadarSuite.Editor",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"

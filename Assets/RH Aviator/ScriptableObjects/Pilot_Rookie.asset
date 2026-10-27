@@ -1,0 +1,131 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7810033db72bb5b4bbcab140233efa52, type: 3}
+  m_Name: Pilot_Rookie
+  m_EditorClassIdentifier: DeepWater.Aviator::DeepWater.Aviator.ScriptableObjects.PilotProfileSO
+  displayName: rookie
+  guidanceGain: 2
+  maxBankDeg: 60
+  rollRatePerBankDeg: 2
+  climbDegPerM: 0.06
+  maxClimbDeg: 20
+  maxDiveDeg: 20
+  gPerPathDeg: 0.25
+  maxG: 4.5
+  throttlePerKt: 0.02
+  throttleTrim: 0.75
+  throttleIntegralPerKtS: 0.004
+  useAfterburner: 1
+  speedBrakeOverKt: 25
+  floorAglM: 100
+  guardLookAheadS: 6
+  guardClimbDeg: 8
+  guardMaxBankDeg: 30
+  leadInM: 3000
+  carrotM: 400
+  carrotTurnRadii: 1
+  throughM: 1000
+  minRunM: 1500
+  captureDeg: 30
+  captureFraction: 0.7
+  cruiseKt: 350
+  bandMarginKt: 60
+  holdAltitudeM: 914
+  holdKt: 350
+  slotRightM: 40
+  slotBackM: 10
+  slotUpM: 0
+  slotLookAheadM: 800
+  slotGainPerS: 0.25
+  joinDecelMps2: 1.5
+  joinOvertakeKt: 150
+  slotOvertakeKt: 30
+  joinMinKt: 250
+  inSlotM: 10
+  inSlotClosureKt: 5
+  lostSlotM: 150
+  slotSpeedLead: 2
+  slotSpeedBrakeOverKt: 8
+  slotClimbDegPerM: 0.03
+  slotGPerPathDeg: 0.5
+  slotRotationShare: 0.75
+  initialM: 5556
+  initialCaptureM: 150
+  initialKt: 350
+  breakAlongM: 600
+  breakHeightM: 244
+  breakKt: 240
+  downwindOffsetM: 1500
+  downwindHeightM: 183
+  finalTurnAlongM: 1500
+  approachKt: 145
+  gearKt: 250
+  patternBankDeg: 40
+  patternGPerPathDeg: 0.1
+  patternMaxDiveDeg: 6
+  patternFloorAglM: 30
+  glidePathDeg: 3
+  touchdownM: 300
+  flareHeightM: 9
+  flarePathDeg: 0.8
+  finalCarrotM: 300
+  rolloutPedalPerM: 0.05
+  rolloutPedalPerDeg: 0.1
+  bingoFlightTimeS: 0
+  fieldOfViewDeg: 90
+  reactionDelayS: 1.2
+  memoryS: 4
+  visualRangeM: 6000
+  cornerKt: 380
+  leadS: 0
+  lagS: 0
+  lagRangeM: 800
+  overshootClosureKt: 60
+  lagSlowKt: 40
+  threatRangeM: 1000
+  threatConeDeg: 60
+  fightFloorM: 300
+  clearRangeM: 8000
+  slowKt: 0
+  turnMatch: 0
+  provenance: "All AUTHORED (RH Aviator W45; no public source describes a generic
+    line pilot), tuned headless against slice 3a's pass criteria (ROADMAP, fixed
+    before tuning). Hands: guidanceGain (2, the classic value of the L1 path-following
+    law, Park, Deyst and How, AIAA 2004-4900, PUBLIC method), maxBankDeg, rollRatePerBankDeg,
+    climbDegPerM, maxClimbDeg, maxDiveDeg, gPerPathDeg, maxG (below the F/A-18E's
+    7.5 G limit: a line pilot does not fly at the limit), throttlePerKt, throttleTrim,
+    throttleIntegralPerKtS, speedBrakeOverKt. Ground guard: floorAglM (100 m, about
+    330 ft), guardLookAheadS, guardClimbDeg, guardMaxBankDeg. Route: leadInM, carrotM,
+    carrotTurnRadii, throughM, minRunM, captureDeg, captureFraction, cruiseKt, bandMarginKt.
+    After the course: holdAltitudeM (3,000 ft), holdKt. Fingertip (W40): slotRightM
+    (40 m, about three of the F/A-18E's 13.6 m wingspans, centre to centre), slotBackM,
+    slotUpM, slotLookAheadM, slotGainPerS, joinDecelMps2 (below what an F/A-18E at
+    idle loses near 400 kt, about 2.3 m/s\xB2 in slice 3b's trace, so the plan is
+    flyable), joinOvertakeKt, slotOvertakeKt, joinMinKt, inSlotM, inSlotClosureKt,
+    lostSlotM, slotSpeedLead, slotSpeedBrakeOverKt, slotClimbDegPerM, slotGPerPathDeg,
+    slotRotationShare (the last three picked by FormationTests.Sweep, a grid on the
+    fixed hold scenario: 0.5 G per degree sits 1.6 times inside where the hold rings,
+    at 0.6 it degrades and at 0.8 it diverges). Going home (W41, W47; the shape as
+    the U.S. Navy publicly describes its overhead break, the numbers fitted): initialM,
+    initialCaptureM, initialKt, breakAlongM, breakHeightM (800 ft), breakKt, downwindOffsetM,
+    downwindHeightM (600 ft), finalTurnAlongM, approachKt (145 kt, as Air Wing's
+    landing test), gearKt, patternBankDeg, patternGPerPathDeg, patternMaxDiveDeg,
+    patternFloorAglM, glidePathDeg, touchdownM, flareHeightM, flarePathDeg, finalCarrotM,
+    rolloutPedalPerM, rolloutPedalPerDeg, bingoFlightTimeS (a STAND-IN for bingo
+    fuel until fuel burn exists; 0 = never). The fight (Pilot L1, W38, W45; a game's
+    skill numbers, AUTHORED, not any real pilot's or air force's): fieldOfViewDeg,
+    reactionDelayS, memoryS, visualRangeM, cornerKt, leadS, lagS, lagRangeM, overshootClosureKt,
+    lagSlowKt, threatRangeM, threatConeDeg, fightFloorM, clearRangeM, slowKt (energy
+    sense; 0 = none), turnMatch. Rookie, from the line pilot (AUTHORED): maxG 4.5,
+    maxBankDeg 60, fieldOfViewDeg 90, reactionDelayS 1.2, memoryS 4, visualRangeM
+    6000, cornerKt 380 (fights too fast), leadS 0 and lagS 0 (pure pursuit only),
+    threatRangeM 1000, slowKt 0 (no energy sense), turnMatch 0."

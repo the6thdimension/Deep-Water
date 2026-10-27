@@ -52,6 +52,14 @@ namespace DeepWater.Aviator.Modules
                     report.AppendLine($"RESULT {n} aircraft: hold seats {hold * 1000.0 / n:F2} µs, AI pilots {ai * 1000.0 / n:F2} µs per aircraft per tick; " +
                                       $"the AI's own cost {(ai - hold) * 1000.0 / n:F2} µs per pilot per tick (budget 10, A4)");
                 }
+                // The fight at eight (W43 re-decided, slice 3d): four blue, four red, every pilot fighting on its eyes.
+                {
+                    const int n = 8;
+                    double hold = Median(() => Fight(e, sheet, p, n, ai: false));
+                    double ai = Median(() => Fight(e, sheet, p, n, ai: true));
+                    report.AppendLine($"RESULT fight, {n} aircraft: hold seats {hold * 1000.0 / n:F2} µs, AI pilots {ai * 1000.0 / n:F2} µs per aircraft per tick; " +
+                                      $"the AI's own cost {(ai - hold) * 1000.0 / n:F2} µs per pilot per tick (budget 10, A4)");
+                }
                 report.AppendLine("FINISHED");
             }
             catch (Exception ex)
@@ -87,6 +95,31 @@ namespace DeepWater.Aviator.Modules
             for (int t = 0; t < warmupTicks; t++) core.Step();
             var clock = Stopwatch.StartNew();
             for (int t = 0; t < ticks; t++) core.Step();
+            clock.Stop();
+            return clock.Elapsed.TotalMilliseconds / ticks;
+        }
+
+        /// <summary>Milliseconds per tick for a 4 v 4 merge: blue at the south heading north, red 20 km north heading south.</summary>
+        double Fight(in AircraftProfile e, in FidelitySheet sheet, in PilotProfile p, int n, bool ai)
+        {
+            var core = new FlightCore(new SubstepClock(0.02, sheet.SubstepsPerTick), new FlatSurface(8f));
+            var fight = new Engagement { Hunted = () => 1 };
+            var seats = new AviatorSeat[n];
+            for (int i = 0; i < n; i++)
+            {
+                bool blue = i < n / 2;
+                var at = blue ? new Vector3(60f * i, 3048f, -60f * i) : new Vector3(200f * (i - n / 2), 3500f, 20000f);
+                var start = AircraftFactory.LevelStart(e, sheet, at, blue ? 0f : 180f, 400f * (float)Units.KnotToMetrePerSecond, 0.6f * e.Airframe.InternalFuelKg, 0.7f);
+                ISeat seat = new HoldSeat(new PilotInputs { Throttle = 0.7f });
+                if (ai) seat = seats[i] = new AviatorSeat(core, e, p, new RuleLog());
+                core.Add(AircraftFactory.Build(i + 1, e, sheet, start), seat);
+                fight.Join(i + 1, blue ? Side.Blue : Side.Red);
+            }
+            if (ai) for (int i = 0; i < n; i++) seats[i].FightIn(i + 1, fight);
+            // Into the fight first: the timing starts once they have met.
+            for (int t = 0; t < 2000 + warmupTicks; t++) { core.Step(); fight.Score(core); }
+            var clock = Stopwatch.StartNew();
+            for (int t = 0; t < ticks; t++) { core.Step(); fight.Score(core); }
             clock.Stop();
             return clock.Elapsed.TotalMilliseconds / ticks;
         }

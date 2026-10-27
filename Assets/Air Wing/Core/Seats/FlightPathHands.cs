@@ -32,6 +32,11 @@ namespace DeepWater.AirWing.Core.Seats
         /// runway (RH Aviator W41). False for everything else.
         /// </summary>
         public bool Landing;
+        /// <summary>
+        /// Limits for this request below the pilot's own, G and degrees of bank; zero for none (RH Aviator slice 3d: a
+        /// pilot short of speed eases its turn to get it back).
+        /// </summary>
+        public float GLimit, BankLimitDeg;
     }
 
     /// <summary>The hands' gains and limits, part of a pilot's profile (RH Aviator W45). All AUTHORED.</summary>
@@ -129,7 +134,8 @@ namespace DeepWater.AirWing.Core.Seats
             float wantTrack = Mathf.Atan2(toAim.x, toAim.z) * Mathf.Rad2Deg;
             float headingError = Mathf.DeltaAngle(track, wantTrack);
             float bankWanted;
-            if (Mathf.Abs(headingError) >= 90f) bankWanted = Mathf.Sign(headingError) * _h.MaxBankDeg;
+            float maxBank = request.BankLimitDeg > 0f ? Mathf.Min(_h.MaxBankDeg, request.BankLimitDeg) : _h.MaxBankDeg;
+            if (Mathf.Abs(headingError) >= 90f) bankWanted = Mathf.Sign(headingError) * maxBank;
             else
             {
                 // L is capped at the turn radius at the bank limit, so a far aim (a heading) still turns firmly
@@ -138,7 +144,7 @@ namespace DeepWater.AirWing.Core.Seats
                 float turnRadius = v * v / (Units.StandardGravity * Mathf.Tan(_h.MaxBankDeg * Mathf.Deg2Rad));
                 float l = Mathf.Clamp(new Vector2(toAim.x, toAim.z).magnitude, 1f, Mathf.Max(turnRadius, 1f));
                 float lateralAccel = _h.GuidanceGain * v * v * Mathf.Sin(headingError * Mathf.Deg2Rad) / l;
-                bankWanted = Mathf.Clamp(request.BankDeg + Mathf.Atan2(lateralAccel, Units.StandardGravity) * Mathf.Rad2Deg, -_h.MaxBankDeg, _h.MaxBankDeg);
+                bankWanted = Mathf.Clamp(request.BankDeg + Mathf.Atan2(lateralAccel, Units.StandardGravity) * Mathf.Rad2Deg, -maxBank, maxBank);
             }
 
             // Altitude → flight-path angle, plus a moving path's own angle (formation).
@@ -160,7 +166,8 @@ namespace DeepWater.AirWing.Core.Seats
             float g = Mathf.Abs(bank) < 90f
                 ? (Mathf.Cos(path * Mathf.Deg2Rad) + pathRateG) / cosBank + _h.GPerPathDeg * (pathWanted - path)
                 : 1f;
-            g = Mathf.Clamp(g, Mathf.Max(_c.LoadFactorMin, -1f), Mathf.Min(_h.MaxG, _c.LoadFactorMax));
+            float maxG = request.GLimit > 0f ? Mathf.Min(_h.MaxG, request.GLimit) : _h.MaxG;
+            g = Mathf.Clamp(g, Mathf.Max(_c.LoadFactorMin, -1f), Mathf.Min(maxG, _c.LoadFactorMax));
 
             // Bank → roll rate.
             float rollRateDeg = request.BankRateDegS + _h.RollRatePerBankDeg * Mathf.DeltaAngle(bank, bankWanted);

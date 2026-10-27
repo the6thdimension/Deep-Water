@@ -12,7 +12,7 @@
 
 **Branch:** `feat/aircraft`, kept level with `main` (CLAUDE.md, Branches), commits through `commit-to-branch`.
 
-**Where things stand (2026-10-27):** slices 3a–3c are done. The AI flies Dogfight's four gates, holds fingertip on a leader, swaps seats with the player, and goes home on the player's order (H, the Xbox D-pad up) or at the bingo stand-in to fly the overhead break and land on runway 09/27; and it fights (Pilot L1: rookie, line, ace; up to eight aircraft; red hunts the player). SIX said "finish out phase 3" (2026-10-27): slice 3e is next. A9 waits on SIX (BLUEPRINT Q3).
+**Where things stand (2026-10-27): PHASE 3 COMPLETE.** The AI flies a route, holds fingertip in a four-ship, swaps seats with the player, goes home and lands after the overhead break, and fights (rookie, line, ace) at up to eight aircraft, red hunting the player. 134/134 tests. Open for SIX: A9 (BLUEPRINT Q3) and whether to build slice 3f (the fight in the vertical).
 
 ## DONE — finished and committed
 
@@ -20,6 +20,7 @@
 |---|---|---|---|---|
 | Blueprint and roadmap | Phase 3's 16 decisions carried for the AI side; slices 3a–3e with their pass criteria | 2026-10-26 | eaf7280f | — |
 | Slice 3a — the AI seat, the hands and the gates | An AI pilot that flies Dogfight's four gates through the player's own stick: the mode machine with its logged rules, the shared flight-path layer, the line pilot's profile, an "Add AI Jet" menu, the AI budget met | 2026-10-26 | `92eaaaff` | 6 here, 4 in Air Wing (113 in all) |
+| Slice 3e — Phase 3 review | Every mode smoked in Dogfight; the AI budget at eight; the dogfight survey; the controls fix (W54); the aircraft skill; Phase 3 closed | 2026-10-27 | see the change log | 134 in all |
 | Slice 3d — Pilot L1, the fight | Perception (field of view, reaction delay, memory), pursuit (lead, pure, lag), the break turn, energy sense, turn matching; rookie, line and ace; the engagement, red hunting the player and blue's wingmen fighting and rejoining; rear-cone scoring; the AI budget met at eight | 2026-10-27 | `8e4ee725` | 5 here (130 in all) |
 | Slice 3c — going home and the break | The AI flies home on the player's order or at the bingo stand-in, the overhead break, the pattern and a landing on 09/27; the "go home" order (A3) | 2026-10-27 | `ec2c5193` | 3 here (125 in all) |
 | Slice 3b — formation and seats | An AI wingman that joins and holds fingertip on its leader; the seat cycle key and the HUD pick list; the player takes any jet mid-flight and the AI takes it back; an "Add AI Wingman" menu | 2026-10-27 | `a2ae171d` | 4 here, 4 in Air Wing (122 in all) |
@@ -27,9 +28,8 @@
 ## STILL TO DO
 
 ### Next
-- **Slice 3e — Phase 3 review.**
+- **SIX:** A9 (BLUEPRINT Q3); and slice 3f, below, or not.
 - *Proposed, not started:* **slice 3f — fight in the vertical** (energy states, nose-high and nose-low turns, the ace spending its G), so equal fights resolve. For SIX to decide after 3e.
-- **SIX:** A9 (BLUEPRINT Q3).
 
 ### Left open in finished slices
 - **Slice 3a:** the first approach to gates 2 and 3 goes around once (each 90° turn onto a gate's line does not fit the first try); the course takes about 5.5 minutes. Not flown against a player by hand.
@@ -147,8 +147,14 @@
   - *Added 2026-10-27 before building, for W43 at eight, W52 and W53:* a 4 v 4 (a player jet, three blue wingmen, four red), 5 minutes headless: no AI crashes; every red pilot pursues the player's jet (W52); every blue wingman engages a red jet and is back in fingertip once none is within its clear range (W53); both sides' rear-cone seconds logged. The AI's own cost at eight aircraft ≤ 10 µs per pilot per tick in a player build (A4).
 - [ ] Smoke: a 1v1 in Dogfight against each profile. *Moved to the dogfight testing that follows Phase 3 (SIX, 2026-10-27).*
 
-### Slice 3e — Phase 3 review
-- [ ] Each mode in Dogfight; the AI budget re-measured with four aircraft; METHODOLOGY; Air Wing's Phase 3 closed.
+### Slice 3e — Phase 3 review (done 2026-10-27: PHASE 3 COMPLETE)
+- [x] **Each mode in Dogfight** (play mode, PhysX contacts, the scene put back from disk after each): the gates (3a: four clean, 239 s); fingertip and the seat cycle (3b: in the slot in about 36 s, held to 0.0–0.3 m to 674 kt; seats swapped both ways); going home and the break (3c: touchdown 8.4 ft/s, 0.0 m off, stopped 1,225 m down 27); the 4 v 4 (3d, the final run: the player's jet handed to its AI at 5 s; blue spread across three red targets; red hunted the player; blue 150.2 s, red 13.8 s in the cone; no crash; closest pass after the start 146 m).
+- [x] **The AI budget**, re-measured at eight (W43 re-decided): 2.96 and 3.21 µs per pilot per tick in a 4 v 4, player build (budget 10).
+- [x] **The dogfight survey** (SIX: test dogfighting extensively with many aircraft): merges of every pairing, 1 v 2, 2 v 2, the 4 v 4 two ways; its findings changed the fight (range control, collision avoidance, flight slots, target spreading, the join's energy rules) and left one problem open: equal pilots stalemate (C44; slice 3f proposed).
+- [x] **The controls fix** (W54, Air Wing): the level hold for keyboard and pad, the mouse's level detent.
+- [x] **The aircraft skill** (SIX: a skill for working with, modifying, building, configuring and testing the aircraft): `.claude/skills/aircraft-workflow`.
+- [x] METHODOLOGY: AP32, AP33, C42, C43, C44 from Phase 3.
+- [x] Air Wing's Phase 3 closed (its ROADMAP).
 
 ---
 
@@ -207,3 +213,4 @@ Kept for the record. Air Wing now owns the airframe side (W5), and W17, W49 and 
 - **2026-10-27** — Slice 3c done (SIX: "finish out phase 3"): going home on the order (A3) or the bingo stand-in, the overhead break and the landing on 09/27, 125/125 tests; 20 of 20 scattered starts land at 10.2 ft/s on the centreline. Found: a path gain in G per degree is a loop gain that grows as the speed falls (C43).
 - **2026-10-27** — Slice 3d done: Pilot L1, the fight; rookie, line and ace; the engagement (red hunts the player, W52; blue fights and rejoins, W53); rear-cone scoring with A9 proposed; 130/130 tests; the ace ahead in 20 of 20 merges; the AI at eight 3 µs per pilot per tick. The fights are gentle (left open).
 - **2026-10-27** — The dogfight survey (SIX: test dogfighting with many aircraft): range control, collision avoidance, flight slots, the fight scene and score panel, the 4 v 4 menu; yo-yos tried and removed; 134/134 tests. Equal fights stalemate (left open; slice 3f proposed).
+- **2026-10-27** — Slice 3e: Phase 3 complete. Every mode smoked in Dogfight, the final 4 v 4 (no crash; blue 150.2 s, red 13.8 s), the budget at eight, the survey, W54, the aircraft skill. Open: A9 (Q3); slice 3f (the vertical) proposed.

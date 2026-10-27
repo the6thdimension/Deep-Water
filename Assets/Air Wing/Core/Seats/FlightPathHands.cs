@@ -16,6 +16,17 @@ namespace DeepWater.AirWing.Core.Seats
         public float SpeedMps;
         /// <summary>The gear and flaps switches the pilot wants (the hands pass them through).</summary>
         public PilotSwitches Switches;
+        /// <summary>
+        /// Feed-forward for following a moving path (RH Aviator slice 3b, formation): the flight-path angle to add to the
+        /// altitude loop's, degrees, and the rate it is changing, degrees per second. Zero for a fixed altitude.
+        /// </summary>
+        public float PathDeg, PathRateDegS;
+        /// <summary>
+        /// Feed-forward bank, degrees, and roll rate, degrees per second (formation: the leader's): the hands bank this
+        /// much plus what the aim asks, and roll at this rate plus their own correction, so a wingman rolls with its
+        /// leader instead of waiting for the slot to move. Zero to steer on the aim alone.
+        /// </summary>
+        public float BankDeg, BankRateDegS;
     }
 
     /// <summary>The hands' gains and limits, part of a pilot's profile (RH Aviator W45). All AUTHORED.</summary>
@@ -57,8 +68,8 @@ namespace DeepWater.AirWing.Core.Seats
     /// line and never settled); the altitude error sets a flight-path angle, capped;
     /// the flight-path error and the bank set the G (cos γ / cos φ to hold the path, plus a correction), capped by
     /// the pilot's own limit; the stick then asks the flight controls for that G and for the roll rate that brings
-    /// the bank round. The throttle is proportional plus integral on the speed error, the integral held between ±0.5
-    /// and frozen while the throttle sits at a stop (no wind-up). Deterministic: its only memory is that integral, and
+    /// the bank round. The throttle is proportional plus integral on the speed error, the integral held between ±1 (so
+    /// it can reach any throttle from the trim) and frozen while the throttle sits at a stop (no wind-up). Deterministic: its only memory is that integral, and
     /// it reads nothing but the state it is handed; one instance per seat.
     /// </summary>
     public sealed class FlightPathHands
@@ -67,6 +78,7 @@ namespace DeepWater.AirWing.Core.Seats
         readonly ControlsProfile _c;
         readonly float _dt;
         float _throttleIntegral;
+        float _seedThrottle = float.NaN;
 
         /// <summary>
         /// <paramref name="controls"/> is the aircraft's stick map (its G limits and roll rate), so the hands ask the
@@ -78,6 +90,12 @@ namespace DeepWater.AirWing.Core.Seats
             _c = controls;
             _dt = (float)tickSeconds;
         }
+
+        /// <summary>
+        /// Taking over mid-flight (Air Wing W42): the next <see cref="Fly"/> sets its integral so the throttle starts at
+        /// <paramref name="throttle"/>, the one the aircraft had, instead of jumping to its trim.
+        /// </summary>
+        public void Resume(float throttle) => _seedThrottle = Mathf.Clamp01(throttle);
 
         /// <summary>Bank angle, degrees, right wing down positive.</summary>
         public static float BankDeg(in AirframeState s)
@@ -115,11 +133,11 @@ namespace DeepWater.AirWing.Core.Seats
                 float turnRadius = v * v / (Units.StandardGravity * Mathf.Tan(_h.MaxBankDeg * Mathf.Deg2Rad));
                 float l = Mathf.Clamp(new Vector2(toAim.x, toAim.z).magnitude, 1f, Mathf.Max(turnRadius, 1f));
                 float lateralAccel = _h.GuidanceGain * v * v * Mathf.Sin(headingError * Mathf.Deg2Rad) / l;
-                bankWanted = Mathf.Clamp(Mathf.Atan2(lateralAccel, Units.StandardGravity) * Mathf.Rad2Deg, -_h.MaxBankDeg, _h.MaxBankDeg);
+                bankWanted = Mathf.Clamp(request.BankDeg + Mathf.Atan2(lateralAccel, Units.StandardGravity) * Mathf.Rad2Deg, -_h.MaxBankDeg, _h.MaxBankDeg);
             }
 
-            // Altitude → flight-path angle.
-            float pathWanted = Mathf.Clamp(_h.ClimbDegPerM * (request.AltitudeM - s.Position.y), -_h.MaxDiveDeg, _h.MaxClimbDeg);
+            // Altitude → flight-path angle, plus a moving path's own angle (formation).
+            float pathWanted = Mathf.Clamp(request.PathDeg + _h.ClimbDegPerM * (request.AltitudeM - s.Position.y), -_h.MaxDiveDeg, _h.MaxClimbDeg);
 
             // The ground guard overrides both (AP25).
             float agl = s.Position.y - surfaceHeightM;
@@ -132,20 +150,29 @@ namespace DeepWater.AirWing.Core.Seats
 
             // Path and bank → G. Upside down (|bank| > 90°) the 1/cos term is meaningless: roll first, pull gently.
             float cosBank = Mathf.Cos(Mathf.Clamp(bank, -85f, 85f) * Mathf.Deg2Rad);
+            // A path that is curving up or down needs V·γ̇ / g more (γ̇ = (n cos φ − cos γ) g / V, solved for n).
+            float pathRateG = request.PathRateDegS * Mathf.Deg2Rad * s.Velocity.magnitude / Units.StandardGravity;
             float g = Mathf.Abs(bank) < 90f
-                ? Mathf.Cos(path * Mathf.Deg2Rad) / cosBank + _h.GPerPathDeg * (pathWanted - path)
+                ? (Mathf.Cos(path * Mathf.Deg2Rad) + pathRateG) / cosBank + _h.GPerPathDeg * (pathWanted - path)
                 : 1f;
             g = Mathf.Clamp(g, Mathf.Max(_c.LoadFactorMin, -1f), Mathf.Min(_h.MaxG, _c.LoadFactorMax));
 
             // Bank → roll rate.
-            float rollRateDeg = _h.RollRatePerBankDeg * Mathf.DeltaAngle(bank, bankWanted);
+            float rollRateDeg = request.BankRateDegS + _h.RollRatePerBankDeg * Mathf.DeltaAngle(bank, bankWanted);
             float maxRollDeg = _c.RollRateMaxRadS * Mathf.Rad2Deg;
 
             // Speed → throttle, afterburner and speed brake.
             float speedErrorKt = (request.SpeedMps - s.Velocity.magnitude) / (float)Units.KnotToMetrePerSecond;
+            if (!float.IsNaN(_seedThrottle))
+            {
+                _throttleIntegral = Mathf.Clamp(_seedThrottle - _h.ThrottleTrim - _h.ThrottlePerKt * speedErrorKt, -1f, 1f);
+                _seedThrottle = float.NaN;
+            }
             float throttle = _h.ThrottleTrim + _h.ThrottlePerKt * speedErrorKt + _throttleIntegral;
             bool atStop = (throttle >= 1f && speedErrorKt > 0f) || (throttle <= 0f && speedErrorKt < 0f);
-            if (!atStop) _throttleIntegral = Mathf.Clamp(_throttleIntegral + _h.ThrottleIntegralPerKtS * speedErrorKt * _dt, -0.5f, 0.5f);
+            // ±1, not ±0.5 (slice 3b): at ±0.5 round a 0.75 trim the hands could not reach the 0.22 that 350 kt needs at
+            // 5,000 ft, and a wingman sat 1.8 kt slow of its command and 5–7 m out of its slot.
+            if (!atStop) _throttleIntegral = Mathf.Clamp(_throttleIntegral + _h.ThrottleIntegralPerKtS * speedErrorKt * _dt, -1f, 1f);
             var inputs = new PilotInputs
             {
                 StickPitch = StickForG(g),

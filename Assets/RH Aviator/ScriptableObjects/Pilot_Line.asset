@@ -41,13 +41,38 @@ MonoBehaviour:
   bandMarginKt: 60
   holdAltitudeM: 914
   holdKt: 350
-  provenance: 'All AUTHORED (RH Aviator W45; no public source describes a generic
-    line pilot), tuned headless against slice 3a''s pass criteria (ROADMAP, fixed
+  slotRightM: 40
+  slotBackM: 10
+  slotUpM: 0
+  slotLookAheadM: 800
+  slotGainPerS: 0.25
+  joinDecelMps2: 1.5
+  joinOvertakeKt: 150
+  slotOvertakeKt: 30
+  joinMinKt: 250
+  inSlotM: 10
+  inSlotClosureKt: 5
+  lostSlotM: 150
+  slotSpeedLead: 2
+  slotSpeedBrakeOverKt: 8
+  slotClimbDegPerM: 0.03
+  slotGPerPathDeg: 0.5
+  slotRotationShare: 0.75
+  provenance: "All AUTHORED (RH Aviator W45; no public source describes a generic
+    line pilot), tuned headless against slice 3a's pass criteria (ROADMAP, fixed
     before tuning). Hands: guidanceGain (2, the classic value of the L1 path-following
     law, Park, Deyst and How, AIAA 2004-4900, PUBLIC method), maxBankDeg, rollRatePerBankDeg,
-    climbDegPerM, maxClimbDeg, maxDiveDeg, gPerPathDeg, maxG (below the F/A-18E''s
+    climbDegPerM, maxClimbDeg, maxDiveDeg, gPerPathDeg, maxG (below the F/A-18E's
     7.5 G limit: a line pilot does not fly at the limit), throttlePerKt, throttleTrim,
     throttleIntegralPerKtS, speedBrakeOverKt. Ground guard: floorAglM (100 m, about
     330 ft), guardLookAheadS, guardClimbDeg, guardMaxBankDeg. Route: leadInM, carrotM,
     carrotTurnRadii, throughM, minRunM, captureDeg, captureFraction, cruiseKt, bandMarginKt.
-    After the course: holdAltitudeM (3,000 ft), holdKt.'
+    After the course: holdAltitudeM (3,000 ft), holdKt. Fingertip (W40): slotRightM
+    (40 m, about three of the F/A-18E's 13.6 m wingspans, centre to centre), slotBackM,
+    slotUpM, slotLookAheadM, slotGainPerS, joinDecelMps2 (below what an F/A-18E at
+    idle loses near 400 kt, about 2.3 m/s\xB2 in slice 3b's trace, so the plan is
+    flyable), joinOvertakeKt, slotOvertakeKt, joinMinKt, inSlotM, inSlotClosureKt,
+    lostSlotM, slotSpeedLead, slotSpeedBrakeOverKt, slotClimbDegPerM, slotGPerPathDeg,
+    slotRotationShare (the last three picked by FormationTests.Sweep, a grid on the
+    fixed hold scenario: 0.5 G per degree sits 1.6 times inside where the hold rings,
+    at 0.6 it degrades and at 0.8 it diverges)."

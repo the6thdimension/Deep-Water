@@ -32,9 +32,14 @@ namespace DeepWater.AirWing.Modules.Aircraft
         [SerializeField] float fallbackSurfaceHeightM = 0f;
 
         FlightCore _core;
+        SeatRoster _roster;
         readonly List<AircraftView> _views = new List<AircraftView>();
 
         public FlightCore Flight => _core;
+        /// <summary>Who flies what (W42): RH Aviator gives each jet its own seat here; the cycle key moves the player.</summary>
+        public SeatRoster Roster => _roster;
+        /// <summary>The aircraft the player flies (0: none). The camera and the HUD follow it.</summary>
+        public int PlayerAircraftId => _roster != null ? _roster.PlayerAircraftId : 0;
         public IReadOnlyList<AircraftView> Views => _views;
         public PlayerSeat PlayerSeat => playerSeat != null ? playerSeat.Seat : null;
 
@@ -60,6 +65,7 @@ namespace DeepWater.AirWing.Modules.Aircraft
             _core = new FlightCore(new SubstepClock(Time.fixedDeltaTime, sheet.SubstepsPerTick), surface, new PhysXContactProbe());
 
             _views.AddRange(FindObjectsByType<AircraftView>(FindObjectsInactive.Exclude).OrderBy(v => v.AircraftId));
+            int playerAircraft = 0;
             foreach (AircraftView view in _views)
             {
                 Transform t = view.transform;
@@ -71,17 +77,25 @@ namespace DeepWater.AirWing.Modules.Aircraft
                 if (onRunway && view.Seat == AircraftView.StartSeat.Player && PlayerSeat != null)
                     PlayerSeat.SetStart(PilotSwitches.GearDown, 0f);   // gear down until the pilot raises it, engines at idle
                 Core.Aircraft aircraft = AircraftFactory.Build(view.AircraftId, p, sheet, start);
-                _core.Add(aircraft, SeatFor(view));
+                ISeat seat = SeatFor(view);
+                _core.Add(aircraft, seat);
+                if (seat is PlayerSeat)
+                {
+                    if (playerAircraft != 0) Debug.LogWarning($"[Air Wing] aircraft {view.AircraftId} also asks for the player seat; the player starts in {playerAircraft} and it holds.", view);
+                    else playerAircraft = view.AircraftId;
+                }
                 view.Bind(aircraft);
                 Debug.Log($"[Air Wing] aircraft {view.AircraftId} ({p.Name}, {view.Seat} seat): {string.Join("; ", aircraft.Levels)}", view);
             }
+            _roster = new SeatRoster(_core, PlayerSeat, playerAircraft);
+            _roster.Moved += (left, taken) => Debug.Log($"[Air Wing] tick {_core.Tick}: the player left aircraft {left} ({_roster.Describe(left)}) and flies {taken}.", this);
         }
 
         ISeat SeatFor(AircraftView view)
         {
             if (view.Seat == AircraftView.StartSeat.Player)
             {
-                if (PlayerSeat != null) return PlayerSeat;
+                if (PlayerSeat != null && !_core.Aircraft.Any(a => _core.SeatOf(a.Id) == PlayerSeat)) return PlayerSeat;
                 Debug.LogWarning($"[Air Wing] aircraft {view.AircraftId} wants the player seat, but none is assigned: it holds its start throttle.", view);
             }
             // A held jet on the runway waits there: idle, brakes on, gear down.
@@ -93,6 +107,8 @@ namespace DeepWater.AirWing.Modules.Aircraft
         void FixedUpdate()
         {
             if (_core == null) return;
+            // The seat cycle moves the player between ticks (W42): the next tick is the first one flown from the new seat.
+            for (int n = playerSeat != null ? playerSeat.TakeCyclePresses() : 0; n > 0; n--) _roster.Cycle();
             for (int i = 0; i < _views.Count; i++) _views[i].BeforeTick();
             _core.Step();
             for (int i = 0; i < _views.Count; i++) _views[i].AfterTick();

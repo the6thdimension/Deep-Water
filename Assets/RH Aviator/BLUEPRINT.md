@@ -1,6 +1,6 @@
 # RH Aviator — blueprint
 
-> **Status: LOCKED BLUEPRINT (W36–W51 and A1–A6, SIX 2026-10-26); slice 3a in progress.** The decisions were made in Air Wing's Phase 3 interview and live in Air Wing's register (`Assets/Air Wing/BLUEPRINT.md` §5, W36–W51). This document carries them for the AI side. Progress is in `ROADMAP.md`.
+> **Status: LOCKED BLUEPRINT (W36–W51 and A1–A6, SIX 2026-10-26); slices 3a and 3b built; A7–A8 proposed (Q2).** The decisions were made in Air Wing's Phase 3 interview and live in Air Wing's register (`Assets/Air Wing/BLUEPRINT.md` §5, W36–W51). This document carries them for the AI side. Progress is in `ROADMAP.md`.
 > **This document's one job:** say what RH Aviator is and why, how its AI pilot is built, and which decisions bind it. Work order and progress live in `ROADMAP.md`, not here.
 
 ## 1. In plain language
@@ -50,7 +50,7 @@ Air Wing (DeepWater.AirWing) ← RH Aviator (DeepWater.Aviator) ← its tests
 ### 3.2 One tick
 
 1. The flight core asks each seat for its inputs, in aircraft-id order (Air Wing).
-2. An AI seat, on a watch tick, runs the brain on the picture: rules fire, the mode may change, and the mode writes a new flight-path request.
+2. An AI seat, on a watch tick, runs the brain on the picture: rules fire, the mode may change, and the mode writes a new flight-path request. In formation the request is worked out again on every tick from the picture (A7).
 3. On every tick, the hands turn the current request into Pilot Inputs.
 4. The flight core logs those inputs and steps the aircraft. A replay replays the inputs; it does not re-run the AI.
 
@@ -114,6 +114,13 @@ Air Wing (DeepWater.AirWing) ← RH Aviator (DeepWater.Aviator) ← its tests
 | A5 | **The old L0–L5 plan is superseded,** its unchecked items struck through with reasons in `ROADMAP.md`: intercept, BVR, countermeasures, strike and tasking fall outside W17 and the safe limits | W49 replaces the ladder; the roadmap rule keeps the record | Locked |
 | A6 | **The legacy flight code is mined first** for pursuit and throttle heuristics, read-only, into `_notes/legacy-mining.md` | The old Phase 0 item; cheap, and it may save tuning | Locked |
 
+### 5.3 Proposed by Claude in slice 3b (Q2)
+
+| # | Decision | Why | Status |
+|---|---|---|---|
+| A7 | **Formation is flown off the slot on every tick**; the 4 Hz watch still decides the mode (Join, Fingertip) and logs it | At 180 m/s the slot moves 45 m between watches and is held to ±5 m. W44 already gives the stick every tick; keeping the slot is the hands' work. The request also carries the leader's bank, roll rate and flight-path rates as feed-forward (AP32), and formation flies its own hands with tighter height and path gains (`PilotProfile.FormationHands`) | Proposed; built |
+| A8 | **The seat roster lives in Air Wing** (`Core/Seats/SeatRoster`): one player seat, and each aircraft's *own* seat, which RH Aviator hands over as a plain `ISeat`. Without one the aircraft holds what it was last given (`HoldSeat`). An optional `ISeatStatus` lets a seat say what it is doing for the pick list | W42 puts the cycle key and the pick list in Air Wing; W5 keeps Air Wing ignorant of AI; W18 says the AI flies every empty seat | Proposed; built |
+
 ## 6. Standing constraints
 
 1. **An aircraft changes only through Pilot Inputs from its seat** (Air Wing W6). The AI never writes an aircraft's state.
@@ -145,7 +152,7 @@ Air Wing (DeepWater.AirWing) ← RH Aviator (DeepWater.Aviator) ← its tests
 | **The overhead break is hard to tune** (W41) | Built from segments on the shared hands; each segment has its own headless test; the straight-in final is its last segment and already proven |
 | **The mouse instructor's pursuit can fly into the ground** (Air Wing AP25) | The hands add altitude and sink-rate guards for the AI only; the player's instructor stays as SIX chose (Air Wing Q5) |
 | **An AI that cheats feels wrong** | Pilot L1 sees only its field of view, late (W38); its profile caps the G it pulls (W45) |
-| **Formation flying amplifies small errors** | Hold is judged by a set error box in the headless test (W50); the leader's state comes from the one-tick-old picture (A1), so the error is consistent |
+| **Formation flying amplifies small errors** | Hold is judged by a set error box in the headless test (W50); the leader's state comes from the one-tick-old picture (A1), so the error is consistent. *Slice 3b:* the box is met with 0.8 m to spare on height, and the formation hands' path gain sits 1.6× inside where the hold rings (C42). A heavier or slower jet, or another fidelity level, needs the sweep run again |
 | **One Editor shared with other sessions** | Smokes run only when no other session is driving the Editor (Air Wing's habit) |
 
 ## 9. Open questions for SIX
@@ -153,7 +160,9 @@ Air Wing (DeepWater.AirWing) ← RH Aviator (DeepWater.Aviator) ← its tests
 | # | Question | Cost |
 |---|---|---|
 | ~~Q1~~ | ~~Confirm A1–A6 as written, or change any?~~ **Answered 2026-10-26 by SIX: confirmed as written.** | — |
+| Q2 | Confirm A7 (formation flown every tick, with feed-forward) and A8 (the seat roster in Air Wing), or change either? Both are built and tested in slice 3b | One reply |
 
 ## Change log
 - **2026-10-26** — Written from Air Wing's Phase 3 interview (W36–W51, SIX). A1–A6 proposed. Nothing built.
 - **2026-10-26** — SIX confirmed A1–A6 and said go on slice 3a. A2 refined while building: the hands use a bounded law, not the instructor's `Steer` (AP25).
+- **2026-10-27** — Slice 3b built at SIX's go. A7 (formation flown every tick) and A8 (the seat roster in Air Wing) proposed as Q2. A2 extended: the hands' request may carry feed-forward (bank, roll rate, flight-path angle and rate), zero for a route.

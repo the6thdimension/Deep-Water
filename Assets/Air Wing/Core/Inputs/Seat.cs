@@ -32,4 +32,13 @@ namespace DeepWater.AirWing.Core.Inputs
         /// </summary>
         PilotInputs Issue(long tick, int aircraftId, in AirframeState state);
     }
+
+    /// <summary>
+    /// A seat that can say in a few words what it is doing, for the HUD's pick list (W42): "FINGERTIP ON 1". Optional;
+    /// a seat without it shows its kind alone. Read on a frame, not a tick, so keep it cheap (a cached string).
+    /// </summary>
+    public interface ISeatStatus
+    {
+        string Status { get; }
+    }
 }

@@ -96,6 +96,12 @@ Runs C# by compiling a **transient assembly** against the loaded project assembl
    - `wait_build.sh` and every grep of the log then see nothing new. Check `Application.consoleLogPath` and the file's size, and prefer results files a command writes itself.
 16. **`Unity_RunCommand` copies nested classes to namespace scope** (2026-10-25). The tool's rewriter emitted a nested `ICallbacks` class a second time outside `CommandScript`, and that copy could not see the outer class's constant (CS0103). In a nested class, use literals or its own members only.
 
+17. **A stale results file reads as a fresh run** (2026-10-27, one tuning round read off old numbers).
+   - Symptom: a test run after a change reports exactly the numbers of the run before it.
+   - Cause: the `rm` of the results file was chained after a `wait_build.sh` that timed out and went to the background. The `rm` ran late. The shell's wait found the old file and printed it; then the `rm` deleted the new one.
+   - Fix: clear the results file in its own command, before the RunCommand that starts the run, never chained after a wait.
+   - Also: the `Library/ScriptAssemblies` DLL keeps its old time when a rebuild is byte-identical, and Unity's auto-refresh often compiles an edit before you ask. To tell whether an edit is in, check the Bee artifact (`Library/Bee/artifacts/*/<Assembly>.dll`) or wait for a new field or method name (trap 9), not the copy's timestamp.
+
 ## Play mode & timing
 
 - **Controls:** `Unity_ManageEditor` Actions `Play`, `Stop` and `GetState` (`IsPlaying`, `IsPaused`, `IsCompiling`, `IsUpdating`).

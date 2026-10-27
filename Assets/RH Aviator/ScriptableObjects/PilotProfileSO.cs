@@ -54,6 +54,32 @@ namespace DeepWater.Aviator.ScriptableObjects
         public float holdAltitudeM;
         public float holdKt;
 
+        [Header("Fingertip formation (W40)")]
+        [Tooltip("The slot off the leader in its level frame, metres: right (negative: left wing), back, up.")]
+        public float slotRightM;
+        public float slotBackM;
+        public float slotUpM;
+        public float slotLookAheadM;
+        [Tooltip("Overtake per metre of along-track gap, (m/s)/m.")]
+        public float slotGainPerS;
+        [Tooltip("The deceleration the pilot counts on to take its overtake off, m/s².")]
+        public float joinDecelMps2;
+        public float joinOvertakeKt;
+        public float slotOvertakeKt;
+        public float joinMinKt;
+        public float inSlotM;
+        public float inSlotClosureKt;
+        public float lostSlotM;
+        [Tooltip("Speed lead: the target speed plus this many times its gap to the speed flown.")]
+        public float slotSpeedLead;
+        public float slotSpeedBrakeOverKt;
+        [Tooltip("The formation hands: flight-path angle per metre off the slot's height, degrees.")]
+        public float slotClimbDegPerM;
+        [Tooltip("The formation hands: G per degree of flight-path error.")]
+        public float slotGPerPathDeg;
+        [Tooltip("How much of the leader's turn and climb is read from its rotation rather than its G, 0 … 1.")]
+        [Range(0f, 1f)] public float slotRotationShare;
+
         [Header("Provenance")]
         [TextArea(4, 20)] public string provenance = "";
 
@@ -72,6 +98,10 @@ namespace DeepWater.Aviator.ScriptableObjects
                 },
                 LeadInM = leadInM, CarrotM = carrotM, CarrotTurnRadii = carrotTurnRadii, ThroughM = throughM, MinRunM = minRunM, CaptureDeg = captureDeg, CaptureFraction = captureFraction,
                 CruiseKt = cruiseKt, BandMarginKt = bandMarginKt, HoldAltitudeM = holdAltitudeM, HoldKt = holdKt,
+                SlotRightM = slotRightM, SlotBackM = slotBackM, SlotUpM = slotUpM, SlotLookAheadM = slotLookAheadM,
+                SlotGainPerS = slotGainPerS, JoinDecelMps2 = joinDecelMps2, JoinOvertakeKt = joinOvertakeKt, SlotOvertakeKt = slotOvertakeKt,
+                JoinMinKt = joinMinKt, InSlotM = inSlotM, InSlotClosureKt = inSlotClosureKt, LostSlotM = lostSlotM,
+                SlotSpeedLead = slotSpeedLead, SlotSpeedBrakeOverKt = slotSpeedBrakeOverKt, SlotClimbDegPerM = slotClimbDegPerM, SlotGPerPathDeg = slotGPerPathDeg, SlotRotationShare = slotRotationShare,
             };
             p.Validate();
             return p;

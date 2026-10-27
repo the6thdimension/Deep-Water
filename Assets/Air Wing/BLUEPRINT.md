@@ -1,6 +1,6 @@
 # Air Wing — blueprint
 
-> **Status: LOCKED BLUEPRINT (W1–W47); Phases 1 and 2 closed (2026-10-26): the F/A-18E flies at L1 from every device class, takes off and lands, and meets its budget. Phase 3 (AI pilots): interview under way, W36–W47 locked.** SIX answered all 24 questions on 2026-10-24 (W1–W24) and locked W25–W31 on 2026-10-25. Progress is in `ROADMAP.md`.
+> **Status: LOCKED BLUEPRINT (W1–W51); Phases 1 and 2 closed (2026-10-26): the F/A-18E flies at L1 from every device class, takes off and lands, and meets its budget. Phase 3 (AI pilots): interview under way, W36–W51 locked; the interview is complete.** SIX answered all 24 questions on 2026-10-24 (W1–W24) and locked W25–W31 on 2026-10-25. Progress is in `ROADMAP.md`.
 > **This document's one job:** say what Air Wing is and why, record every decision behind it, and define the contract each part of an aircraft follows. Work order and progress live in `ROADMAP.md`, not here. The stock-take that preceded it is summarised in §1.
 
 ## 1. In plain language
@@ -182,6 +182,10 @@ All entries W1–W24 are SIX's picks of 2026-10-24, in round order. "Leaning" is
 | W45 | The opponent's skill | **Pilot profiles in a ScriptableObject** (rookie, line, ace): reaction delay, field of view, the G it will pull, how well it manages energy. One brain, different numbers | Same | Locked (SIX, 2026-10-26) |
 | W46 | Scoring the fight | **Time in the rear cone:** seconds each jet spends within about 30° of the other's tail and inside about 1 km (W17). On the HUD and logged per fight. No weapons; no gun solution | Same | Locked (SIX, 2026-10-26) |
 | W47 | What sends the AI home | **A command or a fuel line:** the player orders it home (a key, or the pick list, W42), or it goes on its own at its profile's bingo fuel. Fuel burn comes at L3, so until then a flight-time limit stands in, labelled as a stand-in wherever it shows | Same | Locked (SIX, 2026-10-26) |
+| W48 | Where the AI work is tracked | **RH Aviator's own blueprint and roadmap.** Air Wing's Phase 3 is a pointer plus the Air Wing-side items (seat cycling, the HUD pick list), as W5 splits the modules | Same | Locked (SIX, 2026-10-26) |
+| W49 | The AI's levels | **Pilot L0 and Pilot L1**, the jet's ladder words: L0 waypoints, formation, the break and the landing; L1 the fight. RH Aviator's old L0–L5 table is rewritten to match | Same | Locked (SIX, 2026-10-26) |
+| W50 | How the AI is tested | **Headless flights, then a scene smoke:** EditMode tests fly the AI seat in the flight core with no scene, each against limits fixed before tuning (it flies the gates, holds formation within a set error, lands from the break); then one play-mode smoke in Dogfight per slice | Same | Locked (SIX, 2026-10-26) |
+| W51 | The first Phase 3 slice | **The AI seat, the hands and the gates:** RH Aviator's AI seat, the shared flight-path layer (W37), the mode machine with its logged rules (W36), and the AI flying Dogfight's four gates at L1. Formation, the break and seat cycling come later | Same | Locked (SIX, 2026-10-26) |
 
 ## 6. Standing constraints
 

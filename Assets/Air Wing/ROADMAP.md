@@ -421,11 +421,13 @@ SIX's picks: contacts as W4 says, with spring-damper struts; a brake button (Spa
   - one aircraft costs ≤ 0.05 ms per fixed step in a player: **met**, 18 µs airborne, 13 µs on the wheels.
 - *Anti-goals for Phase 2, held:* no Mach effects or ground effect (L2); no fuel burn or moving centre of gravity (L3); no AI pilot; no carrier; no weapons; no cockpit view; no helicopter; no vendor code edited; no change to the project's fixed timestep.
 
-## Phase 3 — AI pilots (outline; RH Aviator, W5, W17, W18; interview begun 2026-10-26, W36–W47 locked)
-- [ ] RH Aviator Phase 0 (its own roadmap): an AI seat against Air Wing's `ISeat` and `PilotInputs`; named, logged rules (C19).
-- [ ] AI L0: waypoints, wingman formation, return to base with an approach and landing on the Dogfight runway.
-- [ ] Switchable seats with a real AI seat in place of `HoldSeat`.
-- [ ] AI L1: fighting for position against another jet, scored by time behind it. No weapons.
+## Phase 3 — AI pilots (outline; RH Aviator, W5, W17, W18; interview begun 2026-10-26, W36–W51 locked; tracked in RH Aviator's roadmap, W48)
+The AI work is tracked in `Assets/RH Aviator/` (its blueprint and roadmap, W48), against W36–W51 here. Proposed slices, Pilot L0 then Pilot L1 (W49), each tested headless and then smoked in Dogfight (W50):
+- [ ] **3a** (W51): RH Aviator's AI seat, the shared flight-path layer (W37), the mode machine with logged rules (W36) on a 4 Hz watch (W44); the AI flies Dogfight's four gates at L1.
+- [ ] **3b**: join and hold fingertip on the player's wing (W40). Air Wing side: the seat cycle key and the HUD pick list (W42).
+- [ ] **3c**: going home on command or at the bingo stand-in (W47); the overhead break and the landing on runway 09/27 (W41).
+- [ ] **3d**, Pilot L1: the fight, with a field of view and a reaction delay (W38), pilot profiles (W45), rear-cone scoring (W46); up to four aircraft (W43). No weapons.
+- [ ] **3e**: Phase 3 review.
 
 ## Parked: carrier ops (W16)
 Revisit when Phase 3 is done. The questions for SIX are in BLUEPRINT §7.
@@ -446,6 +448,6 @@ Revisit when Phase 3 is done. The questions for SIX are in BLUEPRINT §7.
 - **2026-10-26** — Slice 2c done: Powerplant L1 (spool), the scenes fly L1, the budget met in a player (17 µs per aircraft per step after caching the lift peak, ×2.2); 87/87 tests.
 - **2026-10-26** — Roadmap split into DONE and STILL TO DO at SIX's request (e322f5a7).
 - **2026-10-26** — Slice 2d done (8343959b): Landing Gear L1 on spring-damper struts over PhysX contacts, brakes, nosewheel steering, a runway start, take-off and landing; 99/99 tests. Found and fixed: the sink rate measured along a tilted strut, the flaps missing from the law's lift inversion, the runway start's throttle. Open for SIX: a hands-off touchdown breaks the nose gear.
-- **2026-10-26** — SIX: Phase 1 closed (its live device check met by 2e); the G-limit overshoot accepted, and G-LOC parked as an idea. Phase 3 interview, round 1: W36–W39 locked, all as Claude leaned. Round 2: W40–W43 locked; W41 (the overhead break) is SIX's pick over Claude's straight-in leaning. Round 3: W44–W47 locked, all as Claude leaned.
+- **2026-10-26** — SIX: Phase 1 closed (its live device check met by 2e); the G-limit overshoot accepted, and G-LOC parked as an idea. Phase 3 interview, round 1: W36–W39 locked, all as Claude leaned. Round 2: W40–W43 locked; W41 (the overhead break) is SIX's pick over Claude's straight-in leaning. Round 3: W44–W47 locked, all as Claude leaned. Round 4: W48–W51 locked, all as Claude leaned; the interview is complete. Proposed slices 3a–3e.
 - **2026-10-26** — Slice 2e done (a108970b): **Phase 2 complete.** Every device class flown live at L1 in Dogfight; a landing on runway 09/27 in the scene; the budget met with the gear (18 µs airborne, 13 µs on the wheels on PhysX, per aircraft per step in a player); nothing first-party superseded. Found: an unfocused Editor reads no keyboard or mouse (AP30); a keyboard step pull overshoots the G limit to 8.43 G.
 - **2026-10-26** — (d9cedd4c) Slice 2d follow-up at SIX's word: the struts stiffen over their last 30 % (a hands-off touchdown survives) and the model's gear retracts and extends with the core (`GearRig`, hinges solved off the geometry); 103/103 tests.

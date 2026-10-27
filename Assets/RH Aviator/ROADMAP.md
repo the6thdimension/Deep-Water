@@ -20,7 +20,7 @@
 |---|---|---|---|---|
 | Blueprint and roadmap | Phase 3's 16 decisions carried for the AI side; slices 3a–3e with their pass criteria | 2026-10-26 | eaf7280f | — |
 | Slice 3a — the AI seat, the hands and the gates | An AI pilot that flies Dogfight's four gates through the player's own stick: the mode machine with its logged rules, the shared flight-path layer, the line pilot's profile, an "Add AI Jet" menu, the AI budget met | 2026-10-26 | `92eaaaff` | 6 here, 4 in Air Wing (113 in all) |
-| Slice 3b — formation and seats | An AI wingman that joins and holds fingertip on its leader; the seat cycle key and the HUD pick list; the player takes any jet mid-flight and the AI takes it back; an "Add AI Wingman" menu | 2026-10-27 | see the change log | 4 here, 4 in Air Wing (122 in all) |
+| Slice 3b — formation and seats | An AI wingman that joins and holds fingertip on its leader; the seat cycle key and the HUD pick list; the player takes any jet mid-flight and the AI takes it back; an "Add AI Wingman" menu | 2026-10-27 | `a2ae171d` | 4 here, 4 in Air Wing (122 in all) |
 
 ## STILL TO DO
 
@@ -73,7 +73,7 @@
 - [x] Air Wing tests (`FlightPathHandsTests`, 4): the hands hold 400.0 kt, height and track for 30 s; a turn behind stays inside the bank and G caps and comes round; the ground guard keeps it 110 m up when asked for the sea; aircraft 2 sees aircraft 1 where the last tick left it.
 - [x] **Smoke in Dogfight** (play mode, the AI jet added unsaved, the sea and land of the scene, PhysX contacts): it flew all four gates clean, 3, 2, 36 and 12 m off centre, with one go-around at gate 2, and went into HoldCourse at 239 s. The scene was then reloaded from disk.
 
-### Slice 3b — formation and seats (W40, W42) (done 2026-10-27: all pass criteria met; 122/122 tests in both modules)
+### Slice 3b — formation and seats (W40, W42) (done 2026-10-27: all pass criteria met; 122/122 tests in both modules, `a2ae171d`)
 - [x] Modes **Join** and **Fingertip** (W40) on the order `JoinOn(leader)`; also the orders `FlyRoute` and `HoldCourse`, each logged as a rule. Rules: **in the slot** (inside 10 m on every axis, closing under 5 kt), **lost the slot** (over 150 m), **leader lost** (it crashed). The slot: 40 m right (about three of the F/A-18E's 13.6 m wingspans), 10 m back, level with the leader, in the leader's level frame (`Core/Formation`, `Slot`).
 - [x] The plan is worked out **every tick** from the picture (A7, proposed): the slot's speed plus an overtake (linear near the slot, never more than √(2 a d) at 1.5 m/s², at most 150 kt), with a speed lead and the speed brake past 8 kt over; the aim a look-ahead along the slot's track; the leader's **bank, roll rate, flight-path angle and rate as feed-forward** (AP32), the rates three-quarters from how it is rotating and a quarter from its G. Formation flies its own hands, the route hands with tighter height and path gains (`PilotProfile.FormationHands`).
 - [x] Back from the player (W42): the seat sees the gap in ticks, judges nothing across it, starts the throttle where the player left it (`FlightPathHands.Resume`) and decides at once.

@@ -15,7 +15,10 @@ namespace DeepWater.GeneralQuarters.Core.World
         public Vector3 Position;
         public Vector3 Velocity;
         public bool Alive;
-        /// <summary>Radar cross-section, dBsm. Unused by radar L0; the radar equation (L1) reads it.</summary>
+        /// <summary>
+        /// The scenario's radar cross-section for this target, dBsm. Not read by the radar: Radar L1 takes one dBsm per
+        /// <see cref="TargetKind"/> from its own profile (G65). Kept for per-target signatures (the suite's aspect lobes, later).
+        /// </summary>
         public float RcsDbsm;
         /// <summary>Length and body diameter, m, for the presented area guns L1 aim at; 0 means the kind's default (<see cref="TargetSize"/>).</summary>
         public float LengthM, DiameterM;
@@ -82,6 +85,18 @@ namespace DeepWater.GeneralQuarters.Core.World
             Vector3 local = ToShipFrame(world);
             return Mathf.Atan2(local.x, local.z) * Mathf.Rad2Deg;
         }
+    }
+
+    /// <summary>
+    /// The sea as the combat core's sensors see it: the environment part of the truth feed (BLUEPRINT §3.1). On the range
+    /// it comes from Sea State's <c>SeaConditions</c>; the default is a calm, glassy sea (Douglas 0, no wind).
+    /// </summary>
+    public struct SeaEnvironment
+    {
+        /// <summary>Douglas wind-sea degree, 0–9.</summary>
+        public int DouglasSea;
+        /// <summary>Sustained wind, m/s: Sea State's NATO STANAG 4194 mean for the degree. Radar L1's sea clutter reads it (G67).</summary>
+        public float WindSpeedMps;
     }
 
     /// <summary>A threat that reached the ship: what the damage model applies (BLUEPRINT §4, Damage Control).</summary>

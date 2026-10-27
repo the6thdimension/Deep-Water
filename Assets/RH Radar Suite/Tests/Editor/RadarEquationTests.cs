@@ -50,6 +50,19 @@ namespace RHRadarSuite.Tests
         }
 
         [Test]
+        public void Swerling1Inverse_AndTheCalibrationSolve()
+        {
+            // Pd 0.5 at Pfa 1e-6: 1 + SNR = ln 1e-6 / ln 0.5 = 19.9316, so SNR = 18.9316 = 12.7719 dB (by hand).
+            Assert.AreEqual(12.7719, RadarEquation.RequiredSnrSwerling1Db(0.5, 1e-6), 1e-4);
+            Assert.AreEqual(0.9, RadarEquation.PdSwerling1(RadarEquation.RequiredSnrSwerling1Db(0.9, 1e-6), 1e-6), 1e-12, "the inverse");
+            // Solve the power that puts 12.77 dB on a 0 dBsm target at 324.1 km: the equation then passes through that point.
+            RadarTerms r = Generic();
+            r.PeakPowerW = RadarEquation.PeakPowerForSnrW(r, 0.0, 324_100.0, 12.7719);
+            Assert.AreEqual(12.7719, RadarEquation.SnrDb(r, 0.0, 324_100.0), 1e-9);
+            Assert.Throws<System.ArgumentOutOfRangeException>(() => RadarEquation.RequiredSnrSwerling1Db(1e-7, 1e-6), "Pd below Pfa needs no signal");
+        }
+
+        [Test]
         public void Pd_SteadyAndSwerling1_AtTheReferenceSnr()
         {
             Assert.AreEqual(0.887, RadarEquation.PdSteady(13.1, 1e-6), 0.005, "North's approximation agrees with Albersheim to within 0.02");

@@ -14,14 +14,46 @@ MonoBehaviour:
   m_EditorClassIdentifier: DeepWater.GeneralQuarters::DeepWater.GeneralQuarters.ScriptableObjects.ShipLoadoutSO
   seed: 1442
   tickSeconds: 0.02
-  radarLevel: 0
+  radarLevel: 1
   radar:
     InstrumentedRangeM: 185000
     AntennaHeightM: 20
     SweepPeriodTicks: 25
-  tracksLevel: 0
+    L1:
+      FrequencyGHz: 3
+      GainDbi: 40
+      BandwidthMHz: 1
+      NoiseFigureDb: 3
+      LossesDb: 6
+      PulsesIntegrated: 1
+      AzimuthBeamwidthDeg: 1.7
+      ElevationBeamwidthDeg: 1.7
+      MonopulseSlope: 1.6
+      RangeFloorM: 5
+      AngleFloorDeg: 0.05
+      MinElevationDeg: -5
+      MaxElevationDeg: 90
+      Pfa: 0.000001
+      ClutterImprovementDb: 30
+      CalibrationRangeM: 324100
+      CalibrationRcsDbsm: 0
+      CalibrationPd: 0.5
+      UnknownRcsDbsm: 0
+      AircraftRcsDbsm: 5
+      AntiShipMissileRcsDbsm: -10
+      SurfaceShipRcsDbsm: 30
+  tracksLevel: 1
   tracks:
     DropAfterTicks: 150
+    L1:
+      ConfirmHits: 2
+      ConfirmLooks: 3
+      DropAfterMisses: 4
+      MeasurementSigmaM: 150
+      GateSigmas: 3
+      MaxSpeedMps: 1000
+      MaxAccelMps2: 100
+      Alpha: 0.5
   tewaLevel: 0
   tewa:
     EvaluatePeriodTicks: 5
@@ -361,4 +393,4 @@ MonoBehaviour:
     is cube-root blast scaling (AUTHORED as the law). FLAGGED: one figure. CAPSIZED
     past 45\xB0 held for 5 s (AUTHORED). SINKING when the water aboard leaves the
     hull's whole volume less buoyancy than her weight (G60). Hull hit points still
-    damage systems and no longer decide loss."
+    damage systems and no longer decide loss.\nRADAR L1 (G61-G68, Stream A): one generic S-band search-and-track array in SPY-1's role. Every number is AUTHORED except one public range figure, and nothing here claims anything about the real radar (standing constraint 8). The physics is RH Radar Suite's pure core (RHRadarSuite.Core): the radar equation, a Swerling 1 detection draw per look at Pfa 1e-6 from the run's seed, Barton's range and angle errors, the 4/3-Earth horizon and constant-\u03B3 sea clutter. 3.0 GHz, 40 dBi, 1 MHz (150 m range cells), noise figure 3 dB, losses 6 dB, one pulse per look, 1.7\xB0 beams, monopulse slope 1.6, error floors 5 m and 0.05\xB0, searching -5\xB0 to 90\xB0 all round, a look every 0.5 s (AUTHORED). CALIBRATION (G63): the peak power is not authored but solved, so that a 0 dBsm target is seen with Pd 0.5 in one look at 324.1 km. 175 nmi is the range Friedman gives for SPY-1 (The Naval Institute Guide to World Naval Weapon Systems, 5th ed., 2006, pp. 316-317, as cited by Wikipedia's AN/SPY-1 article, read 2026-10-27). FLAGGED: which target and which Pd that figure means is not public; pairing it with 0 dBsm at Pd 0.5 is AUTHORED. The instrumented range (185 km, above) still caps what is reported. RCS (G65), one figure per kind: aircraft 5 dBsm, anti-ship missile -10 dBsm, surface ship 30 dBsm, unknown 0 dBsm (AUTHORED; the same figures the raids give their threats). SEA CLUTTER (G67): \u03B3 = -64 + 6\xB7K_B - 10\xB7log \u03BB, the mean sea-clutter model of Barton and Ward, Handbook of Radar Measurements (Artech House, 1985), pp. 137-148, as quoted in US patent 7,796,082 B2. \u03BB is taken in metres (FLAGGED: the patent gives no unit; metres matches the plateau level of the empirical sea models). K_B is the Beaufort force of Sea State's wind for the degree (NATO STANAG 4194 means) by v = 0.836\xB7B^1.5. At 3 GHz, Douglas 0-6: -54, -45, -36, -29, -23, -17, -5 dB; the formula grows without limit beyond that, outside any sea it was fitted to. CLUTTER IMPROVEMENT 30 dB: PROPOSED, not in G61-G68 (BLUEPRINT G70), AUTHORED. Constant-\u03B3 is a medium-grazing-angle model that overstates the clutter a ship's radar sees at sub-degree grazing, and the core has no Doppler processing; at 0 dB (G67 to the letter) a -10 dBsm sea-skimmer is not seen inside about 18 km from Douglas 3 up. IDENTITY (G68): from truth, as at L0.\nTRACKS L1 (G64): RH Radar Suite's track file. Confirmed on 2 plots in the first 3 looks; dropped after 4 looks without a plot (2 s); gate 3 sigma of 150 m plus the manoeuvre allowance (a one-plot track 1,000 m/s, a track with a velocity 100 m/s\xB2); \u03B1 0.5 with Benedict-Bordner \u03B2 (AUTHORED)."

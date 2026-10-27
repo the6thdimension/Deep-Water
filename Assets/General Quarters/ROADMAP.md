@@ -180,14 +180,42 @@ SIX's picks: G30 effects reused where they fit and built in code where they don'
 ## Element streams (after Phase 1; one level at a time, each with tests)
 
 ### Stream A — Sensors and CIC
-- [ ] **Radar L1 + Tracks L1** (decided 2026-10-27 by SIX, G61–G68; nothing built). The slice, in order:
-  1. Split RH Radar Suite's pure core into `RHRadarSuite.Core` (engine-free asmdef; the suite's 42 tests still pass) (G61).
-  2. Research a public γ-by-sea-state table; fall back to one AUTHORED γ, flagged (G67).
-  3. One generic S-band radar in SPY-1's role, calibrated to one public detection range, flagged (G62, G63); one
-     dBsm per `TargetKind` (G65); a seeded Swerling 1 draw per look (G66); identity from truth (G68).
-  4. Tracks L1 on the suite's track file, replacing Tracks L0 (G64).
+- [x] **Radar L1 + Tracks L1** (decided 2026-10-27 by SIX, G61–G68; done 2026-10-27, 5bdb3493 and 831e2ff6; 113 GQ tests, all passing in the background mirror but the hull-prefab check that failed there before too; 46/46 RH Radar Suite; 49/49 Sea State). The slice, in order:
+  1. [x] Split RH Radar Suite's pure core into `RHRadarSuite.Core` (G61): `Core/Detection/RHRadarSuite.Core.asmdef`
+     (`noEngineReferences`) with `Core/Tracking` joined by an `.asmref`, so no file moved. The suite's 42 tests still pass; 4 more
+     for what GQ needed (the Swerling 1 inverse and the calibration solve, the sea's γ, the clutter improvement, `LastPlot` and `Drop`).
+  2. [x] γ by sea state (G67): no public table turned up, but a public model did. γ = −64 + 6·K_B − 10·log λ, the mean sea
+     model of Barton and Ward, *Handbook of Radar Measurements* (Artech House, 1985), pp. 137–148, as quoted in US patent
+     7,796,082 B2. K_B is the Beaufort force of Sea State's wind for the degree (STANAG 4194 means) by v = 0.836·B^1.5.
+     At 3 GHz, Douglas 0–6: −54, −45, −36, −29, −23, −17, −5 dB. FLAGGED: λ is taken in metres; the patent gives no unit.
+  3. [x] Radar L1 (`Core/Cic/Radar.cs`, `RadarL1`; G62, G63, G65, G66, G68): a generic S-band array, every number AUTHORED but one.
+     The peak power is solved so a 0 dBsm target is seen with Pd 0.5 at 175 nmi, the range Friedman gives for SPY-1 (*Naval
+     Institute Guide to World Naval Weapon Systems*, 5th ed., 2006, pp. 316–317, via Wikipedia's AN/SPY-1 article); the pairing
+     with 0 dBsm and Pd 0.5 is AUTHORED, flagged. RCS per kind: aircraft 5, anti-ship missile −10, surface ship 30 dBsm. A
+     Swerling 1 draw per look at Pfa 1e-6 from the run's generator (`SeededRandom`), then Barton's errors on each plot.
+  4. [x] Tracks L1 (`Core/Cic/Tracks.cs`, `TrackManagerL1`; G64): the suite's track file. 2 of 3 confirms, 4 missed looks drop,
+     a 3σ gate on 150 m, α 0.5 (Benedict–Bordner). Fire control and guidance read the filter. The host feeds Sea State's
+     conditions to the core (`CombatSystem.Sea`). The range loadout runs both at L1.
+  - **Results** (headless, background mirror, Editor timings; `RadarL1Tests`, 13):
+    - the calibration passes through 324.1 km exactly; 4,000 seeded looks at the Pd 0.5 range see 0.496 (±0.024 at 3σ);
+    - plots at 20 km scatter 16.9 m across and 5.1 m along the line of sight (predicted 17.5 and 5.0);
+    - a closing sea-skimmer: confirmed on its second look at 24.8 km, held all the way in, 12.9 m rms after settling;
+    - 8 sea-skimmers at Douglas 4: 8 killed, as at L0; the same seed gives the same Fix on every tick;
+    - saturation (24) on the range loadout, AI as TAO: 24 killed, 0 leaked at Douglas 4 and in a calm sea; 0.064 ms per
+      fixed step against the 1 ms budget;
+    - one closing sea-skimmer with the AI as TAO: the ESSM leaves at 3.5 s, one look later than at L0 (3.0 s).
+  - **Found, and proposed (G70, Q7; not decided):** constant-γ overstates clutter at a 20 m mast's sub-degree grazing,
+    and the core has no Doppler. With γ alone a −10 dBsm sea-skimmer's Pd per look at 10 km is 0.003 at Douglas 3 and
+    0.000 at Douglas 4, and the saturation raid at Douglas 4 kills 4 and leaks 20. With an AUTHORED 30 dB clutter
+    improvement it is 0.990 and 0.958, and the raid is 24–0. The range loadout carries 30 dB; 0 dB is G67 to the letter.
+  - **Found:** guns L1 lays on the track as it is, so L1 track noise moves the Mk 45's lay look to look: 118 train
+    reversals in the Standard raid, median swing 0.67°, 78 of them under 1° (`RadarL1Tests`). Smoothing it is Guns L2. Tests written on perfect tracks stay pinned at Radar and Tracks L0: the golden
+    Fix, the Mk 45 target-holding test, and the AI captain's C3 tie-break and T1 timing (both hold the world still and give
+    the missile a velocity, which only a perfect track copies).
+  - **Not at L1:** beam and energy scheduling (every target gets a look every sweep), false alarms, aspect RCS, Doppler and
+    range rate, multipath and ducting, the sea clutter's fall-off below the critical grazing angle, a Kalman filter, IFF.
 - [ ] ~~Illuminators L1: three SPG-62 channels gate terminal homing.~~ Moved to Stream B slice B2c (G44, 2026-10-24).
-- [ ] Tracks L1: measurement noise, α-β/Kalman filter, track quality.
+- [x] Tracks L1: measurement noise, α-β/Kalman filter, track quality. Done with Radar L1 above (2026-10-27): α-β and track quality; the Kalman filter is Tracks L2.
 - [ ] TEWA L1: Pk-weighted pairing, shoot-look-shoot.
 - [ ] Radar L2: beam and energy scheduling.
 
@@ -353,6 +381,7 @@ SIX's picks (2026-10-24): G53–G60. Damage Control L1 first.
 - **2026-10-25** — Stream C slice C1 done (84fb04b): Damage Control L1, compartments and flooding (G53–G60). 36 spaces cut from the buoyancy columns, orifice flooding with pressed-up spaces, the water on the Rigidbody, holes from Breach Orders and hits, loss counted from reserve buoyancy, the damage-control board and timeline. The wing's list matches the closed form to 0.02° in EditMode and in PhysX. Seven stations sink her deterministically. 149/149.
 
 - **2026-10-27** — Slice B2 rewritten to game level and made generic (G69; SIX: "Just simplify the plans and generalize them to make them safer"). The old B2 is collapsed to its struck title; the area SAM is an archetype; VLS L1, guidance channels and illuminators are game mechanics with AUTHORED numbers; each part has a gameplay-facing definition of done; the flyout validation against published performance is killed (K1). The cruise-missile line names archetypes. Checked against BLUEPRINT standing constraint 8. Real-system detail removed; the old wording is in git at 2121da9e. No code, asset or test changed. Engineering-grade original preserved outside the repo (from 2121da9e).
+- **2026-10-27** — Stream A, Radar L1 + Tracks L1 (G61–G68): `RHRadarSuite.Core` split out; a generic S-band radar calibrated to one public range; Barton and Ward's sea γ from Sea State's degree; the suite's track file in the CIC; the range loadout at L1. Found: γ alone hides sea-skimmers from Douglas 3 up, so a 30 dB clutter improvement is proposed (G70). 5bdb3493, 831e2ff6.
 
 ## Killed
 

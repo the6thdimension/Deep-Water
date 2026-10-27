@@ -109,6 +109,17 @@ namespace DeepWater.GeneralQuarters.Tests
             };
         }
 
+        /// <summary>The same ship at Radar L1 and Tracks L1, with the range loadout's radar and track-file data (Stream A, G61–G68).</summary>
+        public static CombatLoadout Ddg51L1(ulong seed = 1442)
+        {
+            CombatLoadout l = Ddg51L0(seed);
+            l.RadarLevel = FidelityLevel.L1;
+            l.Radar.L1 = Editor.Ddg51CombatData.RadarL1();
+            l.TracksLevel = FidelityLevel.L1;
+            l.Tracks.L1 = Editor.Ddg51CombatData.TracksL1();
+            return l;
+        }
+
         /// <summary>Sea-skimmers (Harpoon-class: 220 kg warhead is public; speed AUTHORED at ~Mach 0.85) from evenly spread bearings.</summary>
         public static List<RaidThreatSpec> SeaSkimmerRaid(int count, float rangeM = 40_000f, int launchSpacingTicks = 50)
         {

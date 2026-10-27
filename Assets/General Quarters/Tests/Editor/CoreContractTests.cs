@@ -93,9 +93,9 @@ namespace DeepWater.GeneralQuarters.Tests
         public void Ladder_FallsBackToTheHighestBuiltLevel_AndSaysSo()
         {
             FidelityResolution r = FidelityLadder.Resolve(ElementKind.Radar, FidelityLevel.L2);
-            Assert.AreEqual(FidelityLevel.L0, r.Resolved);
+            Assert.AreEqual(FidelityLevel.L1, r.Resolved, "Radar L1 is the highest built (Stream A)");
             Assert.IsTrue(r.FellBack);
-            StringAssert.Contains("L2 requested, L0 used", r.ToString());
+            StringAssert.Contains("L2 requested, L1 used", r.ToString());
 
             FidelityResolution ok = FidelityLadder.Resolve(ElementKind.Guns, FidelityLevel.L0);
             Assert.IsFalse(ok.FellBack);

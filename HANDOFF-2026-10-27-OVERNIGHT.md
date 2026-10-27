@@ -37,6 +37,7 @@ the docs and git current; no missile work.
 | 4 | **General Quarters Radar L1:** eight questions, R1–R8, with leanings | `Assets/General Quarters/RADAR-L1-QUESTIONS.md` (BLUEPRINT Q6) | 10 min |
 | 5 | **Two radar plans:** `Assets/RH Radar/` is an empty greenfield module (README, a September routine ROADMAP, an asmdef) beside `RH Radar Suite`, where tonight's core lives. Which is the home? (Leaning: the suite, and strike the `RH Radar` plan with a reason) | `RADAR-L1-QUESTIONS.md` R1 | 1 min |
 | 6 | **Red cannot catch a hands-off player past Mach 1:** red chases at most its fighting speed + 150 kt. Let red chase flat out when the target runs? A gameplay call, so not changed | `Assets/RH Aviator/ROADMAP.md`, slice 3d notes | 1 min |
+| 7 | **The three autoroutines never ran.** `.claude/autoroutines/` (missile, radar, aviator; imported 2026-09 in 8181c10a) has no scheduled task and no `auto/*` branch exists. As written they would also `git checkout` in the shared checkout, push to branches outside the 2026-10-24 branch table, and point the radar routine at the empty `RH Radar` module. Retire them with a reason, or redesign them? (Leaning: retire; doctrine guard "a routine without a scheduler is a wish") | `.claude/autoroutines/` | 2 min |
 
 ## Things to check
 
@@ -92,7 +93,7 @@ the docs and git current; no missile work.
 
 ## Next steps (when you say go)
 
-1. Answer the table above (about 15 minutes in all).
+1. Answer the table above (about 20 minutes in all).
 2. If R1–R8 are answered: General Quarters Stream A, Radar L1 (+ Tracks L1 if R4 = B).
 3. If slice 3f is a go: the vertical fight (energy states, nose-high and nose-low turns).
 4. Fly the 4 v 4 yourself; your feel for the level hold is the one thing no test can give.

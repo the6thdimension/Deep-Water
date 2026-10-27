@@ -33,7 +33,7 @@ Everything in this table is built, tested and on `main`. The detail behind each 
 | Slice 2b — Fly-by-wire L1 | Hornet-style flight controls: G and roll-rate commands, the AoA and G limits | 2026-10-26 | 7c77b0e1 | 82 |
 | Slice 2c — Engines L1, L1 in the scenes | Engine spool; the scenes fly L1; the L1 budget met (17 µs) | 2026-10-26 | 6edafea9 | 87 |
 | Slice 2d — Landing gear L1 | Wheels on spring-damper struts over PhysX contacts, brakes, nosewheel steering, gear up and down, a runway start, take-off and landing; hard and gear-up landings crash | 2026-10-26 | 8343959b | 99 |
-| Slice 2e — Phase 2 review | Every device class flown live at L1 in Dogfight; a landing on runway 09/27 in the scene; the budget re-measured with the gear, in the air and on the wheels; the phase written up | 2026-10-26 | see the change log | 103 |
+| Slice 2e — Phase 2 review | Every device class flown live at L1 in Dogfight; a landing on runway 09/27 in the scene; the budget re-measured with the gear, in the air and on the wheels; the phase written up | 2026-10-26 | a108970b | 103 |
 | Slice 2d follow-up — the gear moves; softer struts | The model's gear retracts and extends with the core (legs fold, doors close); the struts stiffen at the end of travel, so a hands-off touchdown survives | 2026-10-26 | d9cedd4c | 103 |
 
 ## STILL TO DO
@@ -385,7 +385,7 @@ SIX's picks: contacts as W4 says, with spring-damper struts; a brake button (Spa
   - Tests (103/103): the end stop's formula; the hands-off touchdown; every gear part found and gear down equal to the rest pose; with the gear up, nothing visible below the closed doors (lowest −0.86 m in the model's frame, the right inner door's thick skin). Seen in play in Dogfight: the airborne jet starts with its gear stowed; on gear down the doors open, the leg swings, and it ends on the model's rest pose.
 - [x] **Seen at runtime in Dogfight** (Start Mode set to Runway for the run, then the scene reloaded from disk): at idle the jet held its strut compression on the PhysX runway and crept at 3–4 kt (idle thrust beats rolling friction; the brakes hold it). A scripted seat then took off in afterburner: rotation at 150 kt, lift-off near 183 kt, about 470 m from brake release, the gear up above 80 m, climbing out. The player-script compile passes.
 
-### Slice 2e — Phase 2 review (done 2026-10-26: 103/103 tests; the gate met, by scripted and virtual pilots)
+### Slice 2e — Phase 2 review (done 2026-10-26, a108970b: 103/103 tests; the gate met, by scripted and virtual pilots)
 - [x] **Every device class, live in Dogfight at L1** (play mode, virtual devices added at runtime, one after another, each held 3 s; C18's live check, the item slice 1e left open):
 
   | Device | What it did | Seen |
@@ -444,5 +444,5 @@ Revisit when Phase 3 is done. The questions for SIX are in BLUEPRINT §7.
 - **2026-10-26** — Slice 2c done: Powerplant L1 (spool), the scenes fly L1, the budget met in a player (17 µs per aircraft per step after caching the lift peak, ×2.2); 87/87 tests.
 - **2026-10-26** — Roadmap split into DONE and STILL TO DO at SIX's request (e322f5a7).
 - **2026-10-26** — Slice 2d done (8343959b): Landing Gear L1 on spring-damper struts over PhysX contacts, brakes, nosewheel steering, a runway start, take-off and landing; 99/99 tests. Found and fixed: the sink rate measured along a tilted strut, the flaps missing from the law's lift inversion, the runway start's throttle. Open for SIX: a hands-off touchdown breaks the nose gear.
-- **2026-10-26** — Slice 2e done: **Phase 2 complete.** Every device class flown live at L1 in Dogfight; a landing on runway 09/27 in the scene; the budget met with the gear (18 µs airborne, 13 µs on the wheels on PhysX, per aircraft per step in a player); nothing first-party superseded. Found: an unfocused Editor reads no keyboard or mouse (AP30); a keyboard step pull overshoots the G limit to 8.43 G.
+- **2026-10-26** — Slice 2e done (a108970b): **Phase 2 complete.** Every device class flown live at L1 in Dogfight; a landing on runway 09/27 in the scene; the budget met with the gear (18 µs airborne, 13 µs on the wheels on PhysX, per aircraft per step in a player); nothing first-party superseded. Found: an unfocused Editor reads no keyboard or mouse (AP30); a keyboard step pull overshoots the G limit to 8.43 G.
 - **2026-10-26** — (d9cedd4c) Slice 2d follow-up at SIX's word: the struts stiffen over their last 30 % (a hands-off touchdown survives) and the model's gear retracts and extends with the core (`GearRig`, hinges solved off the geometry); 103/103 tests.

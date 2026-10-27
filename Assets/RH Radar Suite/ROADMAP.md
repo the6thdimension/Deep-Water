@@ -252,8 +252,10 @@ moving aircraft.*
   Phase 4 replaces it; do not invest in it meanwhile.
 - [ ] `RadarSuiteController.Cleanup` destroys modules it may not have created once
   the Phase 1 reuse fix lands — ownership must be tracked (created-by-controller flag).
-- [ ] `Examples/README.md` and `Prefabs/README.md` describe assets that don't exist —
-  Phase 1 and Phase 5 items close them; update the READMEs when they do.
+- [x] `Examples/README.md` and `Prefabs/README.md` describe assets that don't exist —
+  Phase 1 and Phase 5 items close them; update the READMEs when they do. Corrected 2026-10-27: the Prefabs README
+  now says there are none yet and points at one-click outfitting; the Examples README drops the contact panel that
+  never existed, calls LOD5 a stub, and names the pure core the modules do not use yet.
 - **2026-10-27** — Phase 1 tests run at last: 7/7. Phase 2's pure core begun: `Core/Detection/RadarEquation.cs` (the radar equation in dB, the range for a required SNR, Albersheim, North, Swerling 1, the 4/3-Earth horizon, erfc), 8 tests against hand-computed cases and Albersheim's published point; 15/15 in all. Found: the roadmap's "sea-skimmers at 200 km" was off by seven times; the 4/3-Earth horizon for a 20 m mast and a 5 m target is 27.6 km. The modules are untouched (their rewrite waits for SIX).
 - **2026-10-27** — Phase 3 begun: the pure α-β filter (`Core/Tracking/AlphaBetaFilter.cs`), 6 tests; 21/21 in all.
 - **2026-10-27** — Phase 3's pure core: the track file (M of N, coast, reacquire, drop; gated nearest-neighbour association; the track picture with quality and BestTrack), 7 tests; 28/28 in all. Kalman and the gizmos remain; the modules are untouched.

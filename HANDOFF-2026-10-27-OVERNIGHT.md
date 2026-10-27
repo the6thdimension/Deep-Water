@@ -90,11 +90,12 @@ the docs and git current; no missile work.
 | RH Radar Suite EditMode | 42/42 |
 | **Whole project, EditMode** (04:23) | **421 pass, 5 fail, 2 skipped** (the explicit surveys) |
 
-The five failures all sit in code last changed before tonight (10-23 to 10-26). One was Air Wing's and is fixed
-(the Fast Play static-state guard flagged `NoLandingGear`'s shared array; now per instance). Four remain, none
-touched tonight: Fast Play's `TwoPlays_WithoutADomainReload_GiveTheSameFix` (General Quarters' `RangeInput` finds no
-project-wide input actions inside the test, although Project Settings points at `RHMILCOM.inputactions`); the
-Reckoning spike's roll-period criterion (10.73 s against IMO 9.72 s, a known spike finding); and two Guided Fury
+The five failures all sit in code last changed before tonight (10-23 to 10-26). Two were Air Wing's and are fixed:
+the Fast Play static-state guard flagged `NoLandingGear`'s shared array (now per instance); and Air Wing's
+`DeviceBindingTests` (an `InputTestFixture`) left `InputSystem.actions` unset, so Fast Play's
+`TwoPlays_WithoutADomainReload_GiveTheSameFix`, run after it, found no `Range` maps (it passed alone; the fixture now
+puts the project-wide actions back; METHODOLOGY AP35). Three remain, none touched tonight: the Reckoning spike's
+roll-period criterion (10.73 s against IMO 9.72 s, a known spike finding); and two Guided Fury
 tests (`L3_AoaProducesLift_PitchedBodyPullsToward`, `EndToEnd_L2WithConeSeekerAndProNav_AcquiresAndCloses`), left
 alone under tonight's no-missile rule.
 

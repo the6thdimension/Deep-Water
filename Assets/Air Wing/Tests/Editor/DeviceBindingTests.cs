@@ -53,9 +53,13 @@ namespace DeepWater.AirWing.Tests
         };
 
         FlightDeviceReader _reader;
+        // InputTestFixture's reset leaves the project-wide actions unset after TearDown, and a later test that enters
+        // play (Fast Play's SameFixAcrossPlaysTests, General Quarters' RangeInput) then finds none. Put them back.
+        InputActionAsset _projectWide;
 
         public override void Setup()
         {
+            _projectWide = InputSystem.actions;
             base.Setup();
             InputSystem.RegisterLayout<AirWingTestStick>();
             var asset = AssetDatabase.LoadAssetAtPath<InputActionAsset>(ActionsPath);
@@ -67,6 +71,7 @@ namespace DeepWater.AirWing.Tests
         {
             _reader?.Dispose();
             base.TearDown();
+            if (_projectWide != null && InputSystem.actions != _projectWide) InputSystem.actions = _projectWide;
         }
 
         DeviceFrame Tick()

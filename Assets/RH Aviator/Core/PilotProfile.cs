@@ -90,6 +90,27 @@ namespace DeepWater.Aviator.Core
         /// </summary>
         public float BingoFlightTimeS;
 
+        /// <summary>
+        /// The fight (Pilot L1, W38, W45): the half-angle the pilot can see round its nose (degrees), how late what it
+        /// sees arrives (seconds), how long a lost contact is remembered (seconds), and how far it can see (metres).
+        /// </summary>
+        public float FieldOfViewDeg, ReactionDelayS, MemoryS, VisualRangeM;
+        /// <summary>
+        /// The fighting speed (knots); lead and lag, seconds of the target's velocity ahead of or behind it (0: pure
+        /// pursuit only, a rookie); lag inside this range (metres) when closing faster than this (knots), slower by this (knots).
+        /// </summary>
+        public float CornerKt, LeadS, LagS, LagRangeM, OvershootClosureKt, LagSlowKt;
+        /// <summary>
+        /// A threat: an enemy seen inside this range (metres) and this angle of the pilot's own tail (degrees) makes it
+        /// break. The fight's floor above the surface (metres). A wingman with no enemy inside the clear range (metres)
+        /// goes back to fingertip (W53).
+        /// </summary>
+        public float ThreatRangeM, ThreatConeDeg, FightFloorM, ClearRangeM;
+        /// <summary>Energy sense: below the fighting speed the pilot eases its turn, to 2 G at this speed (knots); 0: none (a rookie).</summary>
+        public float SlowKt;
+        /// <summary>How much of the target's turn the pilot matches by feed-forward, 0 … 1 (0: a rookie, the aim alone).</summary>
+        public float TurnMatch;
+
         /// <summary>The hands in the pattern: the route hands, held to the pattern's bank.</summary>
         public HandsSettings PatternHands
         {
@@ -161,6 +182,13 @@ namespace DeepWater.Aviator.Core
             Positive(GlidePathDeg, nameof(GlidePathDeg));
             Positive(FlareHeightM, nameof(FlareHeightM));
             Positive(FinalCarrotM, nameof(FinalCarrotM));
+            Positive(FieldOfViewDeg, nameof(FieldOfViewDeg));
+            if (ReactionDelayS < 0f) throw new ArgumentOutOfRangeException(nameof(ReactionDelayS), ReactionDelayS, "must not be negative");
+            Positive(MemoryS, nameof(MemoryS));
+            Positive(VisualRangeM, nameof(VisualRangeM));
+            Positive(CornerKt, nameof(CornerKt));
+            Positive(FightFloorM, nameof(FightFloorM));
+            Positive(ClearRangeM, nameof(ClearRangeM));
             if (BingoFlightTimeS < 0f) throw new ArgumentOutOfRangeException(nameof(BingoFlightTimeS), BingoFlightTimeS, "must not be negative (zero: never)");
             if (!(LostSlotM > InSlotM)) throw new ArgumentOutOfRangeException(nameof(LostSlotM), LostSlotM, "losing the slot must lie outside being in it");
         }

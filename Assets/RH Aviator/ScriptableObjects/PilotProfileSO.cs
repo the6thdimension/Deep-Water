@@ -106,6 +106,30 @@ namespace DeepWater.Aviator.ScriptableObjects
         [Tooltip("STAND-IN for bingo fuel until fuel burn exists (W47): seconds of flight before going home on its own. 0: never.")]
         public float bingoFlightTimeS;
 
+        [Header("The fight (Pilot L1: W38, W45)")]
+        [Tooltip("Half-angle the pilot can see round its nose, degrees.")]
+        public float fieldOfViewDeg;
+        [Tooltip("How late what it sees arrives, seconds.")]
+        public float reactionDelayS;
+        public float memoryS;
+        public float visualRangeM;
+        public float cornerKt;
+        [Tooltip("Seconds of the target's velocity ahead of it (0: no lead pursuit).")]
+        public float leadS;
+        [Tooltip("Seconds of the target's velocity behind it (0: no lag pursuit).")]
+        public float lagS;
+        public float lagRangeM;
+        public float overshootClosureKt;
+        public float lagSlowKt;
+        public float threatRangeM;
+        public float threatConeDeg;
+        public float fightFloorM;
+        public float clearRangeM;
+        [Tooltip("Energy sense: eases the turn to 2 G at this speed, knots; 0: none.")]
+        public float slowKt;
+        [Tooltip("How much of the target's turn is matched by feed-forward, 0 … 1.")]
+        [Range(0f, 1f)] public float turnMatch;
+
         [Header("Provenance")]
         [TextArea(4, 20)] public string provenance = "";
 
@@ -133,7 +157,10 @@ namespace DeepWater.Aviator.ScriptableObjects
                 ApproachKt = approachKt, GearKt = gearKt, PatternBankDeg = patternBankDeg,
                 PatternGPerPathDeg = patternGPerPathDeg, PatternMaxDiveDeg = patternMaxDiveDeg, PatternFloorAglM = patternFloorAglM,
                 GlidePathDeg = glidePathDeg, TouchdownM = touchdownM, FlareHeightM = flareHeightM, FlarePathDeg = flarePathDeg, FinalCarrotM = finalCarrotM,
-                RolloutPedalPerM = rolloutPedalPerM, RolloutPedalPerDeg = rolloutPedalPerDeg, BingoFlightTimeS = bingoFlightTimeS, SlotClimbDegPerM = slotClimbDegPerM, SlotGPerPathDeg = slotGPerPathDeg, SlotRotationShare = slotRotationShare,
+                RolloutPedalPerM = rolloutPedalPerM, RolloutPedalPerDeg = rolloutPedalPerDeg, BingoFlightTimeS = bingoFlightTimeS,
+                FieldOfViewDeg = fieldOfViewDeg, ReactionDelayS = reactionDelayS, MemoryS = memoryS, VisualRangeM = visualRangeM,
+                CornerKt = cornerKt, LeadS = leadS, LagS = lagS, LagRangeM = lagRangeM, OvershootClosureKt = overshootClosureKt, LagSlowKt = lagSlowKt,
+                ThreatRangeM = threatRangeM, ThreatConeDeg = threatConeDeg, FightFloorM = fightFloorM, ClearRangeM = clearRangeM, SlowKt = slowKt, TurnMatch = turnMatch, SlotClimbDegPerM = slotClimbDegPerM, SlotGPerPathDeg = slotGPerPathDeg, SlotRotationShare = slotRotationShare,
             };
             p.Validate();
             return p;

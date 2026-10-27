@@ -12,7 +12,7 @@
 
 **Branch:** `feat/aircraft`, kept level with `main` (CLAUDE.md, Branches), commits through `commit-to-branch`.
 
-**Where things stand (2026-10-27):** slices 3a–3c are done. The AI flies Dogfight's four gates, holds fingertip on a leader, swaps seats with the player, and goes home on the player's order (H, the Xbox D-pad up) or at the bingo stand-in to fly the overhead break and land on runway 09/27. SIX said "finish out phase 3" (2026-10-27): slice 3d (the fight) is next, then 3e.
+**Where things stand (2026-10-27):** slices 3a–3c are done. The AI flies Dogfight's four gates, holds fingertip on a leader, swaps seats with the player, and goes home on the player's order (H, the Xbox D-pad up) or at the bingo stand-in to fly the overhead break and land on runway 09/27; and it fights (Pilot L1: rookie, line, ace; up to eight aircraft; red hunts the player). SIX said "finish out phase 3" (2026-10-27): slice 3e is next. A9 waits on SIX (BLUEPRINT Q3).
 
 ## DONE — finished and committed
 
@@ -20,16 +20,19 @@
 |---|---|---|---|---|
 | Blueprint and roadmap | Phase 3's 16 decisions carried for the AI side; slices 3a–3e with their pass criteria | 2026-10-26 | eaf7280f | — |
 | Slice 3a — the AI seat, the hands and the gates | An AI pilot that flies Dogfight's four gates through the player's own stick: the mode machine with its logged rules, the shared flight-path layer, the line pilot's profile, an "Add AI Jet" menu, the AI budget met | 2026-10-26 | `92eaaaff` | 6 here, 4 in Air Wing (113 in all) |
+| Slice 3d — Pilot L1, the fight | Perception (field of view, reaction delay, memory), pursuit (lead, pure, lag), the break turn, energy sense, turn matching; rookie, line and ace; the engagement, red hunting the player and blue's wingmen fighting and rejoining; rear-cone scoring; the AI budget met at eight | 2026-10-27 | `8e4ee725` | 5 here (130 in all) |
 | Slice 3c — going home and the break | The AI flies home on the player's order or at the bingo stand-in, the overhead break, the pattern and a landing on 09/27; the "go home" order (A3) | 2026-10-27 | `ec2c5193` | 3 here (125 in all) |
 | Slice 3b — formation and seats | An AI wingman that joins and holds fingertip on its leader; the seat cycle key and the HUD pick list; the player takes any jet mid-flight and the AI takes it back; an "Add AI Wingman" menu | 2026-10-27 | `a2ae171d` | 4 here, 4 in Air Wing (122 in all) |
 
 ## STILL TO DO
 
 ### Next
-- **Slice 3d — Pilot L1, the fight** (W38, W43 at eight, W45, W46, W52, W53).
+- **Slice 3e — Phase 3 review.**
+- **SIX:** A9 (BLUEPRINT Q3).
 
 ### Left open in finished slices
 - **Slice 3a:** the first approach to gates 2 and 3 goes around once (each 90° turn onto a gate's line does not fit the first try); the course takes about 5.5 minutes. Not flown against a player by hand.
+- **Slice 3d:** the fights are gentle. Over 20 merges the ace held the rookie's rear cone 0.7–3.1 s in 180 s (34 s in all, the rookie none), and in the 4 v 4 blue's wingmen engaged but scored nothing (red 104.7 s, blue 5.3 s). The pursuit is a path-follower with feed-forward, not a fighting brain: no vertical moves, no energy trades beyond easing the turn. No collisions are modelled (jets can pass through each other). Not yet flown against a human.
 - **Slice 3c:** every one of the 20 landings is the same landing once on the initial (10.2 ft/s at about 257 m, stopped at about 1,219 m): the pattern is deterministic and the starts only change the way in. Ordered home from the wrong side, the pilot goes around the initial first (in the Dogfight smoke, two minutes). No wind exists yet. The pattern was tuned on the L1 jet at 60 % fuel.
 - **Slice 3b:** the formation gains are tuned on the L1 jet at 5,000 ft and 350 kt; the path gain sits 1.6× inside where the hold rings (METHODOLOGY C42), so another level, weight or speed needs the sweep again. Joining from ahead of the leader is not tested (the wingman slows to 250 kt and lets it pass). The AI budget was not re-measured for formation (slice 3e measures four aircraft). Not yet flown by a human on the wing.
 
@@ -115,14 +118,31 @@
 - [x] **Pass criteria, met** (headless, every part L1, the ground everywhere at the runway's height, 20 seeded starts 10 nm out, 3,000–10,000 ft, 300–450 kt, any heading): all 20 stopped on the runway, none crashed; touchdown 10.2 ft/s (limit 12), 254–258 m past the threshold, 0.0 m off the centreline (limit 5); stopped 1,215–1,221 m down, 0.0 m off; every leg inside its box. The rule log names every leg in order; bingo fires on the tick count, labelled a stand-in.
 - [x] **Smoke in Dogfight** (play mode, the wingman added unsaved, PhysX contacts): joined, ordered home at 45 s, went around once for the initial, then initial, break, downwind, the 180, final; touchdown at 8.4 ft/s, 0.0 m off; stopped 1,225 m down 27 at 330 s. The scene was put back from disk and GQ_Range reopened.
 
-### Slice 3d — Pilot L1, the fight (W38, W43, W45, W46)
-- [ ] Perception: a field of view and a reaction delay from the profile; last-seen memory (W38).
-- [ ] Fight: choose lead, pure or lag pursuit from the geometry and energy; keep its own tail clear; respect the profile's G (W45).
-- [ ] Rear-cone scoring (about 30°, about 1 km) on the HUD and in a fight log (W46). No weapons, no gun solution (BLUEPRINT §6.5).
-- [ ] Profiles: rookie, line, ace.
-- [ ] Up to four aircraft (W43).
+### Slice 3d — Pilot L1, the fight (W38, W43, W45, W46, W52, W53) (done 2026-10-27: all pass criteria met; 130/130 tests in both modules, `8e4ee725`)
+- [x] Perception (`Core/Perception`, W38): a ring of past pictures, so the pilot sees each aircraft as it was its reaction delay ago, and only inside its field of view and visual range; a lost contact is remembered where last seen, carried on at its velocity, and forgotten after the memory time.
+- [x] Fight (`Core/Fight`, W45): lead, pure or lag pursuit by the geometry and the closure; a break turn when a seen enemy, close in the pilot's rear quarter, is pointing at it; turn matching (the target's turn fed forward, AP32); energy sense (below the fighting speed the G and bank are eased, down to 2 G at the slow speed); the profile's G; a fight floor. Lost sight: back to where it was last seen ("search").
+- [x] The engagement (W52, W53): sides; **red hunts the player's jet** (a controller's "vector" from the truth until it sees it, labelled in the rule log); blue goes for the nearest red it sees and, with none inside its clear range, is "clear" and rejoins the player's wing. Rules: tally, engage, break, tail clear, vector, search, clear.
+- [x] Rear-cone scoring (W46): seconds in an enemy's rear cone (30°, 1 km), and the fight log of every entry and exit. *The attacker must also point at its target* (A9, proposed: by position alone, two jets just past a head-on pass each scored 2.7 s while flying apart). Not yet on the HUD (slice 3e). No weapons, no gun solution (BLUEPRINT §6.5).
+- [x] Profiles (W45): **rookie** (sees 90°, 1.2 s late, 4.5 G, 60° bank, pure pursuit only, fights too fast, no energy sense, no turn matching), **line** (120°, 0.7 s, 6 G), **ace** (150°, 0.35 s, 7 G, 75° bank, lead and lag, full turn matching). **Deep Water → RH Aviator → Apply Pilot Profiles** writes all three with their provenance (AUTHORED: a game's skill numbers).
+- [x] Up to eight aircraft (W43 re-decided by SIX 2026-10-27).
+- [x] Air Wing's hands take a per-request G and bank limit (`FlightPathRequest.GLimit`, `BankLimitDeg`).
+- [x] **Found and fixed:**
+  - Perception kept an entry for an aircraft never seen, so "known" answered yes for it (the dead-astern test caught it).
+  - After a head-on pass the rookie forgot the ace behind it and **flew straight on at 416 kt** for the rest of the fight: a lost target is now searched for where it was last seen.
+  - The ace **broke against a jet flying away** from it: a threat must now be pointing at the pilot.
+  - At 75° and 7 G the ace **bled to 200 kt and sank 4,000 ft**: energy sense eases the turn when slow.
+  - On the L1 law alone the ace **settled 33° off a turning rookie's tail** at 1.5 km, turning no harder: the target's turn is now matched by feed-forward.
+- [x] **Pass criteria, met** (headless, every part L1):
+
+  | Criterion | Limit | Flown |
+  |---|---|---|
+  | Ace against rookie, 20 neutral merges (head on, 6 km, 9,000–11,000 ft, 380–420 kt, 180 s) | ace ahead in ≥ 15; no crash | 20 of 20 (ace 34 s in all, rookie 0); lowest 8,937 ft; no crash |
+  | A pilot with the player outside its field of view | no turn before its delay | in view at tick 2046, tally at 2088 (delay 35 ticks); 0.0° of bank before |
+  | 4 v 4 (player jet and three wingmen, line; red rookie, two line, ace), 300 s, then red leaves | no crash; red goes for the player; blue engages, then rejoins | no crash; every red went for aircraft 1; every blue wingman engaged and was back in fingertip at 390 s; red 104.7 s, blue 5.3 s in the cone |
+  | The AI's cost at eight, player build (Windows, Mono, release, two runs) | ≤ 10 µs per pilot per tick | 2.96 and 3.21 µs (route: 1 pilot 1.51 / 1.42, 4 pilots 1.07 / 1.39) |
 - [ ] **Pass criteria, fixed now:** over 20 fights from neutral merges, ace beats rookie on rear-cone time in ≥ 15; no AI crashes into the ground or the sea; an AI with the player outside its field of view does not turn toward the player before its delay has passed.
-- [ ] Smoke: a 1v1 in Dogfight against each profile.
+  - *Added 2026-10-27 before building, for W43 at eight, W52 and W53:* a 4 v 4 (a player jet, three blue wingmen, four red), 5 minutes headless: no AI crashes; every red pilot pursues the player's jet (W52); every blue wingman engages a red jet and is back in fingertip once none is within its clear range (W53); both sides' rear-cone seconds logged. The AI's own cost at eight aircraft ≤ 10 µs per pilot per tick in a player build (A4).
+- [ ] Smoke: a 1v1 in Dogfight against each profile. *Moved to the dogfight testing that follows Phase 3 (SIX, 2026-10-27).*
 
 ### Slice 3e — Phase 3 review
 - [ ] Each mode in Dogfight; the AI budget re-measured with four aircraft; METHODOLOGY; Air Wing's Phase 3 closed.
@@ -182,3 +202,4 @@ Kept for the record. Air Wing now owns the airframe side (W5), and W17, W49 and 
 - **2026-10-27** — Slice 3b done at SIX's go: Join and Fingertip on the leader, the seat cycle and the pick list (Air Wing), 122/122 tests in both modules; the join in 76.7 s, the hold within 6.8 / 2.3 / 4.2 m through a turn and a 2 G pull. A7–A8 proposed (BLUEPRINT Q2). Found: following on position alone is late and overshoots (AP32); a throttle integral clamped short of the cruise setting (AP33); tune by a sweep and ship the margin (C42).
 - **2026-10-27** — SIX confirmed A7 (formation flown every tick) and A8 (the seat roster in Air Wing) as written.
 - **2026-10-27** — Slice 3c done (SIX: "finish out phase 3"): going home on the order (A3) or the bingo stand-in, the overhead break and the landing on 09/27, 125/125 tests; 20 of 20 scattered starts land at 10.2 ft/s on the centreline. Found: a path gain in G per degree is a loop gain that grows as the speed falls (C43).
+- **2026-10-27** — Slice 3d done: Pilot L1, the fight; rookie, line and ace; the engagement (red hunts the player, W52; blue fights and rejoins, W53); rear-cone scoring with A9 proposed; 130/130 tests; the ace ahead in 20 of 20 merges; the AI at eight 3 µs per pilot per tick. The fights are gentle (left open).

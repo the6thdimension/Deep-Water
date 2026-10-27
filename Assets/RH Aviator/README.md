@@ -19,6 +19,10 @@ Pat1: **SO-Profile + Pure-Core + MB-Adapter**. **Read `BLUEPRINT.md` first** (W3
 
 After **Add AI Wingman**, press **H** (or the Xbox **D-pad up**) once the wingman has joined: every AI pilot not in your jet goes home to runway 09/27, flies the overhead break and lands. Its legs print in the Console and show in the pick list (HOME · DOWNWIND …).
 
+## The fight (slice 3d)
+
+`AviatorSeat.FightIn(id, engagement)` puts a pilot in a fight: an `Engagement` holds the sides and whom red hunts (the player's jet, W52). Pilots see through their eyes (field of view, reaction delay, memory) and are scored by seconds in an enemy's rear cone (W46). No weapons. Rookie, line and ace live in `ScriptableObjects/Pilot_*.asset` (**Apply Pilot Profiles**).
+
 The line pilot's numbers are in `ScriptableObjects/Pilot_Line.asset` (written by **Apply Line Pilot Profile**, all AUTHORED). The AI's cost: **Build Benchmark Player**, then `Builds/AviatorBenchmark/AviatorBenchmark.exe -batchmode -nographics -aviatorBenchOut <file>` (3–4 µs per pilot per tick, budget 10).
 
 **Assembly:** `DeepWater.Aviator` (namespace `DeepWater.Aviator`). Renamed from `RH.Aviator` on 2026-10-25 by SIX's call (Air Wing BLUEPRINT Q2), so it matches the other `DeepWater.*` modules.

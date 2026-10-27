@@ -81,6 +81,22 @@ MonoBehaviour:
   rolloutPedalPerM: 0.05
   rolloutPedalPerDeg: 0.1
   bingoFlightTimeS: 0
+  fieldOfViewDeg: 120
+  reactionDelayS: 0.7
+  memoryS: 8
+  visualRangeM: 8000
+  cornerKt: 330
+  leadS: 1
+  lagS: 1
+  lagRangeM: 800
+  overshootClosureKt: 60
+  lagSlowKt: 40
+  threatRangeM: 1500
+  threatConeDeg: 60
+  fightFloorM: 300
+  clearRangeM: 8000
+  slowKt: 220
+  turnMatch: 0.7
   provenance: "All AUTHORED (RH Aviator W45; no public source describes a generic
     line pilot), tuned headless against slice 3a's pass criteria (ROADMAP, fixed
     before tuning). Hands: guidanceGain (2, the classic value of the L1 path-following
@@ -105,4 +121,8 @@ MonoBehaviour:
     landing test), gearKt, patternBankDeg, patternGPerPathDeg, patternMaxDiveDeg,
     patternFloorAglM, glidePathDeg, touchdownM, flareHeightM, flarePathDeg, finalCarrotM,
     rolloutPedalPerM, rolloutPedalPerDeg, bingoFlightTimeS (a STAND-IN for bingo
-    fuel until fuel burn exists; 0 = never)."
+    fuel until fuel burn exists; 0 = never). The fight (Pilot L1, W38, W45; a game's
+    skill numbers, AUTHORED, not any real pilot's or air force's): fieldOfViewDeg,
+    reactionDelayS, memoryS, visualRangeM, cornerKt, leadS, lagS, lagRangeM, overshootClosureKt,
+    lagSlowKt, threatRangeM, threatConeDeg, fightFloorM, clearRangeM, slowKt (energy
+    sense; 0 = none), turnMatch."

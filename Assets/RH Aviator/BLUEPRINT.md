@@ -1,6 +1,6 @@
 # RH Aviator — blueprint
 
-> **Status: LOCKED BLUEPRINT (W36–W51 and A1–A6, SIX 2026-10-26; A7–A8, SIX 2026-10-27); slices 3a and 3b built.** The decisions were made in Air Wing's Phase 3 interview and live in Air Wing's register (`Assets/Air Wing/BLUEPRINT.md` §5, W36–W51). This document carries them for the AI side. Progress is in `ROADMAP.md`.
+> **Status: LOCKED BLUEPRINT (W36–W51 and A1–A6, SIX 2026-10-26; A7–A8, SIX 2026-10-27); slices 3a–3d built; A9 proposed (Q3).** The decisions were made in Air Wing's Phase 3 interview and live in Air Wing's register (`Assets/Air Wing/BLUEPRINT.md` §5, W36–W51). This document carries them for the AI side. Progress is in `ROADMAP.md`.
 > **This document's one job:** say what RH Aviator is and why, how its AI pilot is built, and which decisions bind it. Work order and progress live in `ROADMAP.md`, not here.
 
 ## 1. In plain language
@@ -121,6 +121,12 @@ Air Wing (DeepWater.AirWing) ← RH Aviator (DeepWater.Aviator) ← its tests
 | A7 | **Formation is flown off the slot on every tick**; the 4 Hz watch still decides the mode (Join, Fingertip) and logs it | At 180 m/s the slot moves 45 m between watches and is held to ±5 m. W44 already gives the stick every tick; keeping the slot is the hands' work. The request also carries the leader's bank, roll rate and flight-path rates as feed-forward (AP32), and formation flies its own hands with tighter height and path gains (`PilotProfile.FormationHands`) | Locked |
 | A8 | **The seat roster lives in Air Wing** (`Core/Seats/SeatRoster`): one player seat, and each aircraft's *own* seat, which RH Aviator hands over as a plain `ISeat`. Without one the aircraft holds what it was last given (`HoldSeat`). An optional `ISeatStatus` lets a seat say what it is doing for the pick list | W42 puts the cycle key and the pick list in Air Wing; W5 keeps Air Wing ignorant of AI; W18 says the AI flies every empty seat | Locked |
 
+### 5.4 Proposed by Claude in slice 3d (Q3)
+
+| # | Decision | Why | Status |
+|---|---|---|---|
+| A9 | **To score, an attacker must also point at its target** within the cone's angle, as well as sit within 30° of its tail inside 1 km (W46) | By position alone, two jets just past a head-on pass each scored 2.7 s in the other's cone while flying apart; with it, the pass scores nothing and the ace's lead in 20 merges is real | Proposed; built (reversible: one line in `RearCone.Inside`) |
+
 ## 6. Standing constraints
 
 1. **An aircraft changes only through Pilot Inputs from its seat** (Air Wing W6). The AI never writes an aircraft's state.
@@ -161,9 +167,11 @@ Air Wing (DeepWater.AirWing) ← RH Aviator (DeepWater.Aviator) ← its tests
 |---|---|---|
 | ~~Q1~~ | ~~Confirm A1–A6 as written, or change any?~~ **Answered 2026-10-26 by SIX: confirmed as written.** | — |
 | ~~Q2~~ | ~~Confirm A7 (formation flown every tick, with feed-forward) and A8 (the seat roster in Air Wing), or change either?~~ **Answered 2026-10-27 by SIX: confirmed as written.** | — |
+| Q3 | Confirm A9 (an attacker must point at its target to score), or score by position alone as W46 reads? | One reply |
 
 ## Change log
 - **2026-10-26** — Written from Air Wing's Phase 3 interview (W36–W51, SIX). A1–A6 proposed. Nothing built.
 - **2026-10-26** — SIX confirmed A1–A6 and said go on slice 3a. A2 refined while building: the hands use a bounded law, not the instructor's `Steer` (AP25).
 - **2026-10-27** — Slice 3b built at SIX's go. A7 (formation flown every tick) and A8 (the seat roster in Air Wing) proposed as Q2. A2 extended: the hands' request may carry feed-forward (bank, roll rate, flight-path angle and rate), zero for a route.
 - **2026-10-27** — SIX confirmed A7 and A8 as written (Q2 closed).
+- **2026-10-27** — Slice 3d built. A9 proposed (Q3): an attacker must point at its target to score.

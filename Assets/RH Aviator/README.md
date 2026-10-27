@@ -15,6 +15,10 @@ Pat1: **SO-Profile + Pure-Core + MB-Adapter**. **Read `BLUEPRINT.md` first** (W3
 2. **Deep Water → RH Aviator → Add AI Wingman to the Open Scene.** An AI F/A-18E appears 600 m behind and 200 m right of your jet, ordered to join your right wing; your own jet gets an AI pilot too, for when you leave it. Unsaved.
 3. Press Play. The wingman closes and settles into fingertip in about half a minute. **Tab** (or the Xbox **D-pad right**) moves you into the next jet; the pick list, top right, shows who flies what. The jet you leave goes to its AI at once.
 
+## Try it (slice 3c)
+
+After **Add AI Wingman**, press **H** (or the Xbox **D-pad up**) once the wingman has joined: every AI pilot not in your jet goes home to runway 09/27, flies the overhead break and lands. Its legs print in the Console and show in the pick list (HOME · DOWNWIND …).
+
 The line pilot's numbers are in `ScriptableObjects/Pilot_Line.asset` (written by **Apply Line Pilot Profile**, all AUTHORED). The AI's cost: **Build Benchmark Player**, then `Builds/AviatorBenchmark/AviatorBenchmark.exe -batchmode -nographics -aviatorBenchOut <file>` (3–4 µs per pilot per tick, budget 10).
 
 **Assembly:** `DeepWater.Aviator` (namespace `DeepWater.Aviator`). Renamed from `RH.Aviator` on 2026-10-25 by SIX's call (Air Wing BLUEPRINT Q2), so it matches the other `DeepWater.*` modules.

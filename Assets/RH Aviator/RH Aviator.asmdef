@@ -3,7 +3,8 @@
     "rootNamespace": "DeepWater.Aviator",
     "references": [
         "RH.Shared",
-        "DeepWater.AirWing"
+        "DeepWater.AirWing",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

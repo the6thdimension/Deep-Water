@@ -27,6 +27,11 @@ namespace DeepWater.AirWing.Core.Seats
         /// leader instead of waiting for the slot to move. Zero to steer on the aim alone.
         /// </summary>
         public float BankDeg, BankRateDegS;
+        /// <summary>
+        /// Landing: the ground guard stands down (the glide path is the guard), so the hands will fly the jet onto the
+        /// runway (RH Aviator W41). False for everything else.
+        /// </summary>
+        public bool Landing;
     }
 
     /// <summary>The hands' gains and limits, part of a pilot's profile (RH Aviator W45). All AUTHORED.</summary>
@@ -142,7 +147,7 @@ namespace DeepWater.AirWing.Core.Seats
             // The ground guard overrides both (AP25).
             float agl = s.Position.y - surfaceHeightM;
             float sink = Mathf.Max(0f, -s.Velocity.y);
-            if (agl < _h.FloorAglM || agl - sink * _h.GuardLookAheadS < _h.FloorAglM)
+            if (!request.Landing && (agl < _h.FloorAglM || agl - sink * _h.GuardLookAheadS < _h.FloorAglM))
             {
                 pathWanted = Mathf.Max(pathWanted, _h.GuardClimbDeg);
                 bankWanted = Mathf.Clamp(bankWanted, -_h.GuardMaxBankDeg, _h.GuardMaxBankDeg);

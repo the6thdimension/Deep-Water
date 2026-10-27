@@ -12,7 +12,7 @@
 
 **Branch:** `feat/aircraft`, kept level with `main` (CLAUDE.md, Branches), commits through `commit-to-branch`.
 
-**Where things stand (2026-10-27):** slices 3a and 3b are done. The AI flies Dogfight's four gates, joins and holds fingertip on a leader through a turn and a 2 G pull, and the player swaps seats with it mid-flight (Tab, the Xbox D-pad right). SIX confirmed A7–A8 on 2026-10-27. Next is slice 3c (going home and the break), on SIX's go.
+**Where things stand (2026-10-27):** slices 3a–3c are done. The AI flies Dogfight's four gates, holds fingertip on a leader, swaps seats with the player, and goes home on the player's order (H, the Xbox D-pad up) or at the bingo stand-in to fly the overhead break and land on runway 09/27. SIX said "finish out phase 3" (2026-10-27): slice 3d (the fight) is next, then 3e.
 
 ## DONE — finished and committed
 
@@ -20,15 +20,17 @@
 |---|---|---|---|---|
 | Blueprint and roadmap | Phase 3's 16 decisions carried for the AI side; slices 3a–3e with their pass criteria | 2026-10-26 | eaf7280f | — |
 | Slice 3a — the AI seat, the hands and the gates | An AI pilot that flies Dogfight's four gates through the player's own stick: the mode machine with its logged rules, the shared flight-path layer, the line pilot's profile, an "Add AI Jet" menu, the AI budget met | 2026-10-26 | `92eaaaff` | 6 here, 4 in Air Wing (113 in all) |
+| Slice 3c — going home and the break | The AI flies home on the player's order or at the bingo stand-in, the overhead break, the pattern and a landing on 09/27; the "go home" order (A3) | 2026-10-27 | `ec2c5193` | 3 here (125 in all) |
 | Slice 3b — formation and seats | An AI wingman that joins and holds fingertip on its leader; the seat cycle key and the HUD pick list; the player takes any jet mid-flight and the AI takes it back; an "Add AI Wingman" menu | 2026-10-27 | `a2ae171d` | 4 here, 4 in Air Wing (122 in all) |
 
 ## STILL TO DO
 
 ### Next
-- **Slice 3c — going home and the break** (W41, W47), on SIX's go.
+- **Slice 3d — Pilot L1, the fight** (W38, W43 at eight, W45, W46, W52, W53).
 
 ### Left open in finished slices
 - **Slice 3a:** the first approach to gates 2 and 3 goes around once (each 90° turn onto a gate's line does not fit the first try); the course takes about 5.5 minutes. Not flown against a player by hand.
+- **Slice 3c:** every one of the 20 landings is the same landing once on the initial (10.2 ft/s at about 257 m, stopped at about 1,219 m): the pattern is deterministic and the starts only change the way in. Ordered home from the wrong side, the pilot goes around the initial first (in the Dogfight smoke, two minutes). No wind exists yet. The pattern was tuned on the L1 jet at 60 % fuel.
 - **Slice 3b:** the formation gains are tuned on the L1 jet at 5,000 ft and 350 kt; the path gain sits 1.6× inside where the hold rings (METHODOLOGY C42), so another level, weight or speed needs the sweep again. Joining from ahead of the leader is not tested (the wingman slows to 250 kt and lets it pass). The AI budget was not re-measured for formation (slice 3e measures four aircraft). Not yet flown by a human on the wing.
 
 ---
@@ -99,11 +101,19 @@
   - Air Wing tests (`SeatRosterTests`, 4): the cycle in id order, wrapping; the jet left goes to its own seat or holds; the player takes over at the jet's throttle; a crashed jet is skipped, and the pick list's words.
 - [x] **Smoke in Dogfight** (play mode, the wingman added unsaved, the scene's sea and land, PhysX contacts): the wingman was in the slot about 36 s after the start and held it to 0.0–0.3 m while the hands-off player jet drifted up to 674 kt (Mach 1.05). At 100 s the seat cycle put the player in the wingman's jet; the player's jet went to its AI, holding course; the pick list read "1 AI · HOLD COURSE", "> 2 YOU". At 115 s the cycle gave it back; the AI was 97 m off the slot and back within 1 m 29 s later, without losing the slot. The scene was then put back from disk and GQ_Range reopened.
 
-### Slice 3c — going home and the break (W41, W47)
-- [ ] Return on the player's order (A3) or at the bingo stand-in (W47, labelled).
-- [ ] The break, as segments on the hands (W41): initial (the runway line at 800 ft, 350 kt), the break (a level turn at about 4 G), downwind (gear and flaps down, slowing), the turn to final, the straight-in final, touchdown, rollout and brakes.
+### Slice 3c — going home and the break (W41, W47) (done 2026-10-27: all pass criteria met; 125/125 tests in both modules, `ec2c5193`)
+- [x] Return on the player's order (A3: `Modules/AviatorOrders`, H or the Xbox D-pad up, every AI pilot not in the player's jet) or at the bingo stand-in (W47: `BingoFlightTimeS`, logged "a flight-time stand-in for bingo fuel"; 0 = never). Home is a `Strip` (`AviatorPilot.homeRunway`); the pilot picks the end whose initial is nearer when it turns for home.
+- [x] The break, as legs on the hands (W41, `Core/Pattern`): **initial** (Navigate's line-following and go-around on a gate at the break point: 800 ft, 350 kt, 3 nm), **break** (a level left turn at the pilot's 70° bank, about 3 G, slowing to 240 kt; *not* the roadmap's "about 4 G": the hands' bank limit sets it), **downwind** (600 ft, 1,500 m abeam, gear and flaps below 250 kt, slowing to 145 kt), **the 180** (a descending left turn at 40° onto the centreline), **final** (the 3° path to a point 300 m in, a flare from 30 ft to 0.8°), **touchdown**, **rollout** (idle, the nose's fall checked, brakes once it is down, the pedals on the centreline), **stopped**. Each leg change is a logged rule. The slow legs fly the *pattern hands* (`PilotProfile.PatternHands`: 40° bank, a lower path gain, a 6° dive limit, a 30 m floor); the ground guard stands down on the final only (`FlightPathRequest.Landing`).
 - [ ] **Pass criteria, fixed now:** from 10 nm out, lands on runway 09/27 with touchdown sink < 12 ft/s, on the centreline within ±5 m, stopped on the runway; each segment within its own height, speed and heading box; no crash in 20 runs from scattered starts.
-- [ ] Smoke: the AI breaks over runway 09/27 and lands in Dogfight.
+  - *The boxes, fixed 2026-10-27 before any tuning* (heights above the runway; a leg's first 10 s are its entry and not boxed): **initial** 650–950 ft, 320–380 kt, track within 10° of the runway; **break** 600–1,000 ft, no more than the pilot's G; **downwind** 450–950 ft, track within 15° of the reciprocal, under 250 kt by its end; **turn to final** 150–950 ft, bank within the pattern's limit plus 10°; **final** within 75 ft of the 3° path down to 100 ft, 135–160 kt, track within 10° of the runway; **touchdown** in the first half of the runway; **rollout** stopped inside the runway's length and width.
+  - *The scattered starts:* 20 seeded starts, 10 nm from the runway's centre on a random bearing, a random heading, 3,000–10,000 ft, 300–450 kt.
+- [x] **Found and fixed while tuning** (the criteria and boxes stayed as fixed; the turn to final's box was added before tuning):
+  - The break first asked for the approach speed at 70° of bank: the jet came round at 167 kt and 31° of attack and **stalled** onto downwind. The break now slows to 240 kt; the rest comes off on downwind.
+  - In the turn to final the route's path gain (0.25 G per degree) **pushed to −0.2 G and dived at −24°**: at 145 kt a G moves the path 2.4 times faster than at 350 kt (METHODOLOGY C43). The pattern hands use 0.1, a 6° dive limit, and keep the ground guard at 30 m.
+  - A carrot of a turn radius (680 m) on the final left the jet **44 m off the centreline** at 700 m out and touching down 10 m off; the final's own carrot is 300 m.
+  - The rollout's stick, copied from Air Wing's landing test (aft in proportion to pitch), **rotated the jet again after the flare at 141 kt and struck the tail**. It now only checks the nose's fall.
+- [x] **Pass criteria, met** (headless, every part L1, the ground everywhere at the runway's height, 20 seeded starts 10 nm out, 3,000–10,000 ft, 300–450 kt, any heading): all 20 stopped on the runway, none crashed; touchdown 10.2 ft/s (limit 12), 254–258 m past the threshold, 0.0 m off the centreline (limit 5); stopped 1,215–1,221 m down, 0.0 m off; every leg inside its box. The rule log names every leg in order; bingo fires on the tick count, labelled a stand-in.
+- [x] **Smoke in Dogfight** (play mode, the wingman added unsaved, PhysX contacts): joined, ordered home at 45 s, went around once for the initial, then initial, break, downwind, the 180, final; touchdown at 8.4 ft/s, 0.0 m off; stopped 1,225 m down 27 at 330 s. The scene was put back from disk and GQ_Range reopened.
 
 ### Slice 3d — Pilot L1, the fight (W38, W43, W45, W46)
 - [ ] Perception: a field of view and a reaction delay from the profile; last-seen memory (W38).
@@ -171,3 +181,4 @@ Kept for the record. Air Wing now owns the airframe side (W5), and W17, W49 and 
 - **2026-10-26** — SIX confirmed A1–A6. Slice 3a done: the AI pilot flies Dogfight's four gates through the stick (L1 law hands, sticky go-around, logged rules; `92eaaaff`), 113/113 tests in both modules, the AI budget met (3–4 µs per pilot per tick). Found: an aim point inside the turn orbits for ever (AP31); a look-ahead shorter than the turn radius swings (C41); a float clock moved the watch (AP26).
 - **2026-10-27** — Slice 3b done at SIX's go: Join and Fingertip on the leader, the seat cycle and the pick list (Air Wing), 122/122 tests in both modules; the join in 76.7 s, the hold within 6.8 / 2.3 / 4.2 m through a turn and a 2 G pull. A7–A8 proposed (BLUEPRINT Q2). Found: following on position alone is late and overshoots (AP32); a throttle integral clamped short of the cruise setting (AP33); tune by a sweep and ship the margin (C42).
 - **2026-10-27** — SIX confirmed A7 (formation flown every tick) and A8 (the seat roster in Air Wing) as written.
+- **2026-10-27** — Slice 3c done (SIX: "finish out phase 3"): going home on the order (A3) or the bingo stand-in, the overhead break and the landing on 09/27, 125/125 tests; 20 of 20 scattered starts land at 10.2 ft/s on the centreline. Found: a path gain in G per degree is a loop gain that grows as the speed falls (C43).

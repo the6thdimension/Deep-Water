@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace DeepWater.Aviator.Core
 {
-    /// <summary>What the pilot is doing (W36). Slice 3a has the first two, 3b Join and Fingertip; Return, Break, Land and Fight follow.</summary>
+    /// <summary>What the pilot is doing (W36). Slice 3a has the first two, 3b Join and Fingertip, 3c Home and Landed; Fight follows.</summary>
     public enum PilotMode : byte
     {
         /// <summary>Flying a route, gate by gate.</summary>
@@ -14,6 +14,10 @@ namespace DeepWater.Aviator.Core
         Join = 2,
         /// <summary>Holding the fingertip slot on a leader (W40).</summary>
         Fingertip = 3,
+        /// <summary>Going home: the initial, the break, the pattern and the landing, leg by leg (W41, W47).</summary>
+        Home = 4,
+        /// <summary>Stopped on the runway.</summary>
+        Landed = 5,
     }
 
     /// <summary>One rule firing (C19): when, whose, which rule, the mode change, and why in words.</summary>

@@ -61,6 +61,49 @@ namespace DeepWater.Aviator.Core
         /// </summary>
         public float SlotRotationShare;
 
+        /// <summary>
+        /// Going home and the break (W41, W47), metres and knots, heights above the runway. The initial: this long, at
+        /// the break height and speed, captured inside this radius of its line; the break this far past the threshold.
+        /// </summary>
+        public float InitialM, InitialCaptureM, InitialKt, BreakAlongM, BreakHeightM;
+        /// <summary>The speed the break slows to, knots: the rest comes off on downwind (slice 3c: slowing to the approach speed in a 70° turn stalled the jet at 31° of attack).</summary>
+        public float BreakKt;
+        /// <summary>Downwind: offset to the left of the centreline, its height; the turn to final starts this far before the threshold.</summary>
+        public float DownwindOffsetM, DownwindHeightM, FinalTurnAlongM;
+        /// <summary>The approach speed, the speed below which gear and flaps come down (knots), and the bank limit in the pattern (degrees).</summary>
+        public float ApproachKt, GearKt, PatternBankDeg;
+        /// <summary>
+        /// The pattern hands' path gain (G per degree), dive limit (degrees) and ground-guard floor (metres): at 145 kt
+        /// a G changes the path 2.4 times faster than at 350 kt, so the route's gain overshoots (slice 3c: a −24° dive
+        /// in the turn to final), and the route's 100 m floor sits above the glide path.
+        /// </summary>
+        public float PatternGPerPathDeg, PatternMaxDiveDeg, PatternFloorAglM;
+        /// <summary>The glide path's angle (degrees), its aim point past the threshold (metres); the flare's height and its last angle.</summary>
+        public float GlidePathDeg, TouchdownM, FlareHeightM, FlarePathDeg;
+        /// <summary>On the final, the carrot ahead on the centreline, metres (short, to pull onto it in time).</summary>
+        public float FinalCarrotM;
+        /// <summary>Rollout: pedal per metre off the centreline and per degree of heading.</summary>
+        public float RolloutPedalPerM, RolloutPedalPerDeg;
+        /// <summary>
+        /// Bingo, as a STAND-IN until fuel burn exists (Air Wing L3, W47): after this many seconds of flight the pilot
+        /// goes home on its own. Zero: never.
+        /// </summary>
+        public float BingoFlightTimeS;
+
+        /// <summary>The hands in the pattern: the route hands, held to the pattern's bank.</summary>
+        public HandsSettings PatternHands
+        {
+            get
+            {
+                HandsSettings h = Hands;
+                h.MaxBankDeg = PatternBankDeg;
+                h.GPerPathDeg = PatternGPerPathDeg;
+                h.MaxDiveDeg = PatternMaxDiveDeg;
+                h.FloorAglM = PatternFloorAglM;
+                return h;
+            }
+        }
+
         /// <summary>The hands a wingman flies with: the route hands, with the formation's height and path gains.</summary>
         public HandsSettings FormationHands
         {
@@ -102,6 +145,23 @@ namespace DeepWater.Aviator.Core
             Positive(SlotClimbDegPerM, nameof(SlotClimbDegPerM));
             Positive(SlotGPerPathDeg, nameof(SlotGPerPathDeg));
             if (!(SlotRotationShare >= 0f && SlotRotationShare <= 1f)) throw new ArgumentOutOfRangeException(nameof(SlotRotationShare), SlotRotationShare, "must be in [0, 1]");
+            Positive(InitialM, nameof(InitialM));
+            Positive(InitialCaptureM, nameof(InitialCaptureM));
+            Positive(InitialKt, nameof(InitialKt));
+            Positive(BreakHeightM, nameof(BreakHeightM));
+            Positive(BreakKt, nameof(BreakKt));
+            Positive(DownwindOffsetM, nameof(DownwindOffsetM));
+            Positive(DownwindHeightM, nameof(DownwindHeightM));
+            Positive(ApproachKt, nameof(ApproachKt));
+            Positive(GearKt, nameof(GearKt));
+            Positive(PatternBankDeg, nameof(PatternBankDeg));
+            Positive(PatternGPerPathDeg, nameof(PatternGPerPathDeg));
+            Positive(PatternMaxDiveDeg, nameof(PatternMaxDiveDeg));
+            Positive(PatternFloorAglM, nameof(PatternFloorAglM));
+            Positive(GlidePathDeg, nameof(GlidePathDeg));
+            Positive(FlareHeightM, nameof(FlareHeightM));
+            Positive(FinalCarrotM, nameof(FinalCarrotM));
+            if (BingoFlightTimeS < 0f) throw new ArgumentOutOfRangeException(nameof(BingoFlightTimeS), BingoFlightTimeS, "must not be negative (zero: never)");
             if (!(LostSlotM > InSlotM)) throw new ArgumentOutOfRangeException(nameof(LostSlotM), LostSlotM, "losing the slot must lie outside being in it");
         }
 

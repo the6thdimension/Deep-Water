@@ -1,5 +1,6 @@
 using UnityEngine;
 using DeepWater.AirWing.Modules.Aircraft;
+using DeepWater.AirWing.Modules.World;
 using DeepWater.AirWing.ScriptableObjects;
 using DeepWater.Aviator.Core;
 using DeepWater.Aviator.ScriptableObjects;
@@ -31,6 +32,10 @@ namespace DeepWater.Aviator.Modules
         [SerializeField] GateCourseSO route;
         [Tooltip("The aircraft to formate on (Wingman).")]
         [SerializeField] int leaderId = 1;
+        [Tooltip("Home (W47): the runway it goes to when ordered home or at bingo. Empty: it has no home.")]
+        [SerializeField] FlatGround homeRunway;
+        [Tooltip("The runway's name, for the rule log and the pick list.")]
+        [SerializeField] string homeRunwayName = "09/27";
         [SerializeField] bool logRules = true;
 
         readonly RuleLog _log = new RuleLog();
@@ -60,10 +65,21 @@ namespace DeepWater.Aviator.Modules
                 ? new AviatorSeat(runner.Flight, view.Aircraft.Profile, p, route.Bake(), _log)
                 : new AviatorSeat(runner.Flight, view.Aircraft.Profile, p, _log);
             if (task == Task.Wingman) _seat.JoinOn(id, leaderId);
+            if (homeRunway != null)
+                _seat.SetHome(new Strip(homeRunwayName, homeRunway.transform.position, homeRunway.transform.eulerAngles.y, homeRunway.LengthM, homeRunway.WidthM));
             runner.Roster.SetOwnSeat(id, _seat);
             string what = task == Task.Route ? $"flying {route.name} ({_seat.Route.Gates.Count} gates)" : task == Task.Wingman ? $"joining aircraft {leaderId}" : "holding course";
             string seated = runner.PlayerAircraftId == id ? "; the player flies it until the seat cycle hands it over" : "";
-            Debug.Log($"[RH Aviator] aircraft {id}: pilot '{p.Name}' {what}{seated}.", this);
+            Debug.Log($"[RH Aviator] aircraft {id}: pilot '{p.Name}' {what}{seated}{(homeRunway != null ? $"; home {homeRunwayName}" : "; no home runway")}.", this);
+        }
+
+        /// <summary>The player's order (A3, <see cref="AviatorOrders"/>): go home and land. Refused without a home runway.</summary>
+        public bool GoHome()
+        {
+            if (_seat == null || !_seat.HasHome) return false;
+            if (_seat.Mode == PilotMode.Home || _seat.Mode == PilotMode.Landed) return false;
+            _seat.GoHome(GetComponent<AircraftView>().AircraftId);
+            return true;
         }
     }
 }

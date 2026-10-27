@@ -75,12 +75,13 @@ the docs and git current; no missile work.
 ## Git
 
 - Every working branch (main, Radar-Suite-Dev, feat/general-quarters, feat/aircraft, feat/environment-maps,
-  Guided-Fury) is levelled to the same commit after each slice; Guided-Fury through PRs (#41 onward tonight,
-  #50 the latest so far). Nothing force-pushed; the archive branch untouched.
+  Guided-Fury) is levelled to the same commit after each slice; Guided-Fury through PRs #41–#59 tonight. At the
+  end every branch sits at the merge of the last PR. Nothing force-pushed; the archive branch untouched.
 - Commits tonight, oldest first: Phase 3 slices (see the RH Aviator ROADMAP change log), then the radar:
   1361552a (radar equation), 840bf7ad (α-β), df24fb14 (track file), e5132a0e (measurement errors), b053aa1f
   (READMEs), 26bd558d (clutter), 7f6372ed (range-rate, C45/C46), c8e62aa4 + c12066e0 (Radar L1 questions), then
-  61594723 (join collision fix).
+  61594723 (join collision fix), c99c4004 (one radar look end to end), 43ed62d6 (root README), 713101bd
+  (wait_artifact.sh), 5a922ddd and 3a7718ff (the two Air Wing test-health fixes).
 
 ## Tests
 

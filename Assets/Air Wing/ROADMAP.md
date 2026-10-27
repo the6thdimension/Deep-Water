@@ -43,7 +43,8 @@ Everything in this table is built, tested and on `main`. The detail behind each 
 
 ### Left open in finished slices
 - **Fly by hand** from real devices. Every device class is proven live at L1 with virtual devices (slice 2e), and SIX has flown it with the pad and flown L1 by hand (2026-10-26); SIX's L1 feedback is still to be written in. A real VelocityOne, a real mouse, and take-off and landing by hand are not yet flown.
-- **Two fly-by-wire targets missed** (slice 2b): G onset 1.2 s against 1.0, and the G limit peaks at 8.08 G against 8.0 in the test. **Live, a keyboard's instant full pull at about 470 kt reached 8.43 G** (slice 2e). Reported, not fixed.
+- **One fly-by-wire target missed** (slice 2b): G onset 1.2 s against 1.0. Reported, not fixed.
+- ~~**The G-limit overshoot**~~ (8.08 G in the 2b test; 8.43 G live from a keyboard's instant full pull at about 470 kt, slice 2e): **accepted by SIX, 2026-10-26** ("g limit overshoot is fine"). Not a defect; see *Parked* for what it may feed.
 - **Not built in the fly-by-wire:** the revised Hornet law's sideslip feedback to the ailerons, the differential stabilator, sensor models.
 - **Landing gear (slice 2d), open:**
   - Not flown by hand: a runway start, take-off and landing from a real device. They are tested in EditMode and the take-off was seen in play from a scripted seat.
@@ -62,6 +63,7 @@ Everything in this table is built, tested and on `main`. The detail behind each 
 
 ### Parked
 - **Carrier operations:** waiting until Phase 3 is done (W16).
+- **G-induced loss of consciousness (the pilot passing out):** SIX's idea, 2026-10-26: the fly-by-wire's G overshoot could feed a pilot model that greys out and blacks out under sustained G. Nothing decided; revisit when the pilot or the cockpit view is modelled.
 
 ---
 
@@ -242,7 +244,7 @@ The gate: the F/A-18E flies in the rebuilt Dogfight at L0, from each device clas
 - [x] **Found and fixed:** slice 1d's `RunwayStrip` was a MonoBehaviour declared inside `SceneSurface.cs`, so a scene would have saved it as a missing script. It moved to its own file as `FlatGround`, which also serves land (METHODOLOGY C32).
 - [x] Out of the scene: the `F-18 (1) Variant` (`FighterJetController`), the two switched-off FDS F-18Es, the `RH_RadarModule`, the AerialArcade waypoints, `Cat 1` and the old engine audio. `DogfightSceneTests` reads the saved scene: only Air Wing, Sea State and Unity scripts, none missing, one runner, one seat, one course, one sea, two pieces of ground, one Air Wing jet.
 - [x] Archived (W19) to `Assets/_Archive/Dogfight_legacy/` with the C25 checklist (`README.md` there), GUIDs kept: `FighterJetController.cs` and `WaypointManager.cs` (from `_SCENES/Rocket/`; the second needs the first to compile), `WaypointManager (1).prefab` (unused), `F-18 (1) Variant.prefab`. GUID scan: nothing else references them.
-- [~] Play-mode check per device class. **What is proven:**
+- [x] Play-mode check per device class. **Closed 2026-10-26 by slice 2e:** every device class flown live in Dogfight at L1 with virtual devices (pad, HID stick, keyboard, mouse instructor). Before that, **what was proven:**
   - in EditMode, every device class through its bindings (`DeviceBindingTests`, slice 1c);
   - Dogfight's start, course asset and gate logic through the flight core (`GateCourseTests.TheDogfightStart_FliesThroughGate1`: gate 1 at 22.0 s, 479 kt, 5,000 ft, 0.0 m off centre);
   - SIX flew Dogfight in the Editor with a gamepad. Seen read-only: the seat owner was `Gamepad` at tick 372; no Air Wing errors in the log; no gate flown before SIX stopped.
@@ -263,10 +265,10 @@ The gate: the F/A-18E flies in the rebuilt Dogfight at L0, from each device clas
   - The player is `Builds/AirWingBenchmark/` (git-ignored): **Deep Water → Air Wing → Build Benchmark Player**, then `AirWingBenchmark.exe -batchmode -nographics -airwingBenchOut <file>`. The first player build of the project took 16.5 min (HDRP shaders): 356 MB, 0 errors, 140 warnings.
   - Allocation is **not measured**: `GC.GetAllocatedBytesForCurrentThread` returns 0 in Unity's Mono, even for a 100 kB array, so the harness prints no figure rather than a false zero.
 - [x] METHODOLOGY: AP25 (pure pursuit near the ground, as a pilot or an instructor) and C32 (one MonoBehaviour per file, and a scene test that fails on a missing script); C25 exercised again.
-- [~] *Done when:*
+- [x] *Done when* (**Phase 1 closed 2026-10-26** at SIX's word, its last item met by slice 2e):
   - all Air Wing tests pass: **met**, 59/59;
   - the replay test is bit-identical: **met**, `SeatTests.ReplayingTheInputLog_ReproducesTheFixBitForBit`;
-  - Dogfight flies from all three device classes in the Editor: **partly met**. Bindings are proven in EditMode; SIX flew it with a gamepad; Claude's live run was not done, and the stick and the mouse have not been flown live in Dogfight;
+  - Dogfight flies from all three device classes in the Editor: **met** (slice 2e, live with virtual devices; SIX flew it with a gamepad). The stick and mouse by hand on real hardware are left to SIX;
   - the budget is measured: **met**;
   - the slice 0 and 1e archives carry their checklists: **met**.
 - *Anti-goals for Phase 1:* no landing gear or ground handling; no 6-DOF; no AI pilot; no carrier; no weapons; no cockpit view; no helicopter; no change to the project's fixed timestep; no edits to vendor code or to the original F-18E model and prefab.
@@ -419,7 +421,7 @@ SIX's picks: contacts as W4 says, with spring-damper struts; a brake button (Spa
   - one aircraft costs ≤ 0.05 ms per fixed step in a player: **met**, 18 µs airborne, 13 µs on the wheels.
 - *Anti-goals for Phase 2, held:* no Mach effects or ground effect (L2); no fuel burn or moving centre of gravity (L3); no AI pilot; no carrier; no weapons; no cockpit view; no helicopter; no vendor code edited; no change to the project's fixed timestep.
 
-## Phase 3 — AI pilots (outline; RH Aviator, W5, W17, W18)
+## Phase 3 — AI pilots (outline; RH Aviator, W5, W17, W18; interview begun 2026-10-26, W36–W39 locked)
 - [ ] RH Aviator Phase 0 (its own roadmap): an AI seat against Air Wing's `ISeat` and `PilotInputs`; named, logged rules (C19).
 - [ ] AI L0: waypoints, wingman formation, return to base with an approach and landing on the Dogfight runway.
 - [ ] Switchable seats with a real AI seat in place of `HoldSeat`.
@@ -444,5 +446,6 @@ Revisit when Phase 3 is done. The questions for SIX are in BLUEPRINT §7.
 - **2026-10-26** — Slice 2c done: Powerplant L1 (spool), the scenes fly L1, the budget met in a player (17 µs per aircraft per step after caching the lift peak, ×2.2); 87/87 tests.
 - **2026-10-26** — Roadmap split into DONE and STILL TO DO at SIX's request (e322f5a7).
 - **2026-10-26** — Slice 2d done (8343959b): Landing Gear L1 on spring-damper struts over PhysX contacts, brakes, nosewheel steering, a runway start, take-off and landing; 99/99 tests. Found and fixed: the sink rate measured along a tilted strut, the flaps missing from the law's lift inversion, the runway start's throttle. Open for SIX: a hands-off touchdown breaks the nose gear.
+- **2026-10-26** — SIX: Phase 1 closed (its live device check met by 2e); the G-limit overshoot accepted, and G-LOC parked as an idea. Phase 3 interview, round 1: W36–W39 locked, all as Claude leaned.
 - **2026-10-26** — Slice 2e done (a108970b): **Phase 2 complete.** Every device class flown live at L1 in Dogfight; a landing on runway 09/27 in the scene; the budget met with the gear (18 µs airborne, 13 µs on the wheels on PhysX, per aircraft per step in a player); nothing first-party superseded. Found: an unfocused Editor reads no keyboard or mouse (AP30); a keyboard step pull overshoots the G limit to 8.43 G.
 - **2026-10-26** — (d9cedd4c) Slice 2d follow-up at SIX's word: the struts stiffen over their last 30 % (a hands-off touchdown survives) and the model's gear retracts and extends with the core (`GearRig`, hinges solved off the geometry); 103/103 tests.

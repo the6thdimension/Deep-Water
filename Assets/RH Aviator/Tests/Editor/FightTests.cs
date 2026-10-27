@@ -6,6 +6,7 @@ using UnityEditor;
 using UnityEngine;
 using DeepWater.AirWing.Core;
 using DeepWater.AirWing.Core.Fidelity;
+using DeepWater.AirWing.Core.Inputs;
 using DeepWater.AirWing.Core.Profiles;
 using DeepWater.AirWing.Core.Seats;
 using DeepWater.AirWing.Core.Simulation;
@@ -112,6 +113,95 @@ namespace DeepWater.Aviator.Tests
             Assert.GreaterOrEqual(wins, 15, "the ace beats the rookie on rear-cone time in at least 15 of 20");
         }
 
+        /// <summary>One fight of any size: who flies (a pilot, or null for a hands-off jet), which side, where; scored for <paramref name="seconds"/>.</summary>
+        sealed class Brawl
+        {
+            public Engagement Fight;
+            public string Crash;
+            public float LowestFt = float.MaxValue, ClosestM = float.MaxValue;
+            public int ConeEvents;
+        }
+
+        static Brawl Fly(in AircraftProfile e, (PilotProfile? pilot, Side side, Vector3 at, float heading)[] jets, float seconds, int hunted)
+        {
+            var core = new FlightCore(new SubstepClock(0.02f, 4), new FlatSurface(0f));
+            var b = new Brawl { Fight = new Engagement { Hunted = () => hunted } };
+            var seats = new List<(int id, AviatorSeat seat)>();
+            for (int i = 0; i < jets.Length; i++)
+            {
+                int id = i + 1;
+                ISeat seat;
+                if (jets[i].pilot.HasValue) { var a = new AviatorSeat(core, e, jets[i].pilot.Value, new RuleLog()); seats.Add((id, a)); seat = a; }
+                else seat = new HoldSeat(new DeepWater.AirWing.Core.Inputs.PilotInputs { Throttle = 0.8f });
+                core.Add(AircraftFactory.Build(id, e, L1, Start(e, jets[i].at, jets[i].heading, 400f)), seat);
+                b.Fight.Join(id, jets[i].side);
+            }
+            foreach (var (id, seat) in seats) seat.FightIn(id, b.Fight);
+            while (core.Tick < seconds * 50 && b.Crash == null)
+            {
+                core.Step();
+                b.Fight.Score(core);
+                var all = core.Aircraft;
+                for (int i = 0; i < all.Count; i++)
+                {
+                    if (all[i].State.Status == FlightStatus.Crashed) b.Crash = $"aircraft {all[i].Id}: {all[i].CrashReason}";
+                    b.LowestFt = Mathf.Min(b.LowestFt, all[i].State.Position.y / Ft);
+                    for (int j = i + 1; j < all.Count; j++) b.ClosestM = Mathf.Min(b.ClosestM, (all[i].State.Position - all[j].State.Position).magnitude);
+                }
+            }
+            b.ConeEvents = b.Fight.Log.Count;
+            return b;
+        }
+
+        /// <summary>
+        /// The dogfight survey (SIX 2026-10-27: "extensively test dogfighting with multiple air entities"), not a pass
+        /// criterion: merges of every pairing, 1 v 2, 2 v 2, the 4 v 4 with the player fighting and hands off, all
+        /// logged under [Aviator survey]: rear-cone seconds per side, crashes, the lowest height, the closest pass.
+        /// </summary>
+        [Test, Explicit("the dogfight survey")]
+        public void Survey()
+        {
+            AircraftProfile e = E();
+            PilotProfile rookie = Pilot(AviatorTools.RookiePilotPath), line = Pilot(AviatorTools.LinePilotPath), ace = Pilot(AviatorTools.AcePilotPath);
+            void Merges(string name, PilotProfile blue, PilotProfile red, int n)
+            {
+                int blueAhead = 0, redAhead = 0, crashes = 0;
+                double bs = 0, rs = 0;
+                float lowest = float.MaxValue;
+                for (int i = 0; i < n; i++)
+                {
+                    var rng = new DeterministicRng((ulong)(7000 + i));
+                    float h = (9000f + 2000f * rng.NextFloat01()) * Ft, off = (rng.NextFloat01() < 0.5f ? -1f : 1f) * (200f + 300f * rng.NextFloat01());
+                    Brawl b = Fly(e, new (PilotProfile?, Side, Vector3, float)[] { (blue, Side.Blue, new Vector3(0f, h, -3000f), 0f), (red, Side.Red, new Vector3(off, h, 3000f), 180f) }, 180f, 0);
+                    double x = b.Fight.SecondsInCone(1), y = b.Fight.SecondsInCone(2);
+                    bs += x; rs += y;
+                    if (x > y) blueAhead++; else if (y > x) redAhead++;
+                    if (b.Crash != null) crashes++;
+                    lowest = Mathf.Min(lowest, b.LowestFt);
+                }
+                Debug.Log(FormattableString.Invariant($"[Aviator survey] {name}, {n} merges of 180 s: blue ahead {blueAhead}, red ahead {redAhead}, even {n - blueAhead - redAhead}; cone blue {bs:F0} s, red {rs:F0} s ({bs / n:F1} / {rs / n:F1} a fight); crashes {crashes}; lowest {lowest:F0} ft"));
+            }
+            Merges("ace (blue) v rookie (red)", ace, rookie, 20);
+            Merges("line v line", line, line, 20);
+            Merges("ace v line", ace, line, 20);
+            Merges("rookie v ace", rookie, ace, 20);
+
+            void Report(string name, Brawl b) => Debug.Log(FormattableString.Invariant(
+                $"[Aviator survey] {name}: cone blue {b.Fight.SideSeconds(Side.Blue):F1} s, red {b.Fight.SideSeconds(Side.Red):F1} s; {b.ConeEvents} cone events; lowest {b.LowestFt:F0} ft; closest {b.ClosestM:F0} m{(b.Crash != null ? "; CRASH " + b.Crash : "")}"));
+            Report("1 v 2 (ace blue v two line red)", Fly(e, new (PilotProfile?, Side, Vector3, float)[] {
+                (ace, Side.Blue, new Vector3(0f, 3048f, -3000f), 0f), (line, Side.Red, new Vector3(-200f, 3048f, 3000f), 180f), (line, Side.Red, new Vector3(200f, 3048f, 3200f), 180f) }, 300f, 0));
+            Report("2 v 2 (line pair v line pair)", Fly(e, new (PilotProfile?, Side, Vector3, float)[] {
+                (line, Side.Blue, new Vector3(0f, 3048f, -3000f), 0f), (line, Side.Blue, new Vector3(60f, 3048f, -3060f), 0f),
+                (line, Side.Red, new Vector3(-200f, 3048f, 3000f), 180f), (line, Side.Red, new Vector3(-140f, 3048f, 3060f), 180f) }, 300f, 0));
+            var fourVFour = new List<(PilotProfile?, Side, Vector3, float)>();
+            PilotProfile[] reds = { rookie, line, line, ace };
+            for (int i = 0; i < 4; i++) fourVFour.Add((line, Side.Blue, new Vector3(60f * i, 3048f, -60f * i), 0f));
+            for (int i = 0; i < 4; i++) fourVFour.Add((reds[i], Side.Red, new Vector3(-300f + 200f * i, 3500f, 20000f), 180f));
+            Report("4 v 4, the player's jet fighting (line)", Fly(e, fourVFour.ToArray(), 300f, 1));
+            fourVFour[0] = (null, Side.Blue, fourVFour[0].Item3, 0f);
+            Report("4 v 4, the player's jet hands off", Fly(e, fourVFour.ToArray(), 300f, 1));
+        }
+
         [Test]
         public void APilot_DoesNotTurnTowardWhatItCannotSee_UntilItsDelayHasPassed()
         {
@@ -167,6 +257,7 @@ namespace DeepWater.Aviator.Tests
                 core.Add(AircraftFactory.Build(id, e, L1, Start(e, at, blue ? 0f : 180f, 400f)), seats[id]);
                 fight.Join(id, blue ? Side.Blue : Side.Red);
             }
+            for (int id = 2; id <= 4; id++) seats[id].JoinOn(id, 1, id - 1);   // the flight's slots: left, right, outside right
             for (int id = 1; id <= 8; id++) seats[id].FightIn(id, fight);
             string crash = null;
             void Run(long untilTick)
@@ -183,6 +274,12 @@ namespace DeepWater.Aviator.Tests
             for (int id = 5; id <= 8; id++) fight.Leave(id);
             // Up to five minutes to be back on the player's wing, from wherever the fight left them.
             for (long until = core.Tick + 300 * 50; core.Tick < until && crash == null && !Enumerable.Range(2, 3).All(i => seats[i].Mode == PilotMode.Fingertip);) Run(core.Tick + 50);
+            for (int i = 1; i <= 4; i++)
+            {
+                AirframeState w = core.Find(i).State, lead = core.Find(1).State;
+                Debug.Log(($"[Aviator 3d] 4v4 at the end: aircraft {i} {seats[i].Mode} {seats[i].Pursuit}, {(w.Position - lead.Position).magnitude:F0} m from 1, {w.Velocity.magnitude / Kt:F0} kt, {w.Position.y / Ft:F0} ft; rules after 300 s: " +
+                          string.Join(" | ", logs[i].Firings.Where(f => f.Tick > 300 * 50).Select(f => $"{f.Tick / 50f:F0}s {f.Rule} ({f.Reason})").Take(6))));
+            }
             Debug.Log($"[Aviator 3d] 4v4: red left at 300 s; blue's wingmen {(Enumerable.Range(2, 3).All(i => seats[i].Mode == PilotMode.Fingertip) ? "all back in fingertip" : "not all back")} at {core.Tick / 50f:F0} s");
 
             foreach (int id in seats.Keys)
@@ -198,6 +295,9 @@ namespace DeepWater.Aviator.Tests
                 Assert.IsTrue(logs[id].Firings.Any(f => f.Rule == "clear"), $"blue {id} went clear when red left");
                 Assert.AreEqual(PilotMode.Fingertip, seats[id].Mode, $"blue {id} is back in fingertip on the player");
             }
+            for (int a = 2; a <= 4; a++)
+                for (int b = a + 1; b <= 4; b++)
+                    Assert.Greater((core.Find(a).State.Position - core.Find(b).State.Position).magnitude, 30f, $"blue {a} and {b} fly their own slots");
             Assert.Greater(fight.SideSeconds(Side.Blue) + fight.SideSeconds(Side.Red), 0.0, "somebody got into somebody's rear cone");
         }
 

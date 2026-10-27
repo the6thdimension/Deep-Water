@@ -27,8 +27,20 @@ namespace DeepWater.Aviator.Core
         readonly Vector3 _leader, _leaderForward, _leaderRight, _offset;
         readonly float _speedH, _climbMps, _turnRateRadS;
 
-        public Slot(in AirframeState lead, in PilotProfile p)
+        /// <param name="position">
+        /// Which slot in a flight (slice 3d: three wingmen all flew the one right-wing slot, on top of each other):
+        /// 0 the profile's own; 1 the left wing; 2 the right wing; 3 outside the right wing, twice as far out and back.
+        /// </param>
+        public Slot(in AirframeState lead, in PilotProfile p, int position = 0)
         {
+            float side = Mathf.Abs(p.SlotRightM), back = p.SlotBackM, right;
+            switch (position)
+            {
+                case 1: right = -side; break;
+                case 2: right = side; break;
+                case 3: right = 2f * side; back *= 2f; break;
+                default: right = p.SlotRightM; break;
+            }
             Vector3 vh = lead.Velocity;
             vh.y = 0f;
             _speedH = vh.magnitude;
@@ -37,7 +49,7 @@ namespace DeepWater.Aviator.Core
             _leaderRight = Vector3.Cross(Vector3.up, f);
             _leader = lead.Position;
             _climbMps = lead.Velocity.y;
-            _offset = _leaderRight * p.SlotRightM - f * p.SlotBackM + Vector3.up * p.SlotUpM;
+            _offset = _leaderRight * right - f * back + Vector3.up * p.SlotUpM;
 
             // The leader's turn and climb, without history, part from how it is rotating (its body rates turned into
             // the world) and part from its G (γ̇ = (n cos φ − cos γ) g / V), shared by the profile. In a steady turn the two agree; in a pull
@@ -148,6 +160,17 @@ namespace DeepWater.Aviator.Core
             // aimed on the slot's predicted arc instead: the aim swung with every change in the leader's turn rate and
             // the wingman over-rolled each time, +22° then −15° round the leader's pull, and drifted 11 m across.
             float aheadM = p.SlotLookAheadM + Mathf.Max(0f, along);
+            // Joining slow from below, level off and get the speed back before climbing to the slot (slice 3d: wingmen
+            // rejoining from a fight 2,000 ft below at 160–220 kt hung in a full-afterburner climb and never closed).
+            bool slowBelow = joining && flown < p.JoinMinKt * (float)Units.KnotToMetrePerSecond && slot.Position.y > s.Position.y;
+            if (slowBelow)
+                return new FlightPathRequest
+                {
+                    AimWorld = slot.Position + slot.Forward * aheadM,
+                    AltitudeM = s.Position.y,
+                    SpeedMps = speed,
+                    Switches = switches,
+                };
             return new FlightPathRequest
             {
                 AimWorld = slot.Position + slot.Forward * aheadM,

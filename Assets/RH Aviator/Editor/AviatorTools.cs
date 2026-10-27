@@ -4,6 +4,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using DeepWater.AirWing.Modules.Aircraft;
 using DeepWater.AirWing.ScriptableObjects;
+using DeepWater.Aviator.Core;
 using DeepWater.Aviator.Modules;
 using DeepWater.Aviator.ScriptableObjects;
 
@@ -62,7 +63,8 @@ namespace DeepWater.Aviator.Editor
             // The fight (Pilot L1, W38, W45). AUTHORED: a game's skill numbers, not any real pilot's or air force's.
             so.fieldOfViewDeg = 120f; so.reactionDelayS = 0.7f; so.memoryS = 8f; so.visualRangeM = 8000f;
             so.cornerKt = 330f; so.leadS = 1f; so.lagS = 1f; so.lagRangeM = 800f; so.overshootClosureKt = 60f; so.lagSlowKt = 40f;
-            so.threatRangeM = 1500f; so.threatConeDeg = 60f; so.fightFloorM = 300f; so.clearRangeM = 8000f; so.slowKt = 220f; so.turnMatch = 0.7f;
+            so.threatRangeM = 1500f; so.threatConeDeg = 60f; so.fightFloorM = 300f; so.clearRangeM = 8000f; so.slowKt = 220f; so.turnMatch = 0.7f; so.rangeKtPerM = 0.05f; so.attackRangeM = 600f; so.chaseOverKt = 150f;
+            so.avoidM = 100f; so.avoidS = 3f;
             so.provenance =
                 "All AUTHORED (RH Aviator W45; no public source describes a generic line pilot), tuned headless against slice 3a's " +
                 "pass criteria (ROADMAP, fixed before tuning). Hands: guidanceGain (2, the classic value of the L1 path-following law, Park, Deyst and How, AIAA 2004-4900, PUBLIC method), maxBankDeg, rollRatePerBankDeg, climbDegPerM, " +
@@ -78,7 +80,7 @@ namespace DeepWater.Aviator.Editor
                 "downwindOffsetM, downwindHeightM (600 ft), finalTurnAlongM, approachKt (145 kt, as Air Wing's landing test), gearKt, patternBankDeg, patternGPerPathDeg, patternMaxDiveDeg, patternFloorAglM, glidePathDeg, touchdownM, flareHeightM, flarePathDeg, finalCarrotM, " +
                 "rolloutPedalPerM, rolloutPedalPerDeg, bingoFlightTimeS (a STAND-IN for bingo fuel until fuel burn exists; 0 = never). " +
                 "The fight (Pilot L1, W38, W45; a game's skill numbers, AUTHORED, not any real pilot's or air force's): fieldOfViewDeg, reactionDelayS, memoryS, visualRangeM, " +
-                "cornerKt, leadS, lagS, lagRangeM, overshootClosureKt, lagSlowKt, threatRangeM, threatConeDeg, fightFloorM, clearRangeM, slowKt (energy sense; 0 = none), turnMatch.";
+                "cornerKt, leadS, lagS, lagRangeM, overshootClosureKt, lagSlowKt, threatRangeM, threatConeDeg, fightFloorM, clearRangeM, slowKt (energy sense; 0 = none), turnMatch, rangeKtPerM, attackRangeM, chaseOverKt (range control; 0 = none), avoidM, avoidS (collision avoidance).";
             EditorUtility.SetDirty(so);
             AssetDatabase.SaveAssets();
             so.Bake();   // throws if anything is out of shape
@@ -99,8 +101,8 @@ namespace DeepWater.Aviator.Editor
             {
                 so.maxG = 4.5f; so.maxBankDeg = 60f;
                 so.fieldOfViewDeg = 90f; so.reactionDelayS = 1.2f; so.memoryS = 4f; so.visualRangeM = 6000f;
-                so.cornerKt = 380f; so.leadS = 0f; so.lagS = 0f; so.threatRangeM = 1000f; so.slowKt = 0f; so.turnMatch = 0f;
-            }, "Rookie, from the line pilot (AUTHORED): maxG 4.5, maxBankDeg 60, fieldOfViewDeg 90, reactionDelayS 1.2, memoryS 4, visualRangeM 6000, cornerKt 380 (fights too fast), leadS 0 and lagS 0 (pure pursuit only), threatRangeM 1000, slowKt 0 (no energy sense), turnMatch 0.");
+                so.cornerKt = 380f; so.leadS = 0f; so.lagS = 0f; so.threatRangeM = 1000f; so.slowKt = 0f; so.turnMatch = 0f; so.rangeKtPerM = 0f;
+            }, "Rookie, from the line pilot (AUTHORED): maxG 4.5, maxBankDeg 60, fieldOfViewDeg 90, reactionDelayS 1.2, memoryS 4, visualRangeM 6000, cornerKt 380 (fights too fast), leadS 0 and lagS 0 (pure pursuit only), threatRangeM 1000, slowKt 0 (no energy sense), turnMatch 0, rangeKtPerM 0 (no range control).");
             Write(AcePilotPath, line, "ace", so =>
             {
                 so.maxG = 7f; so.maxBankDeg = 75f;
@@ -149,6 +151,64 @@ namespace DeepWater.Aviator.Editor
             if (runway != null) own.FindProperty("homeRunway").objectReferenceValue = runway.GetComponent<DeepWater.AirWing.Modules.World.FlatGround>();
             own.ApplyModifiedProperties();
             Debug.Log($"[RH Aviator] The player's jet (aircraft {player.AircraftId}) has an AI pilot too, holding course while the player is elsewhere.");
+        }
+
+        /// <summary>
+        /// SIX's 4 v 4 (2026-10-27; W43 at eight, W52, W53): three blue wingmen (line) in echelon behind the player,
+        /// four red (rookie, line, line, ace) 20 km ahead and coming the other way at 6,000 ft, an AI pilot in the
+        /// player's own jet (it fights when the player cycles away), the fight with its score panel, and the orders.
+        /// Unsaved. Red hunts whichever jet the player flies. No weapons: rear-cone seconds only.
+        /// </summary>
+        [MenuItem("Deep Water/RH Aviator/Add 4 v 4 Dogfight to the Open Scene")]
+        public static void AddFourVersusFour()
+        {
+            ApplyPilotProfiles();
+            AircraftView player = null;
+            int maxId = 0;
+            foreach (var v in Object.FindObjectsByType<AircraftView>(FindObjectsSortMode.None))
+            {
+                if (v.AircraftId > maxId) maxId = v.AircraftId;
+                if (v.Seat == AircraftView.StartSeat.Player) player = v;
+            }
+            if (player == null) { Debug.LogError("[RH Aviator] no player jet in the open scene; nothing added."); return; }
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(JetPrefabPath);
+            var runway = GameObject.Find("Runway 09-27");
+            Transform p = player.transform;
+            float startKt = new SerializedObject(player).FindProperty("startSpeedKt").floatValue;
+            void Jet(string name, Vector3 offset, float yaw, string pilotPath, AviatorPilot.Task task, Side side, int id, bool own = false)
+            {
+                GameObject jet = own ? player.gameObject : (GameObject)PrefabUtility.InstantiatePrefab(prefab, player.gameObject.scene);
+                if (!own)
+                {
+                    jet.name = name;
+                    jet.transform.SetPositionAndRotation(p.position + p.rotation * offset, p.rotation * Quaternion.Euler(0f, yaw, 0f));
+                    var view = new SerializedObject(jet.GetComponent<AircraftView>());
+                    view.FindProperty("aircraftId").intValue = id;
+                    view.FindProperty("seat").enumValueIndex = (int)AircraftView.StartSeat.Hold;
+                    view.FindProperty("startSpeedKt").floatValue = startKt;
+                    view.ApplyModifiedProperties();
+                    Undo.RegisterCreatedObjectUndo(jet, "Add 4 v 4");
+                }
+                // Not ?? : in the Editor a missing component comes back as a fake null that ?? does not see.
+                AviatorPilot pilot = jet.GetComponent<AviatorPilot>();
+                if (pilot == null) pilot = Undo.AddComponent<AviatorPilot>(jet);
+                var ai = new SerializedObject(pilot);
+                ai.FindProperty("profile").objectReferenceValue = AssetDatabase.LoadAssetAtPath<PilotProfileSO>(pilotPath);
+                ai.FindProperty("task").enumValueIndex = (int)task;
+                ai.FindProperty("side").enumValueIndex = (int)side;
+                ai.FindProperty("leaderId").intValue = player.AircraftId;
+                ai.FindProperty("slotPosition").intValue = side == Side.Blue && !own ? id - maxId : 0;   // 1 left, 2 right, 3 outside right
+                if (runway != null) ai.FindProperty("homeRunway").objectReferenceValue = runway.GetComponent<DeepWater.AirWing.Modules.World.FlatGround>();
+                ai.ApplyModifiedProperties();
+            }
+            Jet(null, Vector3.zero, 0f, LinePilotPath, AviatorPilot.Task.Fight, Side.Blue, player.AircraftId, own: true);
+            for (int i = 1; i <= 3; i++) Jet($"Blue {i + 1}", new Vector3(60f * i, 0f, -60f * i), 0f, LinePilotPath, AviatorPilot.Task.Fight, Side.Blue, maxId + i);
+            string[] reds = { RookiePilotPath, LinePilotPath, LinePilotPath, AcePilotPath };
+            for (int i = 0; i < 4; i++) Jet($"Red {i + 1}", new Vector3(-300f + 200f * i, 300f, 20000f), 180f, reds[i], AviatorPilot.Task.Fight, Side.Red, maxId + 4 + i);
+            if (Object.FindAnyObjectByType<AviatorFight>() == null) Undo.AddComponent<AviatorFight>(new GameObject("RH Aviator Fight"));
+            if (Object.FindAnyObjectByType<AviatorOrders>() == null) Undo.AddComponent<AviatorOrders>(new GameObject("RH Aviator Orders"));
+            EditorSceneManager.MarkSceneDirty(player.gameObject.scene);
+            Debug.Log($"[RH Aviator] Added the 4 v 4: blue {player.AircraftId}, {maxId + 1}–{maxId + 3}; red {maxId + 4}–{maxId + 7} (rookie, line, line, ace), 20 km ahead. The scene is not saved.");
         }
 
         /// <summary>Adds an AI jet at <paramref name="offset"/> from the player's (its frame); returns the player's view, or null.</summary>

@@ -204,6 +204,9 @@ SIX's picks: G30 effects reused where they fit and built in code where they don'
     - saturation (24) on the range loadout, AI as TAO: 24 killed, 0 leaked at Douglas 4 and in a calm sea; 0.064 ms per
       fixed step against the 1 ms budget;
     - one closing sea-skimmer with the AI as TAO: the ESSM leaves at 3.5 s, one look later than at L0 (3.0 s).
+    - **in play mode on the range** (SIX's Editor, Douglas 4 from Sea State, the Standard raid): 10 tracks made, none dropped;
+      the aircraft confirmed at 79.9 km and each sea-skimmer at about 27.5 km, its horizon; 8 of 8 sea-skimmers killed;
+      track error mostly 20–60 m against truth.
   - **Found, and proposed (G70, Q7; not decided):** constant-γ overstates clutter at a 20 m mast's sub-degree grazing,
     and the core has no Doppler. With γ alone a −10 dBsm sea-skimmer's Pd per look at 10 km is 0.003 at Douglas 3 and
     0.000 at Douglas 4, and the saturation raid at Douglas 4 kills 4 and leaks 20. With an AUTHORED 30 dB clutter

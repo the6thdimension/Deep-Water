@@ -1,6 +1,6 @@
 # Air Wing — blueprint
 
-> **Status: LOCKED BLUEPRINT (W1–W35); Phases 1 and 2 done (2026-10-26): the F/A-18E flies at L1 from every device class, takes off and lands, and meets its budget. Phase 3 (AI pilots) waits for SIX's go.** SIX answered all 24 questions on 2026-10-24 (W1–W24) and locked W25–W31 on 2026-10-25. Progress is in `ROADMAP.md`.
+> **Status: LOCKED BLUEPRINT (W1–W39); Phases 1 and 2 closed (2026-10-26): the F/A-18E flies at L1 from every device class, takes off and lands, and meets its budget. Phase 3 (AI pilots): interview begun, W36–W39 locked.** SIX answered all 24 questions on 2026-10-24 (W1–W24) and locked W25–W31 on 2026-10-25. Progress is in `ROADMAP.md`.
 > **This document's one job:** say what Air Wing is and why, record every decision behind it, and define the contract each part of an aircraft follows. Work order and progress live in `ROADMAP.md`, not here. The stock-take that preceded it is summarised in §1.
 
 ## 1. In plain language
@@ -170,6 +170,10 @@ All entries W1–W24 are SIX's picks of 2026-10-24, in round order. "Leaning" is
 | W33 | Departure at L1 | **Physics decides.** The fly-by-wire limits angle of attack and G as the Hornet's does, but the airframe obeys its tables: abused at its corners (low speed, heavy roll at high angle of attack, full pedal) it can stall, spin or depart. Bad piloting crashes (Q5) | Same | Locked (SIX, 2026-10-26) |
 | W34 | Phase 2 order | **Flying first, gear last:** 2a 6-DOF airframe and aero, headless; 2b fly-by-wire; 2c spool time, L1 in the scenes, the budget; 2d landing gear with runway take-off and landing; 2e phase review | Same | Locked (SIX, 2026-10-26) |
 | W35 | Default level in the scenes | **Switch to L1 once its tests pass; L0 stays selectable** on the fidelity sheet | Same | Locked (SIX, 2026-10-26) |
+| W36 | The AI pilot's brain (Phase 3) | **Modes and named rules:** a small state machine of modes (cruise, join, land, fight) whose switches are named rules, each logged when it fires (C19) | Same | Locked (SIX, 2026-10-26) |
+| W37 | How the AI works the stick | **A shared flight-path layer:** every behaviour asks for a flight path (an aim point, or heading, altitude and speed); one layer flies it with stick and throttle, like the mouse instructor. Tuned once; an autopilot for the player can reuse it | Same | Locked (SIX, 2026-10-26) |
+| W38 | What the AI knows | **Truth at L0; limits for the fight:** at L0 it reads other aircraft's true state. At L1 it sees only inside a field of view, with a reaction delay. Sensors later | Same | Locked (SIX, 2026-10-26) |
+| W39 | Where the first AI slice flies | **Dogfight's gate course:** the AI flies the four gates, which already score speed and altitude; then it joins on the player's wing | Same | Locked (SIX, 2026-10-26) |
 
 ## 6. Standing constraints
 
@@ -197,6 +201,7 @@ All entries W1–W24 are SIX's picks of 2026-10-24, in round order. "Leaning" is
 | **Carrier ops:** launch, trap, the moving deck, wind over the deck, Sea State feeding Carrier Ops' `ISeaStateMotion`, catapults 2–4, a tailhook on the Air Wing jet | W16. **Parked until the AI stream is done.** Questions to ask then: how the deck carries parked aircraft (kinematic Rigidbody or Reckoning), catapult and wire fidelity (constant g or profiled), wind over the deck and the air wake, and Sea State behind `ISeaStateMotion` |
 | Aircraft weapons, countermeasures, sensors (RH Aviator Phases 3–4) | Constraint 8; only if SIX asks |
 | Multi-ship tactics and mission-level AI (RH Aviator Phases 5–6) | After AI L1 |
+| G-induced loss of consciousness (greyout, blackout) | SIX's idea, 2026-10-26: the fly-by-wire's accepted G overshoot could feed it. When the pilot or the cockpit view is modelled |
 | Cockpit view | W11. After the chase camera and HUD prove the numbers |
 | Damage, failures, ejection | Not asked for |
 | VR (HurricaneVR is in the vendor folder) | Not asked for |

@@ -25,6 +25,8 @@ namespace DeepWater.Aviator.Modules
             Wingman,
             /// <summary>Hold the height and speed it has.</summary>
             HoldCourse,
+            /// <summary>Fight on <see cref="side"/> in the scene's <see cref="AviatorFight"/> (slice 3d); a blue wingman rejoins <see cref="leaderId"/>'s wing when clear.</summary>
+            Fight,
         }
 
         [SerializeField] PilotProfileSO profile;
@@ -32,6 +34,10 @@ namespace DeepWater.Aviator.Modules
         [SerializeField] GateCourseSO route;
         [Tooltip("The aircraft to formate on (Wingman).")]
         [SerializeField] int leaderId = 1;
+        [Tooltip("The slot in the flight: 0 the profile's, 1 left wing, 2 right wing, 3 outside the right wing.")]
+        [SerializeField] int slotPosition = 0;
+        [Tooltip("The side it fights on (Fight).")]
+        [SerializeField] Side side = Side.Red;
         [Tooltip("Home (W47): the runway it goes to when ordered home or at bingo. Empty: it has no home.")]
         [SerializeField] FlatGround homeRunway;
         [Tooltip("The runway's name, for the rule log and the pick list.")]
@@ -42,6 +48,8 @@ namespace DeepWater.Aviator.Modules
         AviatorSeat _seat;
 
         public AviatorSeat Seat => _seat;
+        /// <summary>The side it fights on, or None when its task is not Fight.</summary>
+        public Side FightSide => task == Task.Fight ? side : Side.None;
         public RuleLog Log => _log;
 
         void Start()
@@ -64,11 +72,12 @@ namespace DeepWater.Aviator.Modules
             _seat = task == Task.Route
                 ? new AviatorSeat(runner.Flight, view.Aircraft.Profile, p, route.Bake(), _log)
                 : new AviatorSeat(runner.Flight, view.Aircraft.Profile, p, _log);
-            if (task == Task.Wingman) _seat.JoinOn(id, leaderId);
+            if (task == Task.Wingman) _seat.JoinOn(id, leaderId, slotPosition);
             if (homeRunway != null)
                 _seat.SetHome(new Strip(homeRunwayName, homeRunway.transform.position, homeRunway.transform.eulerAngles.y, homeRunway.LengthM, homeRunway.WidthM));
             runner.Roster.SetOwnSeat(id, _seat);
-            string what = task == Task.Route ? $"flying {route.name} ({_seat.Route.Gates.Count} gates)" : task == Task.Wingman ? $"joining aircraft {leaderId}" : "holding course";
+            if (task == Task.Fight && side == Side.Blue && runner.PlayerAircraftId != 0 && runner.PlayerAircraftId != id) _seat.JoinOn(id, runner.PlayerAircraftId, slotPosition);
+            string what = task == Task.Fight ? $"fighting for {side}" : task == Task.Route ? $"flying {route.name} ({_seat.Route.Gates.Count} gates)" : task == Task.Wingman ? $"joining aircraft {leaderId}" : "holding course";
             string seated = runner.PlayerAircraftId == id ? "; the player flies it until the seat cycle hands it over" : "";
             Debug.Log($"[RH Aviator] aircraft {id}: pilot '{p.Name}' {what}{seated}{(homeRunway != null ? $"; home {homeRunwayName}" : "; no home runway")}.", this);
         }

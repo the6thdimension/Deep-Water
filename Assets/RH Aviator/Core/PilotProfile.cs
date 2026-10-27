@@ -110,6 +110,13 @@ namespace DeepWater.Aviator.Core
         public float SlowKt;
         /// <summary>How much of the target's turn the pilot matches by feed-forward, 0 … 1 (0: a rookie, the aim alone).</summary>
         public float TurnMatch;
+        /// <summary>
+        /// Range control: knots of overtake per metre beyond the attack range (0: none, a rookie), the attack range
+        /// (metres), and how far past the fighting speed it will chase (knots).
+        /// </summary>
+        public float RangeKtPerM, AttackRangeM, ChaseOverKt;
+        /// <summary>Collision avoidance: another jet predicted to pass inside this distance (metres) within this time (seconds) is avoided.</summary>
+        public float AvoidM, AvoidS;
 
         /// <summary>The hands in the pattern: the route hands, held to the pattern's bank.</summary>
         public HandsSettings PatternHands

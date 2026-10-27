@@ -36,7 +36,7 @@ namespace DeepWater.Aviator.Core
         long _lastTick = long.MinValue;
         int _target;
         bool _goingAround;
-        int _leaderId;
+        int _leaderId, _slotPosition;
         float _holdAltitudeM, _holdMps;
         Runway _home;
         Strip _strip;
@@ -109,9 +109,10 @@ namespace DeepWater.Aviator.Core
             Fire(_core.Tick, aircraftId, "ordered: fly the route", PilotMode.Navigate, $"{_route.Gates.Count} gates, next {_route.Gates[_target].Name}");
         }
 
-        /// <summary>Order: join aircraft <paramref name="leaderId"/>'s wing in fingertip (W40).</summary>
-        public void JoinOn(int aircraftId, int leaderId)
+        /// <summary>Order: join aircraft <paramref name="leaderId"/>'s wing in fingertip (W40), in slot <paramref name="position"/> (see <see cref="Slot"/>).</summary>
+        public void JoinOn(int aircraftId, int leaderId, int position = 0)
         {
+            _slotPosition = position;
             if (leaderId == aircraftId) throw new ArgumentException("a pilot cannot join its own wing", nameof(leaderId));
             _core.Find(leaderId);   // throws for an unknown aircraft
             _leaderId = leaderId;
@@ -197,7 +198,7 @@ namespace DeepWater.Aviator.Core
 
             // Formation is flown off the slot every tick (Formation, W44: the stick every tick).
             if ((Mode == PilotMode.Join || Mode == PilotMode.Fingertip) && TryLeader(out AirframeState lead))
-                _request = Formation.Plan(new Slot(lead, _pilot), state, _pilot, Mode == PilotMode.Join);
+                _request = Formation.Plan(new Slot(lead, _pilot, _slotPosition), state, _pilot, Mode == PilotMode.Join);
 
             // In a fight the eyes look every tick (the delay is counted in ticks), and the plan follows what they see.
             if (_fight != null && Mode != PilotMode.Home && Mode != PilotMode.Landed)
@@ -207,6 +208,7 @@ namespace DeepWater.Aviator.Core
                 {
                     float floor = _core.Surface.HeightAt(state.Position.x, state.Position.z);
                     _request = Fighting.Plan(state, target, null, tick, _core.Clock.TickSeconds, floor, _pilot, out _pursuit);
+                    if (_avoiding) _request.AltitudeM = Mathf.Max(_avoidHeight, floor + _pilot.FightFloorM);
                 }
             }
 
@@ -317,7 +319,7 @@ namespace DeepWater.Aviator.Core
                 Fire(tick, id, "leader lost", PilotMode.HoldCourse, $"aircraft {_leaderId} is down; holding what it has");
                 return;
             }
-            var slot = new Slot(lead, _pilot);
+            var slot = new Slot(lead, _pilot, _slotPosition);
             slot.ErrorOf(s.Position, out float along, out float across, out float up);
             // Rules "in the slot" and "lost the slot" (W40).
             if (Mode == PilotMode.Join && Formation.InTheSlot(slot, s, _pilot))
@@ -378,6 +380,15 @@ namespace DeepWater.Aviator.Core
             }
             if (Mode != PilotMode.Fight) return;
 
+            // A target that has left the fight is no target (slice 3d: the player's jet kept chasing a red jet after red
+            // left, and its wingmen could not rejoin a leader still turning hard).
+            if (_targetId != 0 && !_fight.Enemies(id, _targetId))
+            {
+                Fire(tick, id, "target gone", PilotMode.Fight, $"aircraft {_targetId} is out of the fight");
+                _targetId = 0;
+                _hasLastSeen = false;
+            }
+
             // The target: red hunts the player's jet (W52); everyone else the nearest enemy it knows.
             int want = mine == Side.Red && hunted != 0 && _fight.Enemies(id, hunted) ? hunted : nearest;
             if (want != _targetId && want != 0)
@@ -393,6 +404,14 @@ namespace DeepWater.Aviator.Core
                 _breaking = breaking;
                 Fire(tick, id, breaking ? "break" : "tail clear", PilotMode.Fight, breaking ? $"aircraft {threatId} at {threatD:F0} m in its rear quarter" : "no threat behind");
             }
+            // Collision avoidance: any jet predicted to pass too close, soon, from the picture (a near miss is seen).
+            if (Avoid(s, out float avoidDy, out int avoidId))
+            {
+                if (!_avoiding) { _avoiding = true; Fire(tick, id, "avoid", PilotMode.Fight, $"aircraft {avoidId} predicted inside {_pilot.AvoidM:F0} m; {(avoidDy > 0f ? "climbing" : "diving")} clear"); }
+                _avoidHeight = s.Position.y + Mathf.Sign(avoidDy) * 3f * _pilot.AvoidM;
+            }
+            else _avoiding = false;
+
             if (_breaking && _eyes.TryGet(threatId, out Contact threat))
             {
                 _request = Fighting.Plan(s, threat, threat, tick, _core.Clock.TickSeconds, _core.Surface.HeightAt(s.Position.x, s.Position.z), _pilot, out _pursuit);
@@ -449,6 +468,28 @@ namespace DeepWater.Aviator.Core
         }
 
         readonly HashSet<int> _tallied = new HashSet<int>();
+        bool _avoiding;
+        float _avoidHeight;
+
+        /// <summary>Another jet's closest approach on straight lines, if inside the avoid distance within the avoid time; which way to go.</summary>
+        bool Avoid(in AirframeState s, out float dy, out int with)
+        {
+            dy = 0f; with = 0;
+            if (_pilot.AvoidM <= 0f) return false;
+            var picture = _core.Picture;
+            float best = float.MaxValue;
+            for (int i = 0; i < picture.Count; i++)
+            {
+                AirframeState o = picture[i].State;
+                Vector3 r = o.Position - s.Position;
+                if (r.sqrMagnitude < 1f || o.Status == FlightStatus.Crashed) continue;   // itself
+                Vector3 v = o.Velocity - s.Velocity;
+                float t = Mathf.Clamp(-Vector3.Dot(r, v) / Mathf.Max(v.sqrMagnitude, 1e-3f), 0f, _pilot.AvoidS);
+                float miss = (r + v * t).magnitude;
+                if (miss < _pilot.AvoidM && miss < best) { best = miss; dy = -(r + v * t).y; if (dy == 0f) dy = picture[i].Id > _leaderId ? 1f : -1f; with = picture[i].Id; }
+            }
+            return with != 0;
+        }
         Vector3 _lastSeen;
         bool _hasLastSeen, _searching;
 

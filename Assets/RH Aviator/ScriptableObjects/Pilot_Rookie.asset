@@ -97,6 +97,11 @@ MonoBehaviour:
   clearRangeM: 8000
   slowKt: 0
   turnMatch: 0
+  rangeKtPerM: 0
+  attackRangeM: 600
+  chaseOverKt: 150
+  avoidM: 100
+  avoidS: 3
   provenance: "All AUTHORED (RH Aviator W45; no public source describes a generic
     line pilot), tuned headless against slice 3a's pass criteria (ROADMAP, fixed
     before tuning). Hands: guidanceGain (2, the classic value of the L1 path-following
@@ -125,7 +130,9 @@ MonoBehaviour:
     skill numbers, AUTHORED, not any real pilot's or air force's): fieldOfViewDeg,
     reactionDelayS, memoryS, visualRangeM, cornerKt, leadS, lagS, lagRangeM, overshootClosureKt,
     lagSlowKt, threatRangeM, threatConeDeg, fightFloorM, clearRangeM, slowKt (energy
-    sense; 0 = none), turnMatch. Rookie, from the line pilot (AUTHORED): maxG 4.5,
-    maxBankDeg 60, fieldOfViewDeg 90, reactionDelayS 1.2, memoryS 4, visualRangeM
-    6000, cornerKt 380 (fights too fast), leadS 0 and lagS 0 (pure pursuit only),
-    threatRangeM 1000, slowKt 0 (no energy sense), turnMatch 0."
+    sense; 0 = none), turnMatch, rangeKtPerM, attackRangeM, chaseOverKt (range control;
+    0 = none), avoidM, avoidS (collision avoidance). Rookie, from the line pilot
+    (AUTHORED): maxG 4.5, maxBankDeg 60, fieldOfViewDeg 90, reactionDelayS 1.2, memoryS
+    4, visualRangeM 6000, cornerKt 380 (fights too fast), leadS 0 and lagS 0 (pure
+    pursuit only), threatRangeM 1000, slowKt 0 (no energy sense), turnMatch 0, rangeKtPerM
+    0 (no range control)."

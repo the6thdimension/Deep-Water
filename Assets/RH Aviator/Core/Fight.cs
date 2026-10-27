@@ -181,6 +181,15 @@ namespace DeepWater.Aviator.Core
                 aim = tPos + tVel * p.LeadS;
             }
             float speedKt = pursuit == Pursuit.Lag ? p.CornerKt - p.LagSlowKt : p.CornerKt;
+            // Range control (W45): close with speed, fight at the fighting speed. The target's own speed plus a term on
+            // the range to the attack distance, held between the slow speed and the fighting speed plus the chase margin
+            // (slice 3d: at its 320 kt fighting speed the ace fell 4–5 km behind a rookie circling at 380 kt, and red
+            // could never catch a hands-off player at 400 kt). A rookie has none: it flies one speed.
+            if (p.RangeKtPerM > 0f && pursuit != Pursuit.Lag)
+            {
+                float targetKt = tVel.magnitude / Kt;
+                speedKt = Mathf.Clamp(targetKt + p.RangeKtPerM * (range - p.AttackRangeM), Mathf.Max(p.SlowKt, 150f), p.CornerKt + p.ChaseOverKt);
+            }
             var q = new FlightPathRequest
             {
                 AimWorld = aim,

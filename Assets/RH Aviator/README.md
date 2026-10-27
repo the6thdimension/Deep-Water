@@ -19,6 +19,10 @@ Pat1: **SO-Profile + Pure-Core + MB-Adapter**. **Read `BLUEPRINT.md` first** (W3
 
 After **Add AI Wingman**, press **H** (or the Xbox **D-pad up**) once the wingman has joined: every AI pilot not in your jet goes home to runway 09/27, flies the overhead break and lands. Its legs print in the Console and show in the pick list (HOME · DOWNWIND …).
 
+## Try it (the 4 v 4)
+
+Open Dogfight, then **Deep Water → RH Aviator → Add 4 v 4 Dogfight to the Open Scene**: three blue wingmen on your wing (left, right, outside right), four red jets 20 km ahead (rookie, line, line, ace) hunting you, a score panel at the top. Press Play and fight; **Tab** moves you between your jets; **H** sends the AI pilots home. Let go of the keys and your jet holds level (LEVEL HOLD on the HUD). No weapons: the score is seconds in the enemy's rear cone.
+
 ## The fight (slice 3d)
 
 `AviatorSeat.FightIn(id, engagement)` puts a pilot in a fight: an `Engagement` holds the sides and whom red hunts (the player's jet, W52). Pilots see through their eyes (field of view, reaction delay, memory) and are scored by seconds in an enemy's rear cone (W46). No weapons. Rookie, line and ace live in `ScriptableObjects/Pilot_*.asset` (**Apply Pilot Profiles**).

@@ -129,6 +129,13 @@ namespace DeepWater.Aviator.ScriptableObjects
         public float slowKt;
         [Tooltip("How much of the target's turn is matched by feed-forward, 0 … 1.")]
         [Range(0f, 1f)] public float turnMatch;
+        [Tooltip("Range control: knots of overtake per metre past the attack range (0: none).")]
+        public float rangeKtPerM;
+        public float attackRangeM;
+        public float chaseOverKt;
+        [Tooltip("Collision avoidance: a jet predicted to pass inside this distance (m) within this time (s).")]
+        public float avoidM;
+        public float avoidS;
 
         [Header("Provenance")]
         [TextArea(4, 20)] public string provenance = "";
@@ -160,7 +167,7 @@ namespace DeepWater.Aviator.ScriptableObjects
                 RolloutPedalPerM = rolloutPedalPerM, RolloutPedalPerDeg = rolloutPedalPerDeg, BingoFlightTimeS = bingoFlightTimeS,
                 FieldOfViewDeg = fieldOfViewDeg, ReactionDelayS = reactionDelayS, MemoryS = memoryS, VisualRangeM = visualRangeM,
                 CornerKt = cornerKt, LeadS = leadS, LagS = lagS, LagRangeM = lagRangeM, OvershootClosureKt = overshootClosureKt, LagSlowKt = lagSlowKt,
-                ThreatRangeM = threatRangeM, ThreatConeDeg = threatConeDeg, FightFloorM = fightFloorM, ClearRangeM = clearRangeM, SlowKt = slowKt, TurnMatch = turnMatch, SlotClimbDegPerM = slotClimbDegPerM, SlotGPerPathDeg = slotGPerPathDeg, SlotRotationShare = slotRotationShare,
+                ThreatRangeM = threatRangeM, ThreatConeDeg = threatConeDeg, FightFloorM = fightFloorM, ClearRangeM = clearRangeM, SlowKt = slowKt, TurnMatch = turnMatch, RangeKtPerM = rangeKtPerM, AttackRangeM = attackRangeM, ChaseOverKt = chaseOverKt, AvoidM = avoidM, AvoidS = avoidS, SlotClimbDegPerM = slotClimbDegPerM, SlotGPerPathDeg = slotGPerPathDeg, SlotRotationShare = slotRotationShare,
             };
             p.Validate();
             return p;

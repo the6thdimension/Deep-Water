@@ -385,6 +385,9 @@ SIX's picks (2026-10-24): G53–G60. Damage Control L1 first.
 
 - **2026-10-27** — Slice B2 rewritten to game level and made generic (G69; SIX: "Just simplify the plans and generalize them to make them safer"). The old B2 is collapsed to its struck title; the area SAM is an archetype; VLS L1, guidance channels and illuminators are game mechanics with AUTHORED numbers; each part has a gameplay-facing definition of done; the flyout validation against published performance is killed (K1). The cruise-missile line names archetypes. Checked against BLUEPRINT standing constraint 8. Real-system detail removed; the old wording is in git at 2121da9e. No code, asset or test changed. Engineering-grade original preserved outside the repo (from 2121da9e).
 - **2026-10-27** — Stream A, Radar L1 + Tracks L1 (G61–G68): `RHRadarSuite.Core` split out; a generic S-band radar calibrated to one public range; Barton and Ward's sea γ from Sea State's degree; the suite's track file in the CIC; the range loadout at L1. Found: γ alone hides sea-skimmers from Douglas 3 up, so a 30 dB clutter improvement is proposed (G70). 5bdb3493, 831e2ff6.
+- **2026-10-29** — Gunnery's `ShotGroup.RoundHitProbability` made exact (SIX's go; Gunnery ROADMAP). Guns L1's hit model (G36) now gives the true chance off centre, so the proximity Mk 45 no longer under-counts close passes.
+  - The guns-only L1 raid kills 7 of 8 instead of 6 (Mk 45 3 kills, was 2; 39 bursts, was 42).
+  - The golden Fix and the L1 raid Fixes are unchanged; 113/113.
 
 ## Killed
 

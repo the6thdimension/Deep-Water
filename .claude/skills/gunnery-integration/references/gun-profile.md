@@ -81,10 +81,14 @@ fragmentation or vulnerability modelling (General Quarters `BLUEPRINT.md:224`).
 
 ## How far to trust the hit model
 
-`ShotGroup.RoundHitProbability` is exact when the pass is centred. Off centre, it multiplies by exp(−d²/2σ²). The
-doc comment says this "errs toward hits for a large one" (`ShotGroup.cs:15`). Measured against a Monte Carlo of the
-true disc probability (200,000 rounds per cell, offline), it errs toward **misses** once the target is larger than
-the spread:
+**Exact since 2026-10-29.** `ShotGroup.RoundHitProbability` is now the pattern's mass inside the disc, 1 − Q₁(d/σ, r/σ):
+the Rice integral by Gauss–Legendre, within 5e-7 of the exact Poisson series on 6,321 points (r/σ from 0.01 to 60).
+Gunnery's `ARoundsHitChance_*` tests pin it to 2e-6 and check that it falls with the miss and rises with the target.
+It costs about 0.9 µs a call in the Editor against the old 0.09 µs, and is only called inside the 3σ reach.
+
+**For the record, the formula it replaced** multiplied the centred chance by exp(−d²/2σ²). Its doc comment said this
+"errs toward hits for a large one". Measured against a Monte Carlo of the true disc probability (200,000 rounds per
+cell, offline), it erred toward **misses** once the target was larger than the spread (old / true):
 
 | r/σ | d/σ = 0 | 1 | 2 | 3 |
 |---|---|---|---|---|
@@ -93,11 +97,15 @@ the spread:
 | 2 | 0.865 / 0.866 | 0.524 / 0.731 | 0.117 / 0.396 | 0.010 / 0.114 |
 | 4 (large target) | 1.000 / 1.000 | 0.606 / 0.997 | 0.135 / 0.966 | 0.011 / 0.802 |
 
-Each cell gives the model, then the true value. Where it bites:
+Each cell gives the old model, then the true value. Where it bit:
 
-- **The jets:** a 4 m sphere at 4 mils is r/σ = 4 at 250 m, 2 at 500 m and 1 at 1,000 m. So close-in passes that go through the jet off centre score far fewer hits than the geometry gives.
+- **The jets:** a 4 m sphere at 4 mils is r/σ = 4 at 250 m, 2 at 500 m and 1 at 1,000 m. Close-in passes that went through the jet off centre scored far fewer hits than the geometry gives.
 - **The Mk 45's proximity fuze:** its 8 m lethal radius is larger than σ inside about 4 km (2 mrad).
-- **Small presented targets** are accurate. A 4.6 × 0.34 m sea-skimmer presents 0.17 to 0.71 m (DERIVED with `PresentedRadiusM`), against CIWS's σ of 4 m at 2 km.
+- **Small presented targets** were already accurate. A 4.6 × 0.34 m sea-skimmer presents 0.17 to 0.71 m (DERIVED with `PresentedRadiusM`), against CIWS's σ of 4 m at 2 km.
 
-Not fixed. The AI's trigger numbers and the measured fights were taken with the model as it is, so changing it is a
-Gunnery-wide decision for SIX.
+**What the fix moved** (SIX's go, 2026-10-29; 268/268 across Gunnery, Air Wing, Aviator and General Quarters, was 266/266):
+- Gunnery's 8 mil test went from 55 to 58 hits of 100 (seed 42).
+- The rookie against a straight target fired 274 rounds, 10 hitting, against 264 and 11; it killed at 4.9 s instead of 4.8 s.
+- The ace against the rookie still won all 20 merges, firing 2,172 rounds instead of 2,234.
+- General Quarters' guns-only L1 raid killed 7 of 8 instead of 6; the Mk 45 got 3 kills instead of 2.
+- Unchanged: Air Wing's gun test, the 4 v 4, and every pinned Fix.

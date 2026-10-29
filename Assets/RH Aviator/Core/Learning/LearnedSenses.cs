@@ -23,15 +23,21 @@ namespace DeepWater.Aviator.Core
     /// each enemy 12: present, in view now, age of the sighting, relative position (3), range, relative velocity (3),
     /// "on its tail" (cosine from its tail to me), "pointing at me" (cosine from its nose to me);
     /// each friend 8: present, in view now, relative position (3), relative velocity (3);
-    /// pipper 4: a solution, the miss in mils, the miss's direction across the bore (x, y).
+    /// pipper 4: a solution, the miss in mils, the miss's direction across the bore (x, y);
+    /// own missiles 4 (version 2): missiles left (of those carried), lock progress, locked, locked on an enemy (+1) or a
+    /// friend (-1); each of the 2 nearest missiles it sees, not its own, 8: present, relative position (3), relative
+    /// velocity (3), aimed at it. A missile is seen inside the pilot's field of view and visual range, as it is now
+    /// (Perception's delay is not applied to missiles: a simplification).
     /// Absent contacts are zeros, so "present" tells the network a slot is empty.</para>
     /// </summary>
     public sealed class LearnedSenses
     {
-        public const int Version = 1;
-        public const int EnemySlots = 3, FriendSlots = 2;
-        public const int OwnSize = 12, EnemySize = 12, FriendSize = 8, PipperSize = 4;
-        public const int Size = OwnSize + EnemySlots * EnemySize + FriendSlots * FriendSize + PipperSize;   // 68
+        /// <summary>2 since 2026-10-29: the missiles (W65) were added at the end, so version 1's 68 numbers kept their places.</summary>
+        public const int Version = 2;
+        public const int EnemySlots = 3, FriendSlots = 2, MissileSlots = 2;
+        public const int OwnSize = 12, EnemySize = 12, FriendSize = 8, PipperSize = 4, OwnMissileSize = 4, MissileSize = 8;
+        public const int Size = OwnSize + EnemySlots * EnemySize + FriendSlots * FriendSize + PipperSize   // 68: version 1
+                                + OwnMissileSize + MissileSlots * MissileSize;                             // 88: version 2
 
         // Scales (Version 1): each brings its number to about ±1 in a fight.
         const float SpeedScaleMps = 300f, HeightScaleM = 3000f, ClimbScaleMps = 100f, GScale = 7.5f, AoaScaleDeg = 20f;
@@ -40,7 +46,7 @@ namespace DeepWater.Aviator.Core
         public const float PipperRangeM = 2000f;
 
         readonly float[] _values = new float[Size];
-        readonly List<(float range, int id)> _enemies = new List<(float, int)>(8), _friends = new List<(float, int)>(8);
+        readonly List<(float range, int id)> _enemies = new List<(float, int)>(8), _friends = new List<(float, int)>(8), _missiles = new List<(float, int)>(8);
 
         /// <summary>The vector written last.</summary>
         public float[] Values => _values;
@@ -51,6 +57,8 @@ namespace DeepWater.Aviator.Core
         /// <summary>The nearest enemy it knows of at the last write (0: none), and where it guesses it is.</summary>
         public int NearestEnemy { get; private set; }
         public Vector3 NearestEnemyGuess { get; private set; }
+        /// <summary>The seeker is locked on an enemy at the last write: a launch now would go at a foe (W65).</summary>
+        public bool LockedOnEnemy { get; private set; }
         /// <summary>The nearest enemy's velocity as last seen.</summary>
         public Vector3 NearestEnemyVelocity { get; private set; }
 
@@ -155,6 +163,47 @@ namespace DeepWater.Aviator.Core
                 }
             }
             i += PipperSize;
+
+            // Version 2: the missiles (W65). Its own: what is left, and the seeker's lock.
+            LockedOnEnemy = false;
+            DeepWater.AirWing.Core.Missiles.MissileMount mount = profile.Missiles;
+            if (mount.IsSet)
+            {
+                _values[i] = me.Missiles / (float)mount.Carried;
+                _values[i + 1] = me.LockTargetId != 0 ? Mathf.Clamp01(me.LockTicks * (float)dt / Mathf.Max(mount.Missile.LockTimeS, 1e-3f)) : 0f;
+                bool locked = core.IsLocked(self);
+                _values[i + 2] = locked ? 1f : 0f;
+                if (me.LockTargetId != 0)
+                {
+                    Side on = fight.SideEver(me.LockTargetId);
+                    _values[i + 3] = on == Side.None ? 0f : on == mine ? -1f : 1f;
+                    LockedOnEnemy = locked && on != Side.None && on != mine;
+                }
+            }
+            i += OwnMissileSize;
+            // Others' missiles it sees: inside its field of view and visual range, nearest first.
+            _missiles.Clear();
+            var live = core.Missiles.Live;
+            float cosFov = Mathf.Cos(Mathf.Clamp(pilot.FieldOfViewDeg, 0f, 180f) * Mathf.Deg2Rad);
+            for (int k = 0; k < live.Count; k++)
+            {
+                if (live[k].ShooterId == selfId) continue;
+                Vector3 to = live[k].Position - me.Position;
+                float d = to.magnitude;
+                if (d > pilot.VisualRangeM || d < 1e-3f || Vector3.Dot(nose, to / d) < cosFov) continue;
+                _missiles.Add((d, k));
+            }
+            _missiles.Sort();
+            for (int s = 0; s < MissileSlots; s++, i += MissileSize)
+            {
+                if (s >= _missiles.Count) continue;
+                var m = live[_missiles[s].id];
+                int j = i;
+                _values[j++] = 1f;
+                Body(toBody * (m.Position - me.Position), PositionScaleM, ref j);
+                Body(toBody * (m.Velocity - me.Velocity), VelocityScaleMps, ref j);
+                _values[j++] = m.TargetId == selfId ? 1f : 0f;
+            }
             if (i != Size) throw new InvalidOperationException($"learned senses wrote {i} numbers, not {Size}");
             return _values;
         }

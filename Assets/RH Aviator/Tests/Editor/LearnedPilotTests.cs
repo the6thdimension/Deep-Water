@@ -63,7 +63,7 @@ namespace DeepWater.Aviator.Tests
             PilotProfile ace = seat.Pilot;
             for (int i = 0; i < seconds * 50; i++)
             {
-                if (core.Tick % Set.DecisionPeriodTicks == 0) seat.Order(LearnedActions.Decode(actions, trigger, core.Find(id).State, Set, ace));
+                if (core.Tick % Set.DecisionPeriodTicks == 0) seat.Order(LearnedActions.Decode(actions, trigger, false, core.Find(id).State, Set, ace));
                 core.Step();
             }
         }
@@ -85,7 +85,7 @@ namespace DeepWater.Aviator.Tests
                 {
                     float t = core.Tick * 0.02f;
                     a[0] = Mathf.Sin(0.3f * t); a[1] = Mathf.Sin(0.17f * t); a[2] = Mathf.Cos(0.11f * t); a[3] = Mathf.Sin(0.7f * t);
-                    seat.Order(LearnedActions.Decode(a, (core.Tick / 50) % 4 == 0, core.Find(1).State, Set, ace));
+                    seat.Order(LearnedActions.Decode(a, (core.Tick / 50) % 4 == 0, (core.Tick / 50) % 6 == 3, core.Find(1).State, Set, ace));
                 }
                 core.Step();
             }
@@ -128,7 +128,7 @@ namespace DeepWater.Aviator.Tests
             float maxBank = 0f;
             for (int i = 0; i < 20 * 50; i++)
             {
-                if (core.Tick % 5 == 0) seat.Order(LearnedActions.Decode(new[] { (i / 100) % 2 == 0 ? 1f : -1f, -1f, 1f, 1f }, false, core.Find(1).State, Set, ace));
+                if (core.Tick % 5 == 0) seat.Order(LearnedActions.Decode(new[] { (i / 100) % 2 == 0 ? 1f : -1f, -1f, 1f, 1f }, false, false, core.Find(1).State, Set, ace));
                 core.Step();
                 maxBank = Mathf.Max(maxBank, Mathf.Abs(FlightPathHands.BankDeg(core.Find(1).State)));
             }
@@ -143,7 +143,7 @@ namespace DeepWater.Aviator.Tests
             PilotProfile ace = Ace();
             AirframeState s = Level(E(), L0, new Vector3(100f, 2000f, 0f), 90f);
             LearnedCommand Of(float turn, float climb, float speed, float g, bool trigger = false) =>
-                LearnedActions.Decode(new[] { turn, climb, speed, g }, trigger, s, Set, ace);
+                LearnedActions.Decode(new[] { turn, climb, speed, g }, trigger, false, s, Set, ace);
 
             LearnedCommand straight = Of(0f, 0f, -1f, -1f);
             Vector3 aim = straight.Request.AimWorld - s.Position;
@@ -163,7 +163,7 @@ namespace DeepWater.Aviator.Tests
 
             Assert.AreEqual(hard.Request.SpeedMps, Of(0.5f, 1f, 3f, 1f).Request.SpeedMps, "past ±1 is clamped");
             Assert.Throws<ArgumentException>(() => Of(float.NaN, 0f, 0f, 0f), "a NaN is a broken policy, not a zero");
-            Assert.Throws<ArgumentException>(() => LearnedActions.Decode(new float[3], false, s, Set, ace));
+            Assert.Throws<ArgumentException>(() => LearnedActions.Decode(new float[3], false, false, s, Set, ace));
         }
 
         [Test]
@@ -192,7 +192,7 @@ namespace DeepWater.Aviator.Tests
                 Assert.IsTrue(v.All(x => !float.IsNaN(x) && !float.IsInfinity(x) && Mathf.Abs(x) <= 5f), "finite and bounded");
                 if (firstSeen < 0 && v[LearnedSenses.OwnSize] == 1f) firstSeen = t;
             }
-            Assert.AreEqual(68, LearnedSenses.Size);
+            Assert.AreEqual(88, LearnedSenses.Size, "version 2: 68, then 20 for the missiles");
             Assert.GreaterOrEqual(firstSeen, delay, "nothing arrives before the ace's reaction delay");
             float[] now = senses.Values;
             int e0 = LearnedSenses.OwnSize, e1 = e0 + LearnedSenses.EnemySize;

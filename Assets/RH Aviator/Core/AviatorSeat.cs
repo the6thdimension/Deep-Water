@@ -263,7 +263,24 @@ namespace DeepWater.Aviator.Core
             float surface = _core.Surface.HeightAt(state.Position.x, state.Position.z);
             PilotInputs inputs = hands.Fly(_request, state, surface);
             inputs.Trigger = _shoot;
+            inputs.Pickle = _fight != null && Mode == PilotMode.Fight && WillLaunch(aircraftId, state, tick);
             return inputs;
+        }
+
+        /// <summary>
+        /// Missile discipline (Air Wing W65, A16): launch when the seeker is locked on the target the pilot is after, the
+        /// target it sees is inside its <see cref="PilotProfile.MissileRangeM"/>, and none of its own missiles is still
+        /// flying at that target. The lock is the seeker's (the jet's instrument), the range the pilot's eyes.
+        /// </summary>
+        bool WillLaunch(int id, in AirframeState me, long tick)
+        {
+            if (_pilot.MissileRangeM <= 0f || _targetId == 0 || me.Missiles <= 0 || me.LockTargetId != _targetId) return false;
+            if (!_core.IsLocked(_core.Find(id)) || !_eyes.TryGet(_targetId, out Contact c)) return false;
+            if ((c.GuessPosition(tick, _core.Clock.TickSeconds) - me.Position).magnitude > _pilot.MissileRangeM) return false;
+            var live = _core.Missiles.Live;
+            for (int i = 0; i < live.Count; i++)
+                if (live[i].ShooterId == id && live[i].TargetId == _targetId && !live[i].Lost) return false;
+            return true;
         }
 
         /// <summary>Ticks between trigger judgements (10 Hz at the 50 Hz tick).</summary>

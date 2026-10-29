@@ -83,7 +83,11 @@ namespace DeepWater.AirWing.Core.Simulation
             h = Mix(h, s.Controls.LoadFactorCommand);
             h = Mix(h, s.Rounds);
             h = Mix(h, s.GunCarry);
-            return Mix(h, s.HitPoints);
+            h = Mix(h, s.HitPoints);
+            h = Mix(h, s.Missiles);
+            h = Mix(h, s.LockTargetId);
+            h = Mix(h, s.LockTicks);
+            return Mix(h, s.MissileCooldownTicks);
         }
 
         /// <summary>

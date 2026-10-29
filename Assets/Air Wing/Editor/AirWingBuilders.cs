@@ -206,19 +206,24 @@ namespace DeepWater.AirWing.Editor
             return visuals;
         }
 
-        const string ExplosionPath = "Assets/_VFX/HD Explosion/Prefabs/HD_Naval_Explosion.prefab";
+        // General Quarters' warhead burst (slice 6): drawn with its HDRP particle shader. The first pick, Assets/_VFX's
+        // HD_Naval_Explosion, uses the built-in pipeline's particle shader, which HDRP draws as bare squares (SIX, 2026-10-29:
+        // "mutated squares and no fire"). An asset reference only: Air Wing's code knows no General Quarters type.
+        const string ExplosionPath = "Assets/General Quarters/Prefabs/Effects/GQ_FX_Warhead.prefab";
         const string ExplosionProvenance =
-            "Explosions (2026-10-29, SIX: 'collisions and kills should render explosions'): the project's HD_Naval_Explosion (Assets/_VFX, " +
-            "first-party, the one Guided Fury's ESSM profile plays), airExplosionScale 1 (a 15 m flash and a 7 m fireball against the 18 m jet) and impactExplosionScale 1.5, explosionLifeS 6: AUTHORED from the effect's sizes.";
+            "Explosions (2026-10-29, SIX: 'collisions and kills should render explosions'): General Quarters' GQ_FX_Warhead (its HDRP particle shader; " +
+            "an 18 m flash, a fireball of 25 flames 4-6 m across, smoke 6-8 m for 5-8 s, debris). airExplosionScale 1.5 (a fireball about 20 m across " +
+            "against the 18 m jet), impactExplosionScale 2, explosionLifeS 9 (the smoke's life; General Quarters uses 9 s): AUTHORED from the effect's sizes. " +
+            "Replaced the same day Assets/_VFX's HD_Naval_Explosion, whose built-in-pipeline particle shader HDRP draws as squares.";
 
         /// <summary>The F/A-18E's explosion (presentation), set on its visuals asset.</summary>
         static void ApplyExplosion(AircraftVisualsSO visuals)
         {
             visuals.explosion = AssetDatabase.LoadAssetAtPath<GameObject>(ExplosionPath);
-            if (visuals.explosion == null) Debug.LogWarning($"[Air Wing] {ExplosionPath} not found; no explosions.");
-            visuals.airExplosionScale = 1f;
-            visuals.impactExplosionScale = 1.5f;
-            visuals.explosionLifeS = 6f;
+            if (visuals.explosion == null) Debug.LogWarning($"[Air Wing] {ExplosionPath} not found (General Quarters → Build Combat Effects); no explosions.");
+            visuals.airExplosionScale = 1.5f;
+            visuals.impactExplosionScale = 2f;
+            visuals.explosionLifeS = 9f;
         }
 
         [MenuItem("Deep Water/Air Wing/Apply Explosion to F-A-18E Visuals")]
@@ -228,10 +233,94 @@ namespace DeepWater.AirWing.Editor
             if (visuals == null) { Debug.LogError($"[Air Wing] {VisualsPath} not found: build the prefab first."); return; }
             Undo.RecordObject(visuals, "Apply explosion");
             ApplyExplosion(visuals);
-            if (!visuals.provenance.Contains("Explosions (")) visuals.provenance += " " + ExplosionProvenance;
+            int at = visuals.provenance.IndexOf(" Explosions (", System.StringComparison.Ordinal);
+            if (at >= 0) visuals.provenance = visuals.provenance.Substring(0, at);   // the explosion's sentence is always the last
+            visuals.provenance += " " + ExplosionProvenance;
             EditorUtility.SetDirty(visuals);
             AssetDatabase.SaveAssets();
             Debug.Log($"[Air Wing] {VisualsPath}: explosion {(visuals.explosion != null ? visuals.explosion.name : "none")}.");
+        }
+
+        const string MissilePrefabPath = Root + "/Prefabs/GameMissile.prefab";
+        const string MissileMaterialPath = Root + "/Examples/Materials/Missile.mat";
+        // General Quarters' threat-missile trail (slice 6): an exhaust glow and a smoke ribbon, on its HDRP particle shader.
+        const string MissileTrailPath = "Assets/General Quarters/Prefabs/Effects/GQ_FX_Trail_Threat.prefab";
+
+        /// <summary>
+        /// Deep Water → Air Wing → Build Game Missile Prefab (W65): a generic missile shape, a 3 m capsule 0.13 m across with
+        /// four tail fins, light grey. Not any real missile's shape. Its +Z is the nose. Overwritten in place.
+        /// </summary>
+        [MenuItem("Deep Water/Air Wing/Build Game Missile Prefab")]
+        public static GameObject BuildMissilePrefab()
+        {
+            Material mat = AssetDatabase.LoadAssetAtPath<Material>(MissileMaterialPath);
+            if (mat == null)
+            {
+                Shader lit = Shader.Find("HDRP/Lit");
+                if (lit == null) { Debug.LogError("[Air Wing] HDRP/Lit not found; no missile prefab."); return null; }
+                mat = new Material(lit) { name = "Missile" };
+                mat.SetColor("_BaseColor", new Color(0.78f, 0.79f, 0.8f));
+                mat.SetFloat("_Smoothness", 0.45f);
+                Directory.CreateDirectory(Path.GetDirectoryName(MissileMaterialPath));
+                AssetDatabase.CreateAsset(mat, MissileMaterialPath);
+            }
+            var root = new GameObject("GameMissile");
+            try
+            {
+                Part(root, PrimitiveType.Capsule, Vector3.zero, Quaternion.Euler(90f, 0f, 0f), new Vector3(0.13f, 1.5f, 0.13f), mat);   // 3 m long
+                for (int i = 0; i < 4; i++)
+                    Part(root, PrimitiveType.Cube, new Vector3(0f, 0f, -1.2f), Quaternion.Euler(0f, 0f, 45f + 90f * i) , new Vector3(0.012f, 0.5f, 0.3f), mat, offsetUp: 0.16f);
+                Directory.CreateDirectory(Path.GetDirectoryName(MissilePrefabPath));
+                GameObject prefab = PrefabUtility.SaveAsPrefabAsset(root, MissilePrefabPath);
+                Debug.Log($"[Air Wing] Built {MissilePrefabPath}: a 3 m game missile shape, four fins.");
+                return prefab;
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+            }
+        }
+
+        /// <summary>A primitive with no collider, under <paramref name="parent"/>; a fin is pushed out along its own up by <paramref name="offsetUp"/>.</summary>
+        static void Part(GameObject parent, PrimitiveType type, Vector3 position, Quaternion rotation, Vector3 scale, Material mat, float offsetUp = 0f)
+        {
+            GameObject go = GameObject.CreatePrimitive(type);
+            Object.DestroyImmediate(go.GetComponent<Collider>());
+            go.transform.SetParent(parent.transform, false);
+            go.transform.localRotation = rotation;
+            go.transform.localPosition = position + rotation * Vector3.up * offsetUp;
+            go.transform.localScale = scale;
+            go.GetComponent<MeshRenderer>().sharedMaterial = mat;
+        }
+
+        /// <summary>
+        /// Deep Water → Air Wing → Apply Missile Visuals to F-A-18E (W65): the game missile's shape, General Quarters'
+        /// threat trail, and the burst's explosion scale, on the jet's visuals.
+        /// </summary>
+        [MenuItem("Deep Water/Air Wing/Apply Missile Visuals to F-A-18E")]
+        public static void ApplyMissileVisuals()
+        {
+            AircraftVisualsSO visuals = AssetDatabase.LoadAssetAtPath<AircraftVisualsSO>(VisualsPath);
+            if (visuals == null) { Debug.LogError($"[Air Wing] {VisualsPath} not found: build the prefab first."); return; }
+            GameObject model = AssetDatabase.LoadAssetAtPath<GameObject>(MissilePrefabPath);
+            if (model == null) model = BuildMissilePrefab();
+            Undo.RecordObject(visuals, "Apply missile visuals");
+            visuals.missileModel = model;
+            visuals.missileTrail = AssetDatabase.LoadAssetAtPath<GameObject>(MissileTrailPath);
+            if (visuals.missileTrail == null) Debug.LogWarning($"[Air Wing] {MissileTrailPath} not found (General Quarters → Build Combat Effects); missiles fly with no trail.");
+            visuals.missileTrailLingerS = 3f;
+            visuals.missileBurstScale = 0.8f;
+            const string MissileMark = " Game missiles (";
+            int at = visuals.provenance.IndexOf(MissileMark, System.StringComparison.Ordinal);
+            int boom = visuals.provenance.IndexOf(" Explosions (", System.StringComparison.Ordinal);
+            if (at >= 0) visuals.provenance = visuals.provenance.Substring(0, at) + (boom > at ? visuals.provenance.Substring(boom) : "");
+            visuals.provenance = visuals.provenance.Replace(" Explosions (", MissileMark +
+                "2026-10-29, W65): the shape is Air Wing's own GameMissile (a generic 3 m capsule and four fins, not any real missile's); " +
+                "the trail is General Quarters' GQ_FX_Trail_Threat; it lingers 3 s; a burst that does not kill plays the explosion at 0.8. AUTHORED by eye)." +
+                " Explosions (");
+            EditorUtility.SetDirty(visuals);
+            AssetDatabase.SaveAssets();
+            Debug.Log($"[Air Wing] {VisualsPath}: missile {(model != null ? model.name : "none")}, trail {(visuals.missileTrail != null ? visuals.missileTrail.name : "none")}.");
         }
 
         static AircraftVisualsSO.Surface Surface(string name, SurfaceDriver driver, Vector3 axis, float maxDeg, float smoothing) =>

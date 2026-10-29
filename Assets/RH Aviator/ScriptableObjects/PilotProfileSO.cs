@@ -145,6 +145,10 @@ namespace DeepWater.Aviator.ScriptableObjects
         [Tooltip("Fires when the burst would pass within this many milliradians of the target (0: never fires).")]
         public float triggerMils;
 
+        [Header("Missile discipline (Air Wing W65)")]
+        [Tooltip("Launches with a lock on its target inside this range, m (0: never launches).")]
+        public float missileRangeM;
+
         [Header("Provenance")]
         [TextArea(4, 20)] public string provenance = "";
 
@@ -175,7 +179,7 @@ namespace DeepWater.Aviator.ScriptableObjects
                 RolloutPedalPerM = rolloutPedalPerM, RolloutPedalPerDeg = rolloutPedalPerDeg, BingoFlightTimeS = bingoFlightTimeS,
                 FieldOfViewDeg = fieldOfViewDeg, ReactionDelayS = reactionDelayS, MemoryS = memoryS, VisualRangeM = visualRangeM,
                 CornerKt = cornerKt, LeadS = leadS, LagS = lagS, LagRangeM = lagRangeM, OvershootClosureKt = overshootClosureKt, LagSlowKt = lagSlowKt,
-                ThreatRangeM = threatRangeM, ThreatConeDeg = threatConeDeg, FightFloorM = fightFloorM, ClearRangeM = clearRangeM, SlowKt = slowKt, TurnMatch = turnMatch, RangeKtPerM = rangeKtPerM, AttackRangeM = attackRangeM, ChaseOverKt = chaseOverKt, AvoidM = avoidM, AvoidS = avoidS, JoinAvoidM = joinAvoidM, GunRangeM = gunRangeM, TriggerMils = triggerMils, SlotClimbDegPerM = slotClimbDegPerM, SlotGPerPathDeg = slotGPerPathDeg, SlotRotationShare = slotRotationShare,
+                ThreatRangeM = threatRangeM, ThreatConeDeg = threatConeDeg, FightFloorM = fightFloorM, ClearRangeM = clearRangeM, SlowKt = slowKt, TurnMatch = turnMatch, RangeKtPerM = rangeKtPerM, AttackRangeM = attackRangeM, ChaseOverKt = chaseOverKt, AvoidM = avoidM, AvoidS = avoidS, JoinAvoidM = joinAvoidM, GunRangeM = gunRangeM, TriggerMils = triggerMils, MissileRangeM = missileRangeM, SlotClimbDegPerM = slotClimbDegPerM, SlotGPerPathDeg = slotGPerPathDeg, SlotRotationShare = slotRotationShare,
             };
             p.Validate();
             return p;

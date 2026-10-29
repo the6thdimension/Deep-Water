@@ -111,6 +111,9 @@ A change to the fight is judged on many merges, before and after, never on one. 
 15. **An editor-time sync that calls `SetDirty` on every validate dirties the scene on open,** and the Test Runner then blocks on a save dialog. Change and mark dirty only what differs (`TrainingSquadron.Apply`, 2026-10-29).
 16. **A pure-pursuit stand-in never shoots:** it sat 50° off its targets' noses in slow circles for two minutes. Lead pursuit gets it behind (34 s pointed in 150 s) but not inside the ace's 6 mils. To see a kill's chain (reward, respawn, explosion), force it with a harness (METHODOLOGY C53).
 17. **A scene camera that remembers a target is not following it** until it sets it: the spectator camera started free until 2026-10-29. Check the overlay in a screenshot, not the field.
+18. **An effect built for a pool does not play on awake.** General Quarters' effects (`GQ_FX_*`) are started by its pool; an instance spawned any other way emits nothing. `ExplosionView` calls `Play` on every layer. And the built-in pipeline's particle shaders (`Assets/_VFX`'s `HD_Naval_Explosion`) draw bare squares under HDRP: check an effect by its particle counts after a spawn and a close capture, never by an instance count.
+19. **A new file can stay out of its assembly's compile list** (2026-10-29: `Air Wing/Editor/MissileData.cs`, through three recompiles and a clean-cache build, while `CompilationPipeline.GetAssemblyNameFromScriptPath` named the right assembly). Check `CompilationPipeline.GetAssemblies()`'s `sourceFiles`; renaming the file with a fresh .meta fixed it (`GameMissileData.cs`).
+20. **Missiles** (W65, A16): the pickle is an input (`PilotInputs.Pickle`); the flight core locks, launches and flies them; `FlightCore.IsLocked` is the one lock test (HUD, AI, senses). Position and gun fights' tests fly missiles safe (`MissileRangeM` 0) so their criteria keep their meaning.
 
 ## 7. Record
 

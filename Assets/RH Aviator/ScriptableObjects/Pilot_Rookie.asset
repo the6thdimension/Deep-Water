@@ -105,6 +105,7 @@ MonoBehaviour:
   joinAvoidM: 25
   gunRangeM: 1400
   triggerMils: 30
+  missileRangeM: 5000
   provenance: "All AUTHORED (RH Aviator W45; no public source describes a generic
     line pilot), tuned headless against slice 3a's pass criteria (ROADMAP, fixed
     before tuning). Hands: guidanceGain (2, the classic value of the L1 path-following
@@ -138,8 +139,11 @@ MonoBehaviour:
     40 m slot spacing: a join with no fight avoids too, after a survey of four-ship
     joins found crossed joins meeting at 0 m). Trigger discipline (Gunnery K6): gunRangeM
     900, triggerMils 12 (a burst that would pass within 12 mils of where the target
-    will be; AUTHORED). Rookie, from the line pilot (AUTHORED): maxG 4.5, maxBankDeg
-    60, fieldOfViewDeg 90, reactionDelayS 1.2, memoryS 4, visualRangeM 6000, cornerKt
-    380 (fights too fast), leadS 0 and lagS 0 (pure pursuit only), threatRangeM 1000,
-    slowKt 0 (no energy sense), turnMatch 0, rangeKtPerM 0 (no range control), gunRangeM
-    1400 and triggerMils 30 (sprays: long and wide)."
+    will be; AUTHORED). Missile discipline (Air Wing W65, A16; SIX 2026-10-29: rookies
+    early, aces close): missileRangeM 3500 (launch with the seeker locked on its
+    target inside 3.5 km, one at a time; AUTHORED). Rookie, from the line pilot (AUTHORED):
+    maxG 4.5, maxBankDeg 60, fieldOfViewDeg 90, reactionDelayS 1.2, memoryS 4, visualRangeM
+    6000, cornerKt 380 (fights too fast), leadS 0 and lagS 0 (pure pursuit only),
+    threatRangeM 1000, slowKt 0 (no energy sense), turnMatch 0, rangeKtPerM 0 (no
+    range control), gunRangeM 1400 and triggerMils 30 (sprays: long and wide), missileRangeM
+    5000 (launches as soon as it locks)."

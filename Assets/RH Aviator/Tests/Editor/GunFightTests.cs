@@ -27,7 +27,13 @@ namespace DeepWater.Aviator.Tests
         static readonly FidelitySheet L1 = new FidelitySheet(FidelityLevel.L1, FidelityLevel.L1, FidelityLevel.L1, FidelityLevel.L1, FidelityLevel.L0, 4, 1442);
 
         static AircraftProfile E() => AssetDatabase.LoadAssetAtPath<AircraftProfileSO>("Assets/Air Wing/ScriptableObjects/FA18E_AirWing.asset").Bake();
-        static PilotProfile Pilot(string path) => AssetDatabase.LoadAssetAtPath<PilotProfileSO>(path).Bake();
+        /// <summary>The pilot, missiles safe: these are the gun fights (Gunnery K6) and keep their criteria (W65 added missiles later).</summary>
+        static PilotProfile Pilot(string path)
+        {
+            PilotProfile p = AssetDatabase.LoadAssetAtPath<PilotProfileSO>(path).Bake();
+            p.MissileRangeM = 0f;
+            return p;
+        }
 
         static AirframeState Start(in AircraftProfile e, Vector3 at, float headingDeg, float kt) =>
             AircraftFactory.LevelStart(e, L1, at, headingDeg, kt * Kt, 0.6f * e.Airframe.InternalFuelKg, 0.7f);

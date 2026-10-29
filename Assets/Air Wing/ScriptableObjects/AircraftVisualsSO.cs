@@ -64,6 +64,16 @@ namespace DeepWater.AirWing.ScriptableObjects
         [Tooltip("Where the model's origin sits relative to the centre of mass the core flies, metres (body frame).")]
         public Vector3 modelOffsetM;
 
+        [Header("Explosions (presentation: ExplosionView)")]
+        [Tooltip("Played where the aircraft is shot down or collides, and where it meets the sea or the ground. Empty: none.")]
+        public GameObject explosion;
+        [Tooltip("The explosion's scale in the air: a kill or a collision.")]
+        [Min(0.01f)] public float airExplosionScale = 1f;
+        [Tooltip("Its scale where the aircraft meets the sea or the ground.")]
+        [Min(0.01f)] public float impactExplosionScale = 1f;
+        [Tooltip("Seconds before a played explosion is removed.")]
+        [Min(0.1f)] public float explosionLifeS = 6f;
+
         [TextArea(2, 8)] public string provenance = "";
     }
 }

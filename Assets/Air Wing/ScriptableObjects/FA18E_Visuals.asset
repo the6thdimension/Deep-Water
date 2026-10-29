@@ -169,7 +169,16 @@ MonoBehaviour:
     endFraction: 1
     hideWhenStowed: 0
   modelOffsetM: {x: 0, y: 0, z: 1.6}
+  explosion: {fileID: 1929451392436837686, guid: c12f61617a57bf74d9095008ef6cc9c4,
+    type: 3}
+  airExplosionScale: 1
+  impactExplosionScale: 1.5
+  explosionLifeS: 6
   provenance: "Copied 2026-10-25 from Assets/FDS Assets/Aircraft/F-18E.prefab's AerialArcade
     ControlSurface settings (transform names, axes, max angles, smoothing). Rudder
     travel AUTHORED at 30\xB0 (the FDS prefab used 50\xB0). Presentation only; the
-    flight core never reads it."
+    flight core never reads it. Explosions (2026-10-29, SIX: 'collisions and kills
+    should render explosions'): the project's HD_Naval_Explosion (Assets/_VFX, first-party,
+    the one Guided Fury's ESSM profile plays), airExplosionScale 1 (a 15 m flash
+    and a 7 m fireball against the 18 m jet) and impactExplosionScale 1.5, explosionLifeS
+    6: AUTHORED from the effect's sizes."

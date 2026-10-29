@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 794d3eebf0e704e44aa1985663f03a5e, type: 3}
+  m_Name: RewardWeights
+  m_EditorClassIdentifier: DeepWater.Aviator::DeepWater.Aviator.ScriptableObjects.RewardWeightsSO
+  kill: 1
+  shotDown: -1
+  crash: -1
+  collision: -1
+  friendlyKill: -1
+  leftArena: -1
+  hitLanded: 0.05
+  hitTaken: -0.05
+  friendlyHit: -0.05
+  pointedConePerS: 0.02
+  coneDeg: 30
+  coneRangeM: 1000
+  squadronShare: 0.25
+  provenance: "AUTHORED 2026-10-29 from SIX's picks in the training interview (TRAINING-CONCEPT
+    M21\u2013M28; all eight recommended options). M24 (M5: outcomes, lightly shaped):
+    kill +1; shotDown, crash, collision, friendlyKill and leftArena \u22121 each.
+    hitLanded +0.05 and hitTaken \u22120.05 per round (ten hit points: one kill's
+    hits are worth +0.5), friendlyHit \u22120.05. pointedConePerS +0.02 inside coneDeg
+    30 of an enemy's tail inside coneRangeM 1000 AND pointing within 30 of it (A11's
+    measure; the fight's own cone score stays position-only, A9). squadronShare 0.25
+    of every squadmate's kill or loss."

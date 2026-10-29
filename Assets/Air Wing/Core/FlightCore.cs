@@ -32,7 +32,9 @@ namespace DeepWater.AirWing.Core
     /// The flight core's tick (BLUEPRINT §3.2): for each aircraft, in ascending id order, its seat issues this tick's
     /// Pilot Inputs, they go into the input log, and the aircraft steps its substeps; then the guns (Gunnery K4): the
     /// rounds already in flight fly the tick and are tested against every aircraft's path over it, hits take hit
-    /// points and may kill, and each aircraft whose trigger is held fires this tick's rounds; then the tick's Fix.
+    /// points and may kill, and each aircraft whose trigger is held fires this tick's rounds; then the tick's Fix. With an
+    /// <see cref="Core.Arena"/> (W59–W61) the tick opens with its respawns and closes, before the Fix, with its
+    /// collisions and its box.
     /// A Unity adapter calls <see cref="Step"/> from FixedUpdate (P2). Same aircraft, same seats issuing the same
     /// inputs, same Fix sequence (W7, W28).
     /// </summary>
@@ -119,9 +121,24 @@ namespace DeepWater.AirWing.Core
             throw new KeyNotFoundException($"No aircraft {id}.");
         }
 
+        /// <summary>The arena's rules (W59–W61), or null: no respawns, no collisions, no box.</summary>
+        public Arena Arena { get; private set; }
+
+        /// <summary>Run <paramref name="arena"/>'s rules inside every tick from the next one on (W59–W61). Once only.</summary>
+        public void UseArena(Arena arena)
+        {
+            if (arena == null) throw new ArgumentNullException(nameof(arena));
+            if (Arena != null && Arena != arena) throw new InvalidOperationException("the flight core already has an arena");
+            Arena = arena;
+        }
+
+        bool Protected(int id, long tick) => Arena != null && Arena.Protected(id, tick);
+
         public void Step()
         {
             long tick = Tick;
+            // The arena's respawns first, so the picture shows a respawned jet where it now is (W59).
+            Arena?.BeforeTick(tick, _aircraft);
             // The picture for this tick: everyone where the last tick left them (A1).
             _picture.Clear();
             foreach (Aircraft a in _aircraft) _picture.Add(new AircraftRecord(a.Id, a.State));
@@ -136,6 +153,7 @@ namespace DeepWater.AirWing.Core
                 _issued.Add(entry.Inputs);
             }
             Guns(tick);
+            Arena?.AfterTick(tick, _aircraft, _picture);
             _records.Clear();
             foreach (Aircraft a in _aircraft) _records.Add(new AircraftRecord(a.Id, a.State));
             Fixes.Append(FlightFix.Of(tick, _records));
@@ -154,7 +172,8 @@ namespace DeepWater.AirWing.Core
             for (int i = 0; i < _aircraft.Count; i++)
             {
                 Aircraft a = _aircraft[i];
-                if (a.State.Status != FlightStatus.Flying || !a.Profile.Combat.IsSet) continue;
+                // A protected jet (just respawned, W59) is not a target: rounds pass through it.
+                if (a.State.Status != FlightStatus.Flying || !a.Profile.Combat.IsSet || Protected(a.Id, tick)) continue;
                 _targets.Add(new GunTarget { Id = a.Id, From = _picture[i].State.Position, To = a.State.Position, RadiusM = a.Profile.Combat.HitRadiusM });
             }
             _tickHits.Clear();
@@ -177,7 +196,7 @@ namespace DeepWater.AirWing.Core
             {
                 Aircraft a = _aircraft[i];
                 ref AirframeState s = ref a.State;
-                if (!a.Profile.Gun.IsSet || s.Status != FlightStatus.Flying || !_issued[i].Trigger || s.Rounds <= 0)
+                if (!a.Profile.Gun.IsSet || s.Status != FlightStatus.Flying || !_issued[i].Trigger || s.Rounds <= 0 || Protected(a.Id, tick))
                 {
                     s.GunCarry = 0f;   // a burst starts from a whole round
                     continue;

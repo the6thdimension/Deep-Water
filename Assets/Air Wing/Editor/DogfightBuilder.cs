@@ -57,18 +57,9 @@ namespace DeepWater.AirWing.Editor
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             if (!AirWingBuilders.RigAssetsPresent()) return;
             GateCourseSO course = EnsureCourse();
-            Material land = EnsureMaterial("Land", "HDRP/Lit", new Color(0.36f, 0.40f, 0.27f), 0.15f);
-            Material runway = EnsureMaterial("Runway", "HDRP/Lit", new Color(0.13f, 0.13f, 0.14f), 0.25f);
-            Material marking = EnsureMaterial("Runway Marking", "HDRP/Lit", new Color(0.92f, 0.92f, 0.90f), 0.25f);
             Material gate = EnsureMaterial("Gate", "HDRP/Lit", new Color(0.85f, 0.85f, 0.85f), 0.4f);
             Material nextGate = EnsureMaterial("Gate Next", "HDRP/Lit", new Color(1f, 0.45f, 0.05f), 0.4f);
-
-            AirWingBuilders.Instantiate(AirWingBuilders.SunPrefabPath);
-            AirWingBuilders.Instantiate(AirWingBuilders.SkyPrefabPath);
-            SeaStateDirector sea = AirWingBuilders.BuildSea();
-
-            FlatGround runwayGround = BuildLand(land, runway, marking);
-            BuildLandmark();
+            FlatGround runwayGround = BuildWorld(out SeaStateDirector sea);
             AirWingBuilders.Rig rig = AirWingBuilders.BuildRig(sea, JetStart, 0f);
             // The runway start is one setting on the jet (W14): Start Mode → Runway. Airborne stays the default.
             var jetView = Object.FindAnyObjectByType<DeepWater.AirWing.Modules.Aircraft.AircraftView>();
@@ -86,6 +77,24 @@ namespace DeepWater.AirWing.Editor
             AssetDatabase.SaveAssets();
             Debug.Log($"[Air Wing] Built {ScenePath}: Sea State sea, land and runway 09/27, {course.gates.Length} gates, DDG-51 landmark, " +
                       "one F/A-18E at 5,000 ft and 400 kt heading 000, chase camera, HUD.");
+        }
+
+        /// <summary>
+        /// Dogfight's world in the open scene: sun, sky, the Sea State sea, the land with runway 09/27, and the DDG
+        /// landmark. Shared with the training scene (RH Aviator's training builder) so both fly over the same world.
+        /// Call after the scene switch (AP12). Returns the runway.
+        /// </summary>
+        public static FlatGround BuildWorld(out SeaStateDirector sea)
+        {
+            Material land = EnsureMaterial("Land", "HDRP/Lit", new Color(0.36f, 0.40f, 0.27f), 0.15f);
+            Material runway = EnsureMaterial("Runway", "HDRP/Lit", new Color(0.13f, 0.13f, 0.14f), 0.25f);
+            Material marking = EnsureMaterial("Runway Marking", "HDRP/Lit", new Color(0.92f, 0.92f, 0.90f), 0.25f);
+            AirWingBuilders.Instantiate(AirWingBuilders.SunPrefabPath);
+            AirWingBuilders.Instantiate(AirWingBuilders.SkyPrefabPath);
+            sea = AirWingBuilders.BuildSea();
+            FlatGround runwayGround = BuildLand(land, runway, marking);
+            BuildLandmark();
+            return runwayGround;
         }
 
         static FlatGround BuildLand(Material land, Material runway, Material marking)

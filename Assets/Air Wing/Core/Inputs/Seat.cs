@@ -15,6 +15,11 @@ namespace DeepWater.AirWing.Core.Inputs
         Scenario = 3,
         /// <summary>Plays an input log back (W28).</summary>
         Replay = 4,
+        /// <summary>
+        /// A learned pilot (RH Aviator's fourth skill level, TRAINING-CONCEPT M2): a trained policy asks the hands for a
+        /// flight path. Its fights need not replay by re-running it (M3); its inputs in the log still replay exactly.
+        /// </summary>
+        Learned = 5,
     }
 
     /// <summary>

@@ -1,11 +1,11 @@
-# Pilot training: learned AI pilots for RH Aviator
-
-> **THEORETICAL — NOTHING BUILT**, with one exception, measured: the ML-Agents upgrade (M9, T0), 2.0.2 → 4.1.0, which
-> pulls in `com.unity.ai.inference` 2.6.1 and drops Barracuda. It compiles on 6000.4.11; whole project EditMode
-> 423 pass, 3 fail (the same three as before the upgrade), 2 explicit skipped. Python's `mlagents` is not installed:
-> this machine has Python 3.13, and the trainer's supported Python version is unverified.
-> Written 2026-10-27 from SIX's talk-through with Claude: 16 questions in four rounds (M1–M16). Nothing here is a
-> plan until SIX says so, except the package upgrade (M9), which SIX asked for "now".
+> **T3a BUILT 2026-10-29; the rest THEORETICAL, NOTHING BUILT.** SIX: "add 1 red squadron and one blue squadron. Give the planes a
+> machine learning brain and give them the ability to fight each other to train", with respawn points opposite each other. Built on
+> SIX's eight picks (round 5, M21–M28): the learned seat and its senses, actions and reward (RH Aviator A13–A15), Air Wing's arena
+> (respawn, collisions, a box; W59–W61), a spectator camera (W62) and explosions (W63), the Dogfight Training scene, the training
+> configs, and the Python side: `mlagents` 1.1.0 on Python 3.10.11 with CPU PyTorch 2.5.1 in `C:\Users\SIX\venvs\mlagents-1.1.0`
+> (verified). Not built: recordings and the training theatre (M12), the Director and scenarios (M15), terrain (M13), fuel, the
+> radar picture, MA-POCA teams, the held-out gate (M11). The ML-Agents upgrade (M9, T0) was measured 2026-10-27: 2.0.2 → 4.1.0.
+> Written 2026-10-27 from SIX's talk-through with Claude: 16 questions in four rounds (M1–M16).
 
 **This document's one job:** record what training AI pilots with ML-Agents means for Deep Water, and every decision
 SIX has made about it, so the build can start later without re-asking. It is not the roadmap (RH Aviator's
@@ -230,6 +230,19 @@ Locked = SIX's pick. Proposed = Claude's recommended default, open to SIX. Open 
 | M15 | "Orchestrated" | **A scenario Director** | Same | Locked |
 | M16 | Terrain challenges | **All four:** masking, valley fights, ridges and peaks, land + sea + airfield | — | Locked |
 
+### Round 5: the squadrons (SIX, 2026-10-29; all eight on the recommended option)
+
+| # | Question | SIX's pick | Leaning | Status |
+|---|---|---|---|---|
+| M21 | Squadron size, and how a squadron learns | **4 v 4, one shared brain "Fighter", PPO with self-play** (blue team 0, red team 1); own kills and losses plus a squadron share. MA-POCA teamwork later. *Reverses M10's order* (1 v 1 first) for this push | Same | Locked, built (A15) |
+| M22 | Who they learn against | **Self-play now, and a pilot setting per squadron** (learned, rookie, line, ace), so M4's curriculum is one setting away (`fighter_vs_rules.yaml`). *Reorders M4* for this push; M4 stays the plan for the gate | Same | Locked, built (A15) |
+| M23 | What it sees and asks for | **M1 and M7 as locked, at the ace's limits (M17):** turn, climb, speed, G cap and trigger every 0.1 s to the hands; Perception with the ace's eyes; 68 numbers; never the truth | Same | Locked, built (A13) |
+| M24 | The reward | **Outcomes, hits and pointed cone time:** kill +1; shot down, crash, collision (a new rule: two jets inside 15 m both go down), friendly kill, leaving the arena −1; ±0.05 a round; +0.02 a second pointed in a rear cone; 25 % squadron share. Weights in `RewardWeightsSO` | Same | Locked, built (A14, Air Wing W60) |
+| M25 | The respawn points | **20 km apart over the sea**, blue (0, 1,829, 2,000) heading 000, red (0, 1,829, 22,000) heading 180; line abreast 300 m, 6,000 ft, 400 kt; seeded jitter ±300 m, ±15°; a 40 km box, leaving it a loss | Same | Locked, built (W59, W61) |
+| M26 | Respawn timing | **Back 3 s after going down; 5 s protected** (can't be hit, can't fire) | Same | Locked, built (W59) |
+| M27 | Which scene | **A new `Assets/_SCENES/Dogfight Training.unity`** built by a menu from Dogfight's world; plus "Add Training Squadrons to the Open Scene". `Dogfight.unity` and SIX's uncommitted edits in it untouched. SIX added (2026-10-29): no player seat, a spectator camera to follow any jet or fly free (W62), explosions for kills and collisions (W63) | Same | Locked, built |
+| M28 | How training runs | **Python 3.10 and a CPU venv** (`C:\Users\SIX\venvs\mlagents-1.1.0`); an Editor smoke at time scale 20; headless builds ×4 for real rounds; results in `Training/results/` (git-ignored); a kept policy's `.onnx` in `Assets/RH Aviator/Policies/` with its settings (M19). *3.10.11, not 3.10.12: python.org has no Windows installer for 3.10.12* | Same | Locked; venv and smoke done, headless build not yet made |
+
 ### Proposed by Claude while writing
 
 | # | Proposal | Why | Status |
@@ -308,6 +321,9 @@ SIX's order for this push: this doc, then guns, then the IR missile, then slice 
 | With position-only scoring, line v line "wins" every merge on head-on-pass time (6.1 / 5.6 s a fight) | build-verified, the survey of 2026-10-27 (BLUEPRINT A11) |
 | The flight core is pure, 50 Hz, headless and deterministic | verified (Air Wing tests, 135/135) |
 | The Theatre blueprint (E1–E25) is locked and unbuilt | verified 2026-10-27 |
+| `mlagents` 0.28.0 on Python 3.13 fails at import (protobuf, then `cattrs` on 3.13); `mlagents` 1.1.0 needs Python 3.10.1–3.10.12 | verified 2026-10-29 |
+| `mlagents` 1.1.0, `mlagents-envs` 1.1.0, PyTorch 2.5.1+cpu installed; `mlagents-learn --help` runs; the venv takes 1.5 GB | verified 2026-10-29 |
+| The 4.1.0 package's communication API is 1.5.0 | verified 2026-10-29 (`Academy.cs`) |
 
 Sources: [issoh.co.jp guide](https://www.issoh.co.jp/md/tech/4905);
 [Unity forum: Is ML-Agents being deprecated?](https://discussions.unity.com/t/is-ml-agents-being-deprecated/1643681).
@@ -339,3 +355,4 @@ Sources: [issoh.co.jp guide](https://www.issoh.co.jp/md/tech/4905);
 ## Change log
 - **2026-10-27** — Written from SIX's 16 answers (M1–M16); M17–M20 proposed. Nothing built.
 - **2026-10-27** — T0: ML-Agents 2.0.2 → 4.1.0 installed and verified (compile, whole-project tests unchanged).
+- **2026-10-29** — Round 5 (M21–M28) asked and answered (all recommended); T3a built: the learned seat, senses, actions and reward (RH Aviator A13–A15), the arena (Air Wing W59–W61), the spectator camera and explosions (W62, W63), the training scene and configs; Python 3.10.11 and `mlagents` 1.1.0 installed; a self-play smoke run in the Editor (RH Aviator ROADMAP has the numbers).

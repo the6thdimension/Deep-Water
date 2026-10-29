@@ -82,6 +82,20 @@ namespace DeepWater.Aviator.Modules
             Debug.Log($"[RH Aviator] aircraft {id}: pilot '{p.Name}' {what}{seated}{(homeRunway != null ? $"; home {homeRunwayName}" : "; no home runway")}.", this);
         }
 
+        /// <summary>
+        /// Sets the pilot up to fight for <paramref name="fightSide"/> as <paramref name="pilot"/> (a training squadron's
+        /// pilot setting, A15). Before play: it takes effect when the pilot seats itself in Start.
+        /// </summary>
+        /// <returns>True when anything changed (so an editor caller marks the scene dirty only then).</returns>
+        public bool ConfigureFight(PilotProfileSO pilot, Side fightSide)
+        {
+            if (profile == pilot && task == Task.Fight && side == fightSide) return false;
+            profile = pilot;
+            task = Task.Fight;
+            side = fightSide;
+            return true;
+        }
+
         /// <summary>The player's order (A3, <see cref="AviatorOrders"/>): go home and land. Refused without a home runway.</summary>
         public bool GoHome()
         {

@@ -61,6 +61,18 @@ namespace DeepWater.AirWing.Core
             CrashReason = reason;
         }
 
+        /// <summary>
+        /// Back in the fight at <paramref name="at"/> (the arena's respawn, W59): whatever it was doing, it flies from
+        /// there with the rounds and hit points <paramref name="at"/> carries. Counted as a reset, so presentation snaps.
+        /// </summary>
+        internal void Respawn(in AirframeState at)
+        {
+            State = at;
+            Resets++;
+            CrashReason = null;
+            KilledBy = 0;
+        }
+
         /// <summary>A killed aircraft's fall: gravity and a crude drag that bleeds its speed; the nose follows the path.</summary>
         void Fall(float surfaceHeightM, float dt)
         {

@@ -1,6 +1,6 @@
 ---
 name: aircraft-workflow
-description: "Work on Deep Water's aircraft: Air Wing (the flight core, its fidelity ladder, the F/A-18E's profile, seats, devices, the HUD, the Dogfight scene, and the jets' gun: the trigger, rounds, hit points, kills, the pipper, tracers) and RH Aviator (the AI pilot: route flying, fingertip formation, the seat cycle, going home and the overhead break, the fight on rookie, line and ace profiles, trigger discipline and gun tracking). Use it to modify, configure, build, tune or test anything that flies: a new mode or rule for the AI, a new part level (airframe, controls, powerplant, gear), a new aircraft type, pilot profiles, the player's controls (mouse, keyboard, pad, stick, the level hold, Fire), scene setups (wingman, 4 v 4), headless pass criteria, traces and gain sweeps, fight surveys and judging a fight (position against pointed cone time, before and after a rule change), slice 3f (the fight in the vertical), the AI budget benchmark, and Dogfight smokes. Also when a jet crashes, stalls, porpoises, overshoots a slot, lands off the centreline, an AI fight stalemates or goes nowhere, or the AI's gun misses. Not for missiles: Guided Fury and Air Wing W58 are SIX's or Codex's work, not Claude's."
+description: "Work on Deep Water's aircraft: Air Wing (the flight core, its fidelity ladder, the F/A-18E's profile, seats, devices, the HUD, the Dogfight scene, and the jets' gun: the trigger, rounds, hit points, kills, the pipper, tracers) and RH Aviator (the AI pilot: route flying, fingertip formation, the seat cycle, going home and the overhead break, the fight on rookie, line and ace profiles, trigger discipline and gun tracking). Use it to modify, configure, build, tune or test anything that flies: a new mode or rule for the AI, a new part level (airframe, controls, powerplant, gear), a new aircraft type, pilot profiles, the player's controls (mouse, keyboard, pad, stick, the level hold, Fire), scene setups (wingman, 4 v 4), headless pass criteria, traces and gain sweeps, fight surveys and judging a fight (position against pointed cone time, before and after a rule change), slice 3f (the fight in the vertical), the AI budget benchmark, and Dogfight smokes. Also the learned pilots and their ML-Agents training (Dogfight Training, the squadrons, the arena and respawn, the spectator camera, explosions, mlagents-learn configs). Also when a jet crashes, stalls, porpoises, overshoots a slot, lands off the centreline, an AI fight stalemates or goes nowhere, or the AI's gun misses. Not for missiles: Guided Fury and Air Wing W58 are SIX's or Codex's work, not Claude's."
 allowed-tools: Bash, Read, Edit, Write, Grep, Glob
 ---
 
@@ -36,6 +36,8 @@ Decisions are numbered and dated; a locked one is not re-litigated, and a new on
 | The player's devices and assists | `PlayerSeatSettings.asset` | deadzone, mouse, lever, the instructor, **the level hold** (W54: keys or pad centred 0.4 s → level on the release heading; mouse detent 2°), the hold's limits |
 | Bindings | `Modules/Input/AirWingFlight.inputactions` | one map per source; `CycleSeat` = Tab / D-pad right; `Fire` = left mouse, left Ctrl, pad A, stick button 5 (the stick's trigger stays the brakes, W56); RH Aviator's own "go home" = H / D-pad up (`AviatorOrders`, A3) |
 | Pilots | `RH Aviator/ScriptableObjects/Pilot_{Rookie,Line,Ace}.asset` | **Deep Water → RH Aviator → Apply Pilot Profiles** (`AviatorTools.ApplyPilotProfiles`); rookie and ace are the line pilot plus named changes, trigger discipline included (`GunRangeM`, `TriggerMils`, A12) |
+| Training (A13–A15, W59–W61) | `RH Aviator/ScriptableObjects/Training/{TrainingArena,LearnedPilot,RewardWeights}.asset` | **Deep Water → RH Aviator → Apply Training Assets** (`FighterTrainingBuilder`): the arena (respawn 3 s, protection 5 s, jitter, collisions 15 m, the 40 km box), the learned pilot (the ace's eyes and hands, decisions every 5 ticks, the action ranges), the reward (M24). Never by hand |
+| Explosions (W63) | `Air Wing/ScriptableObjects/FA18E_Visuals.asset` | **Deep Water → Air Wing → Apply Explosion to F-A-18E Visuals** (`HD_Naval_Explosion`, scale 1 in the air, 1.5 at the surface) |
 
 A new `PilotProfile` field needs six edits: the struct (+ `Validate`), the SO field, `Bake`, `AviatorTools` (value **and** provenance line), and a re-apply. Miss the provenance and `TheLineProfile_NamesTheSourceOfEveryNumber` fails.
 
@@ -43,6 +45,7 @@ A new `PilotProfile` field needs six edits: the struct (+ `Validate`), the SO fi
 
 - **Deep Water → Air Wing → Build Dogfight** rebuilds the scene (sea, land, runway 09/27 at (0, 8.05, −5,500) heading 090, 2,438 × 61 m, the four gates, the DDG landmark).
 - Unsaved additions (RH Aviator menu): **Add AI Jet** (flies the gates), **Add AI Wingman** (joins your right wing; your jet gets an AI too, for the seat cycle), **Add 4 v 4 Dogfight** (three blue wingmen, four red: rookie, line, line, ace; the fight with its score panel; the orders).
+- **Deep Water → RH Aviator → Build Dogfight Training Scene** writes `Assets/_SCENES/Dogfight Training.unity`: Dogfight's world (`DogfightBuilder.BuildWorld`), a runner with **no player seat**, blue 1–4 and red 5–8 on spawn points 20 km apart, the arena, the fight, `FighterTraining`, the spectator camera (W62). **Add Training Squadrons to the Open Scene** puts the same into any scene with a runner, unsaved. A squadron's pilot (learned, rookie, line, ace) is its `TrainingSquadron` setting.
 - Benchmarks: **Build Benchmark Player** (Air Wing and RH Aviator each have one); run the exe with `-batchmode -nographics -aviatorBenchOut <file>`. Judge budgets in a player only (Air Wing: 0.05 ms per aircraft at L1; RH Aviator A4: 10 µs per pilot per tick).
 
 ## 4. Modify
@@ -57,6 +60,12 @@ A new `PilotProfile` field needs six edits: the struct (+ `Validate`), the SO fi
 
 ### The hands (`Air Wing/Core/Seats/FlightPathHands.cs`)
 Aim → L1 law (a = 2V² sin η / L, L capped at the turn radius) → bank; altitude → flight-path angle → G; speed → throttle P+I (integral ±1, AP33). Optional request fields, all zero for a plain route: `PathDeg`/`PathRateDegS` and `BankDeg`/`BankRateDegS` (feed-forward), `Landing` (guard off), `GLimit`/`BankLimitDeg`. **Any new field must default to "no change" so earlier slices fly bit for bit**; rerun their tests.
+
+### The learned pilot (TRAINING-CONCEPT, A13–A15; Air Wing W59–W64)
+- Pure parts in `RH Aviator/Core/Learning` (`LearnedSeat`, `LearnedSenses` 68 numbers, layout version 1, `LearnedActions`, `RewardLedger`); ML-Agents only in `Modules/Learning` (its own assembly, `DeepWater.Aviator.Learning`). Change the senses' layout or scales: bump `LearnedSenses.Version`, since old policies read the old vector.
+- `FighterTraining` (order −55) steps the Academy by hand before Air Wing's runner (−50) steps the tick: pay, `EndEpisode` on a loss, `EpisodeInterrupted` at 180 s, `RequestDecision` every 5 ticks for flying jets, `EnvironmentStep`. Agents keep `MaxStep` 0; there is no `DecisionRequester`.
+- The arena is Air Wing's (`Core/Arena.cs`), inside the tick: respawns before the picture, collisions and the box after the guns; zero turns a rule off. `Engagement.Score` follows it (a respawned jet rejoins; a collided one leaves).
+- Train: `C:\Users\SIX\venvs\mlagents-1.1.0\Scripts\mlagents-learn Training/config/fighter_selfplay.yaml --run-id=<id> --results-dir=Training/results`, then Play in Dogfight Training. `fighter_smoke.yaml` proves the loop in minutes; `fighter_vs_rules.yaml` is M4's curriculum (set red's squadron to a rule pilot).
 
 ### The gun (W55–W57, Gunnery K1–K6, A12)
 - Round flight, drag, the swept hit test and the lead sight are Gunnery's: change them there, with Gunnery's `GunTests`, never a copy in Air Wing.
@@ -98,6 +107,10 @@ A change to the fight is judged on many merges, before and after, never on one. 
 11. **The runway's surface sits at 8.05 m and the land at 8 m;** headless landing tests use `FlatSurface(8.05)` everywhere, the strict case for the ground guard.
 12. **In a RunCommand, FlightSimLite's global `Units` and `Aircraft` beat your `using`s.** The vendor's `Assets/Plugins/FlightSimLite/Scripts/` declares both in the global namespace, which C# searches before `using` directives, and RunCommand compiles against that assembly; tests don't (asmdefs can't see it). `Units.KnotToMetrePerSecond` fails with CS0117. Write `DeepWater.AirWing.Core.Units` and use `var` for aircraft.
 13. **Gun tracking through the height loop porpoised** (A12: misses 4–187 m). Ask the hands for the flight-path angle that puts the bore on the lead point (`PathDeg`); misses settled under 1 m.
+14. **`mlagents` needs Python 3.10** (1.1.0: 3.10.1–3.10.12). The 0.28.0 on Python 3.13 fails at import. Use the venv `C:\Users\SIX\venvs\mlagents-1.1.0` (Python 3.10.11; python.org has no Windows installer for 3.10.12).
+15. **An editor-time sync that calls `SetDirty` on every validate dirties the scene on open,** and the Test Runner then blocks on a save dialog. Change and mark dirty only what differs (`TrainingSquadron.Apply`, 2026-10-29).
+16. **A pure-pursuit stand-in never shoots:** it sat 50° off its targets' noses in slow circles for two minutes. Lead pursuit gets it behind (34 s pointed in 150 s) but not inside the ace's 6 mils. To see a kill's chain (reward, respawn, explosion), force it with a harness (METHODOLOGY C53).
+17. **A scene camera that remembers a target is not following it** until it sets it: the spectator camera started free until 2026-10-29. Check the overlay in a screenshot, not the field.
 
 ## 7. Record
 

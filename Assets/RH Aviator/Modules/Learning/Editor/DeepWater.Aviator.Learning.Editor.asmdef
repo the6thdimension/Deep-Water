@@ -1,0 +1,24 @@
+{
+    "name": "DeepWater.Aviator.Learning.Editor",
+    "rootNamespace": "DeepWater.Aviator.Learning.Editor",
+    "references": [
+        "DeepWater.Aviator.Learning",
+        "DeepWater.Aviator",
+        "DeepWater.Aviator.Editor",
+        "DeepWater.AirWing",
+        "DeepWater.AirWing.Editor",
+        "DeepWater.Sea",
+        "Unity.ML-Agents"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

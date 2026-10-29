@@ -89,6 +89,9 @@ namespace DeepWater.AirWing.Modules.Aircraft
                 view.Bind(aircraft);
                 Debug.Log($"[Air Wing] aircraft {view.AircraftId} ({p.Name}, {view.Seat} seat): {string.Join("; ", aircraft.Levels)}", view);
             }
+            // Explosions show without a scene change too, once any jet's visuals carry one.
+            if (_views.Any(v => v.Visuals != null && v.Visuals.explosion != null) && FindAnyObjectByType<World.ExplosionView>() == null)
+                gameObject.AddComponent<World.ExplosionView>().Use(this);
             _roster = new SeatRoster(_core, PlayerSeat, playerAircraft);
             _roster.Moved += (left, taken) => Debug.Log($"[Air Wing] tick {_core.Tick}: the player left aircraft {left} ({_roster.Describe(left)}) and flies {taken}.", this);
         }

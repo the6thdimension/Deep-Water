@@ -35,7 +35,7 @@ Everything in this table is built, tested and on `main`. The detail behind each 
 | Slice 2d — Landing gear L1 | Wheels on spring-damper struts over PhysX contacts, brakes, nosewheel steering, gear up and down, a runway start, take-off and landing; hard and gear-up landings crash | 2026-10-26 | 8343959b | 99 |
 | Slice 2e — Phase 2 review | Every device class flown live at L1 in Dogfight; a landing on runway 09/27 in the scene; the budget re-measured with the gear, in the air and on the wheels; the phase written up | 2026-10-26 | a108970b | 103 |
 | Slice 2d follow-up — the gear moves; softer struts | The model's gear retracts and extends with the core (legs fold, doors close); the struts stiffen at the end of travel, so a hands-off touchdown survives | 2026-10-26 | d9cedd4c | 103 |
-| The arena, the spectator camera, explosions (W59–W64) | For RH Aviator's training squadrons: a jet that goes down respawns at its spawn point after 3 s, protected 5 s, with seeded jitter; jets inside 15 m both go down; a 40 km box. A spectator camera that follows any jet or flies free, and explosions for kills, collisions and impacts | 2026-10-29 | see the change log | 9 here (ArenaTests) |
+| The arena, the spectator camera, explosions (W59–W64) | For RH Aviator's training squadrons: a jet that goes down respawns at its spawn point after 3 s, protected 5 s, with seeded jitter; jets inside 15 m both go down; a 40 km box. A spectator camera that follows any jet or flies free, and explosions for kills, collisions and impacts | 2026-10-29 | `3dde2e84` | 9 here (ArenaTests) |
 
 ## STILL TO DO
 

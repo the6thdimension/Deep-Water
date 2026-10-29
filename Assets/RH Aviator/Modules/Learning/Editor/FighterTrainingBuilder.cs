@@ -136,7 +136,7 @@ namespace DeepWater.Aviator.Learning.Editor
                 agent.SetSide(side);
             }
             point.AddComponent<SpawnPoint>().Configure(label, jets, SpacingM, colour);
-            point.AddComponent<TrainingSquadron>().Configure(side, SquadronPilot.Learned,
+            point.AddComponent<TrainingSquadron>().Configure(side, FighterBrain.Learning,
                 AssetDatabase.LoadAssetAtPath<PilotProfileSO>(AviatorTools.RookiePilotPath),
                 AssetDatabase.LoadAssetAtPath<PilotProfileSO>(AviatorTools.LinePilotPath),
                 AssetDatabase.LoadAssetAtPath<PilotProfileSO>(AviatorTools.AcePilotPath));

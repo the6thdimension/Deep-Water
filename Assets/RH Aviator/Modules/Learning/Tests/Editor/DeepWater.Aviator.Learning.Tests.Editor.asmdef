@@ -1,0 +1,29 @@
+{
+    "name": "DeepWater.Aviator.Learning.Tests.Editor",
+    "rootNamespace": "DeepWater.Aviator.Learning.Tests",
+    "references": [
+        "DeepWater.Aviator.Learning",
+        "DeepWater.Aviator.Learning.Editor",
+        "DeepWater.Aviator",
+        "DeepWater.AirWing",
+        "Unity.ML-Agents",
+        "Unity.InferenceEngine",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -55,3 +55,7 @@ id_ed25519*
 /Training/results/
 /Assets/ML-Agents/Timers/*.json
 /Assets/ML-Agents/Timers/*.json.meta
+# The latest trained brain, copied here after each auto-train session (RH Aviator A18, M34): it changes every session.
+# A brain worth keeping is saved to Assets/RH Aviator/Policies/Kept/ with its record, and committed (M19).
+/Assets/RH Aviator/Policies/Latest/
+/Assets/RH Aviator/Policies/Latest.meta

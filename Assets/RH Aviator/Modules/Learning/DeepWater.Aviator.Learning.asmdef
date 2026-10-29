@@ -5,7 +5,9 @@
         "DeepWater.Aviator",
         "DeepWater.AirWing",
         "RH.Shared",
-        "Unity.ML-Agents"
+        "Unity.ML-Agents",
+        "Unity.InferenceEngine",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

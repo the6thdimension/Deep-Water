@@ -8,7 +8,8 @@
         "DeepWater.AirWing",
         "DeepWater.AirWing.Editor",
         "DeepWater.Sea",
-        "Unity.ML-Agents"
+        "Unity.ML-Agents",
+        "Unity.InferenceEngine"
     ],
     "includePlatforms": [
         "Editor"

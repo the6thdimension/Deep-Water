@@ -1,9 +1,10 @@
 # The learned pilots' self-play round (RH Aviator A13–A15; TRAINING-CONCEPT M21–M28, SIX 2026-10-29).
-# 4 v 4 in Assets/_SCENES/Dogfight Training.unity: one shared "Fighter" brain, blue team 0 and red team 1,
+# 8 v 8 in Assets/_SCENES/Dogfight Training.unity: one shared "Fighter" brain, blue team 0 and red team 1,
 # PPO with ML-Agents self-play (each side learns in turn against frozen older copies of the brain).
 # Every number here is AUTHORED, a starting point for the first rounds, not a tuned result.
 #
-# Start (from the project root; the venv is mlagents 1.1.0 on Python 3.10.11, CPU PyTorch):
+# Auto-train on Play (RH Aviator A18) runs this config when both sides have learning jets, as the rolling run
+# "auto-selfplay". By hand (turn auto-train off first; from the project root; mlagents 1.1.0 on Python 3.10.11, CPU PyTorch):
 #   In the Editor:   C:/Users/SIX/venvs/mlagents-1.1.0/Scripts/mlagents-learn Training/config/fighter_selfplay.yaml --run-id=fighter-001 --results-dir=Training/results
 #                    then press Play in Dogfight Training.
 #   Headless build:  add --env=Builds/FighterTraining/FighterTraining.exe --num-envs=4 --no-graphics

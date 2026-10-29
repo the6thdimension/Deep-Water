@@ -29,6 +29,41 @@ namespace DeepWater.Aviator.Learning.Editor
         public const string ConnectedMarker = "Connected to Unity environment";
         /// <summary>How long a ready trainer waits for Play before it gives up: a week, so it waits as long as the Editor is open.</summary>
         public const int WaitForPlayS = 7 * 24 * 3600;
+        /// <summary>The headless training player's process name (Lean Build names a player after its scene, spaces as '_').</summary>
+        public const string HeadlessPlayer = "Dogfight_Training";
+
+        /// <summary>
+        /// The newest brain a run has written, with its steps: the final brain (<c>Fighter.onnx</c>, written when the run
+        /// stops) or a checkpoint (<c>Fighter/Fighter-&lt;steps&gt;.onnx</c>, written while it trains), whichever is newer.
+        /// Null when it has none.
+        /// </summary>
+        public static string NewestBrain(string runDir, out int steps)
+        {
+            steps = -1;
+            string newest = null;
+            DateTime newestTime = DateTime.MinValue;
+            string final = Path.Combine(runDir, "Fighter.onnx");
+            if (File.Exists(final))
+            {
+                newest = final;
+                newestTime = File.GetLastWriteTimeUtc(final);
+                string status = Path.Combine(runDir, "run_logs", "training_status.json");
+                steps = FinalSteps(File.Exists(status) ? File.ReadAllText(status) : "");
+            }
+            string checkpoints = Path.Combine(runDir, "Fighter");
+            if (Directory.Exists(checkpoints))
+                foreach (string file in Directory.GetFiles(checkpoints, "Fighter-*.onnx"))
+                {
+                    DateTime t = File.GetLastWriteTimeUtc(file);
+                    if (t <= newestTime) continue;
+                    Match m = Regex.Match(Path.GetFileNameWithoutExtension(file), @"^Fighter-(\d+)$");
+                    if (!m.Success) continue;
+                    newest = file;
+                    newestTime = t;
+                    steps = int.Parse(m.Groups[1].Value);
+                }
+            return newest;
+        }
 
         /// <summary>Self-play needs learning jets on both sides (ML-Agents' ghost trainer swaps which side learns); one side
         /// alone trains against whatever flies the other, with the config that has no self-play.</summary>

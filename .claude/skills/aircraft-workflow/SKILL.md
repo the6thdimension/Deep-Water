@@ -72,6 +72,7 @@ Aim → L1 law (a = 2V² sin η / L, L capped at the turn radius) → bank; alti
   - Scripted: HeuristicOnly.
   - Rookie, line, ace: `AviatorPilot`.
   `BrainLibrary.Fits` checks a model's `obs_0` size against `LearnedSenses.Size`. The pure parts are in `Editor/TrainerCommand`; the tests are `FighterBrainTests` in `Modules/Learning/Tests`.
+- Headless (A19): build `tools/background-build/bg_build.ps1 -Scenes "Assets/_SCENES/Dogfight Training.unity" -Profile Release` (rebuild after any scene or code change the players need), auto-train off, then `tools/headless-training/train_headless.ps1 -Action start | status | stop`. Same rolling run as auto-train (`auto-selfplay`); each side refuses while the other trains it. Stop = end the players, so the trainer saves. **Take the Newest Headless Brain** copies the newest checkpoint into `Policies/Latest`.
 
 ### The gun (W55–W57, Gunnery K1–K6, A12)
 - Round flight, drag, the swept hit test and the lead sight are Gunnery's: change them there, with Gunnery's `GunTests`, never a copy in Air Wing.
@@ -121,7 +122,7 @@ A change to the fight is judged on many merges, before and after, never on one. 
 19. **A new file can stay out of its assembly's compile list** (2026-10-29: `Air Wing/Editor/MissileData.cs`, through three recompiles and a clean-cache build, while `CompilationPipeline.GetAssemblyNameFromScriptPath` named the right assembly). Check `CompilationPipeline.GetAssemblies()`'s `sourceFiles`; renaming the file with a fresh .meta fixed it (`GameMissileData.cs`).
 20. **Missiles** (W65, A16): the pickle is an input (`PilotInputs.Pickle`); the flight core locks, launches and flies them; `FlightCore.IsLocked` is the one lock test (HUD, AI, senses). Position and gun fights' tests fly missiles safe (`MissileRangeM` 0) so their criteria keep their meaning.
 21. **mlagents 1.1.0 does not stop when Play stops:** it restarts its worker, listens again, and saves nothing until the next checkpoint (500,000 steps). A launcher that waits for it to exit waits forever. On 2026-10-29, 20,000 steps were lost when that wait timed out and killed it. Pass `--max-lifetime-restarts=0` (`TrainerCommand.Arguments`), and never kill a trainer that may be saving.
-22. **In the Editor, training runs at about ×2 real time with 16 jets, not the ×20 asked.** On 2026-10-29: about 110–145 environment steps a second at about 1 frame a second; the first 20,000 trainer steps took 141 s. The cost is the Python side and the 16 jets' ticks. Real rounds want headless builds (M28).
+22. **In the Editor, training runs at about ×2 real time with 16 jets, not the ×20 asked.** On 2026-10-29: about 110–145 environment steps a second at about 1 frame a second; the first 20,000 trainer steps took 141 s. The cost is the Python side and the 16 jets' ticks. Headless ×4 (A19) with every jet deciding on the same ticks reached about 820 trainer steps a second (2026-10-29); the trainer's single Python core is the limit (124 %), the players idle at 6–10 %, so more players won't help. Decisions on each jet's own clock (from its respawn) made nearly every tick a round trip: about 295 a second (METHODOLOGY C57).
 
 ## 7. Record
 

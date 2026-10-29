@@ -33,7 +33,15 @@ Built 2026-10-29 on SIX's picks (TRAINING-CONCEPT M21–M34; BLUEPRINT A13–A18
 
 **Choose who flies.** **Deep Water → RH Aviator → Fighter Brains** lists every jet. A squadron's brain is Learning (trains when the trainer runs, else flies the latest brain), Saved (a kept brain: flies it, never trains), Scripted (the stand-in), or Rookie, Line or Ace (the rule pilots). Any jet can have its own brain over its squadron's. Self-play needs learning jets on both sides; with one side learning, the auto-trainer uses the config without self-play (M4's curriculum: blue learns, red Line). A brain trained on other senses does not fit, and that jet flies the stand-in (the window and the Console say so). **Keep this brain…** saves the latest as `Policies/Kept/<name>.onnx` with its record (steps, reward, settings, who flew each side): commit it to keep it (M19).
 
-**Train it by hand** (a long run, or another config; turn auto-train off first, both use port 5004). From the project root:
+**Train it headless** (fast, for long runs; A19). Build the player once, or again after a change to the scene or the code: `tools/background-build/bg_build.ps1 -Scenes "Assets/_SCENES/Dogfight Training.unity" -Profile Release` (the Editor stays free). Switch auto-train off, then:
+
+```
+powershell -NoProfile -ExecutionPolicy Bypass -File tools/headless-training/train_headless.ps1 -Action start
+```
+
+Four players without graphics train the same brain as auto-train (`auto-selfplay`), and keep going until `-Action stop`, which saves the brain. `-Action status` shows the last progress line. To fly the newest checkpoint in the Editor, even mid-run, use **Deep Water → RH Aviator → Take the Newest Headless Brain** (or the button in Fighter Brains). Its logs are in `Training/results/headless/`.
+
+**Train it by hand** (another config; turn auto-train off first, both use port 5004). From the project root:
 
 ```
 C:\Users\SIX\venvs\mlagents-1.1.0\Scripts\mlagents-learn Training/config/fighter_selfplay.yaml --run-id=fighter-001 --results-dir=Training/results

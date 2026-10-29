@@ -267,9 +267,14 @@ namespace DeepWater.Aviator.Learning.Editor
             if (now == State.Off) Launch(needed);
         }
 
+        /// <summary>Headless training players are running (tools/headless-training): they train the same rolling run.</summary>
+        public static bool HeadlessRunning => Process.GetProcessesByName(TrainerCommand.HeadlessPlayer).Length > 0;
+
         static void Launch(TrainerCommand.Mode mode)
         {
             if (!File.Exists(Exe)) { Fail($"no trainer at {Exe}: set the venv in the Fighter Brains window (TRAINING-CONCEPT M28)"); return; }
+            // Two trainers on one run would write over each other's checkpoints.
+            if (HeadlessRunning) { Fail($"headless training is running ({TrainerCommand.HeadlessPlayer} players): it trains the same brain. Stop it first (tools/headless-training/train_headless.ps1 -Action stop), then Retry"); return; }
             string root = ProjectRoot;
             string results = Path.Combine(root, TrainerCommand.ResultsDir).Replace('\\', '/');
             string run = TrainerCommand.RunOf(mode);
@@ -358,25 +363,48 @@ namespace DeepWater.Aviator.Learning.Editor
         /// <summary>What this session trains with, kept until its brain is copied (M19: reward, scenario, settings).</summary>
         static void RecordSession(TrainerCommand.Mode mode)
         {
+            SessionState.SetString(SessionKey, JsonUtility.ToJson(SessionInfo(mode, Scenario())));
+            SessionState.SetString(SessionStartKey, DateTime.UtcNow.Ticks.ToString());
+        }
+
+        /// <summary>A brain's record before its steps are known: the run, config, senses, scenario, reward and settings.</summary>
+        static BrainInfo SessionInfo(TrainerCommand.Mode mode, string scenario)
+        {
             var training = Object.FindAnyObjectByType<FighterTraining>();
             var so = training != null ? new SerializedObject(training) : null;
             var reward = so?.FindProperty("rewardWeights").objectReferenceValue as RewardWeightsSO;
             var pilot = so?.FindProperty("learnedPilot").objectReferenceValue as LearnedPilotSO;
             string config = TrainerCommand.ConfigOf(mode);
             string configPath = Path.Combine(ProjectRoot, config);
-            var info = new BrainInfo
+            return new BrainInfo
             {
                 run = TrainerCommand.RunOf(mode),
                 config = config,
                 sensesVersion = LearnedSenses.Version,
                 sensesSize = LearnedSenses.Size,
-                scenario = Scenario(),
+                scenario = scenario,
                 rewardWeights = reward != null ? EditorJsonUtility.ToJson(reward) : "",
                 learnedPilot = pilot != null ? EditorJsonUtility.ToJson(pilot) : "",
                 configText = File.Exists(configPath) ? File.ReadAllText(configPath) : "",
             };
-            SessionState.SetString(SessionKey, JsonUtility.ToJson(info));
-            SessionState.SetString(SessionStartKey, DateTime.UtcNow.Ticks.ToString());
+        }
+
+        /// <summary>
+        /// Deep Water → RH Aviator → Take the Newest Headless Brain: the newest brain the headless run has written (its last
+        /// checkpoint while it trains, its final brain once stopped) becomes the latest brain, so the Editor flies it.
+        /// </summary>
+        [MenuItem("Deep Water/RH Aviator/Take the Newest Headless Brain", priority = 161)]
+        public static void TakeHeadlessBrain()
+        {
+            string run = TrainerCommand.SelfPlayRun;
+            string runDir = Path.Combine(ProjectRoot, TrainerCommand.ResultsDir, run);
+            string source = TrainerCommand.NewestBrain(runDir, out int steps);
+            if (source == null) { Debug.LogWarning($"[RH Aviator] no brain in {runDir} yet: a headless run writes one at each checkpoint and when it stops."); return; }
+            string scenario = Object.FindAnyObjectByType<FighterTraining>() != null
+                ? "headless player of Dogfight Training as built; the open scene's squadrons: " + Scenario()
+                : "headless player of Dogfight Training as built (squadrons not recorded: the training scene is not open)";
+            BrainInfo info = SessionInfo(TrainerCommand.Mode.SelfPlay, scenario);
+            Install(source, info, steps, File.GetLastWriteTimeUtc(source));
         }
 
         /// <summary>"blue: 8 Learning; red: 4 Line, 4 Saved Ace-2M" from the squadrons as they are.</summary>
@@ -404,18 +432,25 @@ namespace DeepWater.Aviator.Learning.Editor
                 Debug.LogWarning($"[RH Aviator] auto-train: the session left no new brain in {run} (too short to train a step?); the latest brain is unchanged.");
                 return;
             }
+            string status = Path.Combine(runDir, "run_logs", "training_status.json");
+            info.run = run;
+            Install(source, info, TrainerCommand.FinalSteps(File.Exists(status) ? File.ReadAllText(status) : ""), DateTime.UtcNow, "auto-train: session saved");
+        }
+
+        /// <summary>A brain to <see cref="BrainLibrary.LatestPath"/>, with its record beside it.</summary>
+        static void Install(string source, BrainInfo info, int steps, DateTime trainedUtc, string what = "headless brain taken")
+        {
             string target = Path.Combine(ProjectRoot, BrainLibrary.LatestPath);
             Directory.CreateDirectory(Path.GetDirectoryName(target));
             File.Copy(source, target, true);
-            string status = Path.Combine(runDir, "run_logs", "training_status.json");
-            info.run = run;
-            info.steps = TrainerCommand.FinalSteps(File.Exists(status) ? File.ReadAllText(status) : "");
-            info.trainedUtc = DateTime.UtcNow.ToString("u");
+            info.steps = steps;
+            info.trainedUtc = trainedUtc.ToString("u");
+            string run = info.run;
             string record = Path.ChangeExtension(BrainLibrary.LatestPath, ".json");
             File.WriteAllText(Path.Combine(ProjectRoot, record), JsonUtility.ToJson(info, true));
             AssetDatabase.ImportAsset(BrainLibrary.LatestPath, ImportAssetOptions.ForceUpdate);
             AssetDatabase.ImportAsset(record, ImportAssetOptions.ForceUpdate);
-            Debug.Log($"[RH Aviator] auto-train: session saved. The brain at {info.steps:N0} steps ({run}) is now {BrainLibrary.LatestPath}; learning jets fly it when no trainer runs.");
+            Debug.Log($"[RH Aviator] {what}. The brain at {info.steps:N0} steps ({run}) is now {BrainLibrary.LatestPath}; learning jets fly it when no trainer runs.");
         }
 
         /// <summary>The latest brain's record, or null before the first session.</summary>

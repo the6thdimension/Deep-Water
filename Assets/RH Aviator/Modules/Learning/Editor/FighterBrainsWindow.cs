@@ -25,6 +25,8 @@ namespace DeepWater.Aviator.Learning.Editor
         // Loading a brain to check its fit costs a few milliseconds: once per file version, not every repaint.
         static readonly Dictionary<string, string> FitCache = new Dictionary<string, string>();
         Vector2 _scroll;
+        double _headlessLook;
+        bool _headless;
 
         [MenuItem("Deep Water/RH Aviator/Fighter Brains", priority = 159)]
         public static void Open() => GetWindow<FighterBrainsWindow>("Fighter Brains").minSize = new Vector2(420f, 300f);
@@ -76,6 +78,17 @@ namespace DeepWater.Aviator.Learning.Editor
                     if (GUILayout.Button("Retry")) AutoTrainer.Retry();
                     break;
             }
+
+            // Looking for the players costs a process listing: every two seconds, not every repaint.
+            if (EditorApplication.timeSinceStartup > _headlessLook)
+            {
+                _headlessLook = EditorApplication.timeSinceStartup + 2.0;
+                _headless = AutoTrainer.HeadlessRunning;
+            }
+            if (_headless)
+                EditorGUILayout.HelpBox("Headless training is running (tools/headless-training/train_headless.ps1): it trains the same brain, " +
+                                        "so auto-train waits. Take its newest checkpoint to fly it here.", MessageType.Info);
+            if (GUILayout.Button("Take the newest headless brain")) AutoTrainer.TakeHeadlessBrain();
 
             BrainInfo latest = AutoTrainer.LatestInfo();
             ModelAsset latestAsset = BrainLibrary.Latest();

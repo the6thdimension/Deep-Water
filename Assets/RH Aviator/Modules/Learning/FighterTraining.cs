@@ -192,7 +192,11 @@ namespace DeepWater.Aviator.Learning
                     _lifeStart[i] = tick;
                     _interrupted++;
                 }
-                if ((tick - _lifeStart[i]) % _settings.DecisionPeriodTicks == 0) agent.RequestDecision();
+                // Every jet decides on the same ticks, by the core's clock, not its own life's: each tick with a decision is a
+                // round trip to the trainer, and lives that start at different ticks made nearly every tick one (2026-10-29: the
+                // trainer pinned a core while four headless players idled at 3–7 %). A new life waits at most 4 ticks for its
+                // first decision, its seat holding course (LearnedSeat.Hold), inside its 5 s of protection.
+                if (tick % _settings.DecisionPeriodTicks == 0) agent.RequestDecision();
             }
             Academy.Instance.EnvironmentStep();
         }

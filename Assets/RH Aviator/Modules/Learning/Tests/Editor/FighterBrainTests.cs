@@ -150,6 +150,37 @@ namespace DeepWater.Aviator.Learning.Tests
         }
 
         [Test]
+        public void TheNewestBrainIsTheLastWrittenFinalOrCheckpoint()
+        {
+            string dir = Path.Combine(Path.GetTempPath(), "dw-brains-" + System.Guid.NewGuid().ToString("N"));
+            try
+            {
+                Assert.IsNull(TrainerCommand.NewestBrain(dir, out int none));
+                Assert.AreEqual(-1, none);
+                Directory.CreateDirectory(Path.Combine(dir, "Fighter"));
+                Directory.CreateDirectory(Path.Combine(dir, "run_logs"));
+                string final = Path.Combine(dir, "Fighter.onnx");
+                File.WriteAllText(final, "");
+                File.WriteAllText(Path.Combine(dir, "run_logs", "training_status.json"), "{\"Fighter\": {\"final_checkpoint\": {\"steps\": 101593}}}");
+                File.SetLastWriteTimeUtc(final, new System.DateTime(2026, 10, 29, 23, 0, 0));
+                string older = Path.Combine(dir, "Fighter", "Fighter-97428.onnx");
+                File.WriteAllText(older, "");
+                File.SetLastWriteTimeUtc(older, new System.DateTime(2026, 10, 29, 22, 0, 0));
+                Assert.AreEqual(final, TrainerCommand.NewestBrain(dir, out int steps), "a stopped run: its final brain");
+                Assert.AreEqual(101593, steps);
+                string newer = Path.Combine(dir, "Fighter", "Fighter-600000.onnx");
+                File.WriteAllText(newer, "");
+                File.SetLastWriteTimeUtc(newer, new System.DateTime(2026, 10, 30, 1, 0, 0));
+                Assert.AreEqual(newer, TrainerCommand.NewestBrain(dir, out steps), "a run still training: its last checkpoint");
+                Assert.AreEqual(600000, steps);
+            }
+            finally
+            {
+                if (Directory.Exists(dir)) Directory.Delete(dir, true);   // the test's own temp folder
+            }
+        }
+
+        [Test]
         public void TheStepsComeFromTheFinalCheckpoint()
         {
             // The shape of the smoke run's run_logs/training_status.json (2026-10-29).

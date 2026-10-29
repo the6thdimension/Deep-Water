@@ -21,7 +21,7 @@ namespace DeepWater.Aviator.Learning.Editor
     /// Deep Water → RH Aviator → Build Dogfight Training Scene (A13–A15; TRAINING-CONCEPT M21–M28, SIX 2026-10-29).
     /// Writes <c>Assets/_SCENES/Dogfight Training.unity</c> in place: Dogfight's world (the same sea, land, runway and
     /// landmark, from <see cref="DogfightBuilder.BuildWorld"/>), Air Wing's runner with no player seat, two squadrons of
-    /// four F/A-18Es on spawn points 20 km apart facing each other (blue south, red north), the arena that brings them
+    /// eight F/A-18Es (8 v 8; SIX 2026-10-29) on spawn points 20 km apart facing each other (blue south, red north), the arena that brings them
     /// back, the fight, the training director and a spectator camera. It also writes the three training assets with
     /// their provenance (the arena, the learned pilot and its reward), so numbers and sources cannot drift apart.
     /// <para>"Add Training Squadrons to the Open Scene" puts the same squadrons, arena, fight and director into any scene
@@ -35,7 +35,8 @@ namespace DeepWater.Aviator.Learning.Editor
         public const string LearnedPilotPath = TrainingDir + "/LearnedPilot.asset";
         public const string RewardPath = TrainingDir + "/RewardWeights.asset";
         public const string BehaviorName = "Fighter";
-        public const int SquadronSize = 4;
+        /// <summary>Jets a side: 8 v 8 since 2026-10-29 (SIX; it was 4 v 4, M21).</summary>
+        public const int SquadronSize = 8;
 
         // AUTHORED layout (M25, SIX 2026-10-29), metres; +Z is north, the sea datum y = 0. Dogfight's coast is at z = −4,500.
         static readonly Vector3 BlueSpawn = new Vector3(0f, 1829f, 2000f);    // 6,000 ft, heading 000
@@ -62,7 +63,7 @@ namespace DeepWater.Aviator.Learning.Editor
 
             EditorSceneManager.SaveScene(scene, ScenePath);
             AssetDatabase.SaveAssets();
-            Debug.Log($"[RH Aviator] Built {ScenePath}: Dogfight's world; blue 1–4 at (0, 1,829, 2,000) heading 000 and red 5–8 at (0, 1,829, 22,000) heading 180, " +
+            Debug.Log($"[RH Aviator] Built {ScenePath}: Dogfight's world; blue 1–{SquadronSize} at (0, 1,829, 2,000) heading 000 and red {SquadronSize + 1}–{2 * SquadronSize} at (0, 1,829, 22,000) heading 180, " +
                       "line abreast 300 m, 400 kt; learned pilots on both sides; the arena (back 3 s after going down, 5 s protected, collisions inside 15 m, a 40 km box); " +
                       "the fight, the training director and the spectator camera. No player seat.");
         }
@@ -77,7 +78,7 @@ namespace DeepWater.Aviator.Learning.Editor
             int maxId = Object.FindObjectsByType<AircraftView>(FindObjectsSortMode.None).Select(v => v.AircraftId).DefaultIfEmpty(0).Max();
             AddTraining(runner, maxId + 1);
             EditorSceneManager.MarkSceneDirty(runner.gameObject.scene);
-            Debug.Log($"[RH Aviator] Added the training squadrons to {runner.gameObject.scene.name}: blue {maxId + 1}–{maxId + 4}, red {maxId + 5}–{maxId + 8}. The scene is not saved.");
+            Debug.Log($"[RH Aviator] Added the training squadrons to {runner.gameObject.scene.name}: blue {maxId + 1}–{maxId + SquadronSize}, red {maxId + SquadronSize + 1}–{maxId + 2 * SquadronSize}. The scene is not saved.");
         }
 
         /// <summary>Both squadrons, the arena, the fight and the director, in the open scene beside <paramref name="runner"/>.</summary>
@@ -130,7 +131,7 @@ namespace DeepWater.Aviator.Learning.Editor
                 behaviour.BehaviorName = BehaviorName;
                 behaviour.BrainParameters.VectorObservationSize = LearnedSenses.Size;
                 behaviour.BrainParameters.NumStackedVectorObservations = 1;
-                behaviour.BrainParameters.ActionSpec = new ActionSpec(LearnedActions.ContinuousCount, new[] { LearnedActions.TriggerChoices });
+                behaviour.BrainParameters.ActionSpec = new ActionSpec(LearnedActions.ContinuousCount, new[] { LearnedActions.TriggerChoices, LearnedActions.PickleChoices });
                 behaviour.BehaviorType = BehaviorType.Default;
                 agent.SetSide(side);
             }

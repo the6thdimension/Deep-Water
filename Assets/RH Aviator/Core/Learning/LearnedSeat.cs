@@ -8,11 +8,11 @@ using DeepWater.AirWing.Core.State;
 
 namespace DeepWater.Aviator.Core
 {
-    /// <summary>What a learned pilot asks for (M1): a flight path for the hands, and the trigger.</summary>
+    /// <summary>What a learned pilot asks for (M1): a flight path for the hands, the trigger and the missile pickle (W65).</summary>
     public struct LearnedCommand
     {
         public FlightPathRequest Request;
-        public bool Trigger;
+        public bool Trigger, Pickle;
     }
 
     /// <summary>
@@ -61,7 +61,7 @@ namespace DeepWater.Aviator.Core
         {
             _command = command;
             _commands++;
-            _status = command.Trigger ? "GUNS" : "FLYING";   // constant strings, read on every frame; the pick list puts the kind (LEARNED) first
+            _status = command.Pickle ? "MISSILE" : command.Trigger ? "GUNS" : "FLYING";   // constant strings, read on every frame; the pick list puts the kind (LEARNED) first
         }
 
         public PilotInputs Issue(long tick, int aircraftId, in AirframeState state)
@@ -83,6 +83,7 @@ namespace DeepWater.Aviator.Core
             float surface = _core.Surface.HeightAt(state.Position.x, state.Position.z);
             PilotInputs inputs = _hands.Fly(_command.Request, state, surface);
             inputs.Trigger = _command.Trigger;
+            inputs.Pickle = _command.Pickle;
             return inputs;
         }
 

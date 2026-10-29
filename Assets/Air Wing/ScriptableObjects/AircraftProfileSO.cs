@@ -189,6 +189,27 @@ namespace DeepWater.AirWing.ScriptableObjects
         [Tooltip("The sphere rounds are tested against, m.")]
         public float hitRadiusM;
 
+        [Header("Game missiles (W65; AUTHORED arcade numbers; empty name = none)")]
+        public string missileName = "";
+        [Tooltip("Pylon positions about the centre of mass, body frame, m; one missile each, fired in this order.")]
+        public Vector3[] missilePylonsM = new Vector3[0];
+        [Tooltip("Motor: acceleration along the path, m/s², for the burn time, s.")]
+        public float missileBoostAccelMps2, missileBurnS;
+        [Tooltip("Drag as a deceleration k·v², 1/m.")]
+        public float missileDragPerM;
+        [Tooltip("Most sideways acceleration, g; proportional navigation's gain N.")]
+        public float missileMaxG, missileNavGain;
+        [Tooltip("Seeker cone half-angle from the missile's path, degrees: outside it the target is lost.")]
+        public float missileSeekerConeDeg;
+        [Tooltip("Lock: half-angle from the jet's nose, degrees; ranges, m; time held, s.")]
+        public float missileLockConeDeg, missileLockMinM, missileLockMaxM, missileLockTimeS;
+        [Tooltip("Arming and self-destruct times, s.")]
+        public float missileArmS, missileLifeS;
+        [Tooltip("Proximity fuse radius, m; the chance a burst kills, 0-1; hit points taken otherwise.")]
+        public float missileLethalRadiusM, missileKillChance, missileDamageHp;
+        [Tooltip("Least time between launches from one jet, s.")]
+        public float missileLaunchIntervalS;
+
         [Header("Provenance (W8)")]
         [TextArea(8, 40)]
         public string provenance = "";
@@ -333,6 +354,23 @@ namespace DeepWater.AirWing.ScriptableObjects
                 };
             }
             if (hitPoints > 0f) profile.Combat = new CombatProfile { HitPoints = hitPoints, HitRadiusM = hitRadiusM };
+            if (!string.IsNullOrEmpty(missileName))
+            {
+                profile.Missiles = new DeepWater.AirWing.Core.Missiles.MissileMount
+                {
+                    Missile = new DeepWater.AirWing.Core.Missiles.MissileProfile
+                    {
+                        Name = missileName,
+                        BoostAccelMps2 = missileBoostAccelMps2, BurnS = missileBurnS, DragPerM = missileDragPerM,
+                        MaxG = missileMaxG, NavGain = missileNavGain, SeekerConeDeg = missileSeekerConeDeg,
+                        LockConeDeg = missileLockConeDeg, LockMinM = missileLockMinM, LockMaxM = missileLockMaxM, LockTimeS = missileLockTimeS,
+                        ArmS = missileArmS, LifeS = missileLifeS,
+                        LethalRadiusM = missileLethalRadiusM, KillChance = missileKillChance, DamageHp = missileDamageHp,
+                        LaunchIntervalS = missileLaunchIntervalS,
+                    },
+                    PylonsM = (Vector3[])missilePylonsM.Clone(),
+                };
+            }
             profile.Validate();
             return profile;
         }

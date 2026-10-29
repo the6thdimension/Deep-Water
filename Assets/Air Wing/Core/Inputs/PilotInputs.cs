@@ -42,6 +42,8 @@ namespace DeepWater.AirWing.Core.Inputs
         public bool Brakes;
         /// <summary>The gun's trigger, held (Gunnery K4): rounds go while it is held and the gun has any.</summary>
         public bool Trigger;
+        /// <summary>The missile pickle, held (W65): with a lock, a missile goes, then one each launch interval while held.</summary>
+        public bool Pickle;
         public PilotSwitches Switches;
 
         /// <summary>Stick centred, throttle idle, everything off.</summary>
@@ -64,6 +66,7 @@ namespace DeepWater.AirWing.Core.Inputs
                 Afterburner = Afterburner,
                 Brakes = Brakes,
                 Trigger = Trigger,
+                Pickle = Pickle,
                 Switches = Switches,
             };
         }
@@ -78,7 +81,8 @@ namespace DeepWater.AirWing.Core.Inputs
         // Exact comparison on purpose: the input log and replay compare bit for bit (W28).
         public bool Equals(PilotInputs o) =>
             StickPitch.Equals(o.StickPitch) && StickRoll.Equals(o.StickRoll) && Pedals.Equals(o.Pedals) &&
-            Throttle.Equals(o.Throttle) && Afterburner == o.Afterburner && Brakes == o.Brakes && Trigger == o.Trigger && Switches == o.Switches;
+            Throttle.Equals(o.Throttle) && Afterburner == o.Afterburner && Brakes == o.Brakes && Trigger == o.Trigger && Pickle == o.Pickle &&
+            Switches == o.Switches;
 
         public override bool Equals(object obj) => obj is PilotInputs o && Equals(o);
 
@@ -93,11 +97,12 @@ namespace DeepWater.AirWing.Core.Inputs
                 h = h * 31 + (Afterburner ? 1 : 0);
                 h = h * 31 + (Brakes ? 1 : 0);
                 h = h * 31 + (Trigger ? 1 : 0);
+                h = h * 31 + (Pickle ? 1 : 0);
                 return h * 31 + (int)Switches;
             }
         }
 
         public override string ToString() => FormattableString.Invariant(
-            $"pitch {StickPitch:+0.00;-0.00} roll {StickRoll:+0.00;-0.00} pedals {Pedals:+0.00;-0.00} throttle {Throttle:0.00}{(Afterburner ? " AB" : "")}{(Brakes ? " BRAKES" : "")}{(Trigger ? " GUN" : "")} [{Switches}]");
+            $"pitch {StickPitch:+0.00;-0.00} roll {StickRoll:+0.00;-0.00} pedals {Pedals:+0.00;-0.00} throttle {Throttle:0.00}{(Afterburner ? " AB" : "")}{(Brakes ? " BRAKES" : "")}{(Trigger ? " GUN" : "")}{(Pickle ? " MSL" : "")} [{Switches}]");
     }
 }

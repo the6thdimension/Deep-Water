@@ -73,6 +73,16 @@ namespace DeepWater.AirWing.ScriptableObjects
         [Min(0.01f)] public float impactExplosionScale = 1f;
         [Tooltip("Seconds before a played explosion is removed.")]
         [Min(0.1f)] public float explosionLifeS = 6f;
+        [Tooltip("The explosion's scale where a missile bursts without a kill (a kill plays the air explosion at the victim).")]
+        [Min(0.01f)] public float missileBurstScale = 0.8f;
+
+        [Header("Game missiles (presentation: MissileView, W65)")]
+        [Tooltip("The missile's shape: on each loaded pylon, and in flight. Its +Z is the nose. Empty: none drawn.")]
+        public GameObject missileModel;
+        [Tooltip("The smoke trail a missile in flight draws (its exhaust and a ribbon). Empty: none.")]
+        public GameObject missileTrail;
+        [Tooltip("Seconds a trail lingers after its missile is gone.")]
+        [Min(0f)] public float missileTrailLingerS = 3f;
 
         [TextArea(2, 8)] public string provenance = "";
     }

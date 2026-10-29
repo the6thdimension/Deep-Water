@@ -67,24 +67,32 @@ namespace DeepWater.Aviator.Learning
         {
             if (_seat == null) return;
             ActionSegment<float> c = actions.ContinuousActions;
-            bool trigger = actions.DiscreteActions.Length > 0 && actions.DiscreteActions[0] == 1;
-            _seat.Order(LearnedActions.Decode(new ReadOnlySpan<float>(c.Array, c.Offset, c.Length), trigger,
+            ActionSegment<int> d = actions.DiscreteActions;
+            bool trigger = d.Length > LearnedActions.TriggerBranch && d[LearnedActions.TriggerBranch] == 1;
+            bool pickle = d.Length > LearnedActions.PickleBranch && d[LearnedActions.PickleBranch] == 1;
+            _seat.Order(LearnedActions.Decode(new ReadOnlySpan<float>(c.Array, c.Offset, c.Length), trigger, pickle,
                                               _training.Core.Find(_id).State, _training.Settings, _seat.Pilot));
         }
 
         /// <summary>
-        /// The scripted stand-in: lead pursuit on the nearest enemy it knows of, and fire when the pipper's miss is inside
-        /// the pilot's own trigger discipline (the ace's 6 mils). Reads the senses written just before.
+        /// The scripted stand-in: lead pursuit on the nearest enemy it knows of, fire when the pipper's miss is inside the
+        /// pilot's own trigger discipline (the ace's 6 mils), and launch when locked on an enemy inside its missile range
+        /// (the ace's 2.5 km). Reads the senses written just before.
         /// </summary>
         public override void Heuristic(in ActionBuffers actionsOut)
         {
             if (_seat == null) return;
             bool shoot = LearnedActions.Scripted(_training.Core.Find(_id).State, _senses.NearestEnemy != 0, _senses.NearestEnemyGuess,
-                                                 _senses.NearestEnemyVelocity, _senses.PipperMissMils, _seat.Pilot, _training.Settings, _scripted);
+                                                 _senses.NearestEnemyVelocity, _senses.PipperMissMils, _senses.LockedOnEnemy, _seat.Pilot,
+                                                 _training.Settings, _scripted, out bool pickle);
+            // One at a time, as the rule pilots (A16): never while one of its own is still guided.
+            var live = _training.Core.Missiles.Live;
+            for (int i = 0; i < live.Count && pickle; i++) if (live[i].ShooterId == _id && !live[i].Lost) pickle = false;
             ActionSegment<float> c = actionsOut.ContinuousActions;
             for (int i = 0; i < c.Length && i < _scripted.Length; i++) c[i] = _scripted[i];
             ActionSegment<int> d = actionsOut.DiscreteActions;
-            if (d.Length > 0) d[0] = shoot ? 1 : 0;
+            if (d.Length > LearnedActions.TriggerBranch) d[LearnedActions.TriggerBranch] = shoot ? 1 : 0;
+            if (d.Length > LearnedActions.PickleBranch) d[LearnedActions.PickleBranch] = pickle ? 1 : 0;
         }
     }
 }

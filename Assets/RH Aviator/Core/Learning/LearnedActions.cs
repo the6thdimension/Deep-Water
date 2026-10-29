@@ -46,8 +46,9 @@ namespace DeepWater.Aviator.Core
     {
         public const int ContinuousCount = 4;
         public const int Turn = 0, Climb = 1, Speed = 2, GCap = 3;
-        /// <summary>The one discrete branch: 0 trigger off, 1 trigger on.</summary>
-        public const int TriggerChoices = 2;
+        /// <summary>The discrete branches: the trigger (0 off, 1 on), then the missile pickle (0 off, 1 on; W65).</summary>
+        public const int TriggerChoices = 2, PickleChoices = 2;
+        public const int TriggerBranch = 0, PickleBranch = 1;
         /// <summary>The aim point sits this far along the asked-for track: far enough to be a heading (the hands cap L at a turn radius).</summary>
         const float AimDistanceM = 10000f;
 
@@ -55,7 +56,7 @@ namespace DeepWater.Aviator.Core
         /// The command for actions <paramref name="a"/> (length <see cref="ContinuousCount"/>) from state <paramref name="s"/>.
         /// Values beyond ±1 are clamped (the trainer samples a Gaussian); a NaN is a broken policy and throws.
         /// </summary>
-        public static LearnedCommand Decode(ReadOnlySpan<float> a, bool trigger, in AirframeState s, in LearnedPilotSettings set, in PilotProfile pilot)
+        public static LearnedCommand Decode(ReadOnlySpan<float> a, bool trigger, bool pickle, in AirframeState s, in LearnedPilotSettings set, in PilotProfile pilot)
         {
             if (a.Length != ContinuousCount) throw new ArgumentException($"a learned pilot takes {ContinuousCount} continuous actions, not {a.Length}");
             float turn = Unit(a[Turn], "turn"), climb = Unit(a[Climb], "climb"), speed = Unit(a[Speed], "speed"), g = Unit(a[GCap], "G cap");
@@ -70,6 +71,7 @@ namespace DeepWater.Aviator.Core
                     GLimit = Mathf.Lerp(set.MinG, pilot.Hands.MaxG, 0.5f * (g + 1f)),
                 },
                 Trigger = trigger,
+                Pickle = pickle,
             };
         }
 
@@ -87,8 +89,10 @@ namespace DeepWater.Aviator.Core
         /// circles 50° off the target's nose for two minutes and never fired.)
         /// </summary>
         public static bool Scripted(in AirframeState me, bool hasTarget, Vector3 targetGuess, Vector3 targetVelocity, float missMils,
-                                    in PilotProfile pilot, in LearnedPilotSettings set, Span<float> actions)
+                                    bool lockedOnEnemy, in PilotProfile pilot, in LearnedPilotSettings set, Span<float> actions, out bool pickle)
         {
+            // The pickle as the rule pilots' discipline has it: locked on an enemy inside the pilot's missile range (A16).
+            pickle = lockedOnEnemy && hasTarget && (targetGuess - me.Position).magnitude <= pilot.MissileRangeM;
             if (actions.Length != ContinuousCount) throw new ArgumentException($"{ContinuousCount} actions");
             actions[Turn] = actions[Climb] = 0f;
             actions[Speed] = Mathf.Clamp(2f * Mathf.InverseLerp(set.MinKt, set.MaxKt, pilot.CornerKt) - 1f, -1f, 1f);

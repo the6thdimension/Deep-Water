@@ -216,148 +216,112 @@ MonoBehaviour:
   gunBoreBody: {x: 0, y: 0.017497322, z: 0.99984694}
   hitPoints: 10
   hitRadiusM: 4
-  provenance: 'Sources and tags in full: Assets/Air Wing/Calibration~/F18E-SOURCES.md
-    (read 2026-10-25).
-
-    PUBLIC = official page; CALIBRATED = fitted to one public
-    figure (C16); AUTHORED = our estimate.
-
-
-    spanFt 44.9: PUBLIC, Navy fact file
-    (Wingspan 44.9 ft); Boeing agrees.
-
-    engineCount 2: PUBLIC, Navy fact file
-    (two F414-GE-400).
-
-    maxThrustPerEngineLbf 22000: PUBLIC, Navy fact file and
-    GE F414 datasheet (22,000 lb static). Conflict: Boeing says 17,000 lb per engine.
-
-    militaryThrustPerEngineLbf
-    13000: AUTHORED (commonly quoted dry thrust; not on Navy, Boeing or GE pages).
-
-    wingAreaFt2
-    500: AUTHORED (secondary sources agree; no official page found).
-
-    emptyWeightLb
-    32081: AUTHORED (secondary sources 30,600 to 32,100 lb).
-
-    internalFuelLb
-    14400: AUTHORED (secondary sources 14,400 to 14,700 lb).
-
-    cd0 0.025: AUTHORED
-    (textbook fighter with pylons; NASA Hornet data at L1).
-
-    oswaldEfficiency
-    0.80: AUTHORED (textbook).
-
-    clMax 1.6: AUTHORED (clean).
-
-    clMaxNegative
-    0.8: AUTHORED (half of clMax).
-
-    clAlphaPerRad 3.5: AUTHORED (low aspect ratio;
-    sets the HUD''s angle of attack only).
-
-    flapsDeltaClMax 0.5, flapsDeltaCd
-    0.04: AUTHORED.
-
-    speedBrakeDeltaCd 0.05: AUTHORED (no dedicated speed brake;
-    control surfaces do it).
-
-    idleThrustFraction 0.05: AUTHORED.
-
-    thrustLapseExponent
-    1.2726: CALIBRATED to the service ceiling 50,000 ft (Navy fact file and Boeing,
-    50,000+ ft) at empty + half internal fuel, clean, maximum afterburner, climb
-    speeds up to Mach 0.9 (Calibration~/l0_calibration.py).
-
-    loadFactorMax 7.5,
-    loadFactorMin -3.0: AUTHORED (widely quoted; not on the official pages found).
-
-    rollRateMaxDegS
-    150: AUTHORED.
-
-    loadFactorTimeConstantS 0.25, rollTimeConstantS 0.30: AUTHORED
-    (L0 control-law response).
-
-    VALIDATION, not fitted: maximum speed Mach 1.8+
-    (Navy) / Mach 1.6 (Boeing); L0 gives Mach 1.41 at 40,000 ft and 1.54 at sea level
-    (no Mach effects until L2).
-
-
-    --- Airframe L1 (W32) ---
-
-    cma, cmds, cmq,
-    cLift, cLiftDs, cDrag, cDrag0, cDragDs, cyb, cyda, cydr, clb, clda, cldr, clp,
-    clr, cnb, cnda, cndr, cnp, cnr: PUBLIC (W32): the F/A-18 HARV polynomial fits
-    of Chakraborty, Seiler and Balas, J. Guidance 34(1) 2011, Appendix Tables A1-A2,
-    fitted to NASA HARV flight data; checked against the authors'' F18AeroData.mat.
-    Valid for alpha 0-60 deg; alphaMinDeg -10 and alphaMaxDeg 60: AUTHORED, the polynomials
-    held flat outside them. Sideslip enters linearly; no flaps or speed brake in
-    the fits (the L0 increments are used, AUTHORED). Applied to the E''s own wing
-    (500 ft2, 44.9 ft): the E is flown on the A/B''s coefficients, scaled by its
-    reference geometry (AUTHORED, W8).
-
-    meanChordFt 12.0: AUTHORED, the HARV''s
-    11.52 ft times (S_E/S_A)/(b_E/b_A).
-
-    ixxSlugFt2, iyySlugFt2, izzSlugFt2,
-    ixzSlugFt2: AUTHORED, NASA TM-107601 Table 3.5 (33,310 lb: Ixx 23,000, Iyy 151,293,
-    Izz 169,945, Ixz -2,971 slug ft2) scaled as m r2 to the E at 60 % fuel (40721
-    lb, mass x1.2225); roll by span (44.9/37.42 ft), pitch and yaw by length (60.3/56
-    ft, Navy fact files), the product by both: Ixx 40482, Iyy 214448, Izz 240886,
-    Ixz -4693 slug ft2. Fixed at L1; fuel burn moves them at L3.
-
-    dragFloorCd0,
-    dragFloorK: AUTHORED, the L0 polar (cd0 and 1/(pi e AR)) as a floor under the
-    fits'' drag, which is almost nil at low alpha (C_D 0.004 at alpha 0; the authors
-    note their low-alpha data are thin).
-
-    spoolUpTauS 1.2, spoolDownTauS 0.8,
-    afterburnerLightTauS 0.4, afterburnerOffTauS 0.25, afterburnerMinSpool 0.9: AUTHORED,
-    Powerplant L1''s spool (slice 2c); no public F414 spool figures were found.
-
-    Flight
-    Controls L1 (slice 2b, W23): alphaLimitDeg 30, loadFactorCommandTauS 0.3, alphaGainPerS
-    2, loadFactorIntegralDegPerGs 1.15, pitchRateBandwidth 6, rollRateBandwidth 5,
-    yawRateBandwidth 3, sideslipGainPerS 2, sideslipPerPedalDeg 8: AUTHORED, a nonlinear-dynamic-inversion
-    law after Snell, Enns and Garrard (J. Guidance 15(4), 1992), tuned in Calibration~/l1_fbw_mirror.py
-    against criteria fixed before tuning (ROADMAP slice 2b). stabilatorBandwidth,
-    stabilatorRateDegS, stabilatorMinDeg, stabilatorMaxDeg, aileronBandwidth, aileronRateDegS,
-    aileronMinDeg, aileronMaxDeg, rudderBandwidth, rudderRateDegS, rudderMinDeg,
-    rudderMaxDeg: PUBLIC, the actuators of NASA TM-107601 as Chakraborty, Seiler
-    and Balas 2011 Table 2 gives them (30, 48, 40 rad/s lags; 40, 100, 61 deg/s;
-    -24..10.5, -25..45, -30..30 deg).
-
-    Landing Gear L1 (slice 2d, W4): wheels
-    (nose 0,-1.71,5.17; mains +-1.40,-1.71,-0.74 m about the centre of mass), travelM
-    0.3, springNPerM 188e3 nose and 661e3 mains, damperNsPerM 25e3 and 88e3 (about
-    half critical), hardPointsM (belly, tail, nose, wingtips): AUTHORED, measured
-    off the F-18E model with its centre of mass 1.6 m aft of the model''s origin;
-    the springs sized so the static weight compresses each strut about half its travel.
-    gearMaxSinkRateFtS 24: AUTHORED, the carrier-landing design sink rate commonly
-    quoted for Navy jets (source not pinned), used here for any landing. tyreRollingFriction
-    0.02, tyreBrakingFriction 0.5, tyreLateralFriction 0.7, tyreSlipSpeedMps 0.5:
-    AUTHORED, textbook dry-concrete tyre values. nosewheelSteerMaxDeg 20, nosewheelSteerFadeStartKt
-    40, nosewheelSteerFadeEndKt 80, gearTransitTimeS 4, gearDownDeltaCd 0.02: AUTHORED.
-    strutEndStopFraction 0.7, strutEndStopStiffening 30: AUTHORED (SIX, 2026-10-26),
-    an oleo''s stiffening air spring near full stroke, sized so a hands-off touchdown''s
-    nose slap does not bottom the nose strut.
-
-    Note: the published f18full.m
-    adds the thrust term of beta-dot with the wrong sign (T cos(alpha) sin(beta)/(mV));
-    Air Wing derives its motion from body kinematics and does not inherit it (Calibration~/l1_harv_mirror.py).
-
-
-    ---
-    Gun and combat (Gunnery K4, K5) ---
-
-    gunName M61A2 20 mm; gunRoundsPerMinute
-    6000 and gunRoundsCarried 412: PUBLIC, General Dynamics OTS, F/A-18 E/F 20 mm
-    gun system sheet (4,000 or 6,000 shots a minute; the high rate used). gunMuzzleVelocityFtS
-    3450: SECONDARY, a simulator reference''s figure for PGU-28/B (not pinned for
-    the E/F''s gun). gunRoundMassKg 0.1, gunRoundDiameterM 0.02, gunRoundFormFactor
-    1.0 (on G7), gunDispersionMils 4, gunMaxTimeOfFlightS 3: AUTHORED. gunMuzzleM
-    (0, 0.5, 7.5) and gunBoreBody 1 deg up: AUTHORED off the model. hitPoints 10
-    and hitRadiusM 4: AUTHORED, abstract (Gunnery K5): a hit is one round, ten shoot
-    the jet down.'
+  missileName: SR-IR game missile
+  missilePylonsM:
+  - {x: -4.2, y: -0.45, z: -1.8}
+  - {x: 4.2, y: -0.45, z: -1.8}
+  - {x: -2.6, y: -0.55, z: -1.2}
+  - {x: 2.6, y: -0.55, z: -1.2}
+  missileBoostAccelMps2: 100
+  missileBurnS: 3
+  missileDragPerM: 0.00003
+  missileMaxG: 30
+  missileNavGain: 4
+  missileSeekerConeDeg: 45
+  missileLockConeDeg: 30
+  missileLockMinM: 500
+  missileLockMaxM: 5000
+  missileLockTimeS: 1
+  missileArmS: 0.5
+  missileLifeS: 20
+  missileLethalRadiusM: 15
+  missileKillChance: 0.7
+  missileDamageHp: 6
+  missileLaunchIntervalS: 1
+  provenance: "Sources and tags in full: Assets/Air Wing/Calibration~/F18E-SOURCES.md
+    (read 2026-10-25).\nPUBLIC = official page; CALIBRATED = fitted to one public
+    figure (C16); AUTHORED = our estimate.\n\nspanFt 44.9: PUBLIC, Navy fact file
+    (Wingspan 44.9 ft); Boeing agrees.\nengineCount 2: PUBLIC, Navy fact file (two
+    F414-GE-400).\nmaxThrustPerEngineLbf 22000: PUBLIC, Navy fact file and GE F414
+    datasheet (22,000 lb static). Conflict: Boeing says 17,000 lb per engine.\nmilitaryThrustPerEngineLbf
+    13000: AUTHORED (commonly quoted dry thrust; not on Navy, Boeing or GE pages).\nwingAreaFt2
+    500: AUTHORED (secondary sources agree; no official page found).\nemptyWeightLb
+    32081: AUTHORED (secondary sources 30,600 to 32,100 lb).\ninternalFuelLb 14400:
+    AUTHORED (secondary sources 14,400 to 14,700 lb).\ncd0 0.025: AUTHORED (textbook
+    fighter with pylons; NASA Hornet data at L1).\noswaldEfficiency 0.80: AUTHORED
+    (textbook).\nclMax 1.6: AUTHORED (clean).\nclMaxNegative 0.8: AUTHORED (half
+    of clMax).\nclAlphaPerRad 3.5: AUTHORED (low aspect ratio; sets the HUD's angle
+    of attack only).\nflapsDeltaClMax 0.5, flapsDeltaCd 0.04: AUTHORED.\nspeedBrakeDeltaCd
+    0.05: AUTHORED (no dedicated speed brake; control surfaces do it).\nidleThrustFraction
+    0.05: AUTHORED.\nthrustLapseExponent 1.2726: CALIBRATED to the service ceiling
+    50,000 ft (Navy fact file and Boeing, 50,000+ ft) at empty + half internal fuel,
+    clean, maximum afterburner, climb speeds up to Mach 0.9 (Calibration~/l0_calibration.py).\nloadFactorMax
+    7.5, loadFactorMin -3.0: AUTHORED (widely quoted; not on the official pages found).\nrollRateMaxDegS
+    150: AUTHORED.\nloadFactorTimeConstantS 0.25, rollTimeConstantS 0.30: AUTHORED
+    (L0 control-law response).\nVALIDATION, not fitted: maximum speed Mach 1.8+ (Navy)
+    / Mach 1.6 (Boeing); L0 gives Mach 1.41 at 40,000 ft and 1.54 at sea level (no
+    Mach effects until L2).\n\n--- Airframe L1 (W32) ---\ncma, cmds, cmq, cLift,
+    cLiftDs, cDrag, cDrag0, cDragDs, cyb, cyda, cydr, clb, clda, cldr, clp, clr,
+    cnb, cnda, cndr, cnp, cnr: PUBLIC (W32): the F/A-18 HARV polynomial fits of Chakraborty,
+    Seiler and Balas, J. Guidance 34(1) 2011, Appendix Tables A1-A2, fitted to NASA
+    HARV flight data; checked against the authors' F18AeroData.mat. Valid for alpha
+    0-60 deg; alphaMinDeg -10 and alphaMaxDeg 60: AUTHORED, the polynomials held
+    flat outside them. Sideslip enters linearly; no flaps or speed brake in the fits
+    (the L0 increments are used, AUTHORED). Applied to the E's own wing (500 ft2,
+    44.9 ft): the E is flown on the A/B's coefficients, scaled by its reference geometry
+    (AUTHORED, W8).\nmeanChordFt 12.0: AUTHORED, the HARV's 11.52 ft times (S_E/S_A)/(b_E/b_A).\nixxSlugFt2,
+    iyySlugFt2, izzSlugFt2, ixzSlugFt2: AUTHORED, NASA TM-107601 Table 3.5 (33,310
+    lb: Ixx 23,000, Iyy 151,293, Izz 169,945, Ixz -2,971 slug ft2) scaled as m r2
+    to the E at 60 % fuel (40721 lb, mass x1.2225); roll by span (44.9/37.42 ft),
+    pitch and yaw by length (60.3/56 ft, Navy fact files), the product by both: Ixx
+    40482, Iyy 214448, Izz 240886, Ixz -4693 slug ft2. Fixed at L1; fuel burn moves
+    them at L3.\ndragFloorCd0, dragFloorK: AUTHORED, the L0 polar (cd0 and 1/(pi
+    e AR)) as a floor under the fits' drag, which is almost nil at low alpha (C_D
+    0.004 at alpha 0; the authors note their low-alpha data are thin).\nspoolUpTauS
+    1.2, spoolDownTauS 0.8, afterburnerLightTauS 0.4, afterburnerOffTauS 0.25, afterburnerMinSpool
+    0.9: AUTHORED, Powerplant L1's spool (slice 2c); no public F414 spool figures
+    were found.\nFlight Controls L1 (slice 2b, W23): alphaLimitDeg 30, loadFactorCommandTauS
+    0.3, alphaGainPerS 2, loadFactorIntegralDegPerGs 1.15, pitchRateBandwidth 6,
+    rollRateBandwidth 5, yawRateBandwidth 3, sideslipGainPerS 2, sideslipPerPedalDeg
+    8: AUTHORED, a nonlinear-dynamic-inversion law after Snell, Enns and Garrard
+    (J. Guidance 15(4), 1992), tuned in Calibration~/l1_fbw_mirror.py against criteria
+    fixed before tuning (ROADMAP slice 2b). stabilatorBandwidth, stabilatorRateDegS,
+    stabilatorMinDeg, stabilatorMaxDeg, aileronBandwidth, aileronRateDegS, aileronMinDeg,
+    aileronMaxDeg, rudderBandwidth, rudderRateDegS, rudderMinDeg, rudderMaxDeg: PUBLIC,
+    the actuators of NASA TM-107601 as Chakraborty, Seiler and Balas 2011 Table 2
+    gives them (30, 48, 40 rad/s lags; 40, 100, 61 deg/s; -24..10.5, -25..45, -30..30
+    deg).\nLanding Gear L1 (slice 2d, W4): wheels (nose 0,-1.71,5.17; mains +-1.40,-1.71,-0.74
+    m about the centre of mass), travelM 0.3, springNPerM 188e3 nose and 661e3 mains,
+    damperNsPerM 25e3 and 88e3 (about half critical), hardPointsM (belly, tail, nose,
+    wingtips): AUTHORED, measured off the F-18E model with its centre of mass 1.6
+    m aft of the model's origin; the springs sized so the static weight compresses
+    each strut about half its travel. gearMaxSinkRateFtS 24: AUTHORED, the carrier-landing
+    design sink rate commonly quoted for Navy jets (source not pinned), used here
+    for any landing. tyreRollingFriction 0.02, tyreBrakingFriction 0.5, tyreLateralFriction
+    0.7, tyreSlipSpeedMps 0.5: AUTHORED, textbook dry-concrete tyre values. nosewheelSteerMaxDeg
+    20, nosewheelSteerFadeStartKt 40, nosewheelSteerFadeEndKt 80, gearTransitTimeS
+    4, gearDownDeltaCd 0.02: AUTHORED. strutEndStopFraction 0.7, strutEndStopStiffening
+    30: AUTHORED (SIX, 2026-10-26), an oleo's stiffening air spring near full stroke,
+    sized so a hands-off touchdown's nose slap does not bottom the nose strut.\nNote:
+    the published f18full.m adds the thrust term of beta-dot with the wrong sign
+    (T cos(alpha) sin(beta)/(mV)); Air Wing derives its motion from body kinematics
+    and does not inherit it (Calibration~/l1_harv_mirror.py).\n\n--- Gun and combat
+    (Gunnery K4, K5) ---\ngunName M61A2 20 mm; gunRoundsPerMinute 6000 and gunRoundsCarried
+    412: PUBLIC, General Dynamics OTS, F/A-18 E/F 20 mm gun system sheet (4,000 or
+    6,000 shots a minute; the high rate used). gunMuzzleVelocityFtS 3450: SECONDARY,
+    a simulator reference's figure for PGU-28/B (not pinned for the E/F's gun). gunRoundMassKg
+    0.1, gunRoundDiameterM 0.02, gunRoundFormFactor 1.0 (on G7), gunDispersionMils
+    4, gunMaxTimeOfFlightS 3: AUTHORED. gunMuzzleM (0, 0.5, 7.5) and gunBoreBody
+    1 deg up: AUTHORED off the model. hitPoints 10 and hitRadiusM 4: AUTHORED, abstract
+    (Gunnery K5): a hit is one round, ten shoot the jet down.\n\n--- Game missiles
+    (W65) ---\nmissileName 'SR-IR game missile': a generic short-range heat-seeker
+    archetype for a video game (SIX 2026-10-29, Air Wing W65); not any real missile,
+    no real data. All AUTHORED: four pylons, two under each wing at (\xB14.2, \u22120.45,
+    \u22121.8) and (\xB12.6, \u22120.55, \u22121.2) m, off the model; missileBoostAccelMps2
+    100 for missileBurnS 3 (about 2.5 times a 400 kt jet), missileDragPerM 3e-5 (k\xB7v\xB2;
+    a tail chase from 3 km closes inside the life, one from 5 km on a jet running
+    away does not), missileMaxG 30, missileNavGain 4 (proportional navigation, textbook
+    3\u20135), missileSeekerConeDeg 45; the lock (SIX's picks): missileLockConeDeg
+    30, missileLockMinM 500, missileLockMaxM 5000, missileLockTimeS 1; missileArmS
+    0.5, missileLifeS 20; the hit (SIX's picks): missileLethalRadiusM 15, missileKillChance
+    0.7, missileDamageHp 6; missileLaunchIntervalS 1."

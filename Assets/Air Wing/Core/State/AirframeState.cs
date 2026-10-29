@@ -73,5 +73,11 @@ namespace DeepWater.AirWing.Core.State
         public float GunCarry;
         /// <summary>Hit points left (Gunnery K5, abstract): one per round that hits; at zero the aircraft is Killed.</summary>
         public float HitPoints;
+        /// <summary>Game missiles left on the pylons (W65).</summary>
+        public int Missiles;
+        /// <summary>The aircraft the missile seeker is on (0: none), and for how many ticks; locked once that reaches the lock time.</summary>
+        public int LockTargetId, LockTicks;
+        /// <summary>Ticks until the next launch may go (the launch interval).</summary>
+        public int MissileCooldownTicks;
     }
 }

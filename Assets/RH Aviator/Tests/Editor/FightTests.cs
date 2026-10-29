@@ -36,6 +36,7 @@ namespace DeepWater.Aviator.Tests
             Assert.IsNotNull(so, path + " (Deep Water → RH Aviator → Apply Pilot Profiles)");
             PilotProfile p = so.Bake();
             p.TriggerMils = 0f;   // guns safe: these tests are the position fight (W46)
+            p.MissileRangeM = 0f; // and missiles safe (W65)
             return p;
         }
 

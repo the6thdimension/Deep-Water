@@ -126,6 +126,8 @@ namespace DeepWater.AirWing.Core.Profiles
         public GunMount Gun;
         /// <summary>Hit points and hit size (Gunnery K5); unset: rounds pass through it.</summary>
         public CombatProfile Combat;
+        /// <summary>Game missiles on pylons (W65); unset for a type that carries none.</summary>
+        public DeepWater.AirWing.Core.Missiles.MissileMount Missiles;
 
         /// <summary>Airframe L1 and Flight Controls L1 come as a pair: one without the other cannot fly.</summary>
         public bool HasL1 => AirframeL1.IsSet && ControlsL1.IsSet;
@@ -140,6 +142,7 @@ namespace DeepWater.AirWing.Core.Profiles
             if (LandingGear.IsSet) LandingGear.Validate();
             if (Gun.IsSet) Gun.Validate();
             if (Combat.IsSet) Combat.Validate();
+            if (Missiles.IsSet) Missiles.Validate();
         }
     }
 }

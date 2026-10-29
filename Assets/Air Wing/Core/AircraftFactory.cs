@@ -158,6 +158,7 @@ namespace DeepWater.AirWing.Core
                 Status = FlightStatus.Flying,
                 Rounds = profile.Gun.IsSet ? profile.Gun.Gun.RoundsCarried : 0,
                 HitPoints = profile.Combat.HitPoints,
+                Missiles = profile.Missiles.Carried,
             };
         }
     }

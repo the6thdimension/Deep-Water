@@ -242,6 +242,8 @@ Locked = SIX's pick. Proposed = Claude's recommended default, open to SIX. Open 
 | M26 | Respawn timing | **Back 3 s after going down; 5 s protected** (can't be hit, can't fire) | Same | Locked, built (W59) |
 | M27 | Which scene | **A new `Assets/_SCENES/Dogfight Training.unity`** built by a menu from Dogfight's world; plus "Add Training Squadrons to the Open Scene". `Dogfight.unity` and SIX's uncommitted edits in it untouched. SIX added (2026-10-29): no player seat, a spectator camera to follow any jet or fly free (W62), explosions for kills and collisions (W63) | Same | Locked, built |
 | M28 | How training runs | **Python 3.10 and a CPU venv** (`C:\Users\SIX\venvs\mlagents-1.1.0`); an Editor smoke at time scale 20; headless builds ×4 for real rounds; results in `Training/results/` (git-ignored); a kept policy's `.onnx` in `Assets/RH Aviator/Policies/` with its settings (M19). *3.10.11, not 3.10.12: python.org has no Windows installer for 3.10.12* | Same | Locked; venv and smoke done, headless build not yet made |
+| M29 | Squadron size, again (SIX 2026-10-29) | **8 v 8** ("change the scene from 4v4 to 8v8"). *Reverses M21's 4 v 4* | — | Locked, built |
+| M30 | Missiles in the learned pilot (SIX 2026-10-29: "give the planes hard points and a missile armament"; Air Wing W65) | **A pickle action and missile senses** (senses version 2, 88 numbers); a missile kill is a kill. *The "IR missile after guns" slice (T1) is met by a game missile in Air Wing, not Guided Fury* | — | Locked, built (RH Aviator A16) |
 
 ### Proposed by Claude while writing
 
@@ -356,3 +358,4 @@ Sources: [issoh.co.jp guide](https://www.issoh.co.jp/md/tech/4905);
 - **2026-10-27** — Written from SIX's 16 answers (M1–M16); M17–M20 proposed. Nothing built.
 - **2026-10-27** — T0: ML-Agents 2.0.2 → 4.1.0 installed and verified (compile, whole-project tests unchanged).
 - **2026-10-29** — Round 5 (M21–M28) asked and answered (all recommended); T3a built: the learned seat, senses, actions and reward (RH Aviator A13–A15), the arena (Air Wing W59–W61), the spectator camera and explosions (W62, W63), the training scene and configs; Python 3.10.11 and `mlagents` 1.1.0 installed; a self-play smoke run in the Editor (RH Aviator ROADMAP has the numbers).
+- **2026-10-29** — M29 (8 v 8) and M30 (missiles: the pickle and senses version 2) built; a version-1 brain must be trained again.

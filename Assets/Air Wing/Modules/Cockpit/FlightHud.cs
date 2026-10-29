@@ -82,7 +82,8 @@ namespace DeepWater.AirWing.Modules.Cockpit
             {
                 string gun = aircraft.Profile.Gun.IsSet ? $"GUN {aircraft.State.Rounds}{(aircraft.LastInputs.Trigger && aircraft.State.Rounds > 0 ? "  FIRING" : "")}" : "";
                 string hp = aircraft.Profile.Combat.IsSet ? $"  ·  HP {aircraft.State.HitPoints:F0}/{aircraft.Profile.Combat.HitPoints:F0}" : "";
-                GUI.Label(new Rect(40f * s, h - 5f * size.y, w, size.y), gun + hp, _left);
+                string msl = aircraft.Profile.Missiles.IsSet ? $"  ·  MSL {aircraft.State.Missiles}{(runner.Flight.IsLocked(aircraft) ? $"  LOCK {aircraft.State.LockTargetId}" : aircraft.State.LockTargetId != 0 ? "  LOCKING" : "")}" : "";
+                GUI.Label(new Rect(40f * s, h - 5f * size.y, w, size.y), gun + hp + msl, _left);
             }
             GUI.Label(new Rect(40f * s, h - 3f * size.y, w, size.y), $"SEAT {device}", _left);
             GUI.Label(new Rect(40f * s, h - 2f * size.y, w, size.y), string.Join("  ·  ", aircraft.Levels), _left);
@@ -93,6 +94,9 @@ namespace DeepWater.AirWing.Modules.Cockpit
                 if (seat != null && seat.Owner == DeviceSource.Mouse && _view.AircraftId == runner.PlayerAircraftId)
                     Marker(aircraft.State.Position + seat.AimDirection * 1000f, "( )", s);
                 if (aircraft.Profile.Gun.IsSet && aircraft.State.Status == Core.State.FlightStatus.Flying) Pipper(aircraft, s);
+                // The missile seeker's box (W65): dotted while it is locking, solid and labelled once locked.
+                if (aircraft.State.LockTargetId != 0)
+                    Marker(runner.Flight.Find(aircraft.State.LockTargetId).State.Position, runner.Flight.IsLocked(aircraft) ? "[ LOCK ]" : "[ · · ]", s);
             }
             if (runner.Views.Count > 1 && runner.Roster != null) PickList(w, s, size);
         }

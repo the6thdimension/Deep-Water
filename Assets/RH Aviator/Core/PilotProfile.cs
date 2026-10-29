@@ -129,6 +129,12 @@ namespace DeepWater.Aviator.Core
         /// A rookie sprays (wide, long); an ace waits for the shot (tight, close). 0 mils: never fires.
         /// </summary>
         public float GunRangeM, TriggerMils;
+        /// <summary>
+        /// Missile discipline (Air Wing W65, A16): with the seeker locked on its target, the pilot launches inside this
+        /// range, metres, and not while one of its own is still flying at that target. A rookie shoots early (long), an ace
+        /// close. 0: never launches.
+        /// </summary>
+        public float MissileRangeM;
 
         /// <summary>The hands in the pattern: the route hands, held to the pattern's bank.</summary>
         public HandsSettings PatternHands
@@ -212,6 +218,7 @@ namespace DeepWater.Aviator.Core
             if (JoinAvoidM < 0f || JoinAvoidM >= Math.Abs(SlotRightM)) throw new ArgumentOutOfRangeException(nameof(JoinAvoidM), JoinAvoidM, "must be at least 0 and inside the slot spacing, or a jet in its slot would set it off");
             if (GunRangeM < 0f) throw new ArgumentOutOfRangeException(nameof(GunRangeM), GunRangeM, "must not be negative");
             if (TriggerMils < 0f) throw new ArgumentOutOfRangeException(nameof(TriggerMils), TriggerMils, "must not be negative (zero: never fires)");
+            if (MissileRangeM < 0f) throw new ArgumentOutOfRangeException(nameof(MissileRangeM), MissileRangeM, "must not be negative (zero: never launches)");
             if (!(LostSlotM > InSlotM)) throw new ArgumentOutOfRangeException(nameof(LostSlotM), LostSlotM, "losing the slot must lie outside being in it");
         }
 

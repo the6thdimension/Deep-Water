@@ -35,6 +35,8 @@ namespace DeepWater.AirWing.Core.Seats
         public bool Brakes;
         /// <summary>This source's gun trigger is held (it does not take the stick).</summary>
         public bool Fire;
+        /// <summary>This source's missile pickle is held (W65; it does not take the stick).</summary>
+        public bool FireMissile;
 
         public static DeviceSample Idle => new DeviceSample { LeverAbsolute = float.NaN };
     }
@@ -176,6 +178,7 @@ namespace DeepWater.AirWing.Core.Seats
             inputs.Throttle = inputs.Afterburner ? 1f : Mathf.Clamp01(Lever / detent);
             inputs.Brakes = f.Stick.Brakes || f.Gamepad.Brakes || f.Keyboard.Brakes;   // any source's brakes brake
             inputs.Trigger = f.Stick.Fire || f.Gamepad.Fire || f.Keyboard.Fire;      // and any source's trigger fires
+            inputs.Pickle = f.Stick.FireMissile || f.Gamepad.FireMissile || f.Keyboard.FireMissile;   // and any source's pickle launches
 
             LevelHolding = false;
             switch (Owner)

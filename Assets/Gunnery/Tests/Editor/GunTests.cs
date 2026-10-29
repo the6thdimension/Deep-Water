@@ -101,6 +101,50 @@ namespace DeepWater.Gunnery.Tests
         }
 
         [Test]
+        public void ARoundsHitChance_IsThePatternInsideTheDisc_OffCentreToo()
+        {
+            // (radius, σ, miss) → 1 − Q₁(d/σ, r/σ), from the exact Poisson-weighted gamma series in double
+            // (2026-10-29; a 200,000-round Monte Carlo agreed within its noise). The old product formula gave
+            // 0.135 for the first row, a pass inside a target four times the spread.
+            (float r, float s, float d, double p)[] table =
+            {
+                (4f, 1f, 2f, 0.965865155),
+                (1f, 1f, 1f, 0.267120196),
+                (8f, 2f, 6f, 0.803487811),
+                (4f, 1.2f, 0f, 0.996134080),
+                (0.5f, 2f, 1f, 0.027204364),
+                (4f, 0.1f, 3.95f, 0.687019600),
+                (4f, 4f, 8f, 0.081892304),
+                (10f, 0.5f, 10.5f, 0.152822050),
+                (3f, 1f, 7f, 0.000020055),
+                (400f, 1f, 400f, 0.499501322),
+            };
+            foreach (var (r, s, d, p) in table)
+                Assert.AreEqual(p, ShotGroup.RoundHitProbability(r, s, d), 2e-6, FormattableString($"r {r} m, σ {s} m, miss {d} m"));
+        }
+
+        [Test]
+        public void ARoundsHitChance_FallsWithTheMiss_AndRisesWithTheTarget()
+        {
+            float last = 1f;
+            for (float d = 0f; d <= 14f; d += 0.25f)
+            {
+                float p = ShotGroup.RoundHitProbability(4f, 1f, d);
+                Assert.LessOrEqual(p, last + 1e-6f, FormattableString($"miss {d} m"));
+                last = p;
+            }
+            last = 0f;
+            for (float r = 0.25f; r <= 14f; r += 0.25f)
+            {
+                float p = ShotGroup.RoundHitProbability(r, 1f, 3f);
+                Assert.GreaterOrEqual(p, last - 1e-6f, FormattableString($"radius {r} m"));
+                last = p;
+            }
+            Assert.AreEqual(1f, ShotGroup.RoundHitProbability(40f, 1f, 30f), 1e-6f, "well inside a large target: every round hits");
+            Assert.AreEqual(0f, ShotGroup.RoundHitProbability(30f, 1f, 40f), 1e-6f, "well outside it: none do");
+        }
+
+        [Test]
         public void WithDispersion_SomeRoundsHit_AndTheSameSeedHitsTheSameWay()
         {
             GunProfile g = Gun(dispersionMils: 8f);

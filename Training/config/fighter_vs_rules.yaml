@@ -1,6 +1,7 @@
 # The learned pilots against the rule pilots (TRAINING-CONCEPT M4's curriculum, kept one setting away by A15).
-# Set the Red Spawn's Training Squadron pilot to Rookie, then Line, then Ace (Inspector, Dogfight Training);
-# blue stays Learned. No self-play: only blue's four jets carry the "Fighter" brain.
+# Set red's brain to Rookie, then Line, then Ace (Deep Water → RH Aviator → Fighter Brains, or the Red Spawn's
+# Training Squadron); blue stays Learning. No self-play: only one side's jets learn. Auto-train on Play (A18)
+# runs this config whenever only one side has learning jets, as the rolling run "auto-vs-rest".
 # To carry a self-play brain over:  --initialize-from=<that run id>.
 #
 # Start (from the project root):

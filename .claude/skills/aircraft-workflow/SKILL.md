@@ -61,11 +61,17 @@ A new `PilotProfile` field needs six edits: the struct (+ `Validate`), the SO fi
 ### The hands (`Air Wing/Core/Seats/FlightPathHands.cs`)
 Aim → L1 law (a = 2V² sin η / L, L capped at the turn radius) → bank; altitude → flight-path angle → G; speed → throttle P+I (integral ±1, AP33). Optional request fields, all zero for a plain route: `PathDeg`/`PathRateDegS` and `BankDeg`/`BankRateDegS` (feed-forward), `Landing` (guard off), `GLimit`/`BankLimitDeg`. **Any new field must default to "no change" so earlier slices fly bit for bit**; rerun their tests.
 
-### The learned pilot (TRAINING-CONCEPT, A13–A15; Air Wing W59–W64)
-- Pure parts in `RH Aviator/Core/Learning` (`LearnedSeat`, `LearnedSenses` 68 numbers, layout version 1, `LearnedActions`, `RewardLedger`); ML-Agents only in `Modules/Learning` (its own assembly, `DeepWater.Aviator.Learning`). Change the senses' layout or scales: bump `LearnedSenses.Version`, since old policies read the old vector.
+### The learned pilot (TRAINING-CONCEPT, A13–A18; Air Wing W59–W65)
+- Pure parts in `RH Aviator/Core/Learning` (`LearnedSeat`, `LearnedSenses` 88 numbers, layout version 2, `LearnedActions`, `RewardLedger`); ML-Agents only in `Modules/Learning` (its own assembly, `DeepWater.Aviator.Learning`). Change the senses' layout or scales: bump `LearnedSenses.Version`, since old policies read the old vector.
 - `FighterTraining` (order −55) steps the Academy by hand before Air Wing's runner (−50) steps the tick: pay, `EndEpisode` on a loss, `EpisodeInterrupted` at 180 s, `RequestDecision` every 5 ticks for flying jets, `EnvironmentStep`. Agents keep `MaxStep` 0; there is no `DecisionRequester`.
 - The arena is Air Wing's (`Core/Arena.cs`), inside the tick: respawns before the picture, collisions and the box after the guns; zero turns a rule off. `Engagement.Score` follows it (a respawned jet rejoins; a collided one leaves).
-- Train: `C:\Users\SIX\venvs\mlagents-1.1.0\Scripts\mlagents-learn Training/config/fighter_selfplay.yaml --run-id=<id> --results-dir=Training/results`, then Play in Dogfight Training. `fighter_smoke.yaml` proves the loop in minutes; `fighter_vs_rules.yaml` is M4's curriculum (set red's squadron to a rule pilot).
+- Train: **Deep Water → RH Aviator → Auto-Train on Play** (A18). `Editor/AutoTrainer` keeps `mlagents-learn` listening while Dogfight Training is open and holds an early Play. It copies each session's brain to `Policies/Latest/` with its record and resumes the rolling run (`auto-selfplay`, `auto-vs-rest`). By hand: `C:\Users\SIX\venvs\mlagents-1.1.0\Scripts\mlagents-learn Training/config/fighter_selfplay.yaml --run-id=<id> --results-dir=Training/results --max-lifetime-restarts=0`, with auto-train off (one trainer per port). `fighter_smoke.yaml` proves the loop in minutes; `fighter_vs_rules.yaml` is M4's curriculum.
+- Brains (A17): `FighterBrain` per squadron (`TrainingSquadron`) or per jet (`JetBrain`), in the **Fighter Brains** window.
+  - Learning: ML-Agents Default (the trainer, else the latest brain, else the stand-in).
+  - Saved: InferenceOnly with a kept `.onnx`.
+  - Scripted: HeuristicOnly.
+  - Rookie, line, ace: `AviatorPilot`.
+  `BrainLibrary.Fits` checks a model's `obs_0` size against `LearnedSenses.Size`. The pure parts are in `Editor/TrainerCommand`; the tests are `FighterBrainTests` in `Modules/Learning/Tests`.
 
 ### The gun (W55–W57, Gunnery K1–K6, A12)
 - Round flight, drag, the swept hit test and the lead sight are Gunnery's: change them there, with Gunnery's `GunTests`, never a copy in Air Wing.
@@ -114,6 +120,8 @@ A change to the fight is judged on many merges, before and after, never on one. 
 18. **An effect built for a pool does not play on awake.** General Quarters' effects (`GQ_FX_*`) are started by its pool; an instance spawned any other way emits nothing. `ExplosionView` calls `Play` on every layer. And the built-in pipeline's particle shaders (`Assets/_VFX`'s `HD_Naval_Explosion`) draw bare squares under HDRP: check an effect by its particle counts after a spawn and a close capture, never by an instance count.
 19. **A new file can stay out of its assembly's compile list** (2026-10-29: `Air Wing/Editor/MissileData.cs`, through three recompiles and a clean-cache build, while `CompilationPipeline.GetAssemblyNameFromScriptPath` named the right assembly). Check `CompilationPipeline.GetAssemblies()`'s `sourceFiles`; renaming the file with a fresh .meta fixed it (`GameMissileData.cs`).
 20. **Missiles** (W65, A16): the pickle is an input (`PilotInputs.Pickle`); the flight core locks, launches and flies them; `FlightCore.IsLocked` is the one lock test (HUD, AI, senses). Position and gun fights' tests fly missiles safe (`MissileRangeM` 0) so their criteria keep their meaning.
+21. **mlagents 1.1.0 does not stop when Play stops:** it restarts its worker, listens again, and saves nothing until the next checkpoint (500,000 steps). A launcher that waits for it to exit waits forever. On 2026-10-29, 20,000 steps were lost when that wait timed out and killed it. Pass `--max-lifetime-restarts=0` (`TrainerCommand.Arguments`), and never kill a trainer that may be saving.
+22. **In the Editor, training runs at about ×2 real time with 16 jets, not the ×20 asked.** On 2026-10-29: about 110–145 environment steps a second at about 1 frame a second; the first 20,000 trainer steps took 141 s. The cost is the Python side and the 16 jets' ticks. Real rounds want headless builds (M28).
 
 ## 7. Record
 

@@ -245,13 +245,22 @@ Locked = SIX's pick. Proposed = Claude's recommended default, open to SIX. Open 
 | M29 | Squadron size, again (SIX 2026-10-29) | **8 v 8** ("change the scene from 4v4 to 8v8"). *Reverses M21's 4 v 4* | — | Locked, built |
 | M30 | Missiles in the learned pilot (SIX 2026-10-29: "give the planes hard points and a missile armament"; Air Wing W65) | **A pickle action and missile senses** (senses version 2, 88 numbers); a missile kill is a kill. *The "IR missile after guns" slice (T1) is met by a game missile in Air Wing, not Guided Fury* | — | Locked, built (RH Aviator A16) |
 
+### Round 6: auto-train and brain choice (SIX, 2026-10-29: "go ahead and build the auto train. I think I also want an edit which brain a fighter uses if need be"; all four on the recommended option)
+
+| # | Question | SIX's pick | Leaning | Status |
+|---|---|---|---|---|
+| M31 | The clock while Play trains | **×20 by default (the trainer's `time_scale`), T switches to ×1 and back**; learning slows while you watch at ×1 | Same | Locked, built (A18) |
+| M32 | Where a fighter's brain is chosen | **Per squadron, with a per-jet override** (`JetBrain`), and a **Fighter Brains** window listing every jet, the auto-train switch and the trainer's state. Brains: learning, saved (a kept `.onnx`), the scripted stand-in, rookie, line, ace | Same | Locked, built (A17) |
+| M33 | What a learning jet flies with no trainer running | **The latest trained brain**, or the scripted stand-in until one exists (or when it does not fit the senses) | Same | Locked, built (A17) |
+| M34 | Keeping brains | **A rolling latest plus kept brains:** after each session the newest brain is copied to `Policies/Latest/Fighter.onnx` with its record (git-ignored: it changes every session); "Keep this brain" saves a named copy and its record to `Policies/Kept/` (committed, M19). One rolling run per config (`auto-selfplay`, `auto-vs-rest`), resumed every session | Same | Locked, built (A18) |
+
 ### Proposed by Claude while writing
 
 | # | Proposal | Why | Status |
 |---|---|---|---|
 | M17 | A policy flies under the same `PilotProfile` caps as an ace (G, bank, field of view, reaction delay) | Otherwise it wins by being a better airframe, not a better pilot | Proposed |
 | M18 | Recordings save at the first fight, every 10 % of a round, and the last fight | SIX's "first, middle, last", made countable | Proposed |
-| M19 | Each kept policy is committed with its reward weights, scenario mix, rung, step count and scorecard; failed ones are logged, not kept | Doctrine: label AI output with inputs and version | Proposed |
+| M19 | Each kept policy is committed with its reward weights, scenario mix, rung, step count and scorecard; failed ones are logged, not kept | Doctrine: label AI output with inputs and version | Proposed; partly built 2026-10-29 (M34): a kept brain's record has the reward weights, the learned pilot's settings, the config, who flew each side and the steps; the rung and the scorecard wait for the gate |
 | M20 | A policy never leaves the game: no export to drones, model aircraft or real hardware | Safe limits (Air Wing constraint 8) | Proposed (a standing constraint, §6) |
 
 ## 6. Standing constraints
@@ -359,3 +368,4 @@ Sources: [issoh.co.jp guide](https://www.issoh.co.jp/md/tech/4905);
 - **2026-10-27** — T0: ML-Agents 2.0.2 → 4.1.0 installed and verified (compile, whole-project tests unchanged).
 - **2026-10-29** — Round 5 (M21–M28) asked and answered (all recommended); T3a built: the learned seat, senses, actions and reward (RH Aviator A13–A15), the arena (Air Wing W59–W61), the spectator camera and explosions (W62, W63), the training scene and configs; Python 3.10.11 and `mlagents` 1.1.0 installed; a self-play smoke run in the Editor (RH Aviator ROADMAP has the numbers).
 - **2026-10-29** — M29 (8 v 8) and M30 (missiles: the pickle and senses version 2) built; a version-1 brain must be trained again.
+- **2026-10-29** — Round 6 (M31–M34: auto-train on Play and brain choice) asked and answered (all recommended) and built (RH Aviator A17, A18). M19 partly built.

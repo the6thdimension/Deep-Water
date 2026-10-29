@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c302ff5f125211d4b88dc2bb42bf0fa8, type: 3}
+  m_Name: LearnedPilot
+  m_EditorClassIdentifier: DeepWater.Aviator::DeepWater.Aviator.ScriptableObjects.LearnedPilotSO
+  eyesAndHands: {fileID: 11400000, guid: d331f8342967b6a4c83507d3b7fd292e, type: 2}
+  decisionPeriodTicks: 5
+  maxLifeS: 180
+  turnRangeDeg: 180
+  climbRangeM: 1500
+  minKt: 150
+  maxKt: 600
+  minG: 2
+  provenance: "AUTHORED 2026-10-29 from SIX's picks in the training interview (TRAINING-CONCEPT
+    M21\u2013M28; all eight recommended options). Eyes and hands (M23, M17): the
+    ace's profile (150\xB0 field of view, 0.35 s late, 10 km, 12 s memory; 7 G, 75\xB0
+    bank), so a learned pilot wins by judgement, not a better airframe or better
+    eyes. decisionPeriodTicks 5: ten decisions a second, the rule pilots' trigger
+    rate (A12). maxLifeS 180: a life longer than three minutes is cut (interrupted,
+    not lost). Actions (M1, M23): turnRangeDeg 180 (any heading), climbRangeM 1500,
+    minKt 150 and maxKt 600 (the jet's fighting range, below its 7.5 G corner and
+    above its stall), minG 2."

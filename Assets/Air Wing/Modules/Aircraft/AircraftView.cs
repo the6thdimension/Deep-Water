@@ -50,6 +50,9 @@ namespace DeepWater.AirWing.Modules.Aircraft
         public float StartFuelFraction => startFuelFraction;
         public float HoldThrottle => holdThrottle;
 
+        /// <summary>How it is drawn (presentation only).</summary>
+        public AircraftVisualsSO Visuals => visuals;
+
         /// <summary>The core's aircraft, once the runner has built it.</summary>
         public Core.Aircraft Aircraft => _aircraft;
 

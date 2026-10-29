@@ -49,3 +49,9 @@ id_ed25519*
 # Unity Version Control (Plastic) workspace metadata: git is this project's version control (BUILD-SPEED-LEDGER round 1)
 /.plastic/
 /.plastic.pre-*/
+
+# ML-Agents training output (RH Aviator, Dogfight Training): run logs, checkpoints, TensorBoard summaries.
+# A kept policy is copied into Assets/RH Aviator/Policies/ with its settings (TRAINING-CONCEPT M19).
+/Training/results/
+/Assets/ML-Agents/Timers/*.json
+/Assets/ML-Agents/Timers/*.json.meta

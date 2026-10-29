@@ -30,7 +30,7 @@ namespace DeepWater.AirWing.Editor
     {
         internal const string Root = "Assets/Air Wing";
         const string ModelPath = "Assets/_AIRCRAFT/F-18E/Blender/F-18E.blend";
-        internal const string PrefabPath = Root + "/Prefabs/FA18E_AirWing.prefab";
+        public const string PrefabPath = Root + "/Prefabs/FA18E_AirWing.prefab";
         const string VisualsPath = Root + "/ScriptableObjects/FA18E_Visuals.asset";
         const string ProfilePath = Root + "/ScriptableObjects/FA18E_AirWing.asset";
         const string SheetPath = Root + "/ScriptableObjects/FA18E_FidelitySheet.asset";
@@ -102,7 +102,7 @@ namespace DeepWater.AirWing.Editor
         }
 
         /// <summary>True when the prefab, profile, fidelity sheet, seat settings and input actions all load; logs otherwise.</summary>
-        internal static bool RigAssetsPresent()
+        public static bool RigAssetsPresent()
         {
             if (AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath) != null && AssetDatabase.LoadAssetAtPath<AircraftProfileSO>(ProfilePath) != null &&
                 AssetDatabase.LoadAssetAtPath<FidelitySheetSO>(SheetPath) != null && AssetDatabase.LoadAssetAtPath<PlayerSeatSettingsSO>(SeatSettingsPath) != null &&
@@ -151,6 +151,34 @@ namespace DeepWater.AirWing.Editor
             return new Rig { Runner = runner, Hud = hud };
         }
 
+        /// <summary>
+        /// The runner on the sea with no player seat: every jet flies from its own seat (a fight nobody flies, watched
+        /// through a <see cref="SpectatorCamera"/>). Call after the scene switch (AP12) and after <see cref="RigAssetsPresent"/>.
+        /// </summary>
+        public static AirWingRunner BuildRunner(SeaStateDirector sea)
+        {
+            var runner = new GameObject("Air Wing").AddComponent<AirWingRunner>();
+            Set(runner, "profile", AssetDatabase.LoadAssetAtPath<AircraftProfileSO>(ProfilePath));
+            Set(runner, "fidelitySheet", AssetDatabase.LoadAssetAtPath<FidelitySheetSO>(SheetPath));
+            Set(runner, "sea", sea);
+            return runner;
+        }
+
+        /// <summary>The spectator's camera (follow or free roam) at <paramref name="at"/>, starting on aircraft <paramref name="follow"/> (0: free).</summary>
+        public static SpectatorCamera BuildSpectatorCamera(AirWingRunner runner, Vector3 at, Quaternion rotation, int follow)
+        {
+            var camGo = new GameObject("Spectator Camera") { tag = "MainCamera" };
+            var cam = camGo.AddComponent<Camera>();
+            cam.nearClipPlane = 0.3f;
+            cam.farClipPlane = 40000f;
+            camGo.AddComponent<HDAdditionalCameraData>();
+            camGo.AddComponent<AudioListener>();
+            camGo.transform.SetPositionAndRotation(at, rotation);
+            var spectator = camGo.AddComponent<SpectatorCamera>();
+            spectator.Configure(runner, follow);
+            return spectator;
+        }
+
         /// <summary>The F/A-18E's moving parts, copied from the FDS prefab's AerialArcade surface settings (read only).</summary>
         static AircraftVisualsSO EnsureVisuals()
         {
@@ -170,11 +198,40 @@ namespace DeepWater.AirWing.Editor
             };
             visuals.provenance = "Copied 2026-10-25 from Assets/FDS Assets/Aircraft/F-18E.prefab's AerialArcade ControlSurface settings " +
                                  "(transform names, axes, max angles, smoothing). Rudder travel AUTHORED at 30° (the FDS prefab used 50°). " +
-                                 "Presentation only; the flight core never reads it.";
+                                 "Presentation only; the flight core never reads it. " + ExplosionProvenance;
+            ApplyExplosion(visuals);
             Directory.CreateDirectory(Path.GetDirectoryName(VisualsPath));
             AssetDatabase.CreateAsset(visuals, VisualsPath);
             AssetDatabase.SaveAssets();
             return visuals;
+        }
+
+        const string ExplosionPath = "Assets/_VFX/HD Explosion/Prefabs/HD_Naval_Explosion.prefab";
+        const string ExplosionProvenance =
+            "Explosions (2026-10-29, SIX: 'collisions and kills should render explosions'): the project's HD_Naval_Explosion (Assets/_VFX, " +
+            "first-party, the one Guided Fury's ESSM profile plays), airExplosionScale 1 (a 15 m flash and a 7 m fireball against the 18 m jet) and impactExplosionScale 1.5, explosionLifeS 6: AUTHORED from the effect's sizes.";
+
+        /// <summary>The F/A-18E's explosion (presentation), set on its visuals asset.</summary>
+        static void ApplyExplosion(AircraftVisualsSO visuals)
+        {
+            visuals.explosion = AssetDatabase.LoadAssetAtPath<GameObject>(ExplosionPath);
+            if (visuals.explosion == null) Debug.LogWarning($"[Air Wing] {ExplosionPath} not found; no explosions.");
+            visuals.airExplosionScale = 1f;
+            visuals.impactExplosionScale = 1.5f;
+            visuals.explosionLifeS = 6f;
+        }
+
+        [MenuItem("Deep Water/Air Wing/Apply Explosion to F-A-18E Visuals")]
+        public static void ApplyExplosionToVisuals()
+        {
+            AircraftVisualsSO visuals = AssetDatabase.LoadAssetAtPath<AircraftVisualsSO>(VisualsPath);
+            if (visuals == null) { Debug.LogError($"[Air Wing] {VisualsPath} not found: build the prefab first."); return; }
+            Undo.RecordObject(visuals, "Apply explosion");
+            ApplyExplosion(visuals);
+            if (!visuals.provenance.Contains("Explosions (")) visuals.provenance += " " + ExplosionProvenance;
+            EditorUtility.SetDirty(visuals);
+            AssetDatabase.SaveAssets();
+            Debug.Log($"[Air Wing] {VisualsPath}: explosion {(visuals.explosion != null ? visuals.explosion.name : "none")}.");
         }
 
         static AircraftVisualsSO.Surface Surface(string name, SurfaceDriver driver, Vector3 axis, float maxDeg, float smoothing) =>
@@ -210,7 +267,7 @@ namespace DeepWater.AirWing.Editor
             PrefabUtility.InstantiatePrefab(prefab);
         }
 
-        internal static bool AnyDirtyScene()
+        public static bool AnyDirtyScene()
         {
             for (int i = 0; i < EditorSceneManager.sceneCount; i++)
                 if (EditorSceneManager.GetSceneAt(i).isDirty)
@@ -221,7 +278,7 @@ namespace DeepWater.AirWing.Editor
             return false;
         }
 
-        internal static void Set(Object target, string field, Object value)
+        public static void Set(Object target, string field, Object value)
         {
             var so = new SerializedObject(target);
             SerializedProperty p = so.FindProperty(field);

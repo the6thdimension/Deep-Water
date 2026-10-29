@@ -105,6 +105,8 @@ namespace DeepWater.Aviator.Core
         }
 
         public Side SideOf(int id) => _sides.TryGetValue(id, out Side s) ? s : Side.None;
+        /// <summary>The side <paramref name="id"/> fights or fought on, kept after it leaves (a wreck is still red's).</summary>
+        public Side SideEver(int id) => _sideEver.TryGetValue(id, out Side s) ? s : Side.None;
         public bool Enemies(int a, int b) { Side sa = SideOf(a), sb = SideOf(b); return sa != Side.None && sb != Side.None && sa != sb; }
         public IReadOnlyList<int> Fighters => _ids;
         public IReadOnlyList<ConeEvent> Log => _log;
@@ -113,7 +115,7 @@ namespace DeepWater.Aviator.Core
         public double SecondsInCone(int id) => _seconds.TryGetValue(id, out double s) ? s : 0.0;
 
         readonly Dictionary<Side, int> _kills = new Dictionary<Side, int>();
-        int _killsSeen;
+        int _killsSeen, _arenaSeen;
 
         /// <summary>Enemies a side has shot down (Gunnery K6: kills first). A jet shot by its own side is <see cref="FriendlyKills"/>.</summary>
         public int SideKills(Side side) => _kills.TryGetValue(side, out int n) ? n : 0;
@@ -142,6 +144,15 @@ namespace DeepWater.Aviator.Core
                 else if (shooter != Side.None) _kills[shooter] = SideKills(shooter) + 1;
                 Leave(k.VictimId);
             }
+            // The arena (Air Wing W59–W61): a jet that collided or left the box leaves the fight as a kill's victim does,
+            // and a jet that respawns rejoins on the side it fought for.
+            if (core.Arena != null)
+                for (; _arenaSeen < core.Arena.Events.Count; _arenaSeen++)
+                {
+                    ArenaEvent e = core.Arena.Events[_arenaSeen];
+                    if (e.Kind == ArenaEventKind.Respawned) { if (_sideEver.TryGetValue(e.AircraftId, out Side was)) Join(e.AircraftId, was); }
+                    else Leave(e.AircraftId);
+                }
             IReadOnlyList<Aircraft> all = core.Aircraft;
             for (int i = 0; i < all.Count; i++)
             for (int j = 0; j < all.Count; j++)

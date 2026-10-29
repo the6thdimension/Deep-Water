@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df6fb88dad003154ebc47268b2d7d032, type: 3}
+  m_Name: TrainingArena
+  m_EditorClassIdentifier: DeepWater.AirWing::DeepWater.AirWing.ScriptableObjects.ArenaSO
+  respawnDelayS: 3
+  protectionS: 5
+  jitterHeightM: 300
+  jitterHeadingDeg: 15
+  seed: 2026
+  collisionM: 15
+  centreM: {x: 0, y: 0, z: 12000}
+  halfWidthM: {x: 20000, y: 20000}
+  provenance: "AUTHORED 2026-10-29 from SIX's picks in the training interview (TRAINING-CONCEPT
+    M21\u2013M28; all eight recommended options). Respawn (M26, Air Wing W59): respawnDelayS
+    3 (a fall from 6,000 ft takes about 30 s, wasted in training), protectionS 5
+    (can't be hit and can't fire: against spawn camping, which a learner finds).
+    Jitter (M25): jitterHeightM 300, jitterHeadingDeg 15, seed 2026, so the brain
+    never learns one start. Collisions (W60): collisionM 15, about the F/A-18E's
+    13.6 m span plus a margin. The box (W61): centred on the merge midway between
+    the spawn points 20 km apart, (0, 12,000), half-widths 20 km: 40 \xD7 40 km."

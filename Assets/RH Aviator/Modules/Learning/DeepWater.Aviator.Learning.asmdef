@@ -1,0 +1,19 @@
+{
+    "name": "DeepWater.Aviator.Learning",
+    "rootNamespace": "DeepWater.Aviator.Learning",
+    "references": [
+        "DeepWater.Aviator",
+        "DeepWater.AirWing",
+        "RH.Shared",
+        "Unity.ML-Agents"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

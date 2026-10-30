@@ -37,6 +37,7 @@ namespace DeepWater.Aviator.Tests
             PilotProfile p = so.Bake();
             p.TriggerMils = 0f;   // guns safe: these tests are the position fight (W46)
             p.MissileRangeM = 0f; // and missiles safe (W65)
+            p.RadarMissileRangeM = 0f;   // radar missiles too (A21: SensorFightTests is that fight)
             return p;
         }
 

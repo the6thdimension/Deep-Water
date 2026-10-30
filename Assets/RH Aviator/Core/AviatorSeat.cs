@@ -45,6 +45,7 @@ namespace DeepWater.Aviator.Core
         long _legTick;
         Engagement _fight;
         Perception _eyes;
+        SensorHabits _habits;
         int _targetId;
         bool _breaking, _vectored;
         Fighting.Pursuit _pursuit;
@@ -97,6 +98,8 @@ namespace DeepWater.Aviator.Core
         public int TargetId => _targetId;
         public Fighting.Pursuit Pursuit => _pursuit;
         public Perception Eyes => _eyes;
+        /// <summary>In a fight: its hands on the radar, IFF, the radar missile, chaff and flares (A21).</summary>
+        public SensorHabits Habits => _habits;
         public Engagement Fight => _fight;
         /// <summary>For the HUD's pick list (W42): the mode in a few words, updated when it changes.</summary>
         string ISeatStatus.Status => _status;
@@ -169,6 +172,7 @@ namespace DeepWater.Aviator.Core
             _fight = engagement ?? throw new ArgumentNullException(nameof(engagement));
             if (_fight.SideOf(aircraftId) == Side.None) throw new ArgumentException($"aircraft {aircraftId} has no side in the engagement");
             _eyes = new Perception(aircraftId, _pilot, _core.Clock.TickSeconds, truth: false, seed: _core.Seed);
+            _habits = new SensorHabits(_core, _pilot, aircraftId, (t, a, rule, why) => _log.Add(new RuleFiring(t, a, rule, Mode, Mode, why)));
             _targetId = 0;
             _holdAltitudeM = float.NaN;
             Fire(_core.Tick, aircraftId, "ordered: fight", PilotMode.Fight, $"{_fight.SideOf(aircraftId)}; sees {_pilot.FieldOfViewDeg:F0}° round its nose, {_pilot.ReactionDelayS:F2} s late");
@@ -195,7 +199,8 @@ namespace DeepWater.Aviator.Core
             _lastTick = tick;
 
             // A seat that starts between watches decides at once, rather than fly an empty request until the next.
-            if (first || resumed || Watch.IsWatch(tick, _core.Clock.TickSeconds, WatchHz)) Decide(tick, aircraftId, state);
+            bool watch = first || resumed || Watch.IsWatch(tick, _core.Clock.TickSeconds, WatchHz);
+            if (watch) Decide(tick, aircraftId, state);
 
             // Formation is flown off the slot every tick (Formation, W44: the stick every tick).
             if ((Mode == PilotMode.Join || Mode == PilotMode.Fingertip) && TryLeader(out AirframeState lead))
@@ -264,6 +269,7 @@ namespace DeepWater.Aviator.Core
             PilotInputs inputs = hands.Fly(_request, state, surface);
             inputs.Trigger = _shoot;
             inputs.Pickle = _fight != null && Mode == PilotMode.Fight && WillLaunch(aircraftId, state, tick);
+            if (_habits != null && Mode != PilotMode.Home && Mode != PilotMode.Landed) _habits.Apply(tick, aircraftId, state, watch, _eyes, _fight, ref inputs);
             return inputs;
         }
 

@@ -32,6 +32,7 @@ namespace DeepWater.Aviator.Tests
         {
             PilotProfile p = AssetDatabase.LoadAssetAtPath<PilotProfileSO>(path).Bake();
             p.MissileRangeM = 0f;
+            p.RadarMissileRangeM = 0f;   // radar missiles safe too (A21)
             return p;
         }
 

@@ -89,6 +89,11 @@ MonoBehaviour:
   spotHalfRangeM: 5000
   spotNoseSize: 0.5
   spotTailSize: 0.6
+  radarMissileRangeM: 12000
+  iffChallenges: 3
+  iffForgetChance: 0
+  decoyChance: 1
+  missileWarnM: 4000
   cornerKt: 320
   leadS: 1.2
   lagS: 1.2
@@ -149,10 +154,19 @@ MonoBehaviour:
     K6): gunRangeM 900, triggerMils 12 (a burst that would pass within 12 mils of
     where the target will be; AUTHORED). Missile discipline (Air Wing W65, A16; SIX
     2026-10-29: rookies early, aces close): missileRangeM 3500 (launch with the seeker
-    locked on its target inside 3.5 km, one at a time; AUTHORED). Ace, from the line
-    pilot (AUTHORED): maxG 7 (inside the F/A-18E's 7.5), maxBankDeg 75, fieldOfViewDeg
-    150, reactionDelayS 0.35, memoryS 12, visualRangeM 10000, spotRatePerS 1.5 and
-    spotHalfRangeM 5000 (spots sooner), cornerKt 320, leadS 1.2, lagS 1.2, threatRangeM
-    2000, slowKt 240, turnMatch 1, gunRangeM 800 and triggerMils 6 (waits for the
-    shot: close and tight), missileRangeM 2500 (launches close, where the missile
-    has the energy)."
+    locked on its target inside 3.5 km, one at a time; AUTHORED). The jet's sensors
+    (SENSORS-CONCEPT J9, A21; AUTHORED): radarMissileRangeM 15000 (a radar missile
+    on a hostile track inside 15 km, one in the air at a time), iffChallenges 3 (three
+    challenges with the track in the beam and no answer make an unknown hostile:
+    a friend that answers 19 times in 20 fails all three once in 8,000), iffForgetChance
+    0.2 (one new contact in five it forgets to ask about, and shoots only once it
+    has seen it), decoyChance 0.8 (chaff or flares on four missile warnings in five),
+    missileWarnM 3000 (a heat-seeker it sees coming inside 3 km warns it; radar missiles
+    warn through the warning receiver). Ace, from the line pilot (AUTHORED): maxG
+    7 (inside the F/A-18E's 7.5), maxBankDeg 75, fieldOfViewDeg 150, reactionDelayS
+    0.35, memoryS 12, visualRangeM 10000, spotRatePerS 1.5 and spotHalfRangeM 5000
+    (spots sooner), cornerKt 320, leadS 1.2, lagS 1.2, threatRangeM 2000, slowKt
+    240, turnMatch 1, gunRangeM 800 and triggerMils 6 (waits for the shot: close
+    and tight), missileRangeM 2500 (launches close, where the missile has the energy),
+    radarMissileRangeM 12000 (closer, a surer shot), iffForgetChance 0 (always asks),
+    decoyChance 1 (always answers a warning), missileWarnM 4000."

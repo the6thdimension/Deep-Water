@@ -103,6 +103,14 @@ namespace DeepWater.Aviator.Core
         /// </summary>
         public float SpotRatePerS, SpotHalfRangeM, SpotNoseSize, SpotTailSize;
         /// <summary>
+        /// The jet's sensors in the pilot's hands (SENSORS-CONCEPT J9, A21): the range inside which it launches a radar
+        /// missile on a hostile track (metres; 0: never); how many IFF challenges, asked with the track in the beam and never
+        /// answered, make an unknown hostile; the chance it forgets to ask about a new contact (then it shoots that one only
+        /// once it has seen it); the chance it drops chaff or flares on a missile warning; and how near a heat-seeker it
+        /// sees coming must be to warn it (metres).
+        /// </summary>
+        public float RadarMissileRangeM, IffChallenges, IffForgetChance, DecoyChance, MissileWarnM;
+        /// <summary>
         /// The fighting speed (knots); lead and lag, seconds of the target's velocity ahead of or behind it (0: pure
         /// pursuit only, a rookie); lag inside this range (metres) when closing faster than this (knots), slower by this (knots).
         /// </summary>
@@ -218,6 +226,11 @@ namespace DeepWater.Aviator.Core
             if (ReactionDelayS < 0f) throw new ArgumentOutOfRangeException(nameof(ReactionDelayS), ReactionDelayS, "must not be negative");
             Positive(MemoryS, nameof(MemoryS));
             Positive(VisualRangeM, nameof(VisualRangeM));
+            if (RadarMissileRangeM < 0f) throw new ArgumentOutOfRangeException(nameof(RadarMissileRangeM), RadarMissileRangeM, "must not be negative (zero: never)");
+            if (RadarMissileRangeM > 0f && !(IffChallenges >= 1f)) throw new ArgumentOutOfRangeException(nameof(IffChallenges), IffChallenges, "at least one challenge before an unknown is taken as hostile");
+            if (!(IffForgetChance >= 0f && IffForgetChance <= 1f)) throw new ArgumentOutOfRangeException(nameof(IffForgetChance), IffForgetChance, "a chance, 0 … 1");
+            if (!(DecoyChance >= 0f && DecoyChance <= 1f)) throw new ArgumentOutOfRangeException(nameof(DecoyChance), DecoyChance, "a chance, 0 … 1");
+            if (MissileWarnM < 0f) throw new ArgumentOutOfRangeException(nameof(MissileWarnM), MissileWarnM, "must not be negative");
             if (SpotRatePerS < 0f) throw new ArgumentOutOfRangeException(nameof(SpotRatePerS), SpotRatePerS, "must not be negative (zero: the hard edge)");
             if (SpotRatePerS > 0f)
             {

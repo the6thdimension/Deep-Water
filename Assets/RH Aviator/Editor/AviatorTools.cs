@@ -63,6 +63,7 @@ namespace DeepWater.Aviator.Editor
             // The fight (Pilot L1, W38, W45). AUTHORED: a game's skill numbers, not any real pilot's or air force's.
             so.fieldOfViewDeg = 120f; so.reactionDelayS = 0.7f; so.memoryS = 8f; so.visualRangeM = 8000f;
             so.spotRatePerS = 1f; so.spotHalfRangeM = 4000f; so.spotNoseSize = 0.5f; so.spotTailSize = 0.6f;
+            so.radarMissileRangeM = 15000f; so.iffChallenges = 3f; so.iffForgetChance = 0.2f; so.decoyChance = 0.8f; so.missileWarnM = 3000f;
             so.cornerKt = 330f; so.leadS = 1f; so.lagS = 1f; so.lagRangeM = 800f; so.overshootClosureKt = 60f; so.lagSlowKt = 40f;
             so.threatRangeM = 1500f; so.threatConeDeg = 60f; so.fightFloorM = 300f; so.clearRangeM = 8000f; so.slowKt = 220f; so.turnMatch = 0.7f; so.rangeKtPerM = 0.05f; so.attackRangeM = 600f; so.chaseOverKt = 150f;
             so.avoidM = 100f; so.avoidS = 3f;
@@ -86,7 +87,11 @@ namespace DeepWater.Aviator.Editor
                 "The fight (Pilot L1, W38, W45; a game's skill numbers, AUTHORED, not any real pilot's or air force's): fieldOfViewDeg, reactionDelayS, memoryS, visualRangeM, " +
                 "spotting by size (SENSORS-CONCEPT J8, SIX 2026-10-29): spotRatePerS 1 (close up, seen in about a second), spotHalfRangeM 4000 (a jet seen from the beam is spotted at half that rate 4 km out), " +
                 "spotNoseSize 0.5 and spotTailSize 0.6 (nose-on a jet looks half its beam size, from behind six tenths: a game's guess, not measured); " +
-                "cornerKt, leadS, lagS, lagRangeM, overshootClosureKt, lagSlowKt, threatRangeM, threatConeDeg, fightFloorM, clearRangeM, slowKt (energy sense; 0 = none), turnMatch, rangeKtPerM, attackRangeM, chaseOverKt (range control; 0 = none), avoidM, avoidS (collision avoidance); joinAvoidM (25 m, inside the 40 m slot spacing: a join with no fight avoids too, after a survey of four-ship joins found crossed joins meeting at 0 m). Trigger discipline (Gunnery K6): gunRangeM 900, triggerMils 12 (a burst that would pass within 12 mils of where the target will be; AUTHORED). Missile discipline (Air Wing W65, A16; SIX 2026-10-29: rookies early, aces close): missileRangeM 3500 (launch with the seeker locked on its target inside 3.5 km, one at a time; AUTHORED).";
+                "cornerKt, leadS, lagS, lagRangeM, overshootClosureKt, lagSlowKt, threatRangeM, threatConeDeg, fightFloorM, clearRangeM, slowKt (energy sense; 0 = none), turnMatch, rangeKtPerM, attackRangeM, chaseOverKt (range control; 0 = none), avoidM, avoidS (collision avoidance); joinAvoidM (25 m, inside the 40 m slot spacing: a join with no fight avoids too, after a survey of four-ship joins found crossed joins meeting at 0 m). Trigger discipline (Gunnery K6): gunRangeM 900, triggerMils 12 (a burst that would pass within 12 mils of where the target will be; AUTHORED). Missile discipline (Air Wing W65, A16; SIX 2026-10-29: rookies early, aces close): missileRangeM 3500 (launch with the seeker locked on its target inside 3.5 km, one at a time; AUTHORED). " +
+                "The jet's sensors (SENSORS-CONCEPT J9, A21; AUTHORED): radarMissileRangeM 15000 (a radar missile on a hostile track inside 15 km, one in the air at a time), " +
+                "iffChallenges 3 (three challenges with the track in the beam and no answer make an unknown hostile: a friend that answers 19 times in 20 fails all three once in 8,000), " +
+                "iffForgetChance 0.2 (one new contact in five it forgets to ask about, and shoots only once it has seen it), decoyChance 0.8 (chaff or flares on four missile warnings in five), " +
+                "missileWarnM 3000 (a heat-seeker it sees coming inside 3 km warns it; radar missiles warn through the warning receiver).";
             EditorUtility.SetDirty(so);
             AssetDatabase.SaveAssets();
             so.Bake();   // throws if anything is out of shape
@@ -108,19 +113,21 @@ namespace DeepWater.Aviator.Editor
                 so.maxG = 4.5f; so.maxBankDeg = 60f;
                 so.fieldOfViewDeg = 90f; so.reactionDelayS = 1.2f; so.memoryS = 4f; so.visualRangeM = 6000f;
                 so.spotRatePerS = 0.6f; so.spotHalfRangeM = 3000f;
+                so.radarMissileRangeM = 20000f; so.iffForgetChance = 0.5f; so.decoyChance = 0.5f; so.missileWarnM = 2000f;
                 so.cornerKt = 380f; so.leadS = 0f; so.lagS = 0f; so.threatRangeM = 1000f; so.slowKt = 0f; so.turnMatch = 0f; so.rangeKtPerM = 0f;
                 so.gunRangeM = 1400f; so.triggerMils = 30f;
                 so.missileRangeM = 5000f;
-            }, "Rookie, from the line pilot (AUTHORED): maxG 4.5, maxBankDeg 60, fieldOfViewDeg 90, reactionDelayS 1.2, memoryS 4, visualRangeM 6000, spotRatePerS 0.6 and spotHalfRangeM 3000 (spots later), cornerKt 380 (fights too fast), leadS 0 and lagS 0 (pure pursuit only), threatRangeM 1000, slowKt 0 (no energy sense), turnMatch 0, rangeKtPerM 0 (no range control), gunRangeM 1400 and triggerMils 30 (sprays: long and wide), missileRangeM 5000 (launches as soon as it locks).");
+            }, "Rookie, from the line pilot (AUTHORED): maxG 4.5, maxBankDeg 60, fieldOfViewDeg 90, reactionDelayS 1.2, memoryS 4, visualRangeM 6000, spotRatePerS 0.6 and spotHalfRangeM 3000 (spots later), cornerKt 380 (fights too fast), leadS 0 and lagS 0 (pure pursuit only), threatRangeM 1000, slowKt 0 (no energy sense), turnMatch 0, rangeKtPerM 0 (no range control), gunRangeM 1400 and triggerMils 30 (sprays: long and wide), missileRangeM 5000 (launches as soon as it locks), radarMissileRangeM 20000 (a radar missile at long range), iffForgetChance 0.5 (forgets to ask half the time), decoyChance 0.5, missileWarnM 2000 (late to see a heat-seeker).");
             Write(AcePilotPath, line, "ace", so =>
             {
                 so.maxG = 7f; so.maxBankDeg = 75f;
                 so.fieldOfViewDeg = 150f; so.reactionDelayS = 0.35f; so.memoryS = 12f; so.visualRangeM = 10000f;
                 so.spotRatePerS = 1.5f; so.spotHalfRangeM = 5000f;
+                so.radarMissileRangeM = 12000f; so.iffForgetChance = 0f; so.decoyChance = 1f; so.missileWarnM = 4000f;
                 so.cornerKt = 320f; so.leadS = 1.2f; so.lagS = 1.2f; so.threatRangeM = 2000f; so.slowKt = 240f; so.turnMatch = 1f;
                 so.gunRangeM = 800f; so.triggerMils = 6f;
                 so.missileRangeM = 2500f;
-            }, "Ace, from the line pilot (AUTHORED): maxG 7 (inside the F/A-18E's 7.5), maxBankDeg 75, fieldOfViewDeg 150, reactionDelayS 0.35, memoryS 12, visualRangeM 10000, spotRatePerS 1.5 and spotHalfRangeM 5000 (spots sooner), cornerKt 320, leadS 1.2, lagS 1.2, threatRangeM 2000, slowKt 240, turnMatch 1, gunRangeM 800 and triggerMils 6 (waits for the shot: close and tight), missileRangeM 2500 (launches close, where the missile has the energy).");
+            }, "Ace, from the line pilot (AUTHORED): maxG 7 (inside the F/A-18E's 7.5), maxBankDeg 75, fieldOfViewDeg 150, reactionDelayS 0.35, memoryS 12, visualRangeM 10000, spotRatePerS 1.5 and spotHalfRangeM 5000 (spots sooner), cornerKt 320, leadS 1.2, lagS 1.2, threatRangeM 2000, slowKt 240, turnMatch 1, gunRangeM 800 and triggerMils 6 (waits for the shot: close and tight), missileRangeM 2500 (launches close, where the missile has the energy), radarMissileRangeM 12000 (closer, a surer shot), iffForgetChance 0 (always asks), decoyChance 1 (always answers a warning), missileWarnM 4000.");
         }
 
         static void Write(string path, PilotProfileSO from, string name, System.Action<PilotProfileSO> change, string note)

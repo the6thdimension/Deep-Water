@@ -119,6 +119,18 @@ namespace DeepWater.Aviator.ScriptableObjects
         public float spotHalfRangeM;
         [Tooltip("How big a jet looks nose-on and from behind, as a fraction of the beam view.")]
         public float spotNoseSize, spotTailSize;
+
+        [Header("The jet's sensors (J9, A21)")]
+        [Tooltip("Launches a radar missile on a hostile track inside this range, metres (0: never).")]
+        public float radarMissileRangeM;
+        [Tooltip("IFF challenges, asked with the track in the beam and never answered, that make an unknown hostile.")]
+        public float iffChallenges;
+        [Tooltip("Chance it forgets to ask about a new contact (then it shoots that one only once it has seen it).")]
+        public float iffForgetChance;
+        [Tooltip("Chance it drops chaff or flares on a missile warning.")]
+        public float decoyChance;
+        [Tooltip("A heat-seeker it sees coming inside this distance warns it, metres.")]
+        public float missileWarnM;
         public float cornerKt;
         [Tooltip("Seconds of the target's velocity ahead of it (0: no lead pursuit).")]
         public float leadS;
@@ -185,6 +197,7 @@ namespace DeepWater.Aviator.ScriptableObjects
                 RolloutPedalPerM = rolloutPedalPerM, RolloutPedalPerDeg = rolloutPedalPerDeg, BingoFlightTimeS = bingoFlightTimeS,
                 FieldOfViewDeg = fieldOfViewDeg, ReactionDelayS = reactionDelayS, MemoryS = memoryS, VisualRangeM = visualRangeM,
                 SpotRatePerS = spotRatePerS, SpotHalfRangeM = spotHalfRangeM, SpotNoseSize = spotNoseSize, SpotTailSize = spotTailSize,
+                RadarMissileRangeM = radarMissileRangeM, IffChallenges = iffChallenges, IffForgetChance = iffForgetChance, DecoyChance = decoyChance, MissileWarnM = missileWarnM,
                 CornerKt = cornerKt, LeadS = leadS, LagS = lagS, LagRangeM = lagRangeM, OvershootClosureKt = overshootClosureKt, LagSlowKt = lagSlowKt,
                 ThreatRangeM = threatRangeM, ThreatConeDeg = threatConeDeg, FightFloorM = fightFloorM, ClearRangeM = clearRangeM, SlowKt = slowKt, TurnMatch = turnMatch, RangeKtPerM = rangeKtPerM, AttackRangeM = attackRangeM, ChaseOverKt = chaseOverKt, AvoidM = avoidM, AvoidS = avoidS, JoinAvoidM = joinAvoidM, GunRangeM = gunRangeM, TriggerMils = triggerMils, MissileRangeM = missileRangeM, SlotClimbDegPerM = slotClimbDegPerM, SlotGPerPathDeg = slotGPerPathDeg, SlotRotationShare = slotRotationShare,
             };

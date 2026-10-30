@@ -5,7 +5,8 @@
         "RH.Shared",
         "DeepWater.AirWing",
         "Unity.InputSystem",
-        "DeepWater.Gunnery"
+        "DeepWater.Gunnery",
+        "RHRadarSuite.Core"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

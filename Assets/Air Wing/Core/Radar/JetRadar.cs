@@ -44,6 +44,7 @@ namespace DeepWater.AirWing.Core.Radar
         readonly List<Plot> _plots = new List<Plot>();
         readonly List<int> _plotOwners = new List<int>();
         readonly Dictionary<int, TrackIdentity> _identity = new Dictionary<int, TrackIdentity>();
+        readonly Dictionary<int, int> _asked = new Dictionary<int, int>();
         readonly List<RadarPaint> _paintsNow = new List<RadarPaint>();
         int _resets;
         int _misses;
@@ -77,6 +78,11 @@ namespace DeepWater.AirWing.Core.Radar
 
         /// <summary>What IFF has said about track <paramref name="trackId"/> (J5): friend once it answered, else unknown.</summary>
         public TrackIdentity IdentityOf(int trackId) => _identity.TryGetValue(trackId, out TrackIdentity i) ? i : TrackIdentity.Unknown;
+        /// <summary>
+        /// How many challenges have asked this track while it lay in the beam (slice 6): a pilot may take "asked this
+        /// often, never answered" as hostile, which a track asked from outside the beam could not earn.
+        /// </summary>
+        public int ChallengesOf(int trackId) => _asked.TryGetValue(trackId, out int n) ? n : 0;
 
         public JetRadar(int aircraftId, in RadarProfile profile) : this(aircraftId, profile, default) { }
 
@@ -120,6 +126,7 @@ namespace DeepWater.AirWing.Core.Radar
             _file = new TrackFile(_fileSettings);
             _truth.Clear();
             _identity.Clear();
+            _asked.Clear();
             _lastLooks.Clear();
             _lastAskTick = long.MinValue / 2;
             Mode = Profile.StartMode;
@@ -296,7 +303,9 @@ namespace DeepWater.AirWing.Core.Radar
                 bool inBeam = volume.HasValue
                     ? JetRadarLook.InVolume(volume.Value, self.State.Position, self.State.Attitude, at, out _)
                     : JetRadarLook.InGimbal(Profile, self.State.Position, self.State.Attitude, at);
-                if (!inBeam || !_truth.TryGetValue(t.Id, out int who)) continue;
+                if (!inBeam) continue;
+                _asked[t.Id] = ChallengesOf(t.Id) + 1;
+                if (!_truth.TryGetValue(t.Id, out int who)) continue;
                 Aircraft o = null;
                 for (int i = 0; i < all.Count; i++) if (all[i].Id == who) { o = all[i]; break; }
                 if (o == null || o.State.Status != FlightStatus.Flying || !o.Profile.Iff.IsSet || o.IffCode != self.IffCode) continue;
@@ -314,7 +323,7 @@ namespace DeepWater.AirWing.Core.Radar
             if (_truth.Count <= _file.Tracks.Count) return;
             _stale.Clear();
             foreach (int id in _truth.Keys) if (!_file.TryGet(id, out _)) _stale.Add(id);
-            foreach (int id in _stale) { _truth.Remove(id); _identity.Remove(id); }
+            foreach (int id in _stale) { _truth.Remove(id); _identity.Remove(id); _asked.Remove(id); }
         }
 
         bool Due(long tick, float periodS, double tickS)

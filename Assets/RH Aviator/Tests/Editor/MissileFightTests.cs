@@ -27,7 +27,13 @@ namespace DeepWater.Aviator.Tests
         const float Kt = (float)Units.KnotToMetrePerSecond;
         static readonly FidelitySheet L1 = new FidelitySheet(FidelityLevel.L1, FidelityLevel.L1, FidelityLevel.L1, FidelityLevel.L1, FidelityLevel.L0, 4, 1442);
         static AircraftProfile E() => AssetDatabase.LoadAssetAtPath<AircraftProfileSO>("Assets/Air Wing/ScriptableObjects/FA18E_AirWing.asset").Bake();
-        static PilotProfile Pilot(string path) => AssetDatabase.LoadAssetAtPath<PilotProfileSO>(path).Bake();
+        /// <summary>The heat-seeker's fight: radar missiles safe (A21: <c>SensorFightTests</c> is theirs).</summary>
+        static PilotProfile Pilot(string path)
+        {
+            PilotProfile p = AssetDatabase.LoadAssetAtPath<PilotProfileSO>(path).Bake();
+            p.RadarMissileRangeM = 0f;
+            return p;
+        }
 
         static readonly LearnedPilotSettings Set = new LearnedPilotSettings
         {

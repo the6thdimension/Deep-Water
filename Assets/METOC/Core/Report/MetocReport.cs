@@ -3,9 +3,9 @@ using System;
 namespace DeepWater.Metoc
 {
     /// <summary>
-    /// The weather at a place and time (Theatre E19): slice 1 carries the time, the sun, the moon and the reckoned
-    /// light (E27, E41). Cloud, ceiling, visibility, rain and wind join in later slices. Readers take it as it is;
-    /// nothing drawn feeds back into it.
+    /// The weather at a place and time (Theatre E19): the time, the sun, the moon, the reckoned light (E27, E41), and
+    /// the cloud and visibility with their ceiling and labels (E30, E51). Rain and wind join in later slices. Readers
+    /// take it as it is; nothing drawn feeds back into it.
     /// </summary>
     public readonly struct MetocReport
     {
@@ -15,9 +15,10 @@ namespace DeepWater.Metoc
         public readonly SunState Sun;
         public readonly MoonState Moon;
         public readonly IlluminationState Light;
+        public readonly MetocWeather Weather;
 
         public MetocReport(long tick, double utSeconds, double daySpeed, in MetocPlace place, in SunState sun, in MoonState moon,
-            in IlluminationState light)
+            in IlluminationState light, in MetocWeather weather)
         {
             Tick = tick;
             UtSeconds = utSeconds;
@@ -26,6 +27,7 @@ namespace DeepWater.Metoc
             Sun = sun;
             Moon = moon;
             Light = light;
+            Weather = weather;
         }
 
         public string TimeText => FormatUt(UtSeconds);
@@ -56,7 +58,9 @@ namespace DeepWater.Metoc
             Mix(UtSeconds); Mix(DaySpeed); Mix(Place.LatitudeDeg); Mix(Place.LongitudeDeg);
             Mix(Sun.Sky.ElevationDeg); Mix(Sun.Sky.AzimuthDeg); Mix(Sun.DeclinationDeg); Mix(Sun.DistanceAu);
             Mix(Moon.Sky.ElevationDeg); Mix(Moon.Sky.AzimuthDeg); Mix(Moon.PhaseAngleDeg); Mix(Moon.DistanceKm);
-            Mix(Light.SunLux); Mix(Light.MoonLux); Mix(Light.NightSkyLux);
+            Mix(Light.SunLux); Mix(Light.MoonLux); Mix(Light.NightSkyLux); Mix(Light.CloudTransmission);
+            Mix(Weather.CoverOktas); Mix(Weather.CloudBaseM); Mix(Weather.CloudThicknessM); Mix(Weather.HighCloudOktas);
+            Mix(Weather.VisibilityM); Mix(Weather.ObscurationTopM);
             return h;
         }
     }

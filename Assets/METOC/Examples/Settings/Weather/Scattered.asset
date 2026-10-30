@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 671de244bad2a954889f1b030afb423d, type: 3}
+  m_Name: Scattered
+  m_EditorClassIdentifier: DeepWater.Metoc::DeepWater.Metoc.MetocWeatherSO
+  displayName: Scattered
+  coverOktas: 3
+  cloudBaseM: 900
+  cloudThicknessM: 1200
+  highCloudOktas: 1
+  visibilityM: 25000
+  obscurationTopM: 900
+  provenance: 'AUTHORED: a game-level archetype after typical marine weather, not
+    an observation. METAR cover classes and the WMO fog and mist limits are from
+    WMO No. 306 and No. 8 (from memory, verify).'

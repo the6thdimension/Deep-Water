@@ -1,6 +1,6 @@
 # METOC — blueprint (the atmosphere: time, sun, cloud, rain, wind)
 
-> **Status: LOCKED BLUEPRINT (SIX, 2026-10-30). Slice 1 built and seen in play on `feat/metoc` (2026-10-30); E46 waits on SIX (M2).** SIX answered sixteen questions on 2026-10-30 in four rounds (E26–E41). Fourteen picks are Claude's leaning; two are not (E35, E38). E42–E47 are Claude's technical proposals, **Proposed** until SIX locks them. The parent decisions are in `Assets/Theatre/BLUEPRINT.md` (E4, E13, E18–E20).
+> **Status: LOCKED BLUEPRINT (SIX, 2026-10-30). Slice 1 built, seen in play and on `main` (`c788fda2`). Slice 2 built and seen in play on `feat/metoc` (2026-10-30); E31 picked (128/8).** SIX answered sixteen questions on 2026-10-30 in four rounds (E26–E41). Fourteen picks are Claude's leaning; two are not (E35, E38). E42–E47 were Claude's proposals, locked by SIX after slice 1 (M1, M2). E48–E52 are SIX's slice 2 picks, all Claude's leaning. The parent decisions are in `Assets/Theatre/BLUEPRINT.md` (E4, E13, E18–E20).
 > **This document's one job:** say what METOC is and why, and record every decision behind it. Work order and progress live in `ROADMAP.md`, not here.
 
 ## 1. In plain language
@@ -48,6 +48,14 @@ Names follow E19's military-planning family. Code names are proposals until thei
 | **Illumination** | Reckoned ground illuminance on a horizontal surface, in lux (E41, E45) | `Illumination` |
 | **METOC order** | A logged change from the scenario or the god role: jump the time, set the day speed, move the place; later, a weather blend (E33) | `MetocOrder` |
 | **Overlay volume** | The runtime-only HDRP volume through which METOC draws (E42) | `HdrpMetocRenderer` |
+| **METOC weather** | The weather state: main cloud layer (cover, base, thickness), high cloud, visibility and the top of the layer that limits it (slice 2) | `MetocWeather` |
+| **Cover** | How much of the sky the main cloud layer covers, in oktas (0–8); a blend may hold a fraction | `CoverOktas` |
+| **Ceiling** | The base of the main layer when it covers five oktas or more (broken or overcast); none otherwise | `MetocReport.HasCeiling` |
+| **Visibility** | Meteorological optical range at the surface, metres (E51) | `VisibilityM` |
+| **Obscuration top** | The top of the fog bank or haze that limits visibility, metres (E51) | `ObscurationTopM` |
+| **Cloud transmission** | The share of clear-sky light that reaches the ground under the main layer (E49) | `IlluminationState.CloudTransmission` |
+| **Weather preset** | A named weather state as an asset (E35), METAR-labelled | `MetocWeatherSO` |
+| **Cover calibration** | The measured table of HDRP `shapeFactor` against covered sky (E48) | `CloudCoverCalibration` |
 
 ## 3. Architecture
 
@@ -98,7 +106,7 @@ E26–E41 are SIX's picks of 2026-10-30, in round order. "Leaning" is Claude's r
 | E28 | How the sun is placed | **Date + latitude/longitude from public algorithms:** NOAA's solar-position equations (from Meeus), about 0.02°; the moon from the Astronomical Almanac's low-precision formulas, about 0.3°, with its phase. Fictional theatres carry an authored latitude/longitude | Same | Locked |
 | E29 | How time runs | **Reckoned:** the scenario sets the start date and time; the clock advances on the fixed tick × a labelled day-speed factor (default 1×); god jumps are logged orders | Same | Locked |
 | E30 | Clouds | **Volumetric clouds driven by cover:** METOC decides oktas (0–8), cloud base and thickness; the adapter drives HDRP's Custom density and shape, `bottomAltitude` and `altitudeRange`. The 2D layer stays for cirrus | Same | Locked |
-| E31 | Cloud cost against E4 | **Quality is an SO setting, chosen by measurement:** the cloud slice A/Bs 229/13 against 128/8 and 64/6 steps with screenshots; SIX picks from the numbers. 229/13 stays until then | Same | Locked |
+| E31 | Cloud cost against E4 | **Quality is an SO setting, chosen by measurement:** the cloud slice A/Bs 229/13 against 128/8 and 64/6 steps with screenshots; SIX picks from the numbers. 229/13 stays until then. **Measured (ROADMAP, slice 2): clouds 1.78 / 0.92 / 0.58 ms GPU at 229/13, 128/8, 64/6, no visible difference at eye level; SIX picked 128/8** | Same | Locked; **128/8** (SIX, 2026-10-30) |
 | E32 | Rain | **Rate in mm/h with METAR intensity classes;** VFX Graph rain in a camera-following box; rain cuts visibility and darkens the clouds. No wet surfaces in this stream | Same | Locked |
 | E33 | Weather changes at L0 | **Logged blends:** a starting weather, then scenario or god orders that blend to a new state over a set time, deterministic and logged. Seeded fronts stay L1 | Same | Locked |
 | E34 | First scene | **A new METOC demo scene, built by a menu builder from the Sea State demo** (same sky prefab, sun and sea). No existing scene is touched; the Dogfight scenes adopt METOC later, on SIX's say | Same | Locked |
@@ -109,12 +117,17 @@ E26–E41 are SIX's picks of 2026-10-30, in round order. "Leaning" is Claude's r
 | E39 | The sun's brightness | **About 128 000 lux above the air** (solar constant ≈ 1 361 W/m² × ≈ 93 lm/W, from memory; cited in the SO); HDRP's Physically Based Sky dims and reddens it per sun height (verified: `EvaluateSunColorAttenuation` in `LightEvaluation.hlsl`). The moon from the public full-moon figure × phase. SIX's 190 000 lux kept as a labelled look multiplier (≈1.48×) | Same | Locked |
 | E40 | Exposure at dusk and night | **Auto-exposure's floor follows the reckoned light level;** SIX's EV 14 ceiling stays | Same | Locked |
 | E41 | The light level | **Reckoned:** `MetocReport` carries ground illuminance (sun + moon, clear sky; clouds from slice 2) from public formulas; exposure is driven from it; HDRP's rendered brightness never feeds back | Same | Locked |
-| E42 | How METOC draws | **A runtime overlay volume:** its own global volume, priority above the shared sky, with a profile created at run time holding only what METOC drives. No sky asset is written at run time (in play mode, edits to a profile asset persist to disk) | — | Proposed |
-| E43 | Sun and moon lights | **Two directional lights:** the scene's Sun and a Moon light METOC adds. The brighter body casts shadows; the other does not | — | Proposed |
-| E44 | Time standard | **Universal Time in double seconds from J2000.0** (2000-01-01 12:00 UT). TT − UT (≈69 s) and leap seconds ignored: at most ≈0.003° of sun position. Labelled | — | Proposed |
-| E45 | The illuminance model | **Published pieces, constants in `IlluminationProfileSO` with provenance:** IES clear-sky daylight (direct 127.5 klux · e^(−c·m), c = 0.21, plus diffuse 0.8 + 15.5·√sin h klux) above the horizon; a twilight table interpolated in log lux below it; Krisciunas & Schaefer (1991) moonlight with V-band extinction; a starlight-and-airglow floor. Air mass from Kasten & Young (1989). The from-memory values are labelled until cited | — | Proposed |
-| E46 | How often the drawn sun moves | **Open, measured in slice 1:** HDRP re-renders the sky to a cubemap when a body moves. At 60× day speed, moving on every visible change (`redrawQuantumDeg` 0, about every 0.02°) cost 0.43–0.44 ms GPU per frame; a 0.25° quantum cost 0.16–0.17 ms (ROADMAP, slice 1). At 1× both are negligible: about once every 5 s against once a minute | **0** (smooth: a 0.25° quantum makes the sun and its shadows jump half the sun's width); 0.25° for fast-time demos | Open (M2) |
-| E47 | METOC's Watch | **Every fixed tick (50 Hz)** while its cost is measured negligible against E4's 0.5 ms CPU; a slower Watch only with data (no abstraction without data) | — | Proposed |
+| E42 | How METOC draws | **A runtime overlay volume:** its own global volume, priority above the shared sky, with a profile created at run time holding only what METOC drives. No sky asset is written at run time (in play mode, edits to a profile asset persist to disk) | — | Locked (M1, 2026-10-30) |
+| E43 | Sun and moon lights | **Two directional lights:** the scene's Sun and a Moon light METOC adds. The brighter body casts shadows; the other does not | — | Locked (M1, 2026-10-30) |
+| E44 | Time standard | **Universal Time in double seconds from J2000.0** (2000-01-01 12:00 UT). TT − UT (≈69 s) and leap seconds ignored: at most ≈0.003° of sun position. Labelled | — | Locked (M1, 2026-10-30) |
+| E45 | The illuminance model | **Published pieces, constants in `IlluminationProfileSO` with provenance:** IES clear-sky daylight (direct 127.5 klux · e^(−c·m), c = 0.21, plus diffuse 0.8 + 15.5·√sin h klux) above the horizon; a twilight table interpolated in log lux below it; Krisciunas & Schaefer (1991) moonlight with V-band extinction; a starlight-and-airglow floor. Air mass from Kasten & Young (1989). The from-memory values are labelled until cited | — | Locked (M1, 2026-10-30) |
+| E46 | How often the drawn sun moves | **Open, measured in slice 1:** HDRP re-renders the sky to a cubemap when a body moves. At 60× day speed, moving on every visible change (`redrawQuantumDeg` 0, about every 0.02°) cost 0.43–0.44 ms GPU per frame; a 0.25° quantum cost 0.16–0.17 ms (ROADMAP, slice 1). At 1× both are negligible: about once every 5 s against once a minute | **0** (smooth: a 0.25° quantum makes the sun and its shadows jump half the sun's width); 0.25° for fast-time demos | **Locked: quantum 0** (M2, SIX, 2026-10-30) |
+| E47 | METOC's Watch | **Every fixed tick (50 Hz)** while its cost is measured negligible against E4's 0.5 ms CPU; a slower Watch only with data (no abstraction without data) | — | Locked (M1, 2026-10-30) |
+| E48 | How cover becomes HDRP's clouds | **Measure, then solve (C13):** a play-mode tool renders the sky at a sweep of `shapeFactor`, counts the cloud-covered share of the upper hemisphere from five camera views against a clear reference, and keeps the table (mean and spread, method, date) in the look SO. METOC's oktas pick `shapeFactor` by inverting it. 0 oktas switches the clouds off. *As built:* the clear reference is the same clouds at density 0 (clouds switched on after a camera rendered without them draw black), and each point averages twelve fractional noise-tile offsets. One table, measured at the Broken preset's 750 m base, serves every base (M5) | Same | Locked (SIX, 2026-10-30) |
+| E49 | How cloud dims the light | **Kasten & Czeplak (1980):** ground light = clear-sky light × (1 − 0.75·(N/8)^3.4), N the main layer's oktas; overcast lets 25 % through. Applied to sun, moon and night sky. From memory until cited, like E45. **Beer–Lambert from thickness deferred:** SIX, "we can try Beer–Lambert later" (revisit when a sensor or a scenario needs thickness to matter) | Same | Locked (SIX, 2026-10-30) |
+| E50 | The night's look (M3) | **`adaptationBiasEv` 4:** the exposure floor sits 4 EV above the metered ground light, about two stops darker than slice 1, as a night photograph is underexposed | Same | Locked (SIX, 2026-10-30) |
+| E51 | Visibility | **Its own field:** meteorological optical range at the surface, metres, set by the scenario or god orders (rain lowers it in slice 3). With it, the top of the layer that limits it (fog bank or haze). HDRP's fog: extinction = ln(20) / visibility (WMO's 5 % contrast), uniform to half the layer's top and fading out by its top (LOOK). Labels by WMO: fog below 1 km, mist or haze to 5 km | Same | Locked (SIX, 2026-10-30) |
+| E52 | High cloud | **A high-cloud field (oktas) drives the 2D cloud layer's opacity,** so a clear report looks clear. The ceiling and the dimming use the main layer only: a labelled limit (thin cirrus barely dims). Opacity is not coverage: the 2D layer's map has its own fixed coverage | Same | Locked (SIX, 2026-10-30) |
 
 Inherited: Theatre E2 (frame), E4 (budget: terrain + sky ≤ 2 ms GPU, ≤ 0.5 ms CPU), E13 (the full atmosphere pack), E18 (METOC is its own module), E19 (names), E24 (sensors bend their own rays); Reckoning R15 (Watches), R20 (labelled assists), R22 (fog of war).
 
@@ -145,7 +158,7 @@ Inherited: Theatre E2 (frame), E4 (budget: terrain + sky ≤ 2 ms GPU, ≤ 0.5 m
 
 | Risk | Mitigation |
 |---|---|
-| **The current sky already uses ≈1.75 ms of E4's 2 ms** (edit-mode baseline, 2560×1440, before volumetric fog), and terrain has not been added. **In the METOC demo's low view over the sea it is ≈3.2 ms in play** (volumetric clouds 2.2–2.4 ms), over the budget before METOC adds anything | E31: the cloud slice A/Bs the step counts; SIX picks from the numbers |
+| **The current sky already uses ≈1.75 ms of E4's 2 ms** (edit-mode baseline, 2560×1440, before volumetric fog), and terrain has not been added. **In the METOC demo's low view over the sea it is ≈3.2 ms in play** (volumetric clouds 2.2–2.4 ms), over the budget before METOC adds anything. **After slice 2 (128/8, E31): ≈2.18 ms** in that view under the Broken preset, still ≈0.2 ms over, before terrain | E31 cut ≈1 ms (SIX picked 128/8). The rest is M4 |
 | **A moving sun may re-render the sky every frame** | Measured in slice 1 (E46): ≤0.44 ms GPU per frame at 60×, negligible at 1× |
 | **HDRP's exposure limits are tuned for daylight** | E40: the floor follows the reckoned light. Seen at noon, low sun, dusk and night (2026-10-30): the picture never goes black, but the night reads bright (M3) |
 | **One Unity Editor, several sessions** | Check the Editor's state before play, compile or reload; ask SIX when another session is using it |
@@ -155,9 +168,11 @@ Inherited: Theatre E2 (frame), E4 (budget: terrain + sky ≤ 2 ms GPU, ≤ 0.5 m
 
 | # | Question | Cost |
 |---|---|---|
-| M1 | Lock E42–E45 and E47 (Claude's proposals)? | 2 min |
-| M2 | E46: how often the drawn sun moves. Leaning 0 (smooth), from slice 1's numbers | 2 min |
-| M3 | The night's look: keep it as bright as now (`adaptationBiasEv` 2: the moonlit sea reads like a hazy day), or darker (bias 4–5, as a night photo is underexposed)? A look value in `HdrpMetocLook.asset`; changing it is a re-tune, not a rebuild | 5 min, with screenshots |
+| ~~M1~~ | ~~Lock E42–E45 and E47?~~ Locked by SIX 2026-10-30 | — |
+| ~~M2~~ | ~~E46: how often the drawn sun moves~~ Quantum 0, SIX 2026-10-30 | — |
+| ~~M3~~ | ~~The night's look~~ Bias 4 (E50), SIX 2026-10-30 | — |
+| M4 | E4: the sky is ≈2.18 ms GPU in the demo's sea-level view under Broken at 128/8, ≈0.2 ms over, before terrain. Accept it for now, measure 64/6 on the final sky and in Dogfight Training's view, or wait for terrain to set the real number? Leaning: measure both views at 128/8 and 64/6 before cutting more | One A/B run, ≈10 min; a look call for SIX |
+| M5 | One cover table for every cloud base, or a table per base? A 1 500 m deck reads up to 0.09 cover (about ¾ okta) less than the 750 m table assumes. Leaning: keep one table until a scenario's deck sits far from 750 m, then add a base axis to the table | A base axis is a slice of its own: three calibration runs and a 2D lookup |
 
 ## 10. Glossary
 
@@ -172,3 +187,5 @@ Inherited: Theatre E2 (frame), E4 (budget: terrain + sky ≤ 2 ms GPU, ≤ 0.5 m
 ## Change log
 - **2026-10-30** — The interview: E26–E41 picked by SIX in four rounds (E35 and E38 differ from Claude's leaning). E26 reverses Theatre E20's order. E42–E47 proposed. Edit-mode baseline of the current sky measured. Blueprint written; SIX's baseline files committed (`08580940`).
 - **2026-10-30** — Slice 1 built: the clock, almanac, illumination, simulation, director, HDRP renderer, demo and App UI panel; 37/37 EditMode tests. Seen in play at noon, low sun, dusk and night, and the screenshots were sent to SIX. E46 measured and left Open for SIX (M2), leaning 0. The existing sky measured ≈3.2 ms GPU in the demo's sea-level view (risk updated). M3 added: the night's look.
+- **2026-10-30** — Slice 1 fast-forwarded into `main` (`c788fda2`, SIX). Slice 2 interview: SIX locked E42–E45, E47 (M1) and E46 at quantum 0 (M2), and picked E48–E52 (cover measured then solved, Kasten & Czeplak dimming with Beer–Lambert deferred, night bias 4, visibility as its own field, high cloud on the 2D layer). All picks were Claude's leaning.
+- **2026-10-30** — Slice 2 built on `feat/metoc`: weather in the core with logged blends, Kasten & Czeplak dimming, six presets, HDRP clouds, fog and the 2D layer through the overlay, the cover calibration, the panel's weather controls; 54/54 EditMode tests. Seen in play in the six presets by day and under clear and overcast at night; screenshots sent to SIX. The calibration's first runs read a black sky and drew one cloud pattern three times; both fixed (ROADMAP). E31 measured and picked by SIX (128/8). M4 (the remaining ≈0.2 ms over E4) and M5 (a table per cloud base) added.

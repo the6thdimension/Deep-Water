@@ -25,18 +25,20 @@ namespace DeepWater.Metoc
         public MetocPlace Wrapped() => new MetocPlace(LatitudeDeg, Almanac.Normalize360(LongitudeDeg + 180.0) - 180.0);
     }
 
-    /// <summary>A METOC scenario's starting state (E29): when, where, and how fast the day runs.</summary>
+    /// <summary>A METOC scenario's starting state (E29): when, where, how fast the day runs, and the weather.</summary>
     public readonly struct MetocScenario
     {
         public readonly double StartUtSeconds;
         public readonly MetocPlace Place;
         public readonly double DaySpeed;
+        public readonly MetocWeather StartWeather;
 
-        public MetocScenario(double startUtSeconds, in MetocPlace place, double daySpeed)
+        public MetocScenario(double startUtSeconds, in MetocPlace place, double daySpeed, in MetocWeather startWeather)
         {
             StartUtSeconds = startUtSeconds;
             Place = place;
             DaySpeed = daySpeed;
+            StartWeather = startWeather;
         }
 
         public static string DaySpeedProblem(double daySpeed) =>
@@ -46,7 +48,7 @@ namespace DeepWater.Metoc
         public void Validate()
         {
             if (double.IsNaN(StartUtSeconds) || double.IsInfinity(StartUtSeconds)) throw new ArgumentException($"start time {StartUtSeconds} is not finite");
-            string p = Place.Problem() ?? DaySpeedProblem(DaySpeed);
+            string p = Place.Problem() ?? DaySpeedProblem(DaySpeed) ?? StartWeather.Problem();
             if (p != null) throw new ArgumentException(p);
         }
     }

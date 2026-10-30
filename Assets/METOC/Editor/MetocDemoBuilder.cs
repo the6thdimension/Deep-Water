@@ -28,6 +28,21 @@ namespace DeepWater.Metoc.Editor
         public const string IlluminationAsset = SettingsDir + "/ClearSkyIllumination.asset";
         public const string LookAsset = SettingsDir + "/HdrpMetocLook.asset";
         const string PanelSettingsAsset = SettingsDir + "/MetocPanelSettings.asset";
+        const string WeatherDir = SettingsDir + "/Weather";
+        const string PresetProvenance =
+            "AUTHORED: a game-level archetype after typical marine weather, not an observation. METAR cover classes and the " +
+            "WMO fog and mist limits are from WMO No. 306 and No. 8 (from memory, verify).";
+
+        // The six presets of slice 2 (E30, E51): name, cover, base, thickness, high cloud, visibility, obscuration top.
+        static readonly (string name, double cover, double baseM, double thickM, double high, double visM, double topM)[] Presets =
+        {
+            ("Clear", 0, 1500, 1000, 0, 30000, 1000),
+            ("Scattered", 3, 900, 1200, 1, 25000, 900),
+            ("Broken", 6, 750, 1500, 2, 15000, 900),
+            ("Overcast", 8, 450, 900, 0, 8000, 450),
+            ("Haze", 1, 1500, 800, 3, 4000, 1200),
+            ("Fog bank", 0, 1500, 1000, 0, 300, 120),
+        };
         const string AppUiTheme = "Packages/com.unity.dt.app-ui/PackageResources/Styles/Themes/App UI.tss";
 
         [MenuItem("Deep Water/METOC/Build Demo Scene")]
@@ -52,6 +67,7 @@ namespace DeepWater.Metoc.Editor
                     return "[METOC] The METOC demo is open: open another scene, then rebuild. Nothing was built.";
 
             var scenario = LoadOrCreate<MetocScenarioSO>(ScenarioAsset, out _);
+            MetocWeatherSO[] presets = EnsureWeatherPresets(scenario);
             var illumination = LoadOrCreate<IlluminationProfileSO>(IlluminationAsset, out _);
             var look = LoadOrCreate<HdrpMetocLookSO>(LookAsset, out _);
             var panelSettings = BuildPanelSettings();
@@ -107,6 +123,7 @@ namespace DeepWater.Metoc.Editor
                 var panel = panelGo.AddComponent<MetocPanel>();
                 Set(panel, "director", director);
                 Set(panel, "metocRenderer", renderer);
+                SetArray(panel, "weatherPresets", presets);
 
                 EditorSceneManager.SaveScene(scene, DemoScene);
                 AssetDatabase.SaveAssets();
@@ -118,6 +135,40 @@ namespace DeepWater.Metoc.Editor
                 if (previousActive.IsValid() && previousActive.isLoaded) SceneManager.SetActiveScene(previousActive);
                 if (SceneManager.sceneCount > 1) EditorSceneManager.CloseScene(scene, true);
             }
+        }
+
+        /// <summary>
+        /// Makes the weather presets that are missing (one never made is filled in; one that exists is left alone) and
+        /// gives the scenario a start weather if it has none.
+        /// </summary>
+        public static MetocWeatherSO[] EnsureWeatherPresets(MetocScenarioSO scenario)
+        {
+            var assets = new MetocWeatherSO[Presets.Length];
+            for (int i = 0; i < Presets.Length; i++)
+            {
+                var p = Presets[i];
+                var so = LoadOrCreate<MetocWeatherSO>($"{WeatherDir}/{p.name.Replace(" ", "")}.asset", out bool created);
+                if (created)
+                {
+                    so.displayName = p.name;
+                    so.coverOktas = p.cover;
+                    so.cloudBaseM = p.baseM;
+                    so.cloudThicknessM = p.thickM;
+                    so.highCloudOktas = p.high;
+                    so.visibilityM = p.visM;
+                    so.obscurationTopM = p.topM;
+                    so.provenance = PresetProvenance;
+                    EditorUtility.SetDirty(so);
+                }
+                assets[i] = so;
+            }
+            if (scenario.startWeather == null)
+            {
+                scenario.startWeather = assets[0];
+                EditorUtility.SetDirty(scenario);
+            }
+            AssetDatabase.SaveAssets();
+            return assets;
         }
 
         static PanelSettings BuildPanelSettings()
@@ -163,6 +214,16 @@ namespace DeepWater.Metoc.Editor
             var so = new SerializedObject(target);
             SerializedProperty p = so.FindProperty(field) ?? throw new InvalidOperationException($"{target.GetType().Name} has no serialized field '{field}'");
             p.objectReferenceValue = value;
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        static void SetArray(Object target, string field, Object[] values)
+        {
+            var so = new SerializedObject(target);
+            SerializedProperty p = so.FindProperty(field) ?? throw new InvalidOperationException($"{target.GetType().Name} has no serialized field '{field}'");
+            p.arraySize = values.Length;
+            for (int i = 0; i < values.Length; i++)
+                p.GetArrayElementAtIndex(i).objectReferenceValue = values[i] != null ? values[i] : throw new ArgumentNullException(field, $"preset {i} is missing");
             so.ApplyModifiedPropertiesWithoutUndo();
         }
     }

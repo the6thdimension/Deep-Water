@@ -24,31 +24,45 @@ namespace DeepWater.Metoc
         public double MoonMeanDistanceKm = 384400.0;
         /// <summary>Starlight and airglow on a clear moonless night (from memory, verify).</summary>
         public double NightSkyLux = 0.002;
+        /// <summary>
+        /// Cloud dimming T = 1 − A·(N/8)^B for N oktas (Kasten &amp; Czeplak 1980, Solar Energy 24, 177; from memory,
+        /// verify). Overcast lets 1 − A through (E49).
+        /// </summary>
+        public double CloudDimmingA = 0.75, CloudDimmingB = 3.4;
     }
 
-    /// <summary>Reckoned horizontal illuminance at the ground, lux, and the bodies' illuminance above the air.</summary>
+    /// <summary>
+    /// Reckoned horizontal illuminance at the ground under the cloud, lux, and the bodies' illuminance above the air.
+    /// The clear-sky value of each ground term is it divided by <see cref="CloudTransmission"/>.
+    /// </summary>
     public readonly struct IlluminationState
     {
         public readonly double SunLux, MoonLux, NightSkyLux;
         /// <summary>At normal incidence above the air: what the drawn lights carry (HDRP's sky attenuates them).</summary>
         public readonly double SunAboveAirLux, MoonAboveAirLux;
+        /// <summary>The share of clear-sky light the main cloud layer lets through (E49); 1 under a clear sky.</summary>
+        public readonly double CloudTransmission;
 
-        public IlluminationState(double sunLux, double moonLux, double nightSkyLux, double sunAboveAirLux, double moonAboveAirLux)
+        public IlluminationState(double sunLux, double moonLux, double nightSkyLux, double sunAboveAirLux, double moonAboveAirLux,
+            double cloudTransmission)
         {
             SunLux = sunLux;
             MoonLux = moonLux;
             NightSkyLux = nightSkyLux;
             SunAboveAirLux = sunAboveAirLux;
             MoonAboveAirLux = moonAboveAirLux;
+            CloudTransmission = cloudTransmission;
         }
 
         public double TotalLux => SunLux + MoonLux + NightSkyLux;
+        /// <summary>What the ground would get under a clear sky.</summary>
+        public double ClearSkyLux => TotalLux / CloudTransmission;
     }
 
     /// <summary>
-    /// Clear-sky ground illuminance from published pieces (E41, E45): the IES daylight model above the horizon, a
+    /// Ground illuminance from published pieces (E41, E45): the IES clear-sky daylight model above the horizon, a
     /// twilight table interpolated in log lux below it, Krisciunas &amp; Schaefer (1991) moonlight, and a night-sky
-    /// floor. Air mass from Kasten &amp; Young (1989). Clouds join in slice 2.
+    /// floor, all dimmed by the main cloud layer after Kasten &amp; Czeplak (1980, E49). Air mass from Kasten &amp; Young (1989).
     /// </summary>
     public static class Illumination
     {
@@ -57,8 +71,10 @@ namespace DeepWater.Metoc
         /// <summary>Krisciunas &amp; Schaefer: I = 10^(−0.4 (m + 16.57)) foot-candles for a source of V magnitude m.</summary>
         const double MagnitudeZeroPoint = 16.57;
 
-        public static IlluminationState Compute(in SunState sun, in MoonState moon, IlluminationProfile p)
+        public static IlluminationState Compute(in SunState sun, in MoonState moon, IlluminationProfile p, double coverOktas)
         {
+            double t = CloudTransmission(coverOktas, p);
+
             double sunAboveAir = p.SolarAboveAirLux / (sun.DistanceAu * sun.DistanceAu);
             double sunLux = SunHorizontalLux(sun.Sky.ElevationDeg, sunAboveAir, p);
 
@@ -68,8 +84,16 @@ namespace DeepWater.Metoc
             if (hm > 0)
                 moonLux = moonAboveAir * Math.Pow(10, -0.4 * p.MoonExtinctionMag * AirMass(hm)) * Math.Sin(hm * Almanac.Deg);
 
-            return new IlluminationState(sunLux, moonLux, p.NightSkyLux, sunAboveAir, moonAboveAir);
+            return new IlluminationState(sunLux * t, moonLux * t, p.NightSkyLux * t, sunAboveAir, moonAboveAir, t);
         }
+
+        /// <summary>
+        /// The share of clear-sky light reaching the ground under <paramref name="coverOktas"/> of the main layer:
+        /// 1 − A·(N/8)^B (Kasten &amp; Czeplak 1980). 1 when clear, 0.25 overcast with their constants. It ignores the
+        /// layer's thickness; Beer–Lambert from thickness is deferred (E49).
+        /// </summary>
+        public static double CloudTransmission(double coverOktas, IlluminationProfile p) =>
+            1.0 - p.CloudDimmingA * Math.Pow(coverOktas / 8.0, p.CloudDimmingB);
 
         /// <summary>Sun on a horizontal surface: direct beam plus sky above the horizon, the twilight table below.</summary>
         public static double SunHorizontalLux(double elevationDeg, double aboveAirLux, IlluminationProfile p)

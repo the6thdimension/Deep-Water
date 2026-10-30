@@ -16,7 +16,95 @@ MonoBehaviour:
   moonLookMultiplier: 1
   moonColorTemperatureK: 4100
   dayFloorEv: 10.021231
-  adaptationBiasEv: 2
+  adaptationBiasEv: 4
   absoluteMinEv: -6
   overlayPriority: 100
   redrawQuantumDeg: 0
+  cloudCover:
+    shapeFactor:
+    - 1
+    - 0.95
+    - 0.9
+    - 0.85
+    - 0.8
+    - 0.75
+    - 0.7
+    - 0.65
+    - 0.6
+    - 0.5
+    - 0.4
+    - 0.3
+    - 0.2
+    - 0
+    coverMean:
+    - 0.06118177
+    - 0.13679045
+    - 0.2710248
+    - 0.41853914
+    - 0.57014036
+    - 0.6758062
+    - 0.781934
+    - 0.85188276
+    - 0.88769776
+    - 0.9415076
+    - 0.9681096
+    - 0.9869979
+    - 0.9883968
+    - 0.98913234
+    coverMin:
+    - 0.011128177
+    - 0.04753768
+    - 0.10390415
+    - 0.21110271
+    - 0.29285744
+    - 0.4293575
+    - 0.57233393
+    - 0.69434774
+    - 0.792791
+    - 0.85665804
+    - 0.8907021
+    - 0.975795
+    - 0.98829794
+    - 0.9890964
+    coverMax:
+    - 0.23831661
+    - 0.3228116
+    - 0.5553015
+    - 0.6705163
+    - 0.7712414
+    - 0.86040795
+    - 0.92906183
+    - 0.9705174
+    - 0.98349863
+    - 0.9872459
+    - 0.98766786
+    - 0.98812664
+    - 0.9884364
+    - 0.98918587
+    provenance: "Measured 2026-10-30 12:59 by Deep Water \u2192 METOC \u2192 Calibrate
+      Cloud Cover in Assets/METOC/Examples/Scenes/MetocDemo.unity. Eye at 102 m;
+      sun 21.9\xB0 elevation, 237.9\xB0 azimuth. Clouds: base 750 m, thickness 1500
+      m, the shared profile's density and shape otherwise; fog, the 2D layer, tonemapping
+      and bloom off; fixed exposure EV 13. Five 90\xB0 faces at 256\xB2 (the upper
+      hemisphere), solid-angle weighted; 12 fractional noise-tile offsets per point
+      (min and max are the spread across them), 30 frames to settle, temporal accumulation
+      0.5. A pixel is cloud where its luminance differs from the clear reference
+      (the same clouds at density 0) by more than \u03C4 = 0.15. Orientation check
+      ok (north face upper 0.299, lower 0.079).\nshapeFactor  mean   min    max   
+      | mean at tau 0.08  0.30\r\n       1.00  0.061  0.011  0.238  |       0.074 
+      0.048\r\n       0.95  0.137  0.048  0.323  |       0.169  0.098\r\n       0.90 
+      0.271  0.104  0.555  |       0.318  0.200\r\n       0.85  0.419  0.211  0.671 
+      |       0.477  0.322\r\n       0.80  0.570  0.293  0.771  |       0.632  0.453\r\n      
+      0.75  0.676  0.429  0.860  |       0.740  0.546\r\n       0.70  0.782  0.572 
+      0.929  |       0.842  0.640\r\n       0.65  0.852  0.694  0.971  |       0.908 
+      0.730\r\n       0.60  0.888  0.793  0.983  |       0.938  0.767\r\n       0.50 
+      0.942  0.857  0.987  |       0.971  0.867\r\n       0.40  0.968  0.891  0.988 
+      |       0.984  0.925\r\n       0.30  0.987  0.976  0.988  |       0.994  0.962\r\n      
+      0.20  0.988  0.988  0.988  |       0.994  0.977\r\n       0.00  0.989  0.989 
+      0.989  |       0.994  0.978\r\n"
+  cloudPrimarySteps: 128
+  cloudLightSteps: 8
+  fogUniformFraction: 0.5
+  fogDistanceFactor: 1.5
+  fogMinDistanceM: 5000
+  highCloudOpacityAtEightOktas: 1

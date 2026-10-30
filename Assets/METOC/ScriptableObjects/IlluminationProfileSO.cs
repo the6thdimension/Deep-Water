@@ -3,7 +3,7 @@ using UnityEngine;
 namespace DeepWater.Metoc
 {
     /// <summary>
-    /// The clear-sky light model's constants (E45), with provenance. Values marked "from memory, verify" are labelled
+    /// The light model's constants (E45, E49), with provenance. Values marked "from memory, verify" are labelled
     /// until each is checked against its source (blueprint §8).
     /// </summary>
     [CreateAssetMenu(menuName = "Deep Water/METOC/Illumination Profile", fileName = "IlluminationProfile")]
@@ -32,12 +32,17 @@ namespace DeepWater.Metoc
         [Tooltip("Starlight and airglow on a clear moonless night, lux.")]
         public double nightSkyLux = 0.002;
 
+        [Header("Cloud dimming (Kasten & Czeplak 1980; from memory, verify)")]
+        [Tooltip("T = 1 − A·(N/8)^B for N oktas of the main layer; overcast lets 1 − A through.")]
+        public double cloudDimmingA = 0.75, cloudDimmingB = 3.4;
+
         [TextArea(3, 8)]
         public string provenance =
             "IES Lighting Handbook clear-sky daylight model (direct E0·exp(-c·m)·sin h + diffuse A + B·sin^C h): from memory, verify. " +
             "Twilight table after Bond & Henderson (1963) / USNO: from memory, verify. " +
             "Moon: Krisciunas & Schaefer (1991), PASP 103, 1033. Air mass: Kasten & Young (1989), Applied Optics 28, 4735. " +
-            "Night sky 0.002 lux: from memory, verify.";
+            "Night sky 0.002 lux: from memory, verify. " +
+            "Cloud dimming 1 − 0.75·(N/8)^3.4: Kasten & Czeplak (1980), Solar Energy 24, 177; from memory, verify.";
 
         public IlluminationProfile ToProfile() => new IlluminationProfile
         {
@@ -54,6 +59,8 @@ namespace DeepWater.Metoc
             MoonExtinctionMag = moonExtinctionMag,
             MoonMeanDistanceKm = moonMeanDistanceKm,
             NightSkyLux = nightSkyLux,
+            CloudDimmingA = cloudDimmingA,
+            CloudDimmingB = cloudDimmingB,
         };
 
         void OnValidate()

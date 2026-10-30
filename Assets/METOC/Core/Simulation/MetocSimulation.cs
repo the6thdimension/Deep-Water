@@ -5,8 +5,8 @@ namespace DeepWater.Metoc
 {
     /// <summary>
     /// METOC's reckoned core (P6, E29). Each fixed step applies the orders issued since the last one, in the order
-    /// they were issued, advances the clock by the step times the day speed, and computes the report. Pure: the
-    /// same scenario, steps and orders give the same reports, bit for bit.
+    /// they were issued, advances the clock and any weather blend by the step times the day speed, and computes the
+    /// report. Pure: the same scenario, steps and orders give the same reports, bit for bit.
     /// </summary>
     public sealed class MetocSimulation
     {
@@ -15,11 +15,18 @@ namespace DeepWater.Metoc
         readonly List<MetocOrderRecord> _log = new List<MetocOrderRecord>();
         MetocClock _clock;
         MetocPlace _place;
+        // The weather blends from _blendFrom to _blendTo over _blendTotal day seconds (E33); _weather is where it is now.
+        MetocWeather _weather, _blendFrom, _blendTo;
+        double _blendTotal, _blendElapsed;
 
         public long Tick { get; private set; }
         public MetocReport Report { get; private set; }
         public IReadOnlyList<MetocOrderRecord> Log => _log;
         public double DaySpeed => _clock.DaySpeed;
+        /// <summary>The weather the current blend is heading to; the report's weather once the blend ends.</summary>
+        public MetocWeather WeatherTarget => _blendTo;
+        /// <summary>How far through the current blend, 0 to 1; 1 when no blend is running.</summary>
+        public double BlendProgress => _blendTotal > 0 ? Math.Min(1.0, _blendElapsed / _blendTotal) : 1.0;
 
         public MetocSimulation(in MetocScenario scenario, IlluminationProfile light)
         {
@@ -27,6 +34,7 @@ namespace DeepWater.Metoc
             _light = light ?? throw new ArgumentNullException(nameof(light));
             _clock = new MetocClock(scenario.StartUtSeconds, scenario.DaySpeed);
             _place = scenario.Place.Wrapped();
+            _weather = _blendFrom = _blendTo = scenario.StartWeather;
             Report = Compute();
         }
 
@@ -39,6 +47,11 @@ namespace DeepWater.Metoc
             for (int i = 0; i < _pending.Count; i++) Apply(_pending[i]);
             _pending.Clear();
             _clock.Advance(stepSeconds);
+            if (_blendElapsed < _blendTotal)
+            {
+                _blendElapsed += stepSeconds * _clock.DaySpeed;
+                _weather = MetocWeather.Blend(_blendFrom, _blendTo, BlendProgress);
+            }
             Tick++;
             Report = Compute();
         }
@@ -61,6 +74,19 @@ namespace DeepWater.Metoc
                     refused = place.Problem();
                     if (refused == null) _place = place.Wrapped();
                     break;
+                case MetocOrderKind.SetWeather:
+                    refused = o.Weather.Problem() ??
+                              (double.IsNaN(o.A) || double.IsInfinity(o.A) || o.A < 0 ? $"blend time {o.A} must be finite and ≥ 0" : null);
+                    if (refused == null)
+                    {
+                        // A new order mid-blend starts from where the weather is now, so the drawn sky never jumps.
+                        _blendFrom = _weather;
+                        _blendTo = o.Weather;
+                        _blendTotal = o.A;
+                        _blendElapsed = 0;
+                        if (_blendTotal == 0) _weather = _blendTo;
+                    }
+                    break;
                 default:
                     refused = $"unknown order kind {o.Kind}";
                     break;
@@ -72,8 +98,8 @@ namespace DeepWater.Metoc
         {
             var sun = Almanac.Sun(_clock.UtSeconds, _place.LatitudeDeg, _place.LongitudeDeg);
             var moon = Almanac.Moon(_clock.UtSeconds, _place.LatitudeDeg, _place.LongitudeDeg, sun);
-            var light = Illumination.Compute(sun, moon, _light);
-            return new MetocReport(Tick, _clock.UtSeconds, _clock.DaySpeed, _place, sun, moon, light);
+            var light = Illumination.Compute(sun, moon, _light, _weather.CoverOktas);
+            return new MetocReport(Tick, _clock.UtSeconds, _clock.DaySpeed, _place, sun, moon, light, _weather);
         }
     }
 }

@@ -446,6 +446,14 @@ MonoBehaviour:
   metocRenderer: {fileID: 1641516857}
   refreshHz: 10
   dateReachDays: 183
+  weatherPresets:
+  - {fileID: 11400000, guid: 0749e4ade9b5f864aa723de5019dadfb, type: 2}
+  - {fileID: 11400000, guid: 3f95666773ee9b04cb37227302a9b46e, type: 2}
+  - {fileID: 11400000, guid: 38de7edd5ee69ee4aa7d3d20eb05504c, type: 2}
+  - {fileID: 11400000, guid: 83423b84fe61f3a408c724c83db30a10, type: 2}
+  - {fileID: 11400000, guid: 7ded1f7a39d7f544dbae03eb9540b210, type: 2}
+  - {fileID: 11400000, guid: c28bb469d43d2c0458e694bfafbfd6b4, type: 2}
+  presetBlendDayMinutes: 15
 --- !u!114 &323248478
 MonoBehaviour:
   m_ObjectHideFlags: 0

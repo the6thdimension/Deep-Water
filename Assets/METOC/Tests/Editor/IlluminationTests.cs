@@ -55,7 +55,7 @@ namespace DeepWater.Metoc.Tests
             Assert.AreEqual(0.31331, aboveAir, 1e-4);
             var sun = new SunState(new SkyPosition(-40, -40, 0), 0, 0, 0, 0, 1);
             var moon = new MoonState(new SkyPosition(90, 90, 0), 0, 0, P.MoonMeanDistanceKm, 0.95, 0, 1, false);
-            var light = Illumination.Compute(sun, moon, P);
+            var light = Illumination.Compute(sun, moon, P, 0);
             Assert.AreEqual(0.26745, light.MoonLux, 2e-4);
             Assert.AreEqual(0.0, light.SunLux);
             Assert.AreEqual(0.26745 + P.NightSkyLux, light.TotalLux, 2e-4);
@@ -73,7 +73,7 @@ namespace DeepWater.Metoc.Tests
         {
             var sun = new SunState(new SkyPosition(-30, -30, 0), 0, 0, 0, 0, 1);
             var moon = new MoonState(new SkyPosition(-10, -10, 0), 0, 0, P.MoonMeanDistanceKm, 0.95, 0, 1, false);
-            Assert.AreEqual(P.NightSkyLux, Illumination.Compute(sun, moon, P).TotalLux, 1e-15);
+            Assert.AreEqual(P.NightSkyLux, Illumination.Compute(sun, moon, P, 0).TotalLux, 1e-15);
         }
     }
 }

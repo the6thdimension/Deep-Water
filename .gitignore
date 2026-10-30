@@ -53,6 +53,8 @@ id_ed25519*
 # ML-Agents training output (RH Aviator, Dogfight Training): run logs, checkpoints, TensorBoard summaries.
 # A kept policy is copied into Assets/RH Aviator/Policies/ with its settings (TRAINING-CONCEPT M19).
 /Training/results/
+# The ace's recorded demonstrations (SENSORS-CONCEPT J13): tens of MB, re-recorded from the headless player.
+/Training/demos/
 /Assets/ML-Agents/Timers/*.json
 /Assets/ML-Agents/Timers/*.json.meta
 # The latest trained brain, copied here after each auto-train session (RH Aviator A18, M34): it changes every session.

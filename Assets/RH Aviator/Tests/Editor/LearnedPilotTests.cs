@@ -192,7 +192,8 @@ namespace DeepWater.Aviator.Tests
                 Assert.IsTrue(v.All(x => !float.IsNaN(x) && !float.IsInfinity(x) && Mathf.Abs(x) <= 5f), "finite and bounded");
                 if (firstSeen < 0 && v[LearnedSenses.OwnSize] == 1f) firstSeen = t;
             }
-            Assert.AreEqual(88, LearnedSenses.Size, "version 2: 68, then 20 for the missiles");
+            Assert.AreEqual(140, LearnedSenses.Size, "version 3: 68, then 20 for the missiles, then 52 for the sensors");
+            Assert.AreEqual(88, LearnedSenses.SizeVersion2, "version 2's numbers keep their places");
             Assert.GreaterOrEqual(firstSeen, delay, "nothing arrives before the ace's reaction delay");
             float[] now = senses.Values;
             int e0 = LearnedSenses.OwnSize, e1 = e0 + LearnedSenses.EnemySize;

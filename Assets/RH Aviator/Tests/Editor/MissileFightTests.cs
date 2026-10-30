@@ -75,7 +75,7 @@ namespace DeepWater.Aviator.Tests
                 core.Step();
                 if (launched < 0 && core.Missiles.Launched > 0) launched = core.Tick - 1;
                 float[] b = blueSenses.Write(core, 1, blue.Eyes, fight, ace, false);
-                int own = LearnedSenses.Size - LearnedSenses.OwnMissileSize - LearnedSenses.MissileSlots * LearnedSenses.MissileSize;
+                int own = LearnedSenses.SizeVersion2 - LearnedSenses.OwnMissileSize - LearnedSenses.MissileSlots * LearnedSenses.MissileSize;
                 if (b[own + 2] == 1f && b[own + 3] == 1f) sawLock = true;   // locked, on an enemy
                 float[] r = redSenses.Write(core, 2, red.Eyes, fight, ace, false);
                 int slot = own + LearnedSenses.OwnMissileSize;

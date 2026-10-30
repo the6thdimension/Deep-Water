@@ -129,9 +129,7 @@ namespace DeepWater.Aviator.Learning.Editor
                 var agent = jet.AddComponent<FighterAgent>();   // brings its Behavior Parameters
                 var behaviour = jet.GetComponent<BehaviorParameters>();
                 behaviour.BehaviorName = BehaviorName;
-                behaviour.BrainParameters.VectorObservationSize = LearnedSenses.Size;
-                behaviour.BrainParameters.NumStackedVectorObservations = 1;
-                behaviour.BrainParameters.ActionSpec = new ActionSpec(LearnedActions.ContinuousCount, new[] { LearnedActions.TriggerChoices, LearnedActions.PickleChoices });
+                FighterAgent.Shape(behaviour);   // the senses and actions as they are now (the agent shapes itself again when it wakes)
                 behaviour.BehaviorType = BehaviorType.Default;
                 agent.SetSide(side);
             }

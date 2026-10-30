@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using DeepWater.AirWing.Core;
 using DeepWater.AirWing.Core.Profiles;
+using DeepWater.AirWing.Core.Radar;
 using DeepWater.AirWing.Core.State;
 using DeepWater.Gunnery.Guns;
+using RHRadarSuite.Tracking;
 
 namespace DeepWater.Aviator.Core
 {
@@ -28,25 +30,51 @@ namespace DeepWater.Aviator.Core
     /// friend (-1); each of the 2 nearest missiles it sees, not its own, 8: present, relative position (3), relative
     /// velocity (3), aimed at it. A missile is seen inside the pilot's field of view and visual range, as it is now
     /// (Perception's delay is not applied to missiles: a simplification).
+    /// own sensors 8 (version 3, SENSORS-CONCEPT J11): radar in track-while-scan, radar locked, radar missiles left, chaff
+    /// left, flares left, the warning receiver's strongest kind (search 1/3, track 2/3, missile 1), one of its own radar
+    /// missiles guiding (not yet active), one active;
+    /// each of the 4 nearest firm radar tracks 8: present, IFF answered as a friend, challenges asked of it (of
+    /// <see cref="ChallengeScale"/>), relative position (3), range (of 25 km), locked;
+    /// each of the 3 strongest warning-receiver contacts 4: present, azimuth (of 180°), elevation (of 90°), kind (of 3).
+    /// A track slot's radar track id is in <see cref="TrackSlotIds"/>, so an action can name a slot (LearnedActions).
     /// Absent contacts are zeros, so "present" tells the network a slot is empty.</para>
     /// </summary>
     public sealed class LearnedSenses
     {
-        /// <summary>2 since 2026-10-29: the missiles (W65) were added at the end, so version 1's 68 numbers kept their places.</summary>
-        public const int Version = 2;
-        public const int EnemySlots = 3, FriendSlots = 2, MissileSlots = 2;
+        /// <summary>
+        /// 3 since 2026-10-30: the jet's sensors (SENSORS-CONCEPT J11) were added at the end, so version 2's 88 numbers kept
+        /// their places. (2 since 2026-10-29: the missiles, W65.)
+        /// </summary>
+        public const int Version = 3;
+        public const int EnemySlots = 3, FriendSlots = 2, MissileSlots = 2, TrackSlots = 4, WarningSlots = 3;
         public const int OwnSize = 12, EnemySize = 12, FriendSize = 8, PipperSize = 4, OwnMissileSize = 4, MissileSize = 8;
+        public const int OwnSensorSize = 8, TrackSize = 8, WarningSize = 4;
         public const int Size = OwnSize + EnemySlots * EnemySize + FriendSlots * FriendSize + PipperSize   // 68: version 1
-                                + OwnMissileSize + MissileSlots * MissileSize;                             // 88: version 2
+                                + OwnMissileSize + MissileSlots * MissileSize                              // 88: version 2
+                                + OwnSensorSize + TrackSlots * TrackSize + WarningSlots * WarningSize;     // 140: version 3
+        /// <summary>
+        /// Version 2's size. Its 88 numbers are the first 88 of version 3, so a version 2 brain is still fed: the jet that
+        /// flies one is given only those (FighterAgent), and its two action branches leave the sensors alone.
+        /// </summary>
+        public const int SizeVersion2 = OwnSize + EnemySlots * EnemySize + FriendSlots * FriendSize + PipperSize + OwnMissileSize + MissileSlots * MissileSize;
 
         // Scales (Version 1): each brings its number to about ±1 in a fight.
         const float SpeedScaleMps = 300f, HeightScaleM = 3000f, ClimbScaleMps = 100f, GScale = 7.5f, AoaScaleDeg = 20f;
         const float PositionScaleM = 3000f, RangeScaleM = 10000f, VelocityScaleMps = 300f, MissScaleMils = 30f, Clip = 5f;
+        // Scales (Version 3).
+        const float TrackPositionScaleM = 10000f, TrackRangeScaleM = 25000f;
+        /// <summary>Challenges asked of a track are given as a fraction of this (the line pilot asks 3).</summary>
+        public const float ChallengeScale = 3f;
         /// <summary>The pipper is worked on an enemy in view inside this range, metres (past it the gun is no use).</summary>
         public const float PipperRangeM = 2000f;
 
         readonly float[] _values = new float[Size];
         readonly List<(float range, int id)> _enemies = new List<(float, int)>(8), _friends = new List<(float, int)>(8), _missiles = new List<(float, int)>(8);
+        readonly List<(float range, int id)> _tracks = new List<(float, int)>(16);
+        readonly int[] _trackSlotIds = new int[TrackSlots];
+
+        /// <summary>The radar track id in each track slot at the last write (0: empty).</summary>
+        public IReadOnlyList<int> TrackSlotIds => _trackSlotIds;
 
         /// <summary>The vector written last.</summary>
         public float[] Values => _values;
@@ -204,9 +232,71 @@ namespace DeepWater.Aviator.Core
                 Body(toBody * (m.Velocity - me.Velocity), VelocityScaleMps, ref j);
                 _values[j++] = m.TargetId == selfId ? 1f : 0f;
             }
+            i = WriteSensors(core, self, me, toBody, i);
             if (i != Size) throw new InvalidOperationException($"learned senses wrote {i} numbers, not {Size}");
             return _values;
         }
+
+        /// <summary>Version 3: the jet's own sensors, its radar's tracks and its warning receiver, as its instruments show them.</summary>
+        int WriteSensors(FlightCore core, Aircraft self, in AirframeState me, Quaternion toBody, int i)
+        {
+            Array.Clear(_trackSlotIds, 0, TrackSlots);
+            AircraftProfile profile = self.Profile;
+            JetRadar radar = core.RadarOf(self.Id);
+            WarningReceiver rwr = core.WarningReceiverOf(self.Id);
+            DeepWater.AirWing.Core.Missiles.MissileMount mount = profile.Missiles;
+            bool guiding = false, active = false;
+            var live = core.Missiles.Live;
+            for (int k = 0; k < live.Count; k++)
+            {
+                if (live[k].ShooterId != self.Id || !live[k].Radar || live[k].Lost) continue;
+                if (live[k].Active) active = true; else guiding = true;
+            }
+            _values[i] = radar != null && radar.Mode == RadarMode.TrackWhileScan ? 1f : 0f;
+            _values[i + 1] = radar != null && radar.Mode == RadarMode.SingleTarget ? 1f : 0f;
+            _values[i + 2] = mount.IsSet && mount.RadarCarried > 0 ? me.RadarMissiles / (float)mount.RadarCarried : 0f;
+            _values[i + 3] = profile.Countermeasures.IsSet && profile.Countermeasures.Chaff > 0 ? me.Chaff / (float)profile.Countermeasures.Chaff : 0f;
+            _values[i + 4] = profile.Countermeasures.IsSet && profile.Countermeasures.Flares > 0 ? me.Flares / (float)profile.Countermeasures.Flares : 0f;
+            _values[i + 5] = rwr != null && rwr.Strongest.HasValue ? (int)rwr.Strongest.Value / 3f : 0f;
+            _values[i + 6] = guiding ? 1f : 0f;
+            _values[i + 7] = active ? 1f : 0f;
+            i += OwnSensorSize;
+
+            // The nearest firm tracks (ties by id, so the order is stable).
+            _tracks.Clear();
+            if (radar != null)
+                foreach (RadarTrack t in radar.Tracks)
+                    if (t.State == TrackState.Confirmed) _tracks.Add(((TrackAt(t) - me.Position).magnitude, t.Id));
+            _tracks.Sort();
+            for (int s = 0; s < TrackSlots; s++, i += TrackSize)
+            {
+                if (s >= _tracks.Count) continue;
+                int id = _tracks[s].id;
+                radar.TryTrack(id, out RadarTrack t);
+                _trackSlotIds[s] = id;
+                int j = i;
+                _values[j++] = 1f;
+                _values[j++] = radar.IdentityOf(id) == TrackIdentity.Friend ? 1f : 0f;
+                _values[j++] = Mathf.Min(radar.ChallengesOf(id) / ChallengeScale, 2f);
+                Body(toBody * (TrackAt(t) - me.Position), TrackPositionScaleM, ref j);
+                _values[j++] = Mathf.Min(_tracks[s].range / TrackRangeScaleM, 2f);
+                _values[j++] = radar.LockedTrackId == id ? 1f : 0f;
+            }
+
+            // The warning receiver's contacts, strongest first (its own order).
+            for (int s = 0; s < WarningSlots; s++, i += WarningSize)
+            {
+                if (rwr == null || s >= rwr.Contacts.Count) continue;
+                WarningContact w = rwr.Contacts[s];
+                _values[i] = 1f;
+                _values[i + 1] = Mathf.Clamp(w.AzimuthDeg / 180f, -1f, 1f);
+                _values[i + 2] = Mathf.Clamp(w.ElevationDeg / 90f, -1f, 1f);
+                _values[i + 3] = (int)w.Kind / 3f;
+            }
+            return i;
+        }
+
+        static Vector3 TrackAt(RadarTrack t) => new Vector3((float)t.Position.X, (float)t.Position.Y, (float)t.Position.Z);
 
         void Body(Vector3 v, float scale, ref int j)
         {

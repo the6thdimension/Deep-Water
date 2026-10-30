@@ -28,7 +28,10 @@ namespace DeepWater.Aviator.Learning
 #endif
         }
 
-        /// <summary>True when the brain reads the senses as they are now (<see cref="LearnedSenses.Size"/> numbers).</summary>
+        /// <summary>
+        /// True when the brain reads senses the pilot can feed: the senses as they are now (<see cref="LearnedSenses.Size"/>
+        /// numbers), or version 2's (<see cref="LearnedSenses.SizeVersion2"/>), which are their first numbers.
+        /// </summary>
         public static bool Fits(ModelAsset brain, out string why)
         {
             if (brain == null) { why = "no brain"; return false; }
@@ -37,16 +40,22 @@ namespace DeepWater.Aviator.Learning
 
         public static bool Fits(Model model, out string why)
         {
-            foreach (Model.Input input in model.inputs)
-            {
-                if (input.name != ObservationInput) continue;
-                int size = input.shape.isRankDynamic || input.shape.rank < 2 ? -1 : input.shape.Get(-1);
-                if (size == LearnedSenses.Size) { why = null; return true; }
-                why = $"it was trained on {size} senses, the pilot now has {LearnedSenses.Size} (senses version {LearnedSenses.Version})";
-                return false;
-            }
-            why = $"it has no '{ObservationInput}' input: not an ML-Agents brain";
+            int size = SensesOf(model);
+            if (size == LearnedSenses.Size || size == LearnedSenses.SizeVersion2) { why = null; return true; }
+            why = size < 0 && size != -1 ? $"it has no '{ObservationInput}' input: not an ML-Agents brain"
+                : $"it was trained on {size} senses, the pilot now has {LearnedSenses.Size} (senses version {LearnedSenses.Version}) and can still feed version 2's {LearnedSenses.SizeVersion2}";
             return false;
+        }
+
+        /// <summary>How many senses the brain was trained on (-1: not known; -2: not an ML-Agents brain).</summary>
+        public static int SensesOf(ModelAsset brain) => brain == null ? -1 : SensesOf(ModelLoader.Load(brain));
+
+        public static int SensesOf(Model model)
+        {
+            foreach (Model.Input input in model.inputs)
+                if (input.name == ObservationInput)
+                    return input.shape.isRankDynamic || input.shape.rank < 2 ? -1 : input.shape.Get(-1);
+            return -2;
         }
     }
 }

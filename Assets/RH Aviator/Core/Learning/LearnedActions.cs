@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using DeepWater.AirWing.Core;
+using DeepWater.AirWing.Core.Inputs;
 using DeepWater.AirWing.Core.Seats;
 using DeepWater.AirWing.Core.State;
 
@@ -39,8 +41,10 @@ namespace DeepWater.Aviator.Core
 
     /// <summary>
     /// The policy's actions and what they ask for (M1): four continuous numbers in −1 … +1 (turn, climb, speed, G cap)
-    /// and one choice (trigger off or on). Decoded into a <see cref="FlightPathRequest"/> the hands fly, so the policy
-    /// works the same bounded hands as every rule pilot: their bank cap and their ground guard.
+    /// and six choices: the trigger, the missile pickle, and (version 3, SENSORS-CONCEPT J20) the radar, IFF, decoys and
+    /// the radar-missile pickle. Decoded into a <see cref="FlightPathRequest"/> the hands fly, so the policy works the same
+    /// bounded hands as every rule pilot: their bank cap and their ground guard; and into the same radar commands and
+    /// switches a rule pilot's <see cref="SensorHabits"/> give.
     /// </summary>
     public static class LearnedActions
     {
@@ -49,6 +53,16 @@ namespace DeepWater.Aviator.Core
         /// <summary>The discrete branches: the trigger (0 off, 1 on), then the missile pickle (0 off, 1 on; W65).</summary>
         public const int TriggerChoices = 2, PickleChoices = 2;
         public const int TriggerBranch = 0, PickleBranch = 1;
+        /// <summary>
+        /// Version 3 (J20): the radar (0 leave it, 1 track-while-scan, 2 unlock, 3 + k lock the track in senses slot k),
+        /// IFF (0 off, 1 ask), decoys (0 none, 1 chaff, 2 flares, 3 both) and the radar-missile pickle (0 off, 1 on).
+        /// A radar command is momentary: given once, on the tick after the decision.
+        /// </summary>
+        public const int RadarBranch = 2, IffBranch = 3, DecoyBranch = 4, RadarPickleBranch = 5;
+        public const int RadarLeave = 0, RadarSearch = 1, RadarUnlock = 2, RadarLockSlot0 = 3;
+        public const int RadarChoices = RadarLockSlot0 + LearnedSenses.TrackSlots, IffChoices = 2, DecoyChoices = 4, RadarPickleChoices = 2;
+        /// <summary>Every branch's size, in order: the action spec's discrete branches.</summary>
+        public static int[] Branches() => new[] { TriggerChoices, PickleChoices, RadarChoices, IffChoices, DecoyChoices, RadarPickleChoices };
         /// <summary>The aim point sits this far along the asked-for track: far enough to be a heading (the hands cap L at a turn radius).</summary>
         const float AimDistanceM = 10000f;
 
@@ -73,6 +87,70 @@ namespace DeepWater.Aviator.Core
                 Trigger = trigger,
                 Pickle = pickle,
             };
+        }
+
+        /// <summary>
+        /// The sensor choices <paramref name="d"/> (every branch, as <see cref="Branches"/>) added to <paramref name="command"/>:
+        /// a lock names the radar track in that senses slot (<paramref name="trackSlots"/>); a lock on an empty slot is nothing.
+        /// A short vector (an older policy's two branches) leaves the sensors alone.
+        /// </summary>
+        public static void DecodeSensors(ReadOnlySpan<int> d, IReadOnlyList<int> trackSlots, ref LearnedCommand command)
+        {
+            command.Radar = RadarCommand.None;
+            command.RadarTrack = 0;
+            if (d.Length <= RadarPickleBranch) return;
+            int radar = d[RadarBranch];
+            if (radar == RadarSearch) command.Radar = RadarCommand.TrackWhileScan;
+            else if (radar == RadarUnlock) command.Radar = RadarCommand.Unlock;
+            else if (radar >= RadarLockSlot0 && radar < RadarChoices)
+            {
+                int track = trackSlots != null && radar - RadarLockSlot0 < trackSlots.Count ? trackSlots[radar - RadarLockSlot0] : 0;
+                if (track != 0) { command.Radar = RadarCommand.Lock; command.RadarTrack = track; }
+            }
+            command.Interrogate = d[IffBranch] == 1;
+            command.Chaff = (d[DecoyBranch] & 1) != 0;
+            command.Flare = (d[DecoyBranch] & 2) != 0;
+            command.RadarPickle = d[RadarPickleBranch] == 1;
+        }
+
+        /// <summary>
+        /// The continuous actions that ask for <paramref name="r"/> (Decode's inverse, clamped to the ranges; a rule pilot's
+        /// flight-path angle is not expressible and is dropped). Used to turn a teacher's requests into actions (J13).
+        /// </summary>
+        public static void FromRequest(in FlightPathRequest r, in AirframeState s, in LearnedPilotSettings set, in PilotProfile pilot, Span<float> actions)
+        {
+            if (actions.Length != ContinuousCount) throw new ArgumentException($"{ContinuousCount} actions");
+            Vector3 to = r.AimWorld - s.Position;
+            float bearing = to.x * to.x + to.z * to.z > 1f ? Mathf.Atan2(to.x, to.z) * Mathf.Rad2Deg : FlightPathHands.TrackDeg(s);
+            actions[Turn] = Mathf.Clamp(Mathf.DeltaAngle(FlightPathHands.TrackDeg(s), bearing) / set.TurnRangeDeg, -1f, 1f);
+            // A flight-path angle (gun tracking) is the height the hands would climb by for the same path.
+            float climbM = (float.IsNaN(r.AltitudeM) ? 0f : r.AltitudeM - s.Position.y) + (pilot.Hands.ClimbDegPerM > 0f ? r.PathDeg / pilot.Hands.ClimbDegPerM : 0f);
+            actions[Climb] = Mathf.Clamp(climbM / set.ClimbRangeM, -1f, 1f);
+            float kt = r.SpeedMps / (float)Units.KnotToMetrePerSecond;
+            actions[Speed] = Mathf.Clamp(2f * Mathf.InverseLerp(set.MinKt, set.MaxKt, kt) - 1f, -1f, 1f);
+            float g = r.GLimit > 0f ? r.GLimit : pilot.Hands.MaxG;
+            actions[GCap] = Mathf.Clamp(2f * Mathf.InverseLerp(set.MinG, pilot.Hands.MaxG, g) - 1f, -1f, 1f);
+        }
+
+        /// <summary>
+        /// The discrete choices that give a teacher's inputs (J13): its trigger and pickles, its held switches, and its last
+        /// radar command since the previous decision (<paramref name="radar"/>, <paramref name="radarTrack"/>). A lock on a
+        /// track not in a senses slot cannot be named and is left out.
+        /// </summary>
+        public static void FromInputs(in PilotInputs held, RadarCommand radar, int radarTrack, IReadOnlyList<int> trackSlots, Span<int> d)
+        {
+            if (d.Length != 6) throw new ArgumentException("six branches");
+            d[TriggerBranch] = held.Trigger ? 1 : 0;
+            d[PickleBranch] = held.Pickle ? 1 : 0;
+            d[RadarBranch] = RadarLeave;
+            if (radar == RadarCommand.TrackWhileScan) d[RadarBranch] = RadarSearch;
+            else if (radar == RadarCommand.Unlock) d[RadarBranch] = RadarUnlock;
+            else if (radar == RadarCommand.Lock && trackSlots != null)
+                for (int k = 0; k < trackSlots.Count && k < LearnedSenses.TrackSlots; k++)
+                    if (trackSlots[k] == radarTrack) { d[RadarBranch] = RadarLockSlot0 + k; break; }
+            d[IffBranch] = (held.Switches & PilotSwitches.Interrogate) != 0 ? 1 : 0;
+            d[DecoyBranch] = ((held.Switches & PilotSwitches.Chaff) != 0 ? 1 : 0) | ((held.Switches & PilotSwitches.Flare) != 0 ? 2 : 0);
+            d[RadarPickleBranch] = held.RadarPickle ? 1 : 0;
         }
 
         static float Unit(float v, string name)

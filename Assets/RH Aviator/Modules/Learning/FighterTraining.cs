@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Unity.MLAgents;
+using Unity.MLAgents.Demonstrations;
 using Unity.MLAgents.Policies;
 using DeepWater.AirWing.Core;
 using DeepWater.AirWing.Core.State;
@@ -25,6 +27,11 @@ namespace DeepWater.Aviator.Learning
     /// <para>It also draws a small panel: who flies each side (the trainer, the latest or a saved brain, the scripted
     /// stand-in, the rule pilots), the Academy's step, the clock, and each side's lives, kills and losses. T switches the
     /// clock between real time and the training speed (M31): the trainer sets 20×, and learning slows while you watch.</para>
+    /// <para>Recording the ace (SENSORS-CONCEPT J13, A22): with <c>-recordDemos &lt;steps&gt;</c> on a player's command line
+    /// (and <c>-demoDir &lt;folder&gt;</c>), or Record Demos ticked, every learned jet carries the eyes-and-hands profile's
+    /// rule pilot as a teacher riding along, flies what the teacher asks (through the agent's own actions, so the
+    /// recording is exactly what the brain will be asked to copy), and records each decision into a demonstration file
+    /// per jet at the training speed. The player quits when the first jet has recorded its steps.</para>
     /// </summary>
     [DefaultExecutionOrder(-55)]
     public sealed class FighterTraining : MonoBehaviour
@@ -37,6 +44,12 @@ namespace DeepWater.Aviator.Learning
         [Tooltip("The clock T switches to from real time; the trainer's engine_settings.time_scale in Training/config.")]
         [SerializeField] float fastTimeScale = 20f;
         [SerializeField] bool showPanel = true;
+        [Tooltip("Record the ace's demonstrations (J13): a rule pilot rides along in every learned jet and the agent records what it asks. -recordDemos <steps> on a player's command line turns it on.")]
+        [SerializeField] bool recordDemos;
+        [Tooltip("Decisions each jet records before the recording stops (0: until stopped).")]
+        [SerializeField] int demoSteps = 6000;
+        [Tooltip("Where the demonstrations go; empty: Training/demos beside the project (the player's own folder in a build).")]
+        [SerializeField] string demoDirectory = "";
         [SerializeField] Color colour = new Color(0.55f, 0.95f, 0.75f, 0.95f);
 
         FighterAgent[] _agents = new FighterAgent[0];
@@ -47,6 +60,11 @@ namespace DeepWater.Aviator.Learning
         bool _ready, _failed;
         int _blueLives, _redLives, _interrupted;
         string _blueBrains = "", _redBrains = "";
+        // Who shot whom (METHODOLOGY C58): missiles launched, by who flew the shooter, at enemies and at friends.
+        public const int WhoShotWhomEveryTicks = 3000;
+        readonly Dictionary<int, int> _shooterKind = new Dictionary<int, int>();   // aircraft id → 0 learning, 1 stand-in or teacher, absent: a rule pilot
+        readonly int[,] _shots = new int[3, 3];   // [learning, stand-in, rule pilot] × [at enemies, at friends, radar missiles]
+        int _eventsSeen;
         GUIStyle _style;
 
         public FlightCore Core => runner.Flight;
@@ -54,6 +72,8 @@ namespace DeepWater.Aviator.Learning
         public LearnedPilotSettings Settings => _settings;
         public RewardLedger Ledger => _ledger;
         public IReadOnlyList<FighterAgent> Agents => _agents;
+        /// <summary>True when every learned jet is recording its teacher (J13).</summary>
+        public bool Recording => recordDemos;
 
         public bool IsProtected(int id) => runner.Flight.Arena != null && runner.Flight.Arena.Protected(id, runner.Flight.Tick);
 
@@ -73,6 +93,7 @@ namespace DeepWater.Aviator.Learning
             if (arena == null || runner.Flight.Arena == null)
                 Debug.LogWarning("[RH Aviator] training without an arena: a jet that goes down stays down.", this);
 
+            ReadCommandLine();
             _settings = learnedPilot.Bake();
             PilotProfile pilot = learnedPilot.eyesAndHands.Bake();
             Engagement engagement = fight.Engagement;
@@ -92,6 +113,12 @@ namespace DeepWater.Aviator.Learning
                 _ledger.Track(id);
                 a.Bind(this, seat, id);
             }
+            if (recordDemos) StartRecording(pilot, engagement);
+            foreach (FighterAgent a in _agents)
+            {
+                var b = a.GetComponent<BehaviorParameters>();
+                _shooterKind[a.AircraftId] = b != null && b.BehaviorType == BehaviorType.HeuristicOnly ? 1 : 0;
+            }
             Academy.Instance.AutomaticSteppingEnabled = false;
             Academy.Instance.OnEnvironmentReset += ResetFight;
             // Training must not stall when the Editor is not the focused window (2026-10-29: Play stood at frame 1 for 28 s
@@ -105,6 +132,46 @@ namespace DeepWater.Aviator.Learning
                       $"flown by {who}; pilot '{pilot.Name}' eyes and hands; a decision every {_settings.DecisionPeriodTicks} ticks; lives cut at {_settings.MaxLifeS:F0} s. " +
                       $"Blue: {_blueBrains}. Red: {_redBrains}.", this);
             return true;
+        }
+
+        /// <summary>-recordDemos &lt;steps&gt; and -demoDir &lt;folder&gt; from a player's command line.</summary>
+        void ReadCommandLine()
+        {
+            string[] args = Environment.GetCommandLineArgs();
+            for (int i = 0; i < args.Length - 1; i++)
+            {
+                if (args[i] == "-recordDemos" && int.TryParse(args[i + 1], out int steps)) { recordDemos = true; demoSteps = steps; }
+                if (args[i] == "-demoDir") demoDirectory = args[i + 1];
+            }
+        }
+
+        /// <summary>
+        /// A teacher in every learned jet (the eyes-and-hands profile's rule pilot, in this fight), the agent on its
+        /// heuristic (the teacher's lesson), and a demonstration recorder on each, at the training speed.
+        /// </summary>
+        void StartRecording(in PilotProfile pilot, Engagement engagement)
+        {
+            string dir = string.IsNullOrEmpty(demoDirectory)
+                ? System.IO.Path.GetFullPath(System.IO.Path.Combine(Application.dataPath, "..", "Training", "demos"))
+                : demoDirectory;
+            System.IO.Directory.CreateDirectory(dir);
+            foreach (FighterAgent a in _agents)
+            {
+                if (a.Seat == null) continue;
+                var view = a.GetComponent<AircraftView>();
+                var teacher = new AviatorSeat(runner.Flight, view.Aircraft.Profile, pilot, new RuleLog());
+                teacher.FightIn(a.AircraftId, engagement);
+                a.Seat.RideAlong(teacher);
+                var behaviour = a.GetComponent<BehaviorParameters>();
+                behaviour.BehaviorType = BehaviorType.HeuristicOnly;
+                var recorder = a.gameObject.AddComponent<DemonstrationRecorder>();
+                recorder.DemonstrationName = $"Ace{a.AircraftId:00}";
+                recorder.DemonstrationDirectory = dir;
+                recorder.NumStepsToRecord = demoSteps;
+                recorder.Record = true;
+            }
+            Time.timeScale = Mathf.Max(1f, fastTimeScale);
+            Debug.Log($"[RH Aviator] recording the ace (J13): {_agents.Length} jets, a teacher '{pilot.Name}' riding along in each, {demoSteps} decisions a jet, into {dir}; clock ×{Time.timeScale:0.#}.", this);
         }
 
         /// <summary>Who flies a side, counted: "8 TRAINING", "4 LATEST, 4 LINE", "1 SAVED Ace-2M"…</summary>
@@ -200,6 +267,31 @@ namespace DeepWater.Aviator.Learning
                 if (tick % _settings.DecisionPeriodTicks == 0) agent.RequestDecision();
             }
             Academy.Instance.EnvironmentStep();
+            CountShots(core, tick);
+        }
+
+        /// <summary>
+        /// Tallies each new launch by who flew the shooter and whether its target was a friend, and says the running totals
+        /// in the log every <see cref="WhoShotWhomEveryTicks"/> ticks (C58: a training curve is read with this split).
+        /// </summary>
+        void CountShots(FlightCore core, long tick)
+        {
+            var events = core.Missiles.Events;
+            var live = core.Missiles.Live;
+            Engagement e = fight.Engagement;
+            for (; _eventsSeen < events.Count; _eventsSeen++)
+            {
+                var ev = events[_eventsSeen];
+                if (ev.Kind != DeepWater.AirWing.Core.Missiles.MissileEventKind.Launched) continue;
+                int who = _shooterKind.TryGetValue(ev.ShooterId, out int k) ? k : 2;
+                _shots[who, e.SideOf(ev.ShooterId) == e.SideOf(ev.TargetId) ? 1 : 0]++;
+                for (int i = 0; i < live.Count; i++)
+                    if (live[i].Id == ev.MissileId && live[i].Radar) { _shots[who, 2]++; break; }
+            }
+            if (tick > 0 && tick % WhoShotWhomEveryTicks == 0)
+                Debug.Log($"[WHO-SHOT-WHOM] tick {tick}, step {Academy.Instance.StepCount}: missiles at enemies / at friends (radar of them): " +
+                          $"learning {_shots[0, 0]} / {_shots[0, 1]} ({_shots[0, 2]}); stand-in or teacher {_shots[1, 0]} / {_shots[1, 1]} ({_shots[1, 2]}); " +
+                          $"rule pilots {_shots[2, 0]} / {_shots[2, 1]} ({_shots[2, 2]})", this);
         }
 
         void OnGUI()

@@ -6,7 +6,8 @@
         "DeepWater.Sea",
         "Unity.Mathematics",
         "DeepWater.Gunnery",
-        "RH.Shared"
+        "RH.Shared",
+        "RHRadarSuite.Core"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

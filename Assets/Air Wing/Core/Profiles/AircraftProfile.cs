@@ -128,6 +128,10 @@ namespace DeepWater.AirWing.Core.Profiles
         public CombatProfile Combat;
         /// <summary>Game missiles on pylons (W65); unset for a type that carries none.</summary>
         public DeepWater.AirWing.Core.Missiles.MissileMount Missiles;
+        /// <summary>The nose radar (SENSORS-CONCEPT J1); unset for a type with none.</summary>
+        public DeepWater.AirWing.Core.Radar.RadarProfile Radar;
+        /// <summary>How big it looks to a radar (J1); unset: radars do not see it.</summary>
+        public DeepWater.AirWing.Core.Radar.RadarSignatureProfile RadarSignature;
 
         /// <summary>Airframe L1 and Flight Controls L1 come as a pair: one without the other cannot fly.</summary>
         public bool HasL1 => AirframeL1.IsSet && ControlsL1.IsSet;
@@ -143,6 +147,7 @@ namespace DeepWater.AirWing.Core.Profiles
             if (Gun.IsSet) Gun.Validate();
             if (Combat.IsSet) Combat.Validate();
             if (Missiles.IsSet) Missiles.Validate();
+            if (Radar.IsSet) Radar.Validate();
         }
     }
 }

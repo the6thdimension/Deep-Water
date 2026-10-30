@@ -238,6 +238,55 @@ MonoBehaviour:
   missileKillChance: 0.7
   missileDamageHp: 6
   missileLaunchIntervalS: 1
+  radarName: Generic fighter radar (game)
+  radarPeakPowerW: 16856
+  radarGainDbi: 33
+  radarFrequencyHz: 10000000000
+  radarBandwidthHz: 1000000
+  radarNoiseFigureDb: 4
+  radarLossesDb: 8
+  radarPulsesIntegrated: 32
+  radarClutterImprovementDb: 30
+  radarAzimuthBeamwidthDeg: 3.3
+  radarElevationBeamwidthDeg: 3.3
+  radarMonopulseSlope: 1.6
+  radarRangeFloorM: 15
+  radarAngleFloorDeg: 0.1
+  radarFalseAlarmProbability: 0.000001
+  radarRangeWhileSearch:
+    AzimuthHalfDeg: 60
+    ElevationMinDeg: -30
+    ElevationMaxDeg: 30
+    RangeM: 40000
+    FrameS: 4
+  radarTrackWhileScan:
+    AzimuthHalfDeg: 30
+    ElevationMinDeg: -20
+    ElevationMaxDeg: 20
+    RangeM: 40000
+    FrameS: 2
+  radarDogfight:
+    AzimuthHalfDeg: 10
+    ElevationMinDeg: -10
+    ElevationMaxDeg: 50
+    RangeM: 10000
+    FrameS: 0.5
+  radarGimbalHalfDeg: 60
+  radarSttRangeM: 40000
+  radarSttLookS: 0.1
+  radarSttGainDb: 6
+  radarSttDropMisses: 10
+  radarTrackSigmaM: 150
+  radarTrackMaxSpeedMps: 700
+  radarTrackMaxAccelMps2: 90
+  radarConfirmHits: 2
+  radarConfirmLooks: 3
+  radarDropAfterMisses: 3
+  radarStartMode: 1
+  rcsSet: 1
+  rcsNoseDbsm: 3
+  rcsBeamDbsm: 12
+  rcsTailDbsm: 7
   provenance: "Sources and tags in full: Assets/Air Wing/Calibration~/F18E-SOURCES.md
     (read 2026-10-25).\nPUBLIC = official page; CALIBRATED = fitted to one public
     figure (C16); AUTHORED = our estimate.\n\nspanFt 44.9: PUBLIC, Navy fact file
@@ -324,4 +373,20 @@ MonoBehaviour:
     3\u20135), missileSeekerConeDeg 45; the lock (SIX's picks): missileLockConeDeg
     30, missileLockMinM 500, missileLockMaxM 5000, missileLockTimeS 1; missileArmS
     0.5, missileLifeS 20; the hit (SIX's picks): missileLethalRadiusM 15, missileKillChance
-    0.7, missileDamageHp 6; missileLaunchIntervalS 1."
+    0.7, missileDamageHp 6; missileLaunchIntervalS 1.\n\n--- Radar and signature
+    (SENSORS-CONCEPT J1) ---\nradarName 'Generic fighter radar (game)': a generic
+    nose radar for a video game (SIX 2026-10-29, SENSORS-CONCEPT J1); not any real
+    radar, no real data. All AUTHORED: radarGainDbi 33, radarFrequencyHz 10e9 (X
+    band), radarBandwidthHz 1e6, radarNoiseFigureDb 4, radarLossesDb 8, radarPulsesIntegrated
+    32, radarClutterImprovementDb 30, beamwidths 3.3\xB0, monopulse slope 1.6, floors
+    15 m and 0.1\xB0, false alarms 1e-6. radarPeakPowerW 16856 is SOLVED: a 5 dBsm
+    target at 40 km is seen on half the search looks (Swerling 1). Modes (J6, body
+    frame): range-while-search \xB160\xB0 by \u221230\u2026+30\xB0, 40 km, 4 s frame;
+    track-while-scan \xB130\xB0 by \u221220\u2026+20\xB0, 40 km, 2 s; dogfight \xB110\xB0
+    by \u221210\u2026+50\xB0, 10 km, 0.5 s. Single-target track (J2), all AUTHORED:
+    radarGimbalHalfDeg 60, radarSttRangeM 40000, radarSttLookS 0.1 (ten looks a second),
+    radarSttGainDb 6, radarSttDropMisses 10 (a second of misses loses the lock).
+    Track file, all AUTHORED: radarTrackSigmaM 150, radarTrackMaxSpeedMps 700, radarTrackMaxAccelMps2
+    90 (a 9 G turn), radarConfirmHits 2 of radarConfirmLooks 3 to confirm, radarDropAfterMisses
+    3. Starts in range-while-search. Signature: rcsNoseDbsm 3, rcsBeamDbsm 12, rcsTailDbsm
+    7 (a generic fighter)."

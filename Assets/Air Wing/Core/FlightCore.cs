@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using DeepWater.AirWing.Core.Inputs;
 using DeepWater.AirWing.Core.Missiles;
 using DeepWater.AirWing.Core.Profiles;
+using DeepWater.AirWing.Core.Radar;
 using DeepWater.AirWing.Core.Simulation;
 using DeepWater.AirWing.Core.State;
 using DeepWater.Gunnery.Guns;
@@ -98,7 +99,26 @@ namespace DeepWater.AirWing.Core
             _gunDraws = new DeterministicRng(gunnerySeed);
             // The missiles draw from their own sequence, so a missile never shifts the guns' luck (or the other way).
             _missileDraws = new DeterministicRng(gunnerySeed ^ 0x6D697373696C6573UL);
+            // And the radars from theirs ("radars"), so turning a radar on never shifts a gun's or a missile's luck.
+            _radarDraws = new DeterministicRng(gunnerySeed ^ 0x7261646172730000UL);
         }
+
+        readonly List<JetRadar> _radars = new List<JetRadar>();
+        readonly DeterministicRng _radarDraws;
+
+        /// <summary>The world the radars look through (SENSORS-CONCEPT J16); default: no sea, no clutter.</summary>
+        public RadarEnvironment RadarWorld { get; private set; }
+
+        /// <summary>Set the sea the radars look down on (J16), from the next tick.</summary>
+        public void UseRadarWorld(in RadarEnvironment world)
+        {
+            if (world.Sea && !(world.SeaBeaufort >= 0.0 && world.SeaBeaufort <= 12.0))
+                throw new ArgumentOutOfRangeException(nameof(world), world.SeaBeaufort, "Beaufort 0 … 12");
+            RadarWorld = world;
+        }
+
+        /// <summary>Aircraft <paramref name="id"/>'s radar, or null for a type without one (J1).</summary>
+        public JetRadar RadarOf(int id) => _radars[IndexOf(id)];
 
         /// <summary>Add an aircraft and the seat that flies it. Ids must rise, so the tick order and the Fix are stable.</summary>
         public void Add(Aircraft aircraft, ISeat seat)
@@ -108,6 +128,7 @@ namespace DeepWater.AirWing.Core
                 throw new ArgumentException($"Aircraft ids must rise: {aircraft.Id} after {_aircraft[_aircraft.Count - 1].Id}.", nameof(aircraft));
             _aircraft.Add(aircraft);
             _seats.Add(seat ?? throw new ArgumentNullException(nameof(seat)));
+            _radars.Add(aircraft.Profile.Radar.IsSet ? new JetRadar(aircraft.Id, aircraft.Profile.Radar) : null);
         }
 
         /// <summary>Hand aircraft <paramref name="id"/> to another seat. Takes effect on the next tick (W18).</summary>
@@ -162,6 +183,7 @@ namespace DeepWater.AirWing.Core
             Guns(tick);
             MissileStage(tick);
             Arena?.AfterTick(tick, _aircraft, _picture);
+            RadarStage(tick);
             _records.Clear();
             foreach (Aircraft a in _aircraft) _records.Add(new AircraftRecord(a.Id, a.State));
             Fixes.Append(FlightFix.Of(tick, _records));
@@ -217,6 +239,17 @@ namespace DeepWater.AirWing.Core
                 s.Rounds -= n;
                 Rounds.Fire(a.Id, tick, m.Gun, s.Position + s.Attitude * m.MuzzleM, s.Velocity, s.Attitude * m.BoreBody, n);
             }
+        }
+
+        /// <summary>
+        /// The radars' part of the tick (J1, J2, J6), after the arena: each jet's radar obeys this tick's command and takes
+        /// the looks due on this tick, at where everyone now is, in id order (so the draws repeat).
+        /// </summary>
+        void RadarStage(long tick)
+        {
+            double tickS = Math.Round(Clock.TickSeconds, 6);
+            for (int i = 0; i < _aircraft.Count; i++)
+                _radars[i]?.Step(tick, tickS, _aircraft[i], _issued[i], _aircraft, _surface, RadarWorld, _radarDraws);
         }
 
         int IndexOrNone(int id)

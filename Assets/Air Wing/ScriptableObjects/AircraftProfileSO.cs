@@ -210,6 +210,37 @@ namespace DeepWater.AirWing.ScriptableObjects
         [Tooltip("Least time between launches from one jet, s.")]
         public float missileLaunchIntervalS;
 
+        [Header("Radar (SENSORS-CONCEPT J1, J2, J6; AUTHORED game radar; empty name = none)")]
+        public string radarName = "";
+        [Tooltip("Peak power, W; antenna gain, dBi; carrier, Hz; receiver bandwidth, Hz.")]
+        public double radarPeakPowerW, radarGainDbi, radarFrequencyHz, radarBandwidthHz;
+        [Tooltip("Noise figure and losses, dB; pulses integrated per search look; clutter improvement, dB.")]
+        public double radarNoiseFigureDb, radarLossesDb;
+        public int radarPulsesIntegrated = 1;
+        public double radarClutterImprovementDb;
+        [Tooltip("Two-way beamwidths, deg; monopulse slope; range and angle error floors, m and deg.")]
+        public double radarAzimuthBeamwidthDeg, radarElevationBeamwidthDeg, radarMonopulseSlope = 1.6, radarRangeFloorM, radarAngleFloorDeg;
+        [Tooltip("Chance a look at empty sky reports a contact (sets the threshold).")]
+        public double radarFalseAlarmProbability = 1e-6;
+        [Tooltip("Range-while-search: volume (azimuth half-width, elevation band, body frame, deg), range (m), frame (s).")]
+        public DeepWater.AirWing.Core.Radar.RadarModeProfile radarRangeWhileSearch;
+        [Tooltip("Track-while-scan: as above.")]
+        public DeepWater.AirWing.Core.Radar.RadarModeProfile radarTrackWhileScan;
+        [Tooltip("Dogfight: as above.")]
+        public DeepWater.AirWing.Core.Radar.RadarModeProfile radarDogfight;
+        [Tooltip("Single-target track: gimbal half-angle (deg), range (m), seconds between looks, extra gain (dB), misses to lose the lock.")]
+        public float radarGimbalHalfDeg, radarSttRangeM, radarSttLookS, radarSttGainDb;
+        public int radarSttDropMisses = 1;
+        [Tooltip("Track file: plot sigma (m), fastest target (m/s), hardest turn (m/s²); M of N to confirm; misses to drop.")]
+        public float radarTrackSigmaM, radarTrackMaxSpeedMps, radarTrackMaxAccelMps2;
+        public int radarConfirmHits = 2, radarConfirmLooks = 3, radarDropAfterMisses = 3;
+        public DeepWater.AirWing.Core.Radar.RadarMode radarStartMode = DeepWater.AirWing.Core.Radar.RadarMode.RangeWhileSearch;
+
+        [Header("Radar signature (J1; AUTHORED; how big it looks to a radar)")]
+        public bool rcsSet;
+        [Tooltip("Radar cross-section seen from the nose, the beam and the tail, dBsm.")]
+        public double rcsNoseDbsm, rcsBeamDbsm, rcsTailDbsm;
+
         [Header("Provenance (W8)")]
         [TextArea(8, 40)]
         public string provenance = "";
@@ -371,6 +402,40 @@ namespace DeepWater.AirWing.ScriptableObjects
                     PylonsM = (Vector3[])missilePylonsM.Clone(),
                 };
             }
+            if (!string.IsNullOrEmpty(radarName))
+            {
+                profile.Radar = new DeepWater.AirWing.Core.Radar.RadarProfile
+                {
+                    Name = radarName,
+                    Terms = new RHRadarSuite.Detection.RadarTerms
+                    {
+                        PeakPowerW = radarPeakPowerW, GainDbi = radarGainDbi, FrequencyHz = radarFrequencyHz, BandwidthHz = radarBandwidthHz,
+                        NoiseFigureDb = radarNoiseFigureDb, LossesDb = radarLossesDb, PulsesIntegrated = radarPulsesIntegrated,
+                        ClutterImprovementDb = radarClutterImprovementDb,
+                    },
+                    Measurement = new RHRadarSuite.Detection.MeasurementTerms
+                    {
+                        AzimuthBeamwidthDeg = radarAzimuthBeamwidthDeg, ElevationBeamwidthDeg = radarElevationBeamwidthDeg,
+                        MonopulseSlope = radarMonopulseSlope, RangeFloorM = radarRangeFloorM, AngleFloorDeg = radarAngleFloorDeg,
+                    },
+                    FalseAlarmProbability = radarFalseAlarmProbability,
+                    RangeWhileSearch = radarRangeWhileSearch,
+                    TrackWhileScan = radarTrackWhileScan,
+                    Dogfight = radarDogfight,
+                    GimbalHalfDeg = radarGimbalHalfDeg,
+                    SingleTargetRangeM = radarSttRangeM, SingleTargetLookS = radarSttLookS, SingleTargetGainDb = radarSttGainDb,
+                    SingleTargetDropMisses = radarSttDropMisses,
+                    TrackSigmaM = radarTrackSigmaM, TrackMaxSpeedMps = radarTrackMaxSpeedMps, TrackMaxAccelMps2 = radarTrackMaxAccelMps2,
+                    ConfirmHits = radarConfirmHits, ConfirmLooks = radarConfirmLooks, DropAfterMisses = radarDropAfterMisses,
+                    StartMode = radarStartMode,
+                };
+            }
+            if (rcsSet)
+                profile.RadarSignature = new DeepWater.AirWing.Core.Radar.RadarSignatureProfile
+                {
+                    Rcs = new RHRadarSuite.Detection.AspectRcs { NoseDbsm = rcsNoseDbsm, BeamDbsm = rcsBeamDbsm, TailDbsm = rcsTailDbsm },
+                    IsSet = true,
+                };
             profile.Validate();
             return profile;
         }

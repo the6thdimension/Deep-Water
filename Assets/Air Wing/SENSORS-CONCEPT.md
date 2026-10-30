@@ -1,4 +1,4 @@
-> **THEORETICAL, NOTHING BUILT.** Written 2026-10-29 from SIX's 16 answers in four rounds (J1–J16). SIX:
+> **THEORETICAL; SLICE 1 BUILT 2026-10-29 (W66), slices 2–8 not built.** Written 2026-10-29 from SIX's 16 answers in four rounds (J1–J16). SIX:
 > "can you give my jets iff like dcs world. and the two radar tracking modes. I want the jets to learn when they are being
 > track and have that threat awareness. i want them to have search modes. I want them to be vision limited when something is
 > too far to see. I want 2 of the planes missiles to be radar guided. i want planes to also have counter measures".
@@ -108,7 +108,7 @@ BLUEPRINT standing constraint 8).
 
 | # | Slice | Done when |
 |---|---|---|
-| 1 | **Radar, search modes and tracks** (J1, J2, J6, J16) in Air Wing's core | EditMode tests: detection falls with range and with low flight over the sea; track-while-scan holds several tracks, single-target track one; the dogfight mode locks the first contact ahead; same seed, same tracks |
+| 1 | **Radar, search modes and tracks** (J1, J2, J6, J16) in Air Wing's core | EditMode tests: detection falls with range and with low flight over the sea; track-while-scan holds several tracks, single-target track one; the dogfight mode locks the first contact ahead; same seed, same tracks. **Built 2026-10-29 (Air Wing W66): `RadarTests` 11/11** |
 | 2 | **IFF and the warning receiver** (J3, J5) | Tests: a friend usually answers and its track reads *friend*; an enemy stays *unknown*; a jet painted in search, track and missile guidance hears each, with the right bearing |
 | 3 | **The radar missile** (J7, J18) | Tests: it flies on the shooter's track, goes active near the target, the target hears "missile"; a lost track before going active loses it |
 | 4 | **Chaff and flares** (J4) | Tests: each release breaks the right missile's lock at its set chance over many seeded draws; counts run out |
@@ -147,4 +147,5 @@ BLUEPRINT standing constraint 8).
 - **Behavioural cloning:** a brain learning by copying recorded actions before it learns by trial.
 
 ## Change log
+- **2026-10-29** — Slice 1 built (Air Wing W66): `Core/Radar` (`RadarProfile`, `JetRadarLook`, `JetRadar`), the radar stage in `FlightCore` after the arena, `PilotInputs.Radar` and `RadarTrack`, the F/A-18E's generic radar and signature (`RadarData`; peak power solved to 16,856 W). Measured nose-on Pd per look: 0.995, 0.931, 0.700, 0.344, 0.096 at 10–50 km; at 20 km over a Beaufort 4 sea a jet at 60 m drops from 0.928 to 0.297 (clutter improvement 30 dB, the 30 % lean). The jets' senses are unchanged (version 2): the brain does not see the radar until slice 7.
 - **2026-10-29** — Written from SIX's 16 answers (J1–J16; J11 not the leaning; J4 reverses 2026-10-27); J17–J20 proposed. Nothing built.

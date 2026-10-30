@@ -254,6 +254,32 @@ Locked = SIX's pick. Proposed = Claude's recommended default, open to SIX. Open 
 | M33 | What a learning jet flies with no trainer running | **The latest trained brain**, or the scripted stand-in until one exists (or when it does not fit the senses) | Same | Locked, built (A17) |
 | M34 | Keeping brains | **A rolling latest plus kept brains:** after each session the newest brain is copied to `Policies/Latest/Fighter.onnx` with its record (git-ignored: it changes every session); "Keep this brain" saves a named copy and its record to `Policies/Kept/` (committed, M19). One rolling run per config (`auto-selfplay`, `auto-vs-rest`), resumed every session | Same | Locked, built (A18) |
 
+### Round 7: friendly fire and the guns (SIX, 2026-10-29: "on the screen for the kill counts … I see friendly … Is that not damaging to the training?")
+
+Measured first, in Dogfight Training with the trainer connected at ×20: 60,529 ticks (about 20 minutes of fight), the brain at
+1.84 to 1.92 million steps, each side 6 learning jets, 1 line pilot and 1 scripted stand-in. The panel read blue 32, red 27,
+friendly 38 (FRIENDLY is its own count, not blue plus red). Split by who fired:
+
+| Who fired | Missiles at friends | Missiles at enemies | Friends killed | Enemies killed |
+|---|---|---|---|---|
+| 12 learning jets | 138 | 30 | 38 | 8 |
+| 2 line pilots and 2 scripted stand-ins | 0 | 77 | 0 | 51 |
+
+The seeker locks the aircraft nearest the nose, friend or foe (Air Wing `FlightCore.LockCandidate`). The line pilots fire only
+when locked on their target and the stand-in only when `LockedOnEnemy`; the learning jets fire on whatever is locked. Every
+kill was a missile's: no gun round hit anyone, though at least 4,944 rounds were fired.
+
+| # | Question | SIX's pick | Leaning | Status |
+|---|---|---|---|---|
+| M35 | Friendly missile fire by the learning jets | **Leave it, let the brain learn.** The reward already pays for it (the shooter −1 and a −0.25 squadron share per friend killed, −0.05 per friendly hit) and the senses already say whether the lock is on a friend (−1) or an enemy (+1); no trigger mask, and the seeker keeps locking friends | Mask the learning jets' pickle unless `LockedOnEnemy` (ML-Agents action masking; the rule the other pilots already follow) | Locked. *Proposed revisit trigger:* the same split at about 5 million steps; if learning jets still fire more than half their missiles at friends, ask again |
+| M36 | No gun hits in 20 minutes of fight | **Later** | Look now: the pilots' aim or the gun | **PARKED** (see below) |
+
+**M36, PARKED.** *Open question for SIX:* when to find out why no gun round hit in 20 minutes of an 8 v 8. *Revisit trigger:*
+SIX says "guns", or the M35 re-measure shows guns still at zero. *First three tickets:* (1) count trigger presses, rounds
+fired and hits per pilot type (learning, line, scripted) over one fight; (2) an EditMode test that fires a line pilot's gun
+at a jet flying straight and level ahead and asserts hits, to tell the gun from the aim; (3) log the pipper's miss in mils at
+each of the learning jets' trigger presses.
+
 ### Proposed by Claude while writing
 
 | # | Proposal | Why | Status |
@@ -370,3 +396,4 @@ Sources: [issoh.co.jp guide](https://www.issoh.co.jp/md/tech/4905);
 - **2026-10-29** — M29 (8 v 8) and M30 (missiles: the pickle and senses version 2) built; a version-1 brain must be trained again.
 - **2026-10-29** — Round 6 (M31–M34: auto-train on Play and brain choice) asked and answered (all recommended) and built (RH Aviator A17, A18). M19 partly built.
 - **2026-10-29** — M28's headless ×4 built (RH Aviator A19; SIX: "go headless until i say stop").
+- **2026-10-29** — Round 7 (M35, M36) from a measured fight: learning jets fire 82 % of their missiles at friends; SIX left it for the brain to learn (not the leaning) and parked the guns' zero hits. Nothing built.

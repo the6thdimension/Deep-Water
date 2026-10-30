@@ -5,6 +5,7 @@ using DeepWater.AirWing.Core.Missiles;
 using DeepWater.AirWing.Core.Radar;
 using DeepWater.AirWing.Core.Simulation;
 using DeepWater.AirWing.Core.State;
+using DeepWater.Aviator.Core.Tree;
 using RHRadarSuite.Tracking;
 using UnityEngine;
 
@@ -62,7 +63,27 @@ namespace DeepWater.Aviator.Core
             _pilot = pilot;
             _note = note ?? throw new ArgumentNullException(nameof(note));
             _draws = new DeterministicRng(core.Seed ^ 0x6861626974730000UL ^ ((ulong)(uint)selfId * 0xD6E8FEB86659FD93UL));
+            Tree = BuildTree();
         }
+
+        /// <summary>
+        /// The habits as a behavior tree (RH Aviator A27; slice 4a): the port of what were two methods, <c>Defend</c> then
+        /// <c>Shoot</c>, branch for branch, proven by <c>FightTreePortTests</c> to fly as they did (A33). Each early return of
+        /// the old <c>Shoot</c> is a <see cref="Step"/> that fails or a branch of a <see cref="Selector"/> that ends; the
+        /// chances draw in the same order. For the Fight Tree window (A28).
+        /// </summary>
+        public Node Tree { get; }
+
+        // The watch the tree is running on: what the branches read, and the inputs they write (a ref cannot be captured).
+        long _t;
+        int _id;
+        AirframeState _me;
+        JetRadar _radar;
+        Perception _eyes;
+        Engagement _fight;
+        PilotInputs _inputs;
+        bool _guiding, _inAir;
+        RadarTrack _track;
 
         /// <summary>
         /// Adds this tick's sensor inputs to <paramref name="inputs"/>: the held switches every tick; on a watch, the
@@ -71,18 +92,58 @@ namespace DeepWater.Aviator.Core
         /// </summary>
         public void Apply(long tick, int id, in AirframeState me, bool watch, Perception eyes, Engagement fight, ref PilotInputs inputs)
         {
-            JetRadar radar = _core.RadarOf(id);
+            _radar = _core.RadarOf(id);
             if (watch && me.Status == FlightStatus.Flying)
             {
-                Defend(tick, id, me);
-                if (radar != null) Shoot(tick, id, me, radar, eyes, fight, ref inputs);
+                _t = tick; _id = id; _me = me; _eyes = eyes; _fight = fight;
+                _inputs = inputs;
+                Tree.Tick(tick);
+                inputs = _inputs;
             }
             if (me.Status != FlightStatus.Flying) { _held = PilotSwitches.None; _candidate = 0; }
             inputs.Switches |= _held;
         }
 
-        void Defend(long tick, int id, in AirframeState me)
+        Node BuildTree() => new Sequence("sensors",
+            new Act("defend: warnings", Defend),
+            new Condition("has a radar", () => _radar != null),
+            new Act("stop asking", () => _held &= ~PilotSwitches.Interrogate),
+            new Selector("radar",
+                new Sequence("search",
+                    new Condition("radar off", () => _radar.Mode == RadarMode.Off),
+                    new Act("radar: search", Search)),
+                new Sequence("radar missiles",
+                    new Condition("carries radar missiles", () => _pilot.RadarMissileRangeM > 0f),
+                    new Act("count launches", CountLaunches),
+                    new Selector("lock or pick",
+                        new Sequence("locked",
+                            new Condition("radar locked", () => _radar.Mode == RadarMode.SingleTarget),
+                            new Selector("shoot or let go",
+                                new Condition("guiding its missile", () => _guiding),
+                                new Sequence("let go",
+                                    new Condition("nothing to shoot", NothingToShoot),
+                                    new Act("radar: unlock", Unlock)),
+                                new Sequence("shoot",
+                                    new Condition("in shot", () => _radar.TryTrack(_candidate, out _track) && InShot(_me, _track, _pilot.RadarMissileRangeM, LaunchConeDeg)),
+                                    new Act("radar missile", Pickle)),
+                                new Act("hold the lock", () => { }))),
+                        new Sequence("nothing to pick",
+                            new Condition("one in the air, or none left", () => _inAir || _me.RadarMissiles <= 0),
+                            new Act("forget the candidate", () => _candidate = 0)),
+                        new Sequence("pick and identify",
+                            new Act("pick the nearest", PickCandidate),
+                            new Condition("a candidate", () => _candidate != 0),
+                            new Step("its track held", () => { if (_radar.TryTrack(_candidate, out _track)) return true; _candidate = 0; return false; }),
+                            new Step("identify by sight", IdentifyBySight),
+                            new Step("identify by IFF", IdentifyByIff),
+                            new Condition("hostile, in shot", () => _hostile && InShot(_me, _track, _pilot.RadarMissileRangeM, LaunchConeDeg)),
+                            new Act("radar: lock", Lock))))));
+
+        void Defend()
         {
+            long tick = _t;
+            int id = _id;
+            ref readonly AirframeState me = ref _me;
             WarningReceiver rwr = _core.WarningReceiverOf(id);
             bool chaff = rwr != null && rwr.Strongest == PaintKind.Missile;
             bool flare = false;
@@ -113,86 +174,91 @@ namespace DeepWater.Aviator.Core
             return answer;
         }
 
-        void Shoot(long tick, int id, in AirframeState me, JetRadar radar, Perception eyes, Engagement fight, ref PilotInputs inputs)
+        void Search()
         {
-            _held &= ~PilotSwitches.Interrogate;
-            if (radar.Mode == RadarMode.Off)
-            {
-                inputs.Radar = RadarCommand.TrackWhileScan;
-                _note(tick, id, "radar: search", "track-while-scan");
-                return;
-            }
-            if (_pilot.RadarMissileRangeM <= 0f) return;
+            _inputs.Radar = RadarCommand.TrackWhileScan;
+            _note(_t, _id, "radar: search", "track-while-scan");
+        }
 
-            // One radar missile of its own in the air at a time; the lock is held for it until it goes active.
-            bool guiding = false, inAir = false;
+        /// <summary>One radar missile of its own in the air at a time; the lock is held for it until it goes active.</summary>
+        void CountLaunches()
+        {
+            _guiding = false; _inAir = false;
             var live = _core.Missiles.Live;
             for (int i = 0; i < live.Count; i++)
-                if (live[i].ShooterId == id && live[i].Radar && !live[i].Lost) { inAir = true; guiding |= !live[i].Active; }
-            if (_pickled != null && inAir)
+                if (live[i].ShooterId == _id && live[i].Radar && !live[i].Lost) { _inAir = true; _guiding |= !live[i].Active; }
+            if (_pickled != null && _inAir)
             {
                 RadarLaunches++;
                 if (_pickled == "asked") LaunchesAfterAsking++;
                 else LaunchesOnSight++;
             }
             _pickled = null;
+        }
 
-            if (radar.Mode == RadarMode.SingleTarget)
-            {
-                if (guiding) return;
-                if (_candidate == 0 || radar.LockedTrackId != _candidate || inAir || me.RadarMissiles <= 0 || !_hostile)
-                {
-                    inputs.Radar = RadarCommand.Unlock;
-                    _note(tick, id, "radar: unlock", inAir ? "its missile is active" : "nothing to shoot");
-                    _candidate = 0;
-                    return;
-                }
-                if (radar.TryTrack(_candidate, out RadarTrack t) && InShot(me, t, _pilot.RadarMissileRangeM, LaunchConeDeg))
-                {
-                    inputs.RadarPickle = true;
-                    _pickled = _how;
-                    _note(tick, id, "radar missile", $"on track {_candidate}, hostile by {(_how == "asked" ? "IFF: asked, no answer" : "sight")}, {Range(me, t):F0} m");
-                }
-                return;
-            }
+        bool NothingToShoot() =>
+            _candidate == 0 || _radar.LockedTrackId != _candidate || _inAir || _me.RadarMissiles <= 0 || !_hostile;
 
-            if (inAir || me.RadarMissiles <= 0) { _candidate = 0; return; }
-            int pick = Pick(me, radar);
-            if (pick != _candidate)
-            {
-                _candidate = pick;
-                _hostile = false;
-                _how = null;
-                if (pick == 0) return;
-                _asks = !(_draws.NextFloat01() < _pilot.IffForgetChance);
-                _note(tick, id, _asks ? "iff: ask" : "iff: forgot", $"track {pick}");
-            }
-            if (_candidate == 0) return;
-            if (!radar.TryTrack(_candidate, out RadarTrack c)) { _candidate = 0; return; }
+        void Unlock()
+        {
+            _inputs.Radar = RadarCommand.Unlock;
+            _note(_t, _id, "radar: unlock", _inAir ? "its missile is active" : "nothing to shoot");
+            _candidate = 0;
+        }
 
-            if (!_hostile)
+        void Pickle()
+        {
+            _inputs.RadarPickle = true;
+            _pickled = _how;
+            _note(_t, _id, "radar missile", $"on track {_candidate}, hostile by {(_how == "asked" ? "IFF: asked, no answer" : "sight")}, {Range(_me, _track):F0} m");
+        }
+
+        /// <summary>A new pick is a new candidate: not yet hostile, and asked about unless forgotten (one draw).</summary>
+        void PickCandidate()
+        {
+            int pick = Pick(_me, _radar);
+            if (pick == _candidate) return;
+            _candidate = pick;
+            _hostile = false;
+            _how = null;
+            if (pick == 0) return;
+            _asks = !(_draws.NextFloat01() < _pilot.IffForgetChance);
+            _note(_t, _id, _asks ? "iff: ask" : "iff: forgot", $"track {pick}");
+        }
+
+        /// <summary>Seen as a friend: dropped, and the branch ends. Seen as an enemy: hostile, by sight.</summary>
+        bool IdentifyBySight()
+        {
+            if (_hostile) return true;
+            int seen = SeenAs(_track, _eyes, _fight, _id, _t);
+            if (seen < 0) { Drop(_t, _id, _radar, "seen: a friend"); return false; }
+            if (seen > 0) { _hostile = true; _how = "sight"; _note(_t, _id, "identified", $"track {_candidate}: seen, an enemy"); }
+            return true;
+        }
+
+        /// <summary>
+        /// A friend's answer: dropped, and the branch ends. Enough challenges unanswered, its own jet carrying a code:
+        /// hostile, asked. Otherwise it keeps asking.
+        /// </summary>
+        bool IdentifyByIff()
+        {
+            if (_hostile || !_asks) return true;
+            if (_radar.IdentityOf(_candidate) == TrackIdentity.Friend) { Drop(_t, _id, _radar, "iff: a friend answered"); return false; }
+            if (_core.Find(_id).IffCode != 0 && _radar.ChallengesOf(_candidate) >= _pilot.IffChallenges)
             {
-                int seen = SeenAs(c, eyes, fight, id, tick);
-                if (seen < 0) { Drop(tick, id, radar, "seen: a friend"); return; }
-                if (seen > 0) { _hostile = true; _how = "sight"; _note(tick, id, "identified", $"track {_candidate}: seen, an enemy"); }
+                _hostile = true;
+                _how = "asked";
+                _note(_t, _id, "identified", $"track {_candidate}: {_radar.ChallengesOf(_candidate)} challenges, no answer");
             }
-            if (!_hostile && _asks)
-            {
-                if (radar.IdentityOf(_candidate) == TrackIdentity.Friend) { Drop(tick, id, radar, "iff: a friend answered"); return; }
-                if (_core.Find(id).IffCode != 0 && radar.ChallengesOf(_candidate) >= _pilot.IffChallenges)
-                {
-                    _hostile = true;
-                    _how = "asked";
-                    _note(tick, id, "identified", $"track {_candidate}: {radar.ChallengesOf(_candidate)} challenges, no answer");
-                }
-                else _held |= PilotSwitches.Interrogate;
-            }
-            if (_hostile && InShot(me, c, _pilot.RadarMissileRangeM, LaunchConeDeg))
-            {
-                inputs.Radar = RadarCommand.Lock;
-                inputs.RadarTrack = _candidate;
-                _note(tick, id, "radar: lock", $"track {_candidate}, {Range(me, c):F0} m");
-            }
+            else _held |= PilotSwitches.Interrogate;
+            return true;
+        }
+
+        void Lock()
+        {
+            _inputs.Radar = RadarCommand.Lock;
+            _inputs.RadarTrack = _candidate;
+            _note(_t, _id, "radar: lock", $"track {_candidate}, {Range(_me, _track):F0} m");
         }
 
         void Drop(long tick, int id, JetRadar radar, string why)

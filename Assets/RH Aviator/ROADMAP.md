@@ -33,7 +33,7 @@
 ## STILL TO DO
 
 ### Next
-- **Next: the fight tree, slices 4a–4e** (BLUEPRINT §5.6, A25–A36; SIX 2026-10-30). Planned below; **slice 4a starts on SIX's go.** Training waits for slice 4e's ladder, then copies the tree's ace (A35).
+- **Next: the fight tree, slice 4b** (BLUEPRINT §5.6, A25–A36; SIX 2026-10-30): the skill gates, the rookie's flaws, missile defence and fire discipline, on SIX's go. Slice 4a is done (2026-10-30). Training waits for slice 4e's ladder, then copies the tree's ace (A35).
 - **Next for training: the first real round** (TRAINING-CONCEPT T3–T5). Run `Training/config/fighter_selfplay.yaml` for as many hours as SIX allows (concept open question 2), watch TensorBoard, and judge the policy by kills, crashes and pointed cone time against the rule pilots (`fighter_vs_rules.yaml`), not by its mean reward. Before long rounds: a headless player build (several in parallel), recordings of the first, middle and last fights (M8, M18) and the training theatre (M12). The gate (M11) waits for those.
 - ~~**Next: slice 3f — fight in the vertical**~~ *folded into slice 4c, the ace's energy branch (A36, 2026-10-30):* (A11, SIX go 2026-10-27): energy states, nose-high and nose-low turns, the ace spending its G, so equal fights resolve. Spike first; pass criteria fixed before building: line v line and ace v line each produce a winner in some of 20 merges **by pointed cone time** (the A9 measure as a diagnostic; see below), and no fight sinks to the floor. *Survey with A9 removed (2026-10-27):* line v line 14–6, 6.1 / 5.6 s a fight (was 0 / 0); ace v line 14–6, 8.5 / 7.0 s (was 0 / 0); ace v rookie 19 of 20, 1278 s to 60 s (was 1217 to 0); the 4 v 4 player fighting 63.4 / 88.4 s (was 2.8 / 41.9). Nearly all the new equal-fight time is head-on passes, so the position score cannot judge 3f.
 
@@ -169,14 +169,15 @@
 
 Kept for the record. Air Wing now owns the airframe side (W5), and W17, W49 and the safe limits set what the AI does. Each unchecked item is struck through with its reason.
 
-## Phase 4 — the fight tree (BLUEPRINT §5.6; planned 2026-10-30, nothing built)
+## Phase 4 — the fight tree (BLUEPRINT §5.6; planned 2026-10-30; slice 4a built 2026-10-30)
 
 Every slice ends with the Aviator and Air Wing suites green, its new tests named here, and a play smoke in Dogfight Training.
 
-### Slice 4a — the tree, the exact port, the live window (A27, A28, A33, A34)
-- `Core/Tree/`: the nodes (selector, sequence, condition, action; skill gate, cooldown, seeded chance), ticked on the watch, no allocation after the build.
-- `FightTree.Build(skills)`: today's fight rules and sensor habits as a tree, node for node, every rule still logged by name.
-- The **Fight Tree** window: the followed jet's tree, the running branch lit, the last node changes.
+### Slice 4a — the tree, the exact port, the live window (A27, A28, A33, A34) — DONE 2026-10-30
+- [x] `Core/Tree/BehaviorTree.cs`: selector, sequence, condition, action, and a *step* (acts, then says whether the branch goes on: an early return). Ticked on the watch, nothing allocated after the build; each node keeps its last status and tick for the window. *The skill gate, cooldown and seeded chance move to slice 4b, where the first branch needs them (no abstraction without data).*
+- [x] Two builders, each beside its state (BLUEPRINT A28, corrected): `AviatorSeat.BuildFightTree` (`Core/AviatorSeat.FightTree.cs`, replacing `FightRules`) and `SensorHabits.BuildTree` (replacing `Defend` and `Shoot`), branch for branch, every rule still logged by name.
+- [x] The **Fight Tree** window (Deep Water → RH Aviator → Fight Tree): the selected rule pilot's two trees, else the spectator camera's jet; green ran and succeeded, red ran and failed, grey not reached; its last 12 rule firings.
+- **Result:** `FightTreePortTests` 40 of 40 fights identical to the golden hashes recorded from the pre-port code (25 weapons hot: 5 pairings × 5 seeds, 30 or 8 km, 90 s; 15 weapons safe: 5 pairings × 3 seeds, 8 km, 150 s, added because missiles ended the hot fights before anyone broke or searched). The set fires 20 named rules (break 41, search 43, tail clear 41, vector 25, radar missile 135, iff: ask 151 …), and the test fails if one goes missing; `radar: search` alone never fires, since every jet starts with its radar on. `BehaviorTreeTests` 5/5. Reflection-free run: RH Aviator 53 and Learning 10, none failing. Played in Dogfight Training: Blue 2 and Red 2 (the scene's rule pilots) ticked both trees on the watch; the window open on Blue 2 for 8 s with a clean console (its drawing not seen by eye).
 - **Done when:** node unit tests pass; a recorded set of fights (rookie, line, ace; one versus one and two versus two; 5 seeds each) gives the **same Pilot Inputs on every tick and the same rule log** before and after (a hash per fight); the old `FightTests`, `SensorHabits` tests and the learned pilot's teacher tests pass unchanged; the window seen in Play.
 
 ### Slice 4b — the skill gates, the rookie's flaws, missile defence and fire discipline (A26, A30, A31)
@@ -269,3 +270,4 @@ Every slice ends with the Aviator and Air Wing suites green, its new tests named
 - **2026-10-30** — A23 (SIX's ask after the sensors run): brains loaded per jet in play (the Fighter Brains window: live, Load…, keep after Play), every jet's stats (P, and a block for the followed jet), and the price ledger (game credits, `PriceListSO`) on the scoreboard. `LearnedPilotTests` +3 (the price ledger); RH Aviator 47 and Learning 10 pass. Played in the Editor: jet 1 handed from the learned pilot to an ace and back, the red squadron to line pilots, a version 2 brain refused on a version 3 jet, the 20M-step `sensors-bc` brain flown live on red 9 (radar in track-while-scan, 7 IFF questions in 8 s). The window's buttons were driven through their methods, not clicked.
 - **2026-10-30** — A24, the four fixes for the `sensors-bc` collapse: `fighter_bc_held.yaml` (beta 1e-3 fading, cloning 0.25 never fading, all checkpoints kept), deterministic inference on every jet, credits and the learned jets' tallies in `[WHO-SHOT-WHOM]`, player logs kept across restarts. Smoke of 150,000 steps: entropy held near 3 (sensors-bc's climbed to 9.7), stick noise 0.93 and falling. Next: the 20M-step run `sensors-bc-held`, on SIX's go.
 - **2026-10-30** — The fight tree planned (BLUEPRINT §5.6, A25–A36, SIX's twelve picks): slices 4a–4e; slice 3f folded into 4c. The training run `sensors-bc-held` stopped at SIX's word at 140,000 steps (10:14); training waits for slice 4e. Nothing built.
+- **2026-10-30** — Slice 4a: the behavior tree, the fight rules and sensor habits ported into it and proven identical over 40 seeded fights, the Fight Tree window. RH Aviator 53, Learning 10.

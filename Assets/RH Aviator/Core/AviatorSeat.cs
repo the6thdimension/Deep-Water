@@ -22,7 +22,7 @@ namespace DeepWater.Aviator.Core
     /// or hold what it has (<see cref="HoldCourse"/>). Each order is logged as a rule. When the player hands the jet
     /// back after flying it (W42), the seat picks up where the jet is, not where it left it.</para>
     /// </summary>
-    public sealed class AviatorSeat : ISeat, ISeatStatus
+    public sealed partial class AviatorSeat : ISeat, ISeatStatus
     {
         public const int WatchHz = 4;
 
@@ -68,6 +68,7 @@ namespace DeepWater.Aviator.Core
             Mode = PilotMode.HoldCourse;
             _holdAltitudeM = float.NaN;   // taken from the jet on the first watch
             _status = "HOLD COURSE";
+            _fightTree = BuildFightTree();
         }
 
         /// <param name="route">The pilot's own copy of the route (it is watched as the pilot flies it).</param>
@@ -334,7 +335,7 @@ namespace DeepWater.Aviator.Core
             if (Mode == PilotMode.Navigate) NavigateRules(tick, id, s);
             if (Mode == PilotMode.Join || Mode == PilotMode.Fingertip) FormationRules(tick, id, s);
             if (Mode == PilotMode.Home) PatternRules(tick, id, s);
-            if (_fight != null && (Mode == PilotMode.Fight || Mode == PilotMode.Join || Mode == PilotMode.Fingertip)) FightRules(tick, id, s);
+            if (_fight != null && (Mode == PilotMode.Fight || Mode == PilotMode.Join || Mode == PilotMode.Fingertip)) RunFightTree(tick, id, s);
 
             switch (Mode)
             {
@@ -419,163 +420,6 @@ namespace DeepWater.Aviator.Core
                 _avoidHeight = s.Position.y + Mathf.Sign(avoidDy) * 3f * _pilot.JoinAvoidM;
             }
             else _joinAvoiding = false;
-        }
-
-        /// <summary>
-        /// The fight's rules, on the watch (W38, W52, W53): a first sight of an enemy is a "tally"; a seen enemy close in
-        /// the pilot's own rear quarter makes it "break"; red goes for the jet the player flies, by a "vector" (a
-        /// controller's steer, from the truth) until it sees it; blue goes for the nearest red it sees, and with none
-        /// inside its clear range it is "clear" and rejoins the player's wing.
-        /// </summary>
-        void FightRules(long tick, int id, in AirframeState s)
-        {
-            Side mine = _fight.SideOf(id);
-            int hunted = _fight.Hunted();
-            // Tally: first sight of each enemy (the contact is as old as the delay).
-            int nearest = 0, threatId = 0;
-            float nearestD = float.MaxValue, threatD = float.MaxValue;
-            IReadOnlyList<int> known = _eyes.Known;
-            for (int i = 0; i < known.Count; i++)
-            {
-                int other = known[i];
-                if (!_fight.Enemies(id, other) || !_eyes.TryGet(other, out Contact c)) continue;
-                if (!_tallied.Contains(other))
-                {
-                    _tallied.Add(other);
-                    Fire(tick, id, "tally", Mode, $"aircraft {other} seen at {(c.Seen.Position - s.Position).magnitude:F0} m (as of {(tick - c.SeenTick) * Math.Round(_core.Clock.TickSeconds, 6):F2} s ago)");
-                }
-                Vector3 guess = c.GuessPosition(tick, _core.Clock.TickSeconds);
-                float d = (guess - s.Position).magnitude;
-                if (d < nearestD) { nearestD = d; nearest = other; }
-                Vector3 tail = -(s.Velocity.sqrMagnitude > 1f ? s.Velocity.normalized : s.Attitude * Vector3.forward);
-                // A threat: close, in the pilot's rear quarter, and pointing at it (slice 3d: a jet just past a head-on
-                // pass, flying away, made the ace break for nothing).
-                bool pointing = Vector3.Angle(c.Seen.Velocity, s.Position - guess) < _pilot.ThreatConeDeg;
-                if (c.InView && pointing && d < _pilot.ThreatRangeM && Vector3.Angle(guess - s.Position, tail) < _pilot.ThreatConeDeg && d < threatD)
-                {
-                    threatD = d;
-                    threatId = other;
-                }
-            }
-
-            // Blue, out of the fight: back to the player's wing; and back in when an enemy is seen inside the clear range.
-            if (mine == Side.Blue && hunted != 0 && hunted != id)
-            {
-                if (Mode == PilotMode.Fight && (nearest == 0 || nearestD > _pilot.ClearRangeM))
-                {
-                    _leaderId = hunted;
-                    _targetId = 0;
-                    _fight.Claim(id, 0);
-                    Fire(tick, id, "clear", PilotMode.Join, $"no enemy inside {_pilot.ClearRangeM:F0} m; rejoining aircraft {hunted}");
-                    return;
-                }
-                if ((Mode == PilotMode.Join || Mode == PilotMode.Fingertip) && nearest != 0 && nearestD <= _pilot.ClearRangeM)
-                    Fire(tick, id, "engage", PilotMode.Fight, $"aircraft {nearest} at {nearestD:F0} m");
-            }
-            if (Mode != PilotMode.Fight) return;
-
-            // A target that has left the fight is no target (slice 3d: the player's jet kept chasing a red jet after red
-            // left, and its wingmen could not rejoin a leader still turning hard).
-            if (_targetId != 0 && !_fight.Enemies(id, _targetId))
-            {
-                Fire(tick, id, "target gone", PilotMode.Fight, $"aircraft {_targetId} is out of the fight");
-                _targetId = 0;
-                _fight.Claim(id, 0);
-                _hasLastSeen = false;
-            }
-
-            // The target: red hunts the player's jet (W52); everyone else the nearest enemy it knows that no teammate is
-            // already after, else the nearest (slice 3d smoke: three blue jets all chose the one nearest red and sat in
-            // its cone for three minutes while the other three hunted the player unopposed).
-            int want = mine == Side.Red && hunted != 0 && _fight.Enemies(id, hunted) ? hunted : nearest;
-            if (!(mine == Side.Red && hunted != 0))
-            {
-                int free = 0;
-                float freeD = float.MaxValue;
-                for (int i = 0; i < known.Count; i++)
-                {
-                    int other = known[i];
-                    if (!_fight.Enemies(id, other) || _fight.ClaimedBy(other, mine, id) > 0 || !_eyes.TryGet(other, out Contact c)) continue;
-                    float d = (c.GuessPosition(tick, _core.Clock.TickSeconds) - s.Position).magnitude;
-                    if (d < freeD) { freeD = d; free = other; }
-                }
-                if (free != 0) want = free;
-            }
-            if (want != _targetId && want != 0)
-            {
-                _targetId = want;
-                _fight.Claim(id, want);
-                Fire(tick, id, "engage", PilotMode.Fight, $"after aircraft {want}");
-            }
-
-            // A threat on its tail first: break.
-            bool breaking = threatId != 0;
-            if (breaking != _breaking)
-            {
-                _breaking = breaking;
-                Fire(tick, id, breaking ? "break" : "tail clear", PilotMode.Fight, breaking ? $"aircraft {threatId} at {threatD:F0} m in its rear quarter" : "no threat behind");
-            }
-            // Collision avoidance: any jet predicted to pass too close, soon, from the picture (a near miss is seen).
-            if (Avoid(s, id, _pilot.AvoidM, out float avoidDy, out int avoidId))
-            {
-                if (!_avoiding) { _avoiding = true; Fire(tick, id, "avoid", PilotMode.Fight, $"aircraft {avoidId} predicted inside {_pilot.AvoidM:F0} m; {(avoidDy > 0f ? "climbing" : "diving")} clear"); }
-                _avoidHeight = s.Position.y + Mathf.Sign(avoidDy) * 3f * _pilot.AvoidM;
-            }
-            else _avoiding = false;
-
-            if (_breaking && _eyes.TryGet(threatId, out Contact threat))
-            {
-                _request = Fighting.Plan(s, threat, threat, tick, _core.Clock.TickSeconds, _core.Surface.HeightAt(s.Position.x, s.Position.z), _pilot, out _pursuit);
-                return;
-            }
-
-            // Red with no sight of its quarry: a vector from the truth (a controller's steer), labelled in the log.
-            bool seen = _targetId != 0 && _eyes.TryGet(_targetId, out _);
-            bool vector = mine == Side.Red && hunted != 0 && !seen;
-            if (vector != _vectored)
-            {
-                _vectored = vector;
-                if (vector) Fire(tick, id, "vector", PilotMode.Fight, $"no sight of aircraft {hunted}; steering on a controller's vector (the truth)");
-            }
-            if (_vectored)
-            {
-                AirframeState truth = _core.Find(hunted).State;
-                _request = new FlightPathRequest
-                {
-                    AimWorld = truth.Position,
-                    AltitudeM = Mathf.Max(truth.Position.y, _core.Surface.HeightAt(s.Position.x, s.Position.z) + _pilot.FightFloorM),
-                    SpeedMps = _pilot.CornerKt * (float)Units.KnotToMetrePerSecond,
-                };
-                return;
-            }
-            if (seen && _eyes.TryGet(_targetId, out Contact last)) { _lastSeen = last.GuessPosition(tick, _core.Clock.TickSeconds); _hasLastSeen = true; }
-            if ((_targetId == 0 || !seen) && _hasLastSeen)
-            {
-                // Lost it: turn back to where it was last seen and look there (slice 3d: a rookie that forgot a jet
-                // behind it after the pass flew straight on at 416 kt for the rest of the fight).
-                if (!_searching) { _searching = true; Fire(tick, id, "search", PilotMode.Fight, $"lost sight; turning to where it was last seen, {(_lastSeen - s.Position).magnitude:F0} m"); }
-                _request = new FlightPathRequest
-                {
-                    AimWorld = _lastSeen,
-                    AltitudeM = Mathf.Max(_lastSeen.y, _core.Surface.HeightAt(s.Position.x, s.Position.z) + _pilot.FightFloorM),
-                    SpeedMps = _pilot.CornerKt * (float)Units.KnotToMetrePerSecond,
-                };
-                if ((_lastSeen - s.Position).magnitude < 1000f) _hasLastSeen = false;   // nothing there: hold and look
-                return;
-            }
-            _searching = false;
-            if (_targetId == 0 || !seen)
-            {
-                // Nothing to fight yet: hold what it has, looking.
-                if (float.IsNaN(_holdAltitudeM)) { _holdAltitudeM = s.Position.y; _holdMps = s.Velocity.magnitude; }
-                Vector3 ahead = new Vector3(s.Velocity.x, 0f, s.Velocity.z);
-                _request = new FlightPathRequest
-                {
-                    AimWorld = s.Position + (ahead.sqrMagnitude > 1f ? ahead.normalized : Vector3.forward) * 10000f,
-                    AltitudeM = _holdAltitudeM,
-                    SpeedMps = _holdMps,
-                };
-            }
         }
 
         readonly HashSet<int> _tallied = new HashSet<int>();

@@ -101,6 +101,20 @@ namespace DeepWater.AirWing.Core.Radar
 
         public bool TryTrack(int trackId, out RadarTrack track) => _file.TryGet(trackId, out track);
 
+        /// <summary>
+        /// Where the locked track says its target is at <paramref name="timeS"/>, and how fast it moves (W68: what a radar
+        /// missile flies on before it goes active). False without a lock, or before the track has a velocity.
+        /// </summary>
+        public bool TryLockEstimate(double timeS, out Vector3 position, out Vector3 velocity)
+        {
+            position = velocity = Vector3.zero;
+            if (Mode != RadarMode.SingleTarget || !_file.TryGet(LockedTrackId, out RadarTrack t) || !t.HasVelocity) return false;
+            Plot at = t.PredictAt(timeS);
+            position = new Vector3((float)at.X, (float)at.Y, (float)at.Z);
+            velocity = new Vector3((float)t.VelocityX, (float)t.VelocityY, (float)t.VelocityZ);
+            return true;
+        }
+
         void Clear()
         {
             _file = new TrackFile(_fileSettings);
@@ -158,7 +172,7 @@ namespace DeepWater.AirWing.Core.Radar
                 if (o.Id == AircraftId || o.State.Status != FlightStatus.Flying) continue;
                 if (!JetRadarLook.InVolume(volume, self.State.Position, self.State.Attitude, o.State.Position, out float range)) continue;
                 if (range > RadarEquation.HorizonM(myHeight, HeightAbove(o.State.Position, surface))) continue;
-                _paintsNow.Add(new RadarPaint(AircraftId, o.Id, PaintKind.Search));   // the beam crossed it, seen or not
+                _paintsNow.Add(new RadarPaint(AircraftId, o.Id, PaintKind.Search, self.State.Position));   // the beam crossed it, seen or not
                 if (!o.Profile.RadarSignature.IsSet) continue;
                 JetLookResult look = LookAt(self, o, 0.0, surface, seaGamma, myHeight, draws);
                 if (!look.Detected) continue;
@@ -240,7 +254,7 @@ namespace DeepWater.AirWing.Core.Radar
                 && JetRadarLook.InGimbal(Profile, self.State.Position, self.State.Attitude, target.State.Position)
                 && (target.State.Position - self.State.Position).magnitude <= RadarEquation.HorizonM(myHeight, HeightAbove(target.State.Position, surface)))
             {
-                _paintsNow.Add(new RadarPaint(AircraftId, target.Id, PaintKind.Track));
+                _paintsNow.Add(new RadarPaint(AircraftId, target.Id, PaintKind.Track, self.State.Position));
                 JetLookResult look = LookAt(self, target, Profile.SingleTargetGainDb, surface, seaGamma, myHeight, draws);
                 if (look.Detected) { _plots.Add(look.Plot); _plotOwners.Add(target.Id); }
             }

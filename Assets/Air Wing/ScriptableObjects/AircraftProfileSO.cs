@@ -183,6 +183,12 @@ namespace DeepWater.AirWing.ScriptableObjects
         [Tooltip("The bore line, body frame.")]
         public Vector3 gunBoreBody = Vector3.forward;
 
+        [Header("Radar missile (W68, SENSORS-CONCEPT J7, J18; AUTHORED; empty name = none; carried only with the heat-seeker)")]
+        [Tooltip("The active radar missile: Seeker must be ActiveRadar; launched on the radar's single-target track.")]
+        public DeepWater.AirWing.Core.Missiles.MissileProfile radarMissile;
+        [Tooltip("Its pylons, body frame, m; one missile each, fired in this order.")]
+        public Vector3[] radarMissilePylonsM = new Vector3[0];
+
         [Header("Combat (Gunnery K5; abstract)")]
         [Tooltip("Hit points: each round that hits takes one. 0 = rounds pass through it.")]
         public float hitPoints;
@@ -412,6 +418,8 @@ namespace DeepWater.AirWing.ScriptableObjects
                         LaunchIntervalS = missileLaunchIntervalS,
                     },
                     PylonsM = (Vector3[])missilePylonsM.Clone(),
+                    RadarMissile = radarMissile,
+                    RadarPylonsM = (Vector3[])(radarMissilePylonsM ?? new Vector3[0]).Clone(),
                 };
             }
             if (!string.IsNullOrEmpty(radarName))

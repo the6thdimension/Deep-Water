@@ -1,4 +1,4 @@
-> **THEORETICAL; SLICES 1–2 BUILT 2026-10-29/30, the rest not built.** Written 2026-10-29 from SIX's 16 answers in four rounds (J1–J16). SIX:
+> **THEORETICAL; SLICES 1–3 BUILT 2026-10-29/30, the rest not built.** Written 2026-10-29 from SIX's 16 answers in four rounds (J1–J16). SIX:
 > "can you give my jets iff like dcs world. and the two radar tracking modes. I want the jets to learn when they are being
 > track and have that threat awareness. i want them to have search modes. I want them to be vision limited when something is
 > too far to see. I want 2 of the planes missiles to be radar guided. i want planes to also have counter measures".
@@ -110,7 +110,7 @@ BLUEPRINT standing constraint 8).
 |---|---|---|
 | 1 | **Radar, search modes and tracks** (J1, J2, J6, J16) in Air Wing's core | EditMode tests: detection falls with range and with low flight over the sea; track-while-scan holds several tracks, single-target track one; the dogfight mode locks the first contact ahead; same seed, same tracks. **Built 2026-10-29 (Air Wing W66): `RadarTests` 11/11** |
 | 2 | **IFF and the warning receiver** (J3, J5) | Tests: a friend usually answers and its track reads *friend*; an enemy stays *unknown*; a jet painted in search, track and missile guidance hears each, with the right bearing **Built 2026-10-29 (Air Wing W67): `IffAndWarningTests` 8/8** |
-| 3 | **The radar missile** (J7, J18) | Tests: it flies on the shooter's track, goes active near the target, the target hears "missile"; a lost track before going active loses it |
+| 3 | **The radar missile** (J7, J18) | Tests: it flies on the shooter's track, goes active near the target, the target hears "missile"; a lost track before going active loses it **Built 2026-10-29 (Air Wing W68): `RadarMissileTests` 7/7** |
 | 4 | **Chaff and flares** (J4) | Tests: each release breaks the right missile's lock at its set chance over many seeded draws; counts run out |
 | 5 | **Spotting by size** (J8) | Tests: the chance falls with distance and nose-on aspect; the rule pilots' fight tests still pass |
 | 6 | **The rule pilots and the stand-in use it** (J9) | Headless fights: the ace interrogates before firing at an unknown, drops chaff or flares on a warning; friendly radar-missile launches by rule pilots are zero |
@@ -147,6 +147,7 @@ BLUEPRINT standing constraint 8).
 - **Behavioural cloning:** a brain learning by copying recorded actions before it learns by trial.
 
 ## Change log
+- **2026-10-29** — Slice 3 built (Air Wing W68): the active radar game missile (`MissileSeeker.ActiveRadar`, `MissileMount.RadarMissile`, `PilotInputs.RadarPickle`, `JetRadar.TryLockEstimate`). J18 at the leaning: two heat-seekers outboard, two radar missiles inboard. Measured: launched at 18 km, active at 16.3 s, burst at 31.6 s, a kill; the target hears only the shooter's track before active, "missile" after.
 - **2026-10-29** — Slice 2 built (Air Wing W67): IFF (`IffProfile`, `TrackIdentity`, `Aircraft.IffCode`, `FlightCore.SetIffCode`, `PilotSwitches.Interrogate`) and the warning receiver (`WarningReceiver`, `RadarPaint`, `PaintKind`, `WarningContact`). RH Aviator gives each side its own code where jets join a fight. Measured: 286 answers to 300 challenges (95.3 %, the authored 0.95); a jet 20 km ahead hears the search dead ahead at 0°/−3° (the −3° is its angle of attack). SIX, mid-slice: "keep rolling through till all the slices are done, then do an overnight training run"; the two open questions are taken at the leaning (J18 2 + 2; 30 chaff and 30 flares).
 - **2026-10-29** — Slice 1 built (Air Wing W66): `Core/Radar` (`RadarProfile`, `JetRadarLook`, `JetRadar`), the radar stage in `FlightCore` after the arena, `PilotInputs.Radar` and `RadarTrack`, the F/A-18E's generic radar and signature (`RadarData`; peak power solved to 16,856 W). Measured nose-on Pd per look: 0.995, 0.931, 0.700, 0.344, 0.096 at 10–50 km; at 20 km over a Beaufort 4 sea a jet at 60 m drops from 0.928 to 0.297 (clutter improvement 30 dB, the 30 % lean). The jets' senses are unchanged (version 2): the brain does not see the radar until slice 7.
 - **2026-10-29** — Written from SIX's 16 answers (J1–J16; J11 not the leaning; J4 reverses 2026-10-27); J17–J20 proposed. Nothing built.

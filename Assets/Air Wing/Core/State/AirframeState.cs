@@ -77,6 +77,8 @@ namespace DeepWater.AirWing.Core.State
         public int Missiles;
         /// <summary>The aircraft the missile seeker is on (0: none), and for how many ticks; locked once that reaches the lock time.</summary>
         public int LockTargetId, LockTicks;
+        /// <summary>Active radar missiles left on their pylons (W68).</summary>
+        public int RadarMissiles;
         /// <summary>Ticks until the next launch may go (the launch interval).</summary>
         public int MissileCooldownTicks;
     }

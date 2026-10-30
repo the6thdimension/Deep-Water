@@ -55,6 +55,11 @@ namespace DeepWater.AirWing.Core.Inputs
         public bool Trigger;
         /// <summary>The missile pickle, held (W65): with a lock, a missile goes, then one each launch interval while held.</summary>
         public bool Pickle;
+        /// <summary>
+        /// The radar missile's pickle, held (W68, SENSORS-CONCEPT J7): with the radar in single-target track on a jet inside
+        /// the radar missile's launch cone and range, one goes, then one each launch interval while held.
+        /// </summary>
+        public bool RadarPickle;
         /// <summary>The radar command this tick (J2, J6); None leaves the radar as it is.</summary>
         public RadarCommand Radar;
         /// <summary>The track a <see cref="RadarCommand.Lock"/> names (the radar's own track id).</summary>
@@ -82,6 +87,7 @@ namespace DeepWater.AirWing.Core.Inputs
                 Brakes = Brakes,
                 Trigger = Trigger,
                 Pickle = Pickle,
+                RadarPickle = RadarPickle,
                 Radar = Radar,
                 RadarTrack = RadarTrack,
                 Switches = Switches,
@@ -98,7 +104,7 @@ namespace DeepWater.AirWing.Core.Inputs
         // Exact comparison on purpose: the input log and replay compare bit for bit (W28).
         public bool Equals(PilotInputs o) =>
             StickPitch.Equals(o.StickPitch) && StickRoll.Equals(o.StickRoll) && Pedals.Equals(o.Pedals) &&
-            Throttle.Equals(o.Throttle) && Afterburner == o.Afterburner && Brakes == o.Brakes && Trigger == o.Trigger && Pickle == o.Pickle &&
+            Throttle.Equals(o.Throttle) && Afterburner == o.Afterburner && Brakes == o.Brakes && Trigger == o.Trigger && Pickle == o.Pickle && RadarPickle == o.RadarPickle &&
             Radar == o.Radar && RadarTrack == o.RadarTrack && Switches == o.Switches;
 
         public override bool Equals(object obj) => obj is PilotInputs o && Equals(o);
@@ -115,6 +121,7 @@ namespace DeepWater.AirWing.Core.Inputs
                 h = h * 31 + (Brakes ? 1 : 0);
                 h = h * 31 + (Trigger ? 1 : 0);
                 h = h * 31 + (Pickle ? 1 : 0);
+                h = h * 31 + (RadarPickle ? 1 : 0);
                 h = h * 31 + (int)Radar;
                 h = h * 31 + RadarTrack;
                 return h * 31 + (int)Switches;
@@ -122,6 +129,6 @@ namespace DeepWater.AirWing.Core.Inputs
         }
 
         public override string ToString() => FormattableString.Invariant(
-            $"pitch {StickPitch:+0.00;-0.00} roll {StickRoll:+0.00;-0.00} pedals {Pedals:+0.00;-0.00} throttle {Throttle:0.00}{(Afterburner ? " AB" : "")}{(Brakes ? " BRAKES" : "")}{(Trigger ? " GUN" : "")}{(Pickle ? " MSL" : "")}{(Radar != RadarCommand.None ? $" RADAR {Radar} {RadarTrack}" : "")} [{Switches}]");
+            $"pitch {StickPitch:+0.00;-0.00} roll {StickRoll:+0.00;-0.00} pedals {Pedals:+0.00;-0.00} throttle {Throttle:0.00}{(Afterburner ? " AB" : "")}{(Brakes ? " BRAKES" : "")}{(Trigger ? " GUN" : "")}{(Pickle ? " MSL" : "")}{(RadarPickle ? " RDR-MSL" : "")}{(Radar != RadarCommand.None ? $" RADAR {Radar} {RadarTrack}" : "")} [{Switches}]");
     }
 }

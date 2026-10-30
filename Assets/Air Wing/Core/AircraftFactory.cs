@@ -159,6 +159,7 @@ namespace DeepWater.AirWing.Core
                 Rounds = profile.Gun.IsSet ? profile.Gun.Gun.RoundsCarried : 0,
                 HitPoints = profile.Combat.HitPoints,
                 Missiles = profile.Missiles.Carried,
+                RadarMissiles = profile.Missiles.RadarCarried,
             };
         }
     }

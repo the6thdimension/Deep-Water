@@ -4,13 +4,31 @@ using UnityEngine;
 
 namespace DeepWater.AirWing.Core.Missiles
 {
+    /// <summary>How a game missile finds its target (W65, W68).</summary>
+    public enum MissileSeeker : byte
+    {
+        /// <summary>Its own heat seeker from launch (W65): the jet's lock is its seeker's.</summary>
+        Heat = 0,
+        /// <summary>
+        /// Active radar (SENSORS-CONCEPT J7): launched on the shooter's single-target track, it flies on that track's
+        /// estimate until it is <see cref="MissileProfile.ActiveRangeM"/> from it, then its own radar takes over.
+        /// </summary>
+        ActiveRadar = 1,
+    }
+
     /// <summary>
     /// A game missile (Air Wing W65, SIX 2026-10-29: "make game missile sufficient for video game air to air"): a generic
-    /// short-range heat-seeker archetype with arcade numbers, every one AUTHORED. Not any real missile; no real data.
+    /// archetype with arcade numbers, every one AUTHORED: the short-range heat-seeker (W65) or the medium-range active radar
+    /// missile (W68). Not any real missile; no real data.
     /// </summary>
+    [Serializable]
     public struct MissileProfile
     {
         public string Name;
+        /// <summary>How it finds its target.</summary>
+        public MissileSeeker Seeker;
+        /// <summary>An active radar missile: its own radar takes over this far from the target's estimated position, m.</summary>
+        public float ActiveRangeM;
         /// <summary>The motor: this acceleration along the missile's path for <see cref="BurnS"/> seconds, m/s².</summary>
         public float BoostAccelMps2, BurnS;
         /// <summary>Drag as a deceleration k·v², 1/m: after the burn the missile coasts and slows.</summary>
@@ -47,6 +65,7 @@ namespace DeepWater.AirWing.Core.Missiles
             if (!(LockMinM >= 0f && LockMinM < LockMaxM)) throw new ArgumentException("missile: lock ranges need 0 ≤ min < max");
             if (!(LockTimeS >= 0f && ArmS >= 0f && ArmS < LifeS)) throw new ArgumentException("missile: the lock time and arming are zero or more, arming inside the life");
             if (!(KillChance >= 0f && KillChance <= 1f && DamageHp >= 0f)) throw new ArgumentException("missile: kill chance 0 … 1, damage zero or more");
+            if (Seeker == MissileSeeker.ActiveRadar && !(ActiveRangeM > 0f)) throw new ArgumentException("missile: an active radar missile needs its active range");
         }
 
         static void Positive(float v, string name)
@@ -55,20 +74,35 @@ namespace DeepWater.AirWing.Core.Missiles
         }
     }
 
-    /// <summary>The missiles an aircraft carries (W65): one profile, and its pylons in the body frame (one missile each).</summary>
+    /// <summary>
+    /// The missiles an aircraft carries (W65, W68): the heat-seeker and its pylons, and the radar missile and its pylons, in
+    /// the body frame, one missile each. Either may be absent.
+    /// </summary>
     public struct MissileMount
     {
         public MissileProfile Missile;
         /// <summary>Pylon positions about the centre of mass, body frame (Unity axes), m. Fired in this order.</summary>
         public Vector3[] PylonsM;
+        /// <summary>The active radar missile (W68, SENSORS-CONCEPT J7, J18); unset for a jet that carries none.</summary>
+        public MissileProfile RadarMissile;
+        public Vector3[] RadarPylonsM;
 
         public bool IsSet => Missile.IsSet && PylonsM != null && PylonsM.Length > 0;
         public int Carried => IsSet ? PylonsM.Length : 0;
+        public bool HasRadarMissiles => RadarMissile.IsSet && RadarPylonsM != null && RadarPylonsM.Length > 0;
+        public int RadarCarried => HasRadarMissiles ? RadarPylonsM.Length : 0;
 
         public void Validate()
         {
             Missile.Validate();
             if (PylonsM == null || PylonsM.Length == 0) throw new ArgumentException("missile mount: no pylons");
+            if (Missile.Seeker != MissileSeeker.Heat) throw new ArgumentException("missile mount: the pickle's missile is the heat-seeker");
+            if (RadarMissile.IsSet)
+            {
+                RadarMissile.Validate();
+                if (RadarMissile.Seeker != MissileSeeker.ActiveRadar) throw new ArgumentException("missile mount: the radar missile must be active radar");
+                if (RadarPylonsM == null || RadarPylonsM.Length == 0) throw new ArgumentException("missile mount: a radar missile with no pylons");
+            }
         }
     }
 
@@ -84,9 +118,13 @@ namespace DeepWater.AirWing.Core.Missiles
         /// <summary>Its seeker has lost the target: it flies on, unguided and unfused, until its life ends.</summary>
         public bool Lost;
         public string Name;
+        /// <summary>An active radar missile (W68), and whether its own radar has taken over.</summary>
+        public bool Radar, Active;
+        /// <summary>The shooter's reset count at launch: a radar missile flying on the shooter's track dies with it.</summary>
+        public int ShooterResets;
     }
 
-    public enum MissileEventKind : byte { Launched = 0, Burst = 1, Lost = 2, Expired = 3 }
+    public enum MissileEventKind : byte { Launched = 0, Burst = 1, Lost = 2, Expired = 3, Active = 4 }
 
     /// <summary>Something a missile did, on a tick.</summary>
     public readonly struct MissileEvent
@@ -114,6 +152,7 @@ namespace DeepWater.AirWing.Core.Missiles
             MissileEventKind.Launched => $"tick {Tick} · {ShooterId} launched missile {MissileId} at {TargetId}",
             MissileEventKind.Burst => $"tick {Tick} · missile {MissileId} ({ShooterId}) burst at {TargetId}{(Killed ? ", a kill" : "")}",
             MissileEventKind.Lost => $"tick {Tick} · missile {MissileId} ({ShooterId}) lost {TargetId}",
+            MissileEventKind.Active => $"tick {Tick} · missile {MissileId} ({ShooterId}) went active on {TargetId}",
             _ => $"tick {Tick} · missile {MissileId} ({ShooterId}) expired",
         };
     }

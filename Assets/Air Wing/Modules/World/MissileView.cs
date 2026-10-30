@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using DeepWater.AirWing.Core;
@@ -40,16 +41,18 @@ namespace DeepWater.AirWing.Modules.World
             if (_views.Count != runner.Views.Count)
                 foreach (AircraftView v in runner.Views) _views[v.AircraftId] = v;
 
-            // Stores on the pylons: the first (carried − left) pylons have fired.
+            // Stores on the pylons: the heat-seekers' first (carried − left) pylons have fired, then the radar missiles' (W68).
             foreach (AircraftView v in runner.Views)
             {
                 if (v.Aircraft == null || v.Visuals == null || v.Visuals.missileModel == null || !v.Aircraft.Profile.Missiles.IsSet) continue;
                 if (!_stores.TryGetValue(v.AircraftId, out GameObject[] stores)) _stores[v.AircraftId] = stores = Hang(v);
-                int fired = v.Aircraft.Profile.Missiles.Carried - v.Aircraft.State.Missiles;
+                Core.Missiles.MissileMount mount = v.Aircraft.Profile.Missiles;
+                int fired = mount.Carried - v.Aircraft.State.Missiles;
+                int radarFired = mount.RadarCarried - v.Aircraft.State.RadarMissiles;
                 bool flying = v.Aircraft.State.Status == FlightStatus.Flying || v.Aircraft.State.Status == FlightStatus.Killed;
                 for (int i = 0; i < stores.Length; i++)
                 {
-                    bool show = flying && i >= fired;
+                    bool show = flying && (i < mount.Carried ? i >= fired : i - mount.Carried >= radarFired);
                     if (stores[i].activeSelf != show) stores[i].SetActive(show);
                 }
             }
@@ -102,10 +105,11 @@ namespace DeepWater.AirWing.Modules.World
             }
         }
 
-        /// <summary>One store per pylon, a child of the jet's view, so it flies with it.</summary>
+        /// <summary>One store per pylon (the heat-seekers', then the radar missiles'), a child of the jet's view, so it flies with it.</summary>
         GameObject[] Hang(AircraftView v)
         {
-            Vector3[] pylons = v.Aircraft.Profile.Missiles.PylonsM;
+            Core.Missiles.MissileMount mount = v.Aircraft.Profile.Missiles;
+            Vector3[] pylons = mount.HasRadarMissiles ? mount.PylonsM.Concat(mount.RadarPylonsM).ToArray() : mount.PylonsM;
             var stores = new GameObject[pylons.Length];
             for (int i = 0; i < pylons.Length; i++)
             {

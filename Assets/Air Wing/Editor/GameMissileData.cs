@@ -23,11 +23,11 @@ namespace DeepWater.AirWing.Editor
             Undo.RecordObject(so, "Apply missile data");
 
             so.missileName = "SR-IR game missile";
-            // Two under each wing, outboard first, alternating sides (AUTHORED off the model; checked in a capture).
+            // The outboard pylon under each wing, alternating sides (AUTHORED off the model; checked in a capture). The
+            // inboard pair carries the radar missiles (SENSORS-CONCEPT J18: 2 + 2; RadarMissileData).
             so.missilePylonsM = new[]
             {
                 new Vector3(-4.2f, -0.45f, -1.8f), new Vector3(4.2f, -0.45f, -1.8f),
-                new Vector3(-2.6f, -0.55f, -1.2f), new Vector3(2.6f, -0.55f, -1.2f),
             };
             so.missileBoostAccelMps2 = 100f;  // AUTHORED: 3 s of motor adds 300 m/s: about 2.5 times a 400 kt jet
             so.missileBurnS = 3f;
@@ -49,8 +49,8 @@ namespace DeepWater.AirWing.Editor
             string paragraph =
                 Marker + "\n" +
                 "missileName 'SR-IR game missile': a generic short-range heat-seeker archetype for a video game (SIX 2026-10-29, Air Wing W65); " +
-                "not any real missile, no real data. All AUTHORED: four pylons, two under each wing at (±4.2, −0.45, −1.8) and " +
-                "(±2.6, −0.55, −1.2) m, off the model; missileBoostAccelMps2 100 for missileBurnS 3 (about 2.5 times a 400 kt jet), " +
+                "not any real missile, no real data. All AUTHORED: two pylons, the outboard one under each wing at (±4.2, −0.45, −1.8) m, " +
+                "off the model (four until 2026-10-29; the inboard pair now carries the radar missiles, SENSORS-CONCEPT J18); missileBoostAccelMps2 100 for missileBurnS 3 (about 2.5 times a 400 kt jet), " +
                 "missileDragPerM 3e-5 (k·v²; a tail chase from 3 km closes inside the life, one from 5 km on a jet running away does not), missileMaxG 30, missileNavGain 4 (proportional navigation, textbook 3–5), missileSeekerConeDeg 45; " +
                 "the lock (SIX's picks): missileLockConeDeg 30, missileLockMinM 500, missileLockMaxM 5000, missileLockTimeS 1; missileArmS 0.5, " +
                 "missileLifeS 20; the hit (SIX's picks): missileLethalRadiusM 15, missileKillChance 0.7, missileDamageHp 6; missileLaunchIntervalS 1.";

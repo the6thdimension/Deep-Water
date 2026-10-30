@@ -40,10 +40,14 @@ namespace DeepWater.AirWing.Tests
             public bool ResetNext;
             /// <summary>Switches held every tick (e.g. Interrogate).</summary>
             public PilotSwitches Hold;
+            /// <summary>The radar missile's pickle, for the next tick only.</summary>
+            public bool FireRadar;
             public SeatKind Kind => SeatKind.Scenario;
             public PilotInputs Issue(long tick, int aircraftId, in AirframeState state)
             {
                 var p = new PilotInputs { Throttle = 0.7f, Radar = Next, RadarTrack = NextTrack, Switches = Hold | (ResetNext ? PilotSwitches.Reset : default) };
+                p.RadarPickle = FireRadar;
+                FireRadar = false;
                 Next = RadarCommand.None;
                 NextTrack = 0;
                 ResetNext = false;

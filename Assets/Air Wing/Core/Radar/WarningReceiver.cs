@@ -10,14 +10,18 @@ namespace DeepWater.AirWing.Core.Radar
     /// <summary>One radar's beam crossing one jet on one tick: who, at whom, and how. The core's truth; a pilot never reads it.</summary>
     public readonly struct RadarPaint
     {
+        /// <summary>The emitting aircraft's id, or minus a radar missile's id (W68).</summary>
         public readonly int EmitterId, TargetId;
         public readonly PaintKind Kind;
+        /// <summary>Where the emitter is this tick.</summary>
+        public readonly Vector3 From;
 
-        public RadarPaint(int emitterId, int targetId, PaintKind kind)
+        public RadarPaint(int emitterId, int targetId, PaintKind kind, Vector3 from)
         {
             EmitterId = emitterId;
             TargetId = targetId;
             Kind = kind;
+            From = from;
         }
     }
 
@@ -79,7 +83,10 @@ namespace DeepWater.AirWing.Core.Radar
         /// <summary>Every radar heard now, strongest threat first.</summary>
         public IReadOnlyList<WarningContact> Contacts => _contacts;
 
-        /// <summary>The radar behind <see cref="Contacts"/>[<paramref name="index"/>]: the core's truth, for tests and logs, not a pilot's.</summary>
+        /// <summary>
+        /// The radar behind <see cref="Contacts"/>[<paramref name="index"/>] (an aircraft id, or minus a missile's id): the
+        /// core's truth, for tests and logs, not a pilot's.
+        /// </summary>
         public int EmitterOf(int index) => _emitters[index];
 
         /// <summary>The strongest threat heard (null when quiet): what a warning tone would sound for.</summary>
@@ -94,10 +101,7 @@ namespace DeepWater.AirWing.Core.Radar
             {
                 RadarPaint p = paints[i];
                 if (p.TargetId != AircraftId) continue;
-                Aircraft emitter = null;
-                for (int k = 0; k < all.Count; k++) if (all[k].Id == p.EmitterId) { emitter = all[k]; break; }
-                if (emitter == null) continue;
-                JetRadarLook.Bearing(self.State.Position, self.State.Attitude, emitter.State.Position, out _, out float az, out float el);
+                JetRadarLook.Bearing(self.State.Position, self.State.Attitude, p.From, out _, out float az, out float el);
                 _heard[p.EmitterId] = new Heard { Tick = tick, Kind = p.Kind, AzimuthDeg = az, ElevationDeg = el };
             }
             Rebuild(tick, tickS);

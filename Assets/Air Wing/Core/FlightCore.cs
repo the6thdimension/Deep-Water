@@ -272,6 +272,9 @@ namespace DeepWater.AirWing.Core
                 r.Step(tick, tickS, _aircraft[i], _issued[i], _aircraft, _surface, RadarWorld, _radarDraws);
                 _paints.AddRange(r.Paints);
             }
+            // Active radar missiles paint their targets (W68, J7): the target hears "missile".
+            foreach (MissileInFlight m in Missiles.Live)
+                if (m.Radar && m.Active && !m.Lost) _paints.Add(new RadarPaint(-m.Id, m.TargetId, PaintKind.Missile, m.Position));
             // The warning receivers hear this tick's paints, after every radar has looked (J3).
             for (int i = 0; i < _aircraft.Count; i++)
                 _receivers[i]?.Step(tick, tickS, _aircraft[i], _aircraft, _paints);
@@ -302,16 +305,45 @@ namespace DeepWater.AirWing.Core
             for (int i = 0; i < live.Count; i++)
             {
                 MissileInFlight m = live[i];
-                MissileProfile p = Find(m.ShooterId).Profile.Missiles.Missile;
+                Aircraft shooter = Find(m.ShooterId);
+                MissileProfile p = m.Radar ? shooter.Profile.Missiles.RadarMissile : shooter.Profile.Missiles.Missile;
                 int ti = IndexOrNone(m.TargetId);
                 Aircraft target = ti >= 0 ? _aircraft[ti] : null;
                 Vector3 tFrom = ti >= 0 ? _picture[ti].State.Position : m.Position, tTo = target != null ? target.State.Position : m.Position;
                 bool trackable = target != null && target.State.Status == FlightStatus.Flying && target.Resets == m.TargetResets;
                 Vector3 from = m.Position;
+
+                // A radar missile not yet active flies on the shooter's track (W68, J7): lost if the shooter goes down,
+                // respawns or drops the lock; active once it is within its active range of where the track says the target is.
+                Vector3 estPos = Vector3.zero, estVel = Vector3.zero;
+                if (m.Radar && !m.Active && !m.Lost)
+                {
+                    JetRadar sr = _radars[IndexOf(m.ShooterId)];
+                    bool held = trackable && shooter.State.Status == FlightStatus.Flying && shooter.Resets == m.ShooterResets
+                                && sr != null && sr.LockedAircraftId == m.TargetId
+                                && sr.TryLockEstimate((tick + 1) * Math.Round(Clock.TickSeconds, 6), out estPos, out estVel);
+                    if (!held)
+                    {
+                        m.Lost = true;
+                        Missiles.Log(new MissileEvent(tick, m.Id, m.ShooterId, m.TargetId, MissileEventKind.Lost, m.Position, false));
+                    }
+                    else if ((estPos - m.Position).sqrMagnitude <= p.ActiveRangeM * p.ActiveRangeM)
+                    {
+                        m.Active = true;
+                        Missiles.Log(new MissileEvent(tick, m.Id, m.ShooterId, m.TargetId, MissileEventKind.Active, m.Position, false));
+                    }
+                }
+
                 for (int k = 0; k < steps; k++)
                 {
                     Vector3 accel = Vector3.zero;
-                    if (!m.Lost)
+                    if (!m.Lost && m.Radar && !m.Active)
+                    {
+                        // On the track's estimate, carried back from the tick's end to this substep.
+                        Vector3 aim = estPos - estVel * (dt * (1f - (k + 1f) / steps));
+                        accel = MissileGuidance.Command(m.Position, m.Velocity, aim, estVel, p.NavGain, p.MaxG);
+                    }
+                    else if (!m.Lost)
                     {
                         Vector3 tPos = Vector3.Lerp(tFrom, tTo, (k + 1f) / steps);
                         if (!trackable || !MissileGuidance.InCone(m.Position, m.Velocity, tPos, p.SeekerConeDeg))
@@ -359,6 +391,18 @@ namespace DeepWater.AirWing.Core
                 ref AirframeState s = ref a.State;
                 MissileMount mount = a.Profile.Missiles;
                 if (s.MissileCooldownTicks > 0) s.MissileCooldownTicks--;
+                // The radar missile (W68): on the radar's single-target track, inside its launch cone and range.
+                if (mount.HasRadarMissiles && s.Status == FlightStatus.Flying && s.RadarMissiles > 0 && s.MissileCooldownTicks == 0
+                    && _issued[i].RadarPickle && !Protected(a.Id, tick) && _radars[i] != null && _radars[i].Mode == RadarMode.SingleTarget
+                    && Lockable(i, IndexOrNone(_radars[i].LockedAircraftId), mount.RadarMissile, tick))
+                {
+                    int radarPylon = mount.RadarCarried - s.RadarMissiles;
+                    Aircraft tracked = Find(_radars[i].LockedAircraftId);
+                    Missiles.Launch(tick, a.Id, tracked.Id, tracked.Resets, mount.RadarMissile.Name, s.Position + s.Attitude * mount.RadarPylonsM[radarPylon], s.Velocity,
+                                    radar: true, shooterResets: a.Resets);
+                    s.RadarMissiles--;
+                    s.MissileCooldownTicks = Mathf.Max(1, Mathf.RoundToInt(mount.RadarMissile.LaunchIntervalS / dt));
+                }
                 if (!mount.IsSet || s.Status != FlightStatus.Flying || s.Missiles <= 0)
                 {
                     s.LockTargetId = 0;

@@ -51,12 +51,12 @@ namespace DeepWater.AirWing.Tests
         }
 
         [Test]
-        public void TheF18E_CarriesFourGameMissiles_AndStartsWithThemLoaded()
+        public void TheF18E_CarriesTwoHeatSeekers_AndStartsWithThemLoaded()
         {
             AircraftProfile e = E();
             Assert.IsTrue(e.Missiles.IsSet);
-            Assert.AreEqual(4, e.Missiles.Carried, "SIX's pick: four, two under each wing");
-            Assert.AreEqual(4, Level(e, new Vector3(0f, 3000f, 0f), 0f).Missiles, "a jet starts loaded (and so respawns loaded: the arena restores its start)");
+            Assert.AreEqual(2, e.Missiles.Carried, "SENSORS-CONCEPT J18: two heat-seekers outboard (four until the radar missiles took the inboard pair)");
+            Assert.AreEqual(2, Level(e, new Vector3(0f, 3000f, 0f), 0f).Missiles, "a jet starts loaded (and so respawns loaded: the arena restores its start)");
             MissileProfile m = e.Missiles.Missile;
             Assert.AreEqual(30f, m.LockConeDeg); Assert.AreEqual(500f, m.LockMinM); Assert.AreEqual(5000f, m.LockMaxM); Assert.AreEqual(1f, m.LockTimeS);
             Assert.AreEqual(15f, m.LethalRadiusM); Assert.AreEqual(0.7f, m.KillChance); Assert.AreEqual(6f, m.DamageHp); Assert.AreEqual(20f, m.LifeS);
@@ -96,10 +96,10 @@ namespace DeepWater.AirWing.Tests
             for (int i = 0; i < 25 * 50; i++) core.Step();
             var launches = core.Missiles.Events.Where(e => e.Kind == MissileEventKind.Launched).Select(e => e.Tick).ToList();
             Debug.Log($"[MISSILE] launches at ticks {string.Join(", ", launches)}; bursts {core.Missiles.Bursts}");
-            Assert.LessOrEqual(launches.Count, 4, "four on the pylons");
+            Assert.LessOrEqual(launches.Count, 2, "two heat-seekers on the pylons");
             Assert.AreEqual(49, launches[0], "the tick the lock completes");
             for (int i = 1; i < launches.Count; i++) Assert.GreaterOrEqual(launches[i] - launches[i - 1], 50, "one a second at most");
-            Assert.AreEqual(4 - launches.Count, core.Find(1).State.Missiles);
+            Assert.AreEqual(2 - launches.Count, core.Find(1).State.Missiles);
             Assert.Greater(core.Missiles.Bursts, 0, "a tail chase from 3 km on a jet at the same speed closes inside the 20 s life");
         }
 

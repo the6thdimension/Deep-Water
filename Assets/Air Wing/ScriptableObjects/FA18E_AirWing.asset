@@ -214,14 +214,35 @@ MonoBehaviour:
   gunMaxTimeOfFlightS: 3
   gunMuzzleM: {x: 0, y: 0.5, z: 7.5}
   gunBoreBody: {x: 0, y: 0.017497322, z: 0.99984694}
+  radarMissile:
+    Name: MR-AR game missile
+    Seeker: 1
+    ActiveRangeM: 8000
+    BoostAccelMps2: 150
+    BurnS: 6
+    DragPerM: 0.00002
+    MaxG: 30
+    NavGain: 4
+    SeekerConeDeg: 45
+    LockConeDeg: 45
+    LockMinM: 1500
+    LockMaxM: 25000
+    LockTimeS: 0
+    ArmS: 1
+    LifeS: 50
+    LethalRadiusM: 15
+    KillChance: 0.7
+    DamageHp: 6
+    LaunchIntervalS: 1
+  radarMissilePylonsM:
+  - {x: -2.6, y: -0.55, z: -1.2}
+  - {x: 2.6, y: -0.55, z: -1.2}
   hitPoints: 10
   hitRadiusM: 4
   missileName: SR-IR game missile
   missilePylonsM:
   - {x: -4.2, y: -0.45, z: -1.8}
   - {x: 4.2, y: -0.45, z: -1.8}
-  - {x: -2.6, y: -0.55, z: -1.2}
-  - {x: 2.6, y: -0.55, z: -1.2}
   missileBoostAccelMps2: 100
   missileBurnS: 3
   missileDragPerM: 0.00003
@@ -368,18 +389,7 @@ MonoBehaviour:
     0.1, gunRoundDiameterM 0.02, gunRoundFormFactor 1.0 (on G7), gunDispersionMils
     4, gunMaxTimeOfFlightS 3: AUTHORED. gunMuzzleM (0, 0.5, 7.5) and gunBoreBody
     1 deg up: AUTHORED off the model. hitPoints 10 and hitRadiusM 4: AUTHORED, abstract
-    (Gunnery K5): a hit is one round, ten shoot the jet down.\n\n--- Game missiles
-    (W65) ---\nmissileName 'SR-IR game missile': a generic short-range heat-seeker
-    archetype for a video game (SIX 2026-10-29, Air Wing W65); not any real missile,
-    no real data. All AUTHORED: four pylons, two under each wing at (\xB14.2, \u22120.45,
-    \u22121.8) and (\xB12.6, \u22120.55, \u22121.2) m, off the model; missileBoostAccelMps2
-    100 for missileBurnS 3 (about 2.5 times a 400 kt jet), missileDragPerM 3e-5 (k\xB7v\xB2;
-    a tail chase from 3 km closes inside the life, one from 5 km on a jet running
-    away does not), missileMaxG 30, missileNavGain 4 (proportional navigation, textbook
-    3\u20135), missileSeekerConeDeg 45; the lock (SIX's picks): missileLockConeDeg
-    30, missileLockMinM 500, missileLockMaxM 5000, missileLockTimeS 1; missileArmS
-    0.5, missileLifeS 20; the hit (SIX's picks): missileLethalRadiusM 15, missileKillChance
-    0.7, missileDamageHp 6; missileLaunchIntervalS 1.\n\n--- Radar and signature
+    (Gunnery K5): a hit is one round, ten shoot the jet down.\n\n--- Radar and signature
     (SENSORS-CONCEPT J1) ---\nradarName 'Generic fighter radar (game)': a generic
     nose radar for a video game (SIX 2026-10-29, SENSORS-CONCEPT J1); not any real
     radar, no real data. All AUTHORED: radarGainDbi 33, radarFrequencyHz 10e9 (X
@@ -398,4 +408,25 @@ MonoBehaviour:
     7 (a generic fighter). IFF (J5), AUTHORED: iffReplyChance 0.95 (a friend answers
     19 times in 20), iffInterrogateIntervalS 1; the code is set per fight. Warning
     receiver (J3), AUTHORED: rwrSearchHoldS 5 (outlasts the 4 s sweep), rwrTrackHoldS
-    0.5."
+    0.5.\n\n--- Game missiles (W65) ---\nmissileName 'SR-IR game missile': a generic
+    short-range heat-seeker archetype for a video game (SIX 2026-10-29, Air Wing
+    W65); not any real missile, no real data. All AUTHORED: two pylons, the outboard
+    one under each wing at (\xB14.2, \u22120.45, \u22121.8) m, off the model (four
+    until 2026-10-29; the inboard pair now carries the radar missiles, SENSORS-CONCEPT
+    J18); missileBoostAccelMps2 100 for missileBurnS 3 (about 2.5 times a 400 kt
+    jet), missileDragPerM 3e-5 (k\xB7v\xB2; a tail chase from 3 km closes inside
+    the life, one from 5 km on a jet running away does not), missileMaxG 30, missileNavGain
+    4 (proportional navigation, textbook 3\u20135), missileSeekerConeDeg 45; the
+    lock (SIX's picks): missileLockConeDeg 30, missileLockMinM 500, missileLockMaxM
+    5000, missileLockTimeS 1; missileArmS 0.5, missileLifeS 20; the hit (SIX's picks):
+    missileLethalRadiusM 15, missileKillChance 0.7, missileDamageHp 6; missileLaunchIntervalS
+    1.\n\n--- Radar missiles (W68) ---\nradarMissile 'MR-AR game missile': a generic
+    medium-range active radar missile archetype for a video game (SIX 2026-10-29,
+    SENSORS-CONCEPT J7, J18: two of the four missiles radar-guided); not any real
+    missile, no real data. All AUTHORED: radarMissilePylonsM the inboard pylon under
+    each wing at (\xB12.6, \u22120.55, \u22121.2) m, off the model; Seeker ActiveRadar,
+    ActiveRangeM 8000 (it flies on the shooter's single-target track until 8 km from
+    it, then its own radar takes over); BoostAccelMps2 150 for BurnS 6; DragPerM
+    2e-5; MaxG 30; NavGain 4; SeekerConeDeg 45; launch cone LockConeDeg 45, LockMinM
+    1500 to LockMaxM 25000 (J15); ArmS 1; LifeS 50; the burst as the heat-seeker's:
+    LethalRadiusM 15, KillChance 0.7, DamageHp 6; LaunchIntervalS 1."

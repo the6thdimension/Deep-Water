@@ -80,7 +80,7 @@ namespace DeepWater.Aviator.Tests
             Assert.IsTrue(core.Inputs.All.Where(x => x.AircraftId == 1 && x.Tick == launched).Single().Inputs.Pickle, "through the Pilot Inputs");
             Assert.IsTrue(sawLock, "its senses showed the lock, on an enemy");
             Assert.IsTrue(sawMissile, "the target's senses showed the missile coming at it");
-            Assert.AreEqual(4, core.Find(1).State.Missiles + core.Missiles.Launched, "one gone from the pylons per launch (only blue pickled)");
+            Assert.AreEqual(2, core.Find(1).State.Missiles + core.Missiles.Launched, "one gone from the pylons per launch (only blue pickled; two heat-seekers, J18)");
         }
 
         [Test]

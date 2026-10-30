@@ -46,6 +46,19 @@ namespace DeepWater.Aviator.Modules
 
         bool _ordered;
 
+        /// <summary>True once the fight has put its pilots in (the first FixedUpdate); a pilot seated later enlists itself.</summary>
+        public bool Ordered => _ordered;
+
+        /// <summary>A pilot seated after the fight was ordered (A23: a brain changed in play) joins it on its side.</summary>
+        public void Enlist(AviatorPilot p)
+        {
+            if (_fight == null || p.FightSide == Side.None || p.Seat == null) return;
+            int id = p.GetComponent<AircraftView>().AircraftId;
+            _fight.Join(id, p.FightSide);
+            _runner.Flight.SetIffCode(id, (int)p.FightSide);
+            p.Seat.FightIn(id, _fight);
+        }
+
         void FixedUpdate()
         {
             if (_fight == null) return;

@@ -18,6 +18,8 @@ namespace DeepWater.AirWing.Modules.Cockpit
     /// mouse button (or right stick) to look, Shift for four times the speed, scroll to change the speed. F again
     /// follows the last jet.</item>
     /// </list>
+    /// <b>Cockpit:</b> K (pad X) looks out of the followed jet from where its pilot sits, with its HUD (A23); K again
+    /// goes back behind it.
     /// A tag over every jet names it, coloured by its spawn point (L hides them), and a line at the top says what is
     /// followed and who flies it (the seat roster's own words). Presentation only: it reads the runner and moves
     /// itself, on unscaled time so it handles the same while training runs fast.
@@ -53,6 +55,13 @@ namespace DeepWater.AirWing.Modules.Cockpit
 
         public bool Free => _free;
         public AircraftView Target => _free ? null : _target;
+        /// <summary>Looking out of the followed jet's cockpit (K), its HUD drawn.</summary>
+        public bool Cockpit => _cockpit && Target != null;
+
+        bool _cockpit;
+        FlightHud _hud;
+        float _farNear = -1f;
+        readonly Dictionary<int, Vector3> _eyes = new Dictionary<int, Vector3>();
 
         void Start()
         {
@@ -87,6 +96,7 @@ namespace DeepWater.AirWing.Modules.Cockpit
             bool shift = kb != null && (kb.leftShiftKey.isPressed || kb.rightShiftKey.isPressed);
             if (kb != null && kb.lKey.wasPressedThisFrame) showTags = !showTags;
             if ((kb != null && kb.fKey.wasPressedThisFrame) || (pad != null && pad.buttonNorth.wasPressedThisFrame)) ToggleFree();
+            if ((kb != null && kb.kKey.wasPressedThisFrame) || (pad != null && pad.buttonWest.wasPressedThisFrame)) _cockpit = !_cockpit;
             int step = 0;
             if (kb != null && (kb.tabKey.wasPressedThisFrame || kb.rightBracketKey.wasPressedThisFrame)) step = kb.tabKey.wasPressedThisFrame && shift ? -1 : 1;
             if (kb != null && kb.leftBracketKey.wasPressedThisFrame) step = -1;
@@ -104,7 +114,68 @@ namespace DeepWater.AirWing.Modules.Cockpit
             float scroll = mouse != null ? mouse.scroll.ReadValue().y : 0f;
 
             if (_free || _target == null || _target.Aircraft == null) FlyFree(look, scroll, shift, kb, pad, dt);
+            else if (_cockpit) InCockpit(look, dt);
             else Chase(look, scroll, dt);
+            Hud();
+        }
+
+        /// <summary>
+        /// The followed jet's cockpit (A23; SIX 2026-10-30: "a key so that I can see inside the cockpit of any of the planes"):
+        /// fixed at its eye, turning with it; hold the right mouse button (or move the right stick) to look round, and the
+        /// view eases back to the nose. There is no modelled cockpit: it looks out from where the pilot sits.
+        /// </summary>
+        void InCockpit(Vector2 look, float dt)
+        {
+            Transform jet = _target.transform;
+            _orbitYaw = Mathf.Clamp(_orbitYaw + look.x, -160f, 160f);
+            _orbitPitch = Mathf.Clamp(_orbitPitch - look.y, -60f, 80f);
+            if (look == Vector2.zero)
+            {
+                float k = 1f - Mathf.Exp(-1.5f * dt);
+                _orbitYaw = Mathf.Lerp(_orbitYaw, 0f, k);
+                _orbitPitch = Mathf.Lerp(_orbitPitch, 0f, k);
+            }
+            transform.rotation = jet.rotation * Quaternion.Euler(_orbitPitch, _orbitYaw, 0f);
+            transform.position = jet.TransformPoint(Eye(_target));
+        }
+
+        /// <summary>
+        /// Where the pilot's eye sits in the jet's frame, on its centreline: a child named "CockpitEye" when the model has
+        /// one; else just under its canopy part (AUTHORED: 0.25 m below the canopy's pivot; the F/A-18E's "Canopy" sits at
+        /// 1.3 m up, 4.0 m ahead); else a guess (1.2 m up, 4.5 m ahead).
+        /// </summary>
+        Vector3 Eye(AircraftView jet)
+        {
+            if (_eyes.TryGetValue(jet.AircraftId, out Vector3 eye)) return eye;
+            Transform marker = FindChild(jet.transform, n => n == "CockpitEye");
+            Transform canopy = marker == null ? FindChild(jet.transform, n => n.IndexOf("canopy", System.StringComparison.OrdinalIgnoreCase) >= 0) : null;
+            if (marker != null) eye = jet.transform.InverseTransformPoint(marker.position);
+            else if (canopy != null) eye = jet.transform.InverseTransformPoint(canopy.position) + Vector3.down * 0.25f;
+            else eye = new Vector3(0f, 1.2f, 4.5f);
+            eye.x = 0f;
+            _eyes[jet.AircraftId] = eye;
+            return eye;
+        }
+
+        static Transform FindChild(Transform t, System.Predicate<string> named)
+        {
+            foreach (Transform c in t.GetComponentsInChildren<Transform>(true)) if (named(c.name)) return c;
+            return null;
+        }
+
+        /// <summary>The followed jet's HUD while in its cockpit, drawn by Air Wing's own HUD; a closer near plane inside it.</summary>
+        void Hud()
+        {
+            bool on = Cockpit && _target.Aircraft != null;
+            if (on && _hud == null) _hud = gameObject.AddComponent<FlightHud>();
+            if (_hud != null)
+            {
+                if (on) _hud.Show(runner, _target.AircraftId, _camera);
+                _hud.enabled = on;
+            }
+            if (_camera == null) return;
+            if (on && _farNear < 0f) { _farNear = _camera.nearClipPlane; _camera.nearClipPlane = 0.05f; }
+            else if (!on && _farNear >= 0f) { _camera.nearClipPlane = _farNear; _farNear = -1f; }
         }
 
         void FlyFree(Vector2 look, float scroll, bool shift, Keyboard kb, Gamepad pad, float dt)
@@ -215,11 +286,11 @@ namespace DeepWater.AirWing.Modules.Cockpit
                 var a = _target.Aircraft;
                 string side = _sides.TryGetValue(a.Id, out var sd) ? sd.label + " · " : "";
                 string state = a.State.Status == FlightStatus.Flying ? $"{a.State.Rounds} RDS · {a.State.HitPoints:F0} HP" : $"DOWN: {a.CrashReason}";
-                line = $"FOLLOWING {a.Id} · {side}{runner.Roster.Describe(a.Id)} · {state}";
+                line = $"{(_cockpit ? "COCKPIT OF" : "FOLLOWING")} {a.Id} · {side}{runner.Roster.Describe(a.Id)} · {state}";
             }
             GUI.Label(new Rect(20f * s, 12f * s, 1200f * s, 30f * s), line, _style);
             GUI.Label(new Rect(20f * s, Screen.height - 34f * s, 1600f * s, 30f * s),
-                      "TAB / ] NEXT JET · SHIFT+TAB / [ PREVIOUS · 1–9 JET · F FREE / FOLLOW · RMB LOOK · WASD QE FLY · SHIFT FAST · SCROLL SPEED/ZOOM · L TAGS", _tag);
+                      "TAB / ] NEXT JET · SHIFT+TAB / [ PREVIOUS · 1–9 JET · F FREE / FOLLOW · K COCKPIT · RMB LOOK · WASD QE FLY · SHIFT FAST · SCROLL SPEED/ZOOM · L TAGS", _tag);
 
             if (!showTags || _camera == null) return;
             foreach (AircraftView v in _jets)

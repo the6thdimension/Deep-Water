@@ -34,6 +34,7 @@ namespace DeepWater.Aviator.Learning.Editor
         public const string ArenaPath = TrainingDir + "/TrainingArena.asset";
         public const string LearnedPilotPath = TrainingDir + "/LearnedPilot.asset";
         public const string RewardPath = TrainingDir + "/RewardWeights.asset";
+        public const string PriceListPath = TrainingDir + "/PriceList.asset";
         public const string BehaviorName = "Fighter";
         /// <summary>Jets a side: 8 v 8 since 2026-10-29 (SIX; it was 4 v 4, M21).</summary>
         public const int SquadronSize = 8;
@@ -102,6 +103,7 @@ namespace DeepWater.Aviator.Learning.Editor
             AirWingBuilders.Set(training, "arena", arena);
             AirWingBuilders.Set(training, "learnedPilot", AssetDatabase.LoadAssetAtPath<LearnedPilotSO>(LearnedPilotPath));
             AirWingBuilders.Set(training, "rewardWeights", AssetDatabase.LoadAssetAtPath<RewardWeightsSO>(RewardPath));
+            AirWingBuilders.Set(training, "priceList", AssetDatabase.LoadAssetAtPath<PriceListSO>(PriceListPath));
         }
 
         /// <summary>
@@ -175,9 +177,26 @@ namespace DeepWater.Aviator.Learning.Editor
                                 "pointedConePerS +0.02 inside coneDeg 30 of an enemy's tail inside coneRangeM 1000 AND pointing within 30 of it (A11's measure; " +
                                 "the fight's own cone score stays position-only, A9). squadronShare 0.25 of every squadmate's kill or loss.";
             EditorUtility.SetDirty(reward);
+
+            PriceListSO prices = ApplyPriceList();
             AssetDatabase.SaveAssets();
-            arena.Bake(); pilot.Bake(); reward.Bake();   // throws if anything is out of shape
-            Debug.Log($"[RH Aviator] Applied the training assets: {ArenaPath}, {LearnedPilotPath}, {RewardPath}.");
+            arena.Bake(); pilot.Bake(); reward.Bake(); prices.Bake();   // throws if anything is out of shape
+            Debug.Log($"[RH Aviator] Applied the training assets: {ArenaPath}, {LearnedPilotPath}, {RewardPath}, {PriceListPath}.");
+        }
+
+        /// <summary>The price list (A23) with its provenance, written on its own so it can be refreshed without the other training assets.</summary>
+        public static PriceListSO ApplyPriceList()
+        {
+            PriceListSO prices = Ensure<PriceListSO>(PriceListPath);
+            prices.jet = 1000f; prices.friendlyKillPenalty = 500f;
+            prices.round = 0.5f; prices.heatMissile = 50f; prices.radarMissile = 120f; prices.chaff = 3f; prices.flare = 3f; prices.fuelPerKg = 0.02f;
+            prices.provenance = "A23 (SIX 2026-10-30: \"a price tag on every bullet and missile, friendly kill, enemy kill, death, fuel\"; shown on the scoreboard first, " +
+                                "the reward later on SIX's go). Game credits, every number AUTHORED, none a real-world price (BLUEPRINT standing constraint 8). " +
+                                "jet 1000: what an enemy kill earns and what losing your own costs, however it went down. friendlyKillPenalty 500 on top of the jet the side lost. " +
+                                "Scaled so one kill pays for a whole sortie: round 0.5 (the full 412 rounds 206), heatMissile 50, radarMissile 120 (the long shot dearer), " +
+                                "chaff 3 and flare 3 (all 30 of each 90), fuelPerKg 0.02 (a full tank of about 6,500 kg is 130). Radar time and IFF questions are free.";
+            EditorUtility.SetDirty(prices);
+            return prices;
         }
 
         static T Ensure<T>(string path) where T : ScriptableObject

@@ -41,6 +41,8 @@ namespace DeepWater.Aviator.Learning
         [SerializeField] AirWingArena arena;
         [SerializeField] LearnedPilotSO learnedPilot;
         [SerializeField] RewardWeightsSO rewardWeights;
+        [Tooltip("What everything costs, in game credits (A23): the scoreboard's ledger. Empty: the training asset in the Editor, else the list's own defaults.")]
+        [SerializeField] PriceListSO priceList;
         [Tooltip("The clock T switches to from real time; the trainer's engine_settings.time_scale in Training/config.")]
         [SerializeField] float fastTimeScale = 20f;
         [SerializeField] bool showPanel = true;
@@ -56,6 +58,7 @@ namespace DeepWater.Aviator.Learning
         long[] _lifeStart;
         int[] _resets;
         RewardLedger _ledger;
+        PriceLedger _prices;
         LearnedPilotSettings _settings;
         bool _ready, _failed;
         int _blueLives, _redLives, _interrupted;
@@ -71,6 +74,9 @@ namespace DeepWater.Aviator.Learning
         public Engagement Fight => fight.Engagement;
         public LearnedPilotSettings Settings => _settings;
         public RewardLedger Ledger => _ledger;
+        /// <summary>Every jet's account in game credits (A23): what it used and did, priced. Null until training starts.</summary>
+        public PriceLedger Prices => _prices;
+        public AirWingRunner Runner => runner;
         public IReadOnlyList<FighterAgent> Agents => _agents;
         /// <summary>True when every learned jet is recording its teacher (J13).</summary>
         public bool Recording => recordDemos;
@@ -98,7 +104,10 @@ namespace DeepWater.Aviator.Learning
             PilotProfile pilot = learnedPilot.eyesAndHands.Bake();
             Engagement engagement = fight.Engagement;
             _ledger = new RewardLedger(rewardWeights.Bake(), engagement);
-            _agents = FindObjectsByType<FighterAgent>(FindObjectsInactive.Exclude).Where(a => a.enabled).OrderBy(a => a.AircraftId).ToArray();
+            _prices = new PriceLedger(PriceListOrDefault().Bake(), engagement);
+            if (GetComponent<FightStats>() == null) gameObject.AddComponent<FightStats>();   // P: every jet's stats (A23)
+            // Every jet's agent, flying or not: a brain changed in play (A23) can hand a rule pilot's jet to its agent.
+            _agents = FindObjectsByType<FighterAgent>(FindObjectsInactive.Exclude).OrderBy(a => a.AircraftId).ToArray();
             _lifeStart = new long[_agents.Length];
             _resets = Enumerable.Repeat(-1, _agents.Length).ToArray();   // so the first flying tick starts the first life
             foreach (FighterAgent a in _agents)
@@ -107,18 +116,14 @@ namespace DeepWater.Aviator.Learning
                 if (view.Aircraft == null) { Debug.LogError($"[RH Aviator] {a.name}: the runner built no aircraft for it; it is not seated.", a); continue; }
                 int id = view.AircraftId;
                 var seat = new LearnedSeat(runner.Flight, view.Aircraft.Profile, pilot);
-                runner.Roster.SetOwnSeat(id, seat);
+                if (a.enabled) runner.Roster.SetOwnSeat(id, seat);   // a rule pilot flies the others, seated by itself
                 engagement.Join(id, a.Side);
                 runner.Flight.SetIffCode(id, (int)a.Side);   // one IFF code per side (SENSORS-CONCEPT J5)
                 _ledger.Track(id);
                 a.Bind(this, seat, id);
             }
             if (recordDemos) StartRecording(pilot, engagement);
-            foreach (FighterAgent a in _agents)
-            {
-                var b = a.GetComponent<BehaviorParameters>();
-                _shooterKind[a.AircraftId] = b != null && b.BehaviorType == BehaviorType.HeuristicOnly ? 1 : 0;
-            }
+            foreach (FighterAgent a in _agents) Classify(a);
             Academy.Instance.AutomaticSteppingEnabled = false;
             Academy.Instance.OnEnvironmentReset += ResetFight;
             // Training must not stall when the Editor is not the focused window (2026-10-29: Play stood at frame 1 for 28 s
@@ -128,10 +133,21 @@ namespace DeepWater.Aviator.Learning
             _redBrains = Brains(Side.Red);
             _ready = true;
             string who = Academy.Instance.IsCommunicatorOn ? "the trainer" : "a model or, without one, the scripted stand-in";
-            Debug.Log($"[RH Aviator] training: {_agents.Length} learned jets (blue {_agents.Count(a => a.Side == Side.Blue)}, red {_agents.Count(a => a.Side == Side.Red)}) " +
+            Debug.Log($"[RH Aviator] training: {_agents.Count(a => a.enabled)} learned jets (blue {_agents.Count(a => a.enabled && a.Side == Side.Blue)}, red {_agents.Count(a => a.enabled && a.Side == Side.Red)}) " +
                       $"flown by {who}; pilot '{pilot.Name}' eyes and hands; a decision every {_settings.DecisionPeriodTicks} ticks; lives cut at {_settings.MaxLifeS:F0} s. " +
                       $"Blue: {_blueBrains}. Red: {_redBrains}.", this);
             return true;
+        }
+
+        /// <summary>The price list: the one set, else (in the Editor) the training asset, else the list's own defaults, said in the Console.</summary>
+        PriceListSO PriceListOrDefault()
+        {
+#if UNITY_EDITOR
+            if (priceList == null) priceList = UnityEditor.AssetDatabase.LoadAssetAtPath<PriceListSO>("Assets/RH Aviator/ScriptableObjects/Training/PriceList.asset");
+#endif
+            if (priceList != null) return priceList;
+            Debug.Log("[RH Aviator] no price list set: the scoreboard prices with the list's own defaults (A23).", this);
+            return ScriptableObject.CreateInstance<PriceListSO>();
         }
 
         /// <summary>-recordDemos &lt;steps&gt; and -demoDir &lt;folder&gt; from a player's command line.</summary>
@@ -157,7 +173,7 @@ namespace DeepWater.Aviator.Learning
             System.IO.Directory.CreateDirectory(dir);
             foreach (FighterAgent a in _agents)
             {
-                if (a.Seat == null) continue;
+                if (a.Seat == null || !a.enabled) continue;
                 var view = a.GetComponent<AircraftView>();
                 var teacher = new AviatorSeat(runner.Flight, view.Aircraft.Profile, pilot, new RuleLog());
                 teacher.FightIn(a.AircraftId, engagement);
@@ -192,7 +208,7 @@ namespace DeepWater.Aviator.Learning
         }
 
         /// <summary>What actually flies a jet once the squadron has applied its brain: the policy ML-Agents picked.</summary>
-        static string Who(FighterBrain brain, BehaviorParameters behaviour)
+        internal static string Who(FighterBrain brain, BehaviorParameters behaviour)
         {
             switch (brain)
             {
@@ -204,6 +220,27 @@ namespace DeepWater.Aviator.Learning
             if (behaviour.BehaviorType == BehaviorType.InferenceOnly) return $"SAVED {behaviour.Model.name}";
             if (Academy.Instance.IsCommunicatorOn) return "TRAINING";
             return behaviour.Model != null ? "LATEST" : "STAND-IN";
+        }
+
+        /// <summary>Who flew a shooter, for who-shot-whom: 0 learning, 1 the stand-in or a teacher, absent a rule pilot.</summary>
+        void Classify(FighterAgent a)
+        {
+            var b = a.GetComponent<BehaviorParameters>();
+            if (!a.enabled) _shooterKind.Remove(a.AircraftId);
+            else _shooterKind[a.AircraftId] = b != null && b.BehaviorType == BehaviorType.HeuristicOnly ? 1 : 0;
+        }
+
+        /// <summary>
+        /// After a jet's brain changed in play (A23, the Fighter Brains window): its agent takes its seat back when it flies
+        /// now (its rule pilot reseats itself when it does), the tallies learn who flies it, and the panel says so.
+        /// </summary>
+        public void Reseat(FighterAgent agent)
+        {
+            if (!_ready || agent == null || agent.Seat == null) return;
+            if (agent.enabled) runner.Roster.SetOwnSeat(agent.AircraftId, agent.Seat);
+            Classify(agent);
+            _blueBrains = Brains(Side.Blue);
+            _redBrains = Brains(Side.Red);
         }
 
         void Update()
@@ -232,6 +269,7 @@ namespace DeepWater.Aviator.Learning
             if (!_ready && !TryStart()) return;
             FlightCore core = runner.Flight;
             _ledger.Observe(core);   // the tick the runner flew last (nothing before the first)
+            _prices.Observe(core);
             long tick = core.Tick;   // the tick it flies next
             double dt = System.Math.Round(core.Clock.TickSeconds, 6);
             long lifeTicks = (long)System.Math.Round(_settings.MaxLifeS / dt);
@@ -240,6 +278,14 @@ namespace DeepWater.Aviator.Learning
                 FighterAgent agent = _agents[i];
                 if (agent.Seat == null) continue;
                 Aircraft jet = core.Find(agent.AircraftId);
+                if (!agent.enabled)
+                {
+                    // A rule pilot flies it now: nothing it earns is the agent's, and its next life starts fresh if handed back.
+                    _ledger.Take(jet.Id);
+                    _ledger.TakeLoss(jet.Id, out _);
+                    _resets[i] = -1;
+                    continue;
+                }
                 float r = _ledger.Take(jet.Id);
                 if (r != 0f) agent.AddReward(r);
                 if (_ledger.TakeLoss(jet.Id, out _))
@@ -307,10 +353,11 @@ namespace DeepWater.Aviator.Learning
             string who = Academy.Instance.IsCommunicatorOn ? "TRAINER CONNECTED" : "NO TRAINER";
             int blueLoss = 0, redLoss = 0;
             foreach (FighterAgent a in _agents) { if (a.Side == Side.Red) redLoss += _ledger.LossesOf(a.AircraftId); else blueLoss += _ledger.LossesOf(a.AircraftId); }
-            GUI.Label(new Rect(w - 820f * s, 12f * s, 800f * s, 110f * s),
+            GUI.Label(new Rect(w - 820f * s, 12f * s, 800f * s, 140f * s),
                       $"TRAINING · {who} · STEP {Academy.Instance.StepCount:N0} · ×{Time.timeScale:0.#} (T)\n" +
-                      $"BLUE  {_blueBrains}  ·  LIVES {_blueLives}  KILLS {e.SideKills(Side.Blue)}  LOST {blueLoss}\n" +
-                      $"RED   {_redBrains}  ·  LIVES {_redLives}  KILLS {e.SideKills(Side.Red)}  LOST {redLoss}   CUT {_interrupted}", _style);
+                      $"BLUE  {_blueBrains}  ·  LIVES {_blueLives}  KILLS {e.SideKills(Side.Blue)}  LOST {blueLoss}  ·  {FightStats.Credits(_prices.SideNet(Side.Blue))}\n" +
+                      $"RED   {_redBrains}  ·  LIVES {_redLives}  KILLS {e.SideKills(Side.Red)}  LOST {redLoss}  ·  {FightStats.Credits(_prices.SideNet(Side.Red))}   CUT {_interrupted}\n" +
+                      "P: EVERY JET'S STATS", _style);
         }
     }
 }

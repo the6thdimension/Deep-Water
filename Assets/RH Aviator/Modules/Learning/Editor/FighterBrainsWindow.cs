@@ -15,7 +15,8 @@ namespace DeepWater.Aviator.Learning.Editor
     /// <summary>
     /// Deep Water → RH Aviator → Fighter Brains (A17, A18; M31–M34): every training jet in the open scene with the brain
     /// that flies it, set per squadron or per jet, and the auto-trainer: its switch, what it is doing, the latest brain and
-    /// "Keep this brain". Brains change in edit mode; in play it shows them.
+    /// "Keep this brain". Brains change in edit mode, or in play at once (A23): a squadron's or one jet's, from the list or
+    /// a kept brain's file (Load…), for that session, or kept in the scene when Play stops.
     /// </summary>
     public sealed class FighterBrainsWindow : EditorWindow
     {
@@ -143,12 +144,22 @@ namespace DeepWater.Aviator.Learning.Editor
                 EditorGUILayout.HelpBox("No training squadrons in the open scene. Open Assets/_SCENES/Dogfight Training.unity.", MessageType.None);
                 return;
             }
-            if (EditorApplication.isPlaying) EditorGUILayout.HelpBox("Brains change in edit mode; this shows them.", MessageType.None);
-            using (new EditorGUI.DisabledScope(EditorApplication.isPlayingOrWillChangePlaymode))
-                foreach (TrainingSquadron squadron in squadrons) Squadron(squadron);
+            bool playing = EditorApplication.isPlaying;
+            if (playing)
+            {
+                EditorGUILayout.HelpBox("In play a change flies at once and lasts this session. A jet flying a kept brain flies it and does not learn. " +
+                                        "Tick below to keep this session's choices in the scene when Play stops.", MessageType.Info);
+                PlayChoices.Keep = EditorGUILayout.ToggleLeft($"Keep these choices after Play ({PlayChoices.Count} changed)", PlayChoices.Keep);
+                if (_refused != null) EditorGUILayout.HelpBox(_refused, MessageType.Warning);
+            }
+            using (new EditorGUI.DisabledScope(!playing && EditorApplication.isPlayingOrWillChangePlaymode))
+                foreach (TrainingSquadron squadron in squadrons) Squadron(squadron, playing);
         }
 
-        static void Squadron(TrainingSquadron squadron)
+        // Why the last change in play was refused, shown until the next one.
+        static string _refused;
+
+        static void Squadron(TrainingSquadron squadron, bool playing)
         {
             EditorGUILayout.Space(6f);
             using (new EditorGUILayout.HorizontalScope())
@@ -157,12 +168,13 @@ namespace DeepWater.Aviator.Learning.Editor
                 var brain = (FighterBrain)EditorGUILayout.EnumPopup(squadron.Brain);
                 ModelAsset saved = squadron.SavedBrain;
                 if (brain == FighterBrain.Saved) saved = (ModelAsset)EditorGUILayout.ObjectField(saved, typeof(ModelAsset), false);
-                if (brain != squadron.Brain || saved != squadron.SavedBrain)
+                if (GUILayout.Button(new GUIContent("Load…", "Fly a kept brain (an .onnx in Policies/Kept) on every jet of the squadron without its own"), GUILayout.Width(60f))
+                    && PickBrain() is ModelAsset loaded)
                 {
-                    Undo.RecordObject(squadron, "Squadron brain");
-                    squadron.SetBrain(brain, saved);
-                    Changed(squadron);
+                    brain = FighterBrain.Saved;
+                    saved = loaded;
                 }
+                if (brain != squadron.Brain || saved != squadron.SavedBrain) SetSquadron(squadron, brain, saved, playing);
             }
             if (squadron.Brain == FighterBrain.Saved) SavedNote(squadron.SavedBrain);
 
@@ -180,19 +192,118 @@ namespace DeepWater.Aviator.Learning.Editor
                     ModelAsset saved = hasOwn ? own.SavedBrain : null;
                     if (picked == 5) saved = (ModelAsset)EditorGUILayout.ObjectField(saved, typeof(ModelAsset), false);
                     else EditorGUILayout.LabelField(picked == 0 ? $"→ {squadron.BrainOf(jet, out _)}" : "own brain", EditorStyles.miniLabel);
-                    if (picked != choice || (picked == 5 && saved != own?.SavedBrain))
+                    if (GUILayout.Button(new GUIContent("Load…", $"Fly a kept brain (an .onnx in Policies/Kept) on {jet.name} alone"), GUILayout.Width(60f))
+                        && PickBrain() is ModelAsset loaded)
                     {
-                        if (own == null) own = Undo.AddComponent<JetBrain>(jet.gameObject);
-                        Undo.RecordObject(own, "Jet brain");
-                        own.Set(picked != 0, JetBrains[picked], picked == 5 ? saved : null);
-                        EditorUtility.SetDirty(own);
-                        squadron.Apply();
-                        Changed(squadron);
+                        picked = 5;
+                        saved = loaded;
                     }
+                    if (picked != choice || (picked == 5 && saved != own?.SavedBrain)) SetJet(squadron, jet, picked, saved, playing);
                 }
                 if (hasOwn && own.Brain == FighterBrain.Saved) SavedNote(own.SavedBrain);
             }
             EditorGUI.indentLevel--;
+        }
+
+        /// <summary>A kept brain from a file picker in Policies/Kept, or null (cancelled, or not a brain inside the project).</summary>
+        static ModelAsset PickBrain()
+        {
+            string folder = Path.Combine(AutoTrainer.ProjectRoot, BrainLibrary.KeptFolder);
+            string file = EditorUtility.OpenFilePanel("Load a kept brain", Directory.Exists(folder) ? folder : AutoTrainer.ProjectRoot, "onnx");
+            if (string.IsNullOrEmpty(file)) return null;
+            string full = Path.GetFullPath(file).Replace('\\', '/'), root = Path.GetFullPath(AutoTrainer.ProjectRoot).Replace('\\', '/').TrimEnd('/') + "/";
+            var brain = full.StartsWith(root, StringComparison.OrdinalIgnoreCase) ? AssetDatabase.LoadAssetAtPath<ModelAsset>(full.Substring(root.Length)) : null;
+            if (brain == null)
+                EditorUtility.DisplayDialog("Not a brain here", $"{file} is not a brain inside the project. Copy it into {BrainLibrary.KeptFolder} first.", "OK");
+            return brain;
+        }
+
+        static void SetSquadron(TrainingSquadron squadron, FighterBrain brain, ModelAsset saved, bool playing)
+        {
+            if (playing)
+            {
+                _refused = squadron.SetBrainLive(brain, saved);
+                if (_refused == null) PlayChoices.Squadron(squadron, brain, saved);
+                else _refused = $"{squadron.name} not changed: {_refused}.";
+                return;
+            }
+            Undo.RecordObject(squadron, "Squadron brain");
+            squadron.SetBrain(brain, saved);
+            Changed(squadron);
+        }
+
+        static void SetJet(TrainingSquadron squadron, AircraftView jet, int picked, ModelAsset saved, bool playing)
+        {
+            bool own = picked != 0;
+            FighterBrain brain = JetBrains[picked];
+            if (picked != 5) saved = null;
+            if (playing)
+            {
+                _refused = squadron.SetJetBrainLive(jet, own, brain, saved);
+                if (_refused == null) PlayChoices.Jet(squadron, jet, own, brain, saved);
+                else _refused = $"{jet.name} not changed: {_refused}.";
+                return;
+            }
+            JetBrain mine = jet.GetComponent<JetBrain>();
+            if (mine == null) mine = Undo.AddComponent<JetBrain>(jet.gameObject);
+            Undo.RecordObject(mine, "Jet brain");
+            mine.Set(own, brain, saved);
+            EditorUtility.SetDirty(mine);
+            squadron.Apply();
+            Changed(squadron);
+        }
+
+        /// <summary>
+        /// The brain choices made in play (A23), put into the scene when Play stops if "Keep these choices" is ticked, as if
+        /// made in edit mode (undoable, the scene marked changed, not saved). Squadrons are found by name, jets by aircraft id.
+        /// </summary>
+        static class PlayChoices
+        {
+            struct Choice { public string Squadron; public int JetId; public bool Own; public FighterBrain Brain; public string SavedPath; }
+
+            static readonly List<Choice> Made = new List<Choice>();
+            public static bool Keep;
+            public static int Count => Made.Count;
+
+            [InitializeOnLoadMethod]
+            static void Hook() => EditorApplication.playModeStateChanged += Changed;
+
+            public static void Squadron(TrainingSquadron s, FighterBrain brain, ModelAsset saved) =>
+                Made.Add(new Choice { Squadron = s.name, JetId = 0, Brain = brain, SavedPath = AssetDatabase.GetAssetPath(saved) });
+
+            public static void Jet(TrainingSquadron s, AircraftView jet, bool own, FighterBrain brain, ModelAsset saved) =>
+                Made.Add(new Choice { Squadron = s.name, JetId = jet.AircraftId, Own = own, Brain = brain, SavedPath = AssetDatabase.GetAssetPath(saved) });
+
+            static void Changed(PlayModeStateChange change)
+            {
+                if (change == PlayModeStateChange.EnteredPlayMode) { Made.Clear(); Keep = false; _refused = null; return; }
+                if (change != PlayModeStateChange.EnteredEditMode) return;
+                if (Keep && Made.Count > 0) Apply();
+                Made.Clear();
+                Keep = false;
+                _refused = null;
+            }
+
+            static void Apply()
+            {
+                TrainingSquadron[] squadrons = Object.FindObjectsByType<TrainingSquadron>(FindObjectsInactive.Exclude);
+                int kept = 0;
+                foreach (Choice c in Made)   // in the order made: a later choice wins
+                {
+                    TrainingSquadron s = squadrons.FirstOrDefault(q => q.name == c.Squadron);
+                    if (s == null) { Debug.LogWarning($"[RH Aviator] kept brain choice: no squadron '{c.Squadron}' in the open scene; skipped."); continue; }
+                    var saved = string.IsNullOrEmpty(c.SavedPath) ? null : AssetDatabase.LoadAssetAtPath<ModelAsset>(c.SavedPath);
+                    if (c.JetId == 0) SetSquadron(s, c.Brain, saved, false);
+                    else
+                    {
+                        AircraftView jet = s.Jets.FirstOrDefault(j => j != null && j.AircraftId == c.JetId);
+                        if (jet == null) { Debug.LogWarning($"[RH Aviator] kept brain choice: no jet #{c.JetId} in {c.Squadron}; skipped."); continue; }
+                        SetJet(s, jet, c.Own ? Array.IndexOf(JetBrains, c.Brain, 1) : 0, saved, false);
+                    }
+                    kept++;
+                }
+                Debug.Log($"[RH Aviator] kept {kept} of {Made.Count} brain choices made in play; the scene is changed, not saved.");
+            }
         }
 
         static void SavedNote(ModelAsset saved)

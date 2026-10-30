@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b313f25ec16c9774591111cbd86271e4, type: 3}
+  m_Name: PriceList
+  m_EditorClassIdentifier: DeepWater.Aviator::DeepWater.Aviator.ScriptableObjects.PriceListSO
+  jet: 1000
+  friendlyKillPenalty: 500
+  round: 0.5
+  heatMissile: 50
+  radarMissile: 120
+  chaff: 3
+  flare: 3
+  fuelPerKg: 0.02
+  provenance: 'A23 (SIX 2026-10-30: "a price tag on every bullet and missile, friendly
+    kill, enemy kill, death, fuel"; shown on the scoreboard first, the reward later
+    on SIX''s go). Game credits, every number AUTHORED, none a real-world price (BLUEPRINT
+    standing constraint 8). jet 1000: what an enemy kill earns and what losing your
+    own costs, however it went down. friendlyKillPenalty 500 on top of the jet the
+    side lost. Scaled so one kill pays for a whole sortie: round 0.5 (the full 412
+    rounds 206), heatMissile 50, radarMissile 120 (the long shot dearer), chaff 3
+    and flare 3 (all 30 of each 90), fuelPerKg 0.02 (a full tank of about 6,500 kg
+    is 130). Radar time and IFF questions are free.'

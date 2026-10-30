@@ -35,6 +35,20 @@ namespace DeepWater.AirWing.Modules.Cockpit
 
         AircraftView _view;
         GUIStyle _left, _right, _centre, _small;
+        bool _spectating;
+
+        /// <summary>
+        /// Shows aircraft <paramref name="id"/>'s HUD through <paramref name="camera"/>, whoever flies it (the spectator's
+        /// cockpit view, A23): no player, so no seat pick list.
+        /// </summary>
+        public void Show(AirWingRunner flightRunner, int id, Camera camera)
+        {
+            runner = flightRunner;
+            followPlayer = false;
+            aircraftId = id;
+            viewCamera = camera;
+            _spectating = true;
+        }
 
         void OnGUI()
         {
@@ -103,7 +117,7 @@ namespace DeepWater.AirWing.Modules.Cockpit
                 if (aircraft.State.LockTargetId != 0)
                     Marker(runner.Flight.Find(aircraft.State.LockTargetId).State.Position, runner.Flight.IsLocked(aircraft) ? "[ LOCK ]" : "[ · · ]", s);
             }
-            if (runner.Views.Count > 1 && runner.Roster != null) PickList(w, s, size);
+            if (!_spectating && runner.Views.Count > 1 && runner.Roster != null) PickList(w, s, size);
             JetRadar radar = runner.Flight.RadarOf(aircraft.Id);
             if (radar != null && aircraft.State.Status == Core.State.FlightStatus.Flying) RadarDisplay(aircraft, radar, w, h, s, size);
         }

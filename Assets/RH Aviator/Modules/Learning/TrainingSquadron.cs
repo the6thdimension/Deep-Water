@@ -89,13 +89,79 @@ namespace DeepWater.Aviator.Learning
         }
 #endif
 
-        /// <summary>Every jet of the squadron to its brain: which pilot flies, the agent's behaviour type and model.</summary>
-        public void Apply()
+        /// <summary>
+        /// In play (A23; SIX 2026-10-30, "a button that allows me to load a particular brain for a particular airplane"): the
+        /// squadron's brain changes now, and each of its jets that flies differently for it changes pilot in flight. Null
+        /// when done, else why not (nothing changed).
+        /// </summary>
+        public string SetBrainLive(FighterBrain squadronBrain, ModelAsset saved)
         {
-            bool playing = Application.isPlaying;
             foreach (AircraftView jet in Jets)
             {
                 if (jet == null) continue;
+                JetBrain own = jet.GetComponent<JetBrain>();
+                if (own != null && own.OwnBrain) continue;   // its own brain stays
+                if (CannotFly(jet, squadronBrain, saved) is string why) return why;
+            }
+            brain = squadronBrain;
+            savedBrain = saved;
+            foreach (AircraftView jet in Jets) if (jet != null && ApplyJet(jet)) Reseat(jet);
+            return null;
+        }
+
+        /// <summary>
+        /// In play (A23): one jet's own brain (<paramref name="own"/> false: back to the squadron's) changes now, and the jet
+        /// changes pilot in flight. Null when done, else why not (nothing changed).
+        /// </summary>
+        public string SetJetBrainLive(AircraftView jet, bool own, FighterBrain jetBrain, ModelAsset saved)
+        {
+            FighterBrain flies = own ? jetBrain : brain;
+            if (CannotFly(jet, flies, own ? saved : savedBrain) is string why) return why;
+            JetBrain mine = jet.GetComponent<JetBrain>();
+            if (mine == null) mine = jet.gameObject.AddComponent<JetBrain>();
+            mine.Set(own, jetBrain, own ? saved : null);
+            if (ApplyJet(jet)) Reseat(jet);
+            return null;
+        }
+
+        /// <summary>
+        /// Why a brain cannot fly this jet in play, or null. A saved brain needs a model whose senses are the ones the jet's
+        /// agent was shaped for when it woke (a version 2 brain onto a version 3 jet changes the agent's shape: edit mode only).
+        /// </summary>
+        static string CannotFly(AircraftView jet, FighterBrain jetBrain, ModelAsset saved)
+        {
+            if (jetBrain != FighterBrain.Saved) return null;
+            if (saved == null) return "no brain chosen";
+            if (!BrainLibrary.Fits(saved, out string why)) return $"{saved.name} does not fit: {why}";
+            var agent = jet.GetComponent<FighterAgent>();
+            int senses = BrainLibrary.SensesOf(saved);
+            if (agent != null && senses != agent.SensesSize)
+                return $"{saved.name} reads {senses} senses and {jet.name} was shaped for {agent.SensesSize} when Play started: change it in edit mode";
+            return null;
+        }
+
+        /// <summary>A jet whose brain changed in play takes its new pilot: the agent its seat back, or the rule pilot a new seat.</summary>
+        void Reseat(AircraftView jet)
+        {
+            var agent = jet.GetComponent<FighterAgent>();
+            var rule = jet.GetComponent<AviatorPilot>();
+            if (rule != null && rule.enabled) rule.Reseat();   // before its Start, Start seats it
+            FighterTraining training = FindAnyObjectByType<FighterTraining>();
+            if (training != null) training.Reseat(agent);
+            Debug.Log($"[RH Aviator] {jet.name}: now flown by {BrainOf(jet, out ModelAsset m)}{(m != null && BrainOf(jet, out _) == FighterBrain.Saved ? $" ({m.name})" : "")}, changed in play.", jet);
+        }
+
+        /// <summary>Every jet of the squadron to its brain: which pilot flies, the agent's behaviour type and model.</summary>
+        public void Apply()
+        {
+            foreach (AircraftView jet in Jets) if (jet != null) ApplyJet(jet);
+        }
+
+        /// <summary>One jet to its brain. True when anything about who flies it changed.</summary>
+        bool ApplyJet(AircraftView jet)
+        {
+            bool playing = Application.isPlaying;
+            {
                 FighterBrain jetBrain = BrainOf(jet, out ModelAsset saved);
                 BrainPlan plan = BrainPlan.For(jetBrain);
                 BehaviorType type = plan.Behaviour;
@@ -152,6 +218,7 @@ namespace DeepWater.Aviator.Learning
                     if (behaviour != null) UnityEditor.EditorUtility.SetDirty(behaviour);
                 }
 #endif
+                return changed;
             }
         }
 

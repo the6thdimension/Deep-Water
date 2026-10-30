@@ -358,5 +358,88 @@ namespace DeepWater.Aviator.Tests
             for (int i = 0; i < 3 * 50; i++) { core2.Step(); fight2.Score(core2); }
             Assert.AreEqual(Side.Blue, fight2.SideOf(1), "back in the fight after its respawn");
         }
+
+        // The price ledger (A23): game credits, AUTHORED for the test.
+        static readonly PriceList Prices = new PriceList { Jet = 1000f, FriendlyKillPenalty = 500f, Round = 1f, HeatMissile = 50f, RadarMissile = 120f, Chaff = 3f, Flare = 3f, FuelPerKg = 0.02f };
+
+        /// <summary>Fires from Range's shooter until the kill, then lets the wreck fall to the sea; the price ledger watching.</summary>
+        static PriceLedger KillPriced(bool friend, out int fired)
+        {
+            FlightCore core = Range(out TriggerSeat shooter, out Engagement fight, out _);
+            if (friend) fight.Join(2, Side.Blue);   // the target on the shooter's side
+            var prices = new PriceLedger(Prices, fight);
+            prices.Observe(core);
+            int roundsBefore = core.Find(1).State.Rounds;
+            shooter.FireFrom = core.Tick;
+            while (core.Kills.Count == 0 && core.Tick < 300) { core.Step(); prices.Observe(core); }
+            Assert.AreEqual(1, core.Kills.Count);
+            shooter.FireUntil = core.Tick;
+            for (int i = 0; i < 60 * 50 && core.Find(2).State.Status == FlightStatus.Killed; i++) { core.Step(); prices.Observe(core); }
+            Assert.AreEqual(FlightStatus.Crashed, core.Find(2).State.Status);
+            fired = roundsBefore - core.Find(1).State.Rounds;
+            return prices;
+        }
+
+        [Test]
+        public void ThePriceLedger_ChargesEachRound_AndAnEnemyKillEarnsAJet_TheVictimLosingOne_Once()
+        {
+            PriceLedger prices = KillPriced(friend: false, out int fired);
+            JetAccount shooter = prices.Of(1), victim = prices.Of(2);
+            Debug.Log($"[PRICES] enemy kill: shooter fired {shooter.Rounds} rounds, spent {shooter.Spent:F1}, earned {shooter.Earned:F0}, net {shooter.Net:F1}; " +
+                      $"victim deaths {victim.Deaths}, lost {victim.Lost:F0}; blue {prices.SideNet(Side.Blue):F1}, red {prices.SideNet(Side.Red):F1}");
+            Assert.Greater(fired, 0);
+            Assert.AreEqual(fired, shooter.Rounds, "every round that left the gun is counted");
+            Assert.AreEqual(fired * Prices.Round, shooter.Spent, 1e-3f, "at L0 no fuel burns: only rounds are spent");
+            Assert.AreEqual(1, shooter.Kills);
+            Assert.AreEqual(Prices.Jet, shooter.Earned);
+            Assert.AreEqual(0f, shooter.Lost);
+            Assert.AreEqual(1, victim.Deaths, "shot down, then the fall to the sea: one death");
+            Assert.AreEqual(Prices.Jet, victim.Lost);
+            Assert.AreEqual(Prices.Jet - fired * Prices.Round, prices.SideNet(Side.Blue), 1e-3f);
+            Assert.AreEqual(-Prices.Jet, prices.SideNet(Side.Red), 1e-3f);
+        }
+
+        [Test]
+        public void ThePriceLedger_AFriendShotDown_CostsTheShooterAJetAndThePenalty_AndEarnsNothing()
+        {
+            PriceLedger prices = KillPriced(friend: true, out int fired);
+            JetAccount shooter = prices.Of(1), victim = prices.Of(2);
+            Debug.Log($"[PRICES] friendly kill: shooter spent {shooter.Spent:F1}, lost {shooter.Lost:F0}, net {shooter.Net:F1}; victim lost {victim.Lost:F0}; blue {prices.SideNet(Side.Blue):F1}");
+            Assert.AreEqual(0, shooter.Kills);
+            Assert.AreEqual(1, shooter.FriendlyKills);
+            Assert.AreEqual(0f, shooter.Earned);
+            Assert.AreEqual(Prices.Jet + Prices.FriendlyKillPenalty, shooter.Lost);
+            Assert.AreEqual(Prices.Jet, victim.Lost, "the friend still loses its own jet");
+            Assert.AreEqual(-(fired * Prices.Round + 2f * Prices.Jet + Prices.FriendlyKillPenalty), prices.SideNet(Side.Blue), 1e-3f, "blue pays twice for one jet, and the penalty");
+        }
+
+        [Test]
+        public void ThePriceLedger_CountsTheSameDeathsAsTheRewardLedger_ThroughCrashesCollisionsAndRespawns()
+        {
+            AircraftProfile e = E();
+            var core = new FlightCore(new SubstepClock(0.02f, 4), new FlatSurface(0f));
+            core.Add(AircraftFactory.Build(1, e, L0, Level(e, L0, new Vector3(0f, 2000f, -1000f), 0f)), new TriggerSeat());
+            core.Add(AircraftFactory.Build(2, e, L0, Level(e, L0, new Vector3(0f, 2000f, 1000f), 180f)), new TriggerSeat());
+            core.Add(AircraftFactory.Build(3, e, L0, Level(e, L0, new Vector3(4000f, 300f, 0f), 90f)), new TriggerSeat { Pitch = -1f });
+            core.Add(AircraftFactory.Build(4, e, L0, Level(e, L0, new Vector3(-9000f, 2000f, 0f), 270f)), new TriggerSeat());
+            var arena = new Arena(new ArenaSettings { RespawnDelayS = 3f, ProtectionS = 5f, CollisionM = 15f, HalfWidthXM = 10000f, HalfWidthZM = 10000f }, 0.02, 1);
+            core.UseArena(arena);
+            for (int id = 1; id <= 4; id++) arena.Assign(id, core.Find(id).State);   // back where each started: 3 keeps diving in
+            var fight = new Engagement();
+            fight.Join(1, Side.Blue); fight.Join(3, Side.Blue);
+            fight.Join(2, Side.Red); fight.Join(4, Side.Red);
+            var ledger = new RewardLedger(Pay, fight);
+            var prices = new PriceLedger(Prices, fight);
+            for (int t = 0; t < 60 * 50; t++) { core.Step(); fight.Score(core); ledger.Observe(core); prices.Observe(core); }
+            string counts = string.Join(", ", Enumerable.Range(1, 4).Select(i => $"{i}: {prices.Of(i).Deaths} / {ledger.LossesOf(i)}"));
+            Debug.Log($"[PRICES] deaths, price ledger / reward ledger, over 60 s: {counts}");
+            Assert.Greater(prices.Of(3).Deaths, 1, "set-up: the diving jet comes back and dives in again");
+            for (int id = 1; id <= 4; id++)
+            {
+                Assert.AreEqual(ledger.LossesOf(id), prices.Of(id).Deaths, $"aircraft {id}");
+                Assert.AreEqual(prices.Of(id).Deaths * Prices.Jet, prices.Of(id).Lost, 1e-3f, $"aircraft {id}: a jet a death");
+                Assert.AreEqual(0f, prices.Of(id).Spent, "nothing fired and no fuel burned at L0: a respawn's full stores are no refund and no charge");
+            }
+        }
     }
 }

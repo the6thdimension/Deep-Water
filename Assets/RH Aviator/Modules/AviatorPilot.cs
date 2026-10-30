@@ -46,6 +46,7 @@ namespace DeepWater.Aviator.Modules
 
         readonly RuleLog _log = new RuleLog();
         AviatorSeat _seat;
+        bool _started, _logging;
 
         public AviatorSeat Seat => _seat;
         /// <summary>The side it fights on, or None when its task is not Fight.</summary>
@@ -54,20 +55,49 @@ namespace DeepWater.Aviator.Modules
 
         void Start()
         {
+            _started = true;
+            if (!SeatIt()) return;
+            // Enabled after the fight was ordered (a brain changed in play, A23): it joins the fight itself.
+            if (task == Task.Fight)
+            {
+                AviatorFight fight = FindAnyObjectByType<AviatorFight>();
+                if (fight != null && fight.Ordered) fight.Enlist(this);
+            }
+        }
+
+        /// <summary>
+        /// Seats it again, as its settings are now (A23: a brain changed in play, a rule pilot's skill or the jet handed
+        /// back from a learned pilot), in the fight when it fights. False before its Start (which seats it) or when it
+        /// cannot be seated.
+        /// </summary>
+        public bool Reseat()
+        {
+            if (!_started) return false;
+            if (!SeatIt()) return false;
+            if (task == Task.Fight)
+            {
+                AviatorFight fight = FindAnyObjectByType<AviatorFight>();
+                if (fight != null && fight.Ordered) fight.Enlist(this);
+            }
+            return true;
+        }
+
+        bool SeatIt()
+        {
             var view = GetComponent<AircraftView>();
             var runner = FindAnyObjectByType<AirWingRunner>();
             if (runner == null || runner.Flight == null || runner.Roster == null || view.Aircraft == null)
             {
                 Debug.LogError("[RH Aviator] no Air Wing runner has built this jet; the AI pilot is not seated.", this);
-                return;
+                return false;
             }
             if (profile == null || (task == Task.Route && route == null))
             {
                 Debug.LogError("[RH Aviator] assign a pilot profile (and a route for the Route task); the AI pilot is not seated.", this);
-                return;
+                return false;
             }
             PilotProfile p = profile.Bake();
-            if (logRules) _log.Fired += f => Debug.Log($"[RH Aviator] {f}", this);
+            if (logRules && !_logging) { _log.Fired += f => Debug.Log($"[RH Aviator] {f}", this); _logging = true; }
             int id = view.AircraftId;
             _seat = task == Task.Route
                 ? new AviatorSeat(runner.Flight, view.Aircraft.Profile, p, route.Bake(), _log)
@@ -80,6 +110,7 @@ namespace DeepWater.Aviator.Modules
             string what = task == Task.Fight ? $"fighting for {side}" : task == Task.Route ? $"flying {route.name} ({_seat.Route.Gates.Count} gates)" : task == Task.Wingman ? $"joining aircraft {leaderId}" : "holding course";
             string seated = runner.PlayerAircraftId == id ? "; the player flies it until the seat cycle hands it over" : "";
             Debug.Log($"[RH Aviator] aircraft {id}: pilot '{p.Name}' {what}{seated}{(homeRunway != null ? $"; home {homeRunwayName}" : "; no home runway")}.", this);
+            return true;
         }
 
         /// <summary>

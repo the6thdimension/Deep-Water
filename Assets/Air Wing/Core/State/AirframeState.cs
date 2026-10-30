@@ -81,5 +81,7 @@ namespace DeepWater.AirWing.Core.State
         public int RadarMissiles;
         /// <summary>Ticks until the next launch may go (the launch interval).</summary>
         public int MissileCooldownTicks;
+        /// <summary>Chaff and flares left (W69), and ticks until the next of each may drop.</summary>
+        public int Chaff, Flares, ChaffCooldownTicks, FlareCooldownTicks;
     }
 }

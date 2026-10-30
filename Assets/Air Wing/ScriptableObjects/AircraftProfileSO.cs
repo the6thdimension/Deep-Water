@@ -259,6 +259,15 @@ namespace DeepWater.AirWing.ScriptableObjects
         [Tooltip("Seconds a radar stays shown after it last painted the jet: searching, and tracking or guiding.")]
         public float rwrSearchHoldS, rwrTrackHoldS;
 
+        [Header("Chaff and flares (J4; AUTHORED)")]
+        public bool cmSet;
+        [Tooltip("Chaff and flares carried, refilled on respawn.")]
+        public int cmChaff, cmFlares;
+        [Tooltip("Chance one drop breaks each missile of its kind coming at the jet: chaff on radar missiles, flares on heat-seekers.")]
+        public float cmChaffBreakChance, cmFlareBreakChance;
+        [Tooltip("Least seconds between two drops of the same kind.")]
+        public float cmIntervalS;
+
         [Header("Provenance (W8)")]
         [TextArea(8, 40)]
         public string provenance = "";
@@ -460,6 +469,12 @@ namespace DeepWater.AirWing.ScriptableObjects
                 profile.Iff = new DeepWater.AirWing.Core.Radar.IffProfile { IsSet = true, ReplyChance = iffReplyChance, InterrogateIntervalS = iffInterrogateIntervalS };
             if (rwrSet)
                 profile.WarningReceiver = new DeepWater.AirWing.Core.Radar.WarningReceiverProfile { IsSet = true, SearchHoldS = rwrSearchHoldS, TrackHoldS = rwrTrackHoldS };
+            if (cmSet)
+                profile.Countermeasures = new DeepWater.AirWing.Core.Missiles.CountermeasureProfile
+                {
+                    IsSet = true, Chaff = cmChaff, Flares = cmFlares, ChaffBreakChance = cmChaffBreakChance,
+                    FlareBreakChance = cmFlareBreakChance, IntervalS = cmIntervalS,
+                };
             profile.Validate();
             return profile;
         }

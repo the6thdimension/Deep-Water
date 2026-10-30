@@ -160,6 +160,8 @@ namespace DeepWater.AirWing.Core
                 HitPoints = profile.Combat.HitPoints,
                 Missiles = profile.Missiles.Carried,
                 RadarMissiles = profile.Missiles.RadarCarried,
+                Chaff = profile.Countermeasures.IsSet ? profile.Countermeasures.Chaff : 0,
+                Flares = profile.Countermeasures.IsSet ? profile.Countermeasures.Flares : 0,
             };
         }
     }

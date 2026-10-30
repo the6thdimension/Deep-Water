@@ -18,6 +18,10 @@ namespace DeepWater.AirWing.Core.Inputs
         /// once per the jet's interrogation interval.
         /// </summary>
         Interrogate = 1 << 6,
+        /// <summary>Momentary (SENSORS-CONCEPT J4, W69): drops chaff; a held button drops one per the jet's interval.</summary>
+        Chaff = 1 << 7,
+        /// <summary>Momentary (J4, W69): drops a flare; a held button drops one per the jet's interval.</summary>
+        Flare = 1 << 8,
         /// <summary>
         /// Momentary, not a switch (BLUEPRINT Q6): set for one tick, it puts the aircraft back at its start state
         /// before that tick flies. It travels in the Pilot Inputs so the input log records it and a replay repeats it.

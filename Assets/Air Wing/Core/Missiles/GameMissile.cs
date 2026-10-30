@@ -124,7 +124,7 @@ namespace DeepWater.AirWing.Core.Missiles
         public int ShooterResets;
     }
 
-    public enum MissileEventKind : byte { Launched = 0, Burst = 1, Lost = 2, Expired = 3, Active = 4 }
+    public enum MissileEventKind : byte { Launched = 0, Burst = 1, Lost = 2, Expired = 3, Active = 4, Decoyed = 5 }
 
     /// <summary>Something a missile did, on a tick.</summary>
     public readonly struct MissileEvent
@@ -153,6 +153,7 @@ namespace DeepWater.AirWing.Core.Missiles
             MissileEventKind.Burst => $"tick {Tick} · missile {MissileId} ({ShooterId}) burst at {TargetId}{(Killed ? ", a kill" : "")}",
             MissileEventKind.Lost => $"tick {Tick} · missile {MissileId} ({ShooterId}) lost {TargetId}",
             MissileEventKind.Active => $"tick {Tick} · missile {MissileId} ({ShooterId}) went active on {TargetId}",
+            MissileEventKind.Decoyed => $"tick {Tick} · missile {MissileId} ({ShooterId}) decoyed by {TargetId}",
             _ => $"tick {Tick} · missile {MissileId} ({ShooterId}) expired",
         };
     }

@@ -21,6 +21,16 @@ namespace DeepWater.AirWing.Core.Missiles
         /// <summary>Radar missiles launched (W68), and how many went active.</summary>
         public int RadarLaunched { get; private set; }
         public int WentActive { get; private set; }
+        /// <summary>Chaff and flares dropped (W69), and missiles a drop broke (each also lost).</summary>
+        public int ChaffDropped { get; private set; }
+        public int FlaresDropped { get; private set; }
+        public int Decoyed { get; private set; }
+
+        internal void NoteDrop(bool chaff)
+        {
+            if (chaff) ChaffDropped++;
+            else FlaresDropped++;
+        }
 
         internal List<MissileInFlight> Mutable => _live;
 
@@ -42,6 +52,7 @@ namespace DeepWater.AirWing.Core.Missiles
         {
             if (e.Kind == MissileEventKind.Burst) Bursts++;
             if (e.Kind == MissileEventKind.Active) WentActive++;
+            if (e.Kind == MissileEventKind.Decoyed) Decoyed++;
             _events.Add(e);
         }
     }

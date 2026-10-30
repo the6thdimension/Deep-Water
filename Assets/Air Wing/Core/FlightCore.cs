@@ -49,6 +49,8 @@ namespace DeepWater.AirWing.Core
         readonly ISurfaceTruth _surface;
         readonly IContactProbe _probe;
         readonly List<PilotInputs> _issued = new List<PilotInputs>();
+        /// <summary>What each aircraft dropped this tick (W69): 1 chaff, 2 a flare.</summary>
+        readonly List<byte> _drops = new List<byte>();
         readonly List<GunTarget> _targets = new List<GunTarget>();
         readonly List<HitReport> _tickHits = new List<HitReport>();
         readonly List<HitReport> _hits = new List<HitReport>();
@@ -295,11 +297,46 @@ namespace DeepWater.AirWing.Core
         /// jet whose pickle is pressed, with a lock, a missile and its interval run out, launches from its next pylon; that
         /// missile flies from the next tick. Protected jets (W59) can't be locked, hit or launch.
         /// </summary>
+        /// <summary>
+        /// Chaff and flares (W69, J4): each flying jet holding its Chaff or Flare button drops one, if it has one left and
+        /// that kind's interval has run out. <see cref="_drops"/> keeps what each jet dropped this tick: 1 chaff, 2 a flare.
+        /// </summary>
+        void DropDecoys(float dt)
+        {
+            while (_drops.Count < _aircraft.Count) _drops.Add(0);
+            for (int i = 0; i < _aircraft.Count; i++)
+            {
+                _drops[i] = 0;
+                Aircraft a = _aircraft[i];
+                ref AirframeState s = ref a.State;
+                if (s.ChaffCooldownTicks > 0) s.ChaffCooldownTicks--;
+                if (s.FlareCooldownTicks > 0) s.FlareCooldownTicks--;
+                CountermeasureProfile cm = a.Profile.Countermeasures;
+                if (!cm.IsSet || s.Status != FlightStatus.Flying) continue;
+                int interval = Mathf.Max(1, Mathf.RoundToInt(cm.IntervalS / dt));
+                if (_issued[i].Has(PilotSwitches.Chaff) && s.Chaff > 0 && s.ChaffCooldownTicks == 0)
+                {
+                    s.Chaff--;
+                    s.ChaffCooldownTicks = interval;
+                    _drops[i] |= 1;
+                    Missiles.NoteDrop(chaff: true);
+                }
+                if (_issued[i].Has(PilotSwitches.Flare) && s.Flares > 0 && s.FlareCooldownTicks == 0)
+                {
+                    s.Flares--;
+                    s.FlareCooldownTicks = interval;
+                    _drops[i] |= 2;
+                    Missiles.NoteDrop(chaff: false);
+                }
+            }
+        }
+
         void MissileStage(long tick)
         {
             float dt = (float)Clock.TickSeconds;
             int steps = Clock.Substeps;
             float sdt = dt / steps;
+            DropDecoys(dt);
             List<MissileInFlight> live = Missiles.Mutable;
             int kept = 0;
             for (int i = 0; i < live.Count; i++)
@@ -312,6 +349,14 @@ namespace DeepWater.AirWing.Core
                 Vector3 tFrom = ti >= 0 ? _picture[ti].State.Position : m.Position, tTo = target != null ? target.State.Position : m.Position;
                 bool trackable = target != null && target.State.Status == FlightStatus.Flying && target.Resets == m.TargetResets;
                 Vector3 from = m.Position;
+
+                // Chaff or a flare its target dropped this tick may break it (W69, J4): one draw, only for the right kind.
+                if (!m.Lost && trackable && _drops[ti] != 0
+                    && target.Profile.Countermeasures.Breaks(m.Radar, (_drops[ti] & 1) != 0, (_drops[ti] & 2) != 0, _missileDraws))
+                {
+                    m.Lost = true;
+                    Missiles.Log(new MissileEvent(tick, m.Id, m.ShooterId, m.TargetId, MissileEventKind.Decoyed, m.Position, false));
+                }
 
                 // A radar missile not yet active flies on the shooter's track (W68, J7): lost if the shooter goes down,
                 // respawns or drops the lock; active once it is within its active range of where the track says the target is.

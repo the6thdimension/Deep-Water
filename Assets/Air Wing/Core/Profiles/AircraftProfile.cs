@@ -136,6 +136,8 @@ namespace DeepWater.AirWing.Core.Profiles
         public DeepWater.AirWing.Core.Radar.IffProfile Iff;
         /// <summary>The radar warning receiver (J3); unset: it hears nothing.</summary>
         public DeepWater.AirWing.Core.Radar.WarningReceiverProfile WarningReceiver;
+        /// <summary>Chaff and flares (J4, W69); unset: it carries none.</summary>
+        public DeepWater.AirWing.Core.Missiles.CountermeasureProfile Countermeasures;
 
         /// <summary>Airframe L1 and Flight Controls L1 come as a pair: one without the other cannot fly.</summary>
         public bool HasL1 => AirframeL1.IsSet && ControlsL1.IsSet;
@@ -154,6 +156,7 @@ namespace DeepWater.AirWing.Core.Profiles
             if (Radar.IsSet) Radar.Validate();
             if (Iff.IsSet) Iff.Validate();
             if (WarningReceiver.IsSet) WarningReceiver.Validate();
+            if (Countermeasures.IsSet) Countermeasures.Validate();
         }
     }
 }

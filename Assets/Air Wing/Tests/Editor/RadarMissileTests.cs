@@ -18,7 +18,7 @@ namespace DeepWater.AirWing.Tests
     public class RadarMissileTests
     {
         /// <summary>Jet 1 locked in single-target track on jet 2, <paramref name="aheadM"/> ahead and flying the same way.</summary>
-        static FlightCore Locked(out RadarSeat[] seats, float aheadM, ulong seed = 5)
+        internal static FlightCore Locked(out RadarSeat[] seats, float aheadM, ulong seed = 5)
         {
             FlightCore core = FightAll(out seats, seed, (new Vector3(0f, 0f, aheadM), 0f));
             seats[1].Next = RadarCommand.Off;   // only jet 1 emits

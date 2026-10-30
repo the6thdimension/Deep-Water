@@ -314,6 +314,12 @@ MonoBehaviour:
   rwrSet: 1
   rwrSearchHoldS: 5
   rwrTrackHoldS: 0.5
+  cmSet: 1
+  cmChaff: 30
+  cmFlares: 30
+  cmChaffBreakChance: 0.25
+  cmFlareBreakChance: 0.25
+  cmIntervalS: 1
   provenance: "Sources and tags in full: Assets/Air Wing/Calibration~/F18E-SOURCES.md
     (read 2026-10-25).\nPUBLIC = official page; CALIBRATED = fitted to one public
     figure (C16); AUTHORED = our estimate.\n\nspanFt 44.9: PUBLIC, Navy fact file
@@ -429,4 +435,10 @@ MonoBehaviour:
     it, then its own radar takes over); BoostAccelMps2 150 for BurnS 6; DragPerM
     2e-5; MaxG 30; NavGain 4; SeekerConeDeg 45; launch cone LockConeDeg 45, LockMinM
     1500 to LockMaxM 25000 (J15); ArmS 1; LifeS 50; the burst as the heat-seeker's:
-    LethalRadiusM 15, KillChance 0.7, DamageHp 6; LaunchIntervalS 1."
+    LethalRadiusM 15, KillChance 0.7, DamageHp 6; LaunchIntervalS 1.\n\n--- Chaff
+    and flares (W69) ---\nChaff and flares (SENSORS-CONCEPT J4, SIX 2026-10-29),
+    a game's numbers, not any real dispenser; all AUTHORED: cmChaff 30 and cmFlares
+    30, refilled on respawn (the open question's leaning); cmChaffBreakChance 0.25
+    (each chaff drop breaks each radar missile coming at the jet one time in four)
+    and cmFlareBreakChance 0.25 (the same for heat-seekers); cmIntervalS 1 (a held
+    button drops one a second)."

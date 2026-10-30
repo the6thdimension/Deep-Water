@@ -88,6 +88,7 @@ namespace DeepWater.Aviator.Learning
                 var seat = new LearnedSeat(runner.Flight, view.Aircraft.Profile, pilot);
                 runner.Roster.SetOwnSeat(id, seat);
                 engagement.Join(id, a.Side);
+                runner.Flight.SetIffCode(id, (int)a.Side);   // one IFF code per side (SENSORS-CONCEPT J5)
                 _ledger.Track(id);
                 a.Bind(this, seat, id);
             }

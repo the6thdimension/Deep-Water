@@ -14,6 +14,11 @@ namespace DeepWater.AirWing.Core.Inputs
         AltitudeHold = 1 << 4,
         ApproachSpeedHold = 1 << 5,
         /// <summary>
+        /// Momentary (SENSORS-CONCEPT J5): asks every contact in the radar's beam for an IFF answer. A held button asks
+        /// once per the jet's interrogation interval.
+        /// </summary>
+        Interrogate = 1 << 6,
+        /// <summary>
         /// Momentary, not a switch (BLUEPRINT Q6): set for one tick, it puts the aircraft back at its start state
         /// before that tick flies. It travels in the Pilot Inputs so the input log records it and a replay repeats it.
         /// </summary>

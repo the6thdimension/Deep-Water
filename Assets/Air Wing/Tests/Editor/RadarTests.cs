@@ -27,21 +27,23 @@ namespace DeepWater.AirWing.Tests
         static readonly FidelitySheet L0 = new FidelitySheet(FidelityLevel.L0, FidelityLevel.L0, FidelityLevel.L0, FidelityLevel.L0, FidelityLevel.L0, 4, 1442);
         const float Kt = 0.514444f;
         const int TicksPerS = 50;
-        static AircraftProfile E() => AssetDatabase.LoadAssetAtPath<AircraftProfileSO>("Assets/Air Wing/ScriptableObjects/FA18E_AirWing.asset").Bake();
+        internal static AircraftProfile E() => AssetDatabase.LoadAssetAtPath<AircraftProfileSO>("Assets/Air Wing/ScriptableObjects/FA18E_AirWing.asset").Bake();
 
         static AirframeState Level(in AircraftProfile e, Vector3 at, float headingDeg, float kt = 400f) =>
             AircraftFactory.LevelStart(e, L0, at, headingDeg, kt * Kt, 0.6f * e.Airframe.InternalFuelKg, 0.7f);
 
         /// <summary>A seat that holds the throttle and sends one radar command when told to (and a reset when told to).</summary>
-        sealed class RadarSeat : ISeat
+        internal sealed class RadarSeat : ISeat
         {
             public RadarCommand Next;
             public int NextTrack;
             public bool ResetNext;
+            /// <summary>Switches held every tick (e.g. Interrogate).</summary>
+            public PilotSwitches Hold;
             public SeatKind Kind => SeatKind.Scenario;
             public PilotInputs Issue(long tick, int aircraftId, in AirframeState state)
             {
-                var p = new PilotInputs { Throttle = 0.7f, Radar = Next, RadarTrack = NextTrack, Switches = ResetNext ? PilotSwitches.Reset : default };
+                var p = new PilotInputs { Throttle = 0.7f, Radar = Next, RadarTrack = NextTrack, Switches = Hold | (ResetNext ? PilotSwitches.Reset : default) };
                 Next = RadarCommand.None;
                 NextTrack = 0;
                 ResetNext = false;
@@ -50,7 +52,7 @@ namespace DeepWater.AirWing.Tests
         }
 
         /// <summary>A shooter (id 1) at 10,000 ft heading north, and targets (ids 2, 3 …) at the given offsets and headings.</summary>
-        static FlightCore Fight(out RadarSeat shooter, ulong seed, params (Vector3 offset, float heading)[] targets)
+        internal static FlightCore Fight(out RadarSeat shooter, ulong seed, params (Vector3 offset, float heading)[] targets)
         {
             AircraftProfile e = E();
             var core = new FlightCore(new SubstepClock(0.02f, 4), new FlatSurface(0f), gunnerySeed: seed);
@@ -62,13 +64,26 @@ namespace DeepWater.AirWing.Tests
             return core;
         }
 
-        static void Run(FlightCore core, float seconds)
+        /// <summary>As the one-seat Fight, handing back every seat (index 0 the shooter).</summary>
+        internal static FlightCore FightAll(out RadarSeat[] seats, ulong seed, params (Vector3 offset, float heading)[] targets)
+        {
+            AircraftProfile e = E();
+            var core = new FlightCore(new SubstepClock(0.02f, 4), new FlatSurface(0f), gunnerySeed: seed);
+            seats = new RadarSeat[targets.Length + 1];
+            var origin = new Vector3(0f, 3048f, 0f);
+            core.Add(AircraftFactory.Build(1, e, L0, Level(e, origin, 0f)), seats[0] = new RadarSeat());
+            for (int i = 0; i < targets.Length; i++)
+                core.Add(AircraftFactory.Build(2 + i, e, L0, Level(e, origin + targets[i].offset, targets[i].heading)), seats[i + 1] = new RadarSeat());
+            return core;
+        }
+
+        internal static void Run(FlightCore core, float seconds)
         {
             long end = core.Tick + (long)Mathf.Round(seconds * TicksPerS);
             while (core.Tick < end) core.Step();
         }
 
-        static IEnumerable<RadarTrack> Firm(JetRadar r) => r.Tracks.Where(t => t.State == TrackState.Confirmed || t.State == TrackState.Coasting);
+        internal static IEnumerable<RadarTrack> Firm(JetRadar r) => r.Tracks.Where(t => t.State == TrackState.Confirmed || t.State == TrackState.Coasting);
 
         /// <summary>One look from a radar at 6 km at a target nose-on at <paramref name="rangeM"/> and <paramref name="heightM"/>.</summary>
         static JetLookResult LookAt(in RadarProfile p, float rangeM, float heightM, double? seaGamma, ulong seed = 1)

@@ -104,6 +104,8 @@ namespace DeepWater.AirWing.Core
         }
 
         readonly List<JetRadar> _radars = new List<JetRadar>();
+        readonly List<WarningReceiver> _receivers = new List<WarningReceiver>();
+        readonly List<RadarPaint> _paints = new List<RadarPaint>();
         readonly DeterministicRng _radarDraws;
 
         /// <summary>The world the radars look through (SENSORS-CONCEPT J16); default: no sea, no clutter.</summary>
@@ -120,6 +122,19 @@ namespace DeepWater.AirWing.Core
         /// <summary>Aircraft <paramref name="id"/>'s radar, or null for a type without one (J1).</summary>
         public JetRadar RadarOf(int id) => _radars[IndexOf(id)];
 
+        /// <summary>Aircraft <paramref name="id"/>'s radar warning receiver, or null for a type without one (J3).</summary>
+        public WarningReceiver WarningReceiverOf(int id) => _receivers[IndexOf(id)];
+
+        /// <summary>
+        /// Give aircraft <paramref name="id"/> the IFF code its transponder answers in (J5; 0: none). Jets in one code are
+        /// friends to each other's interrogators. Whoever runs the fight sets it (RH Aviator: one code per side).
+        /// </summary>
+        public void SetIffCode(int id, int code)
+        {
+            if (code < 0) throw new ArgumentOutOfRangeException(nameof(code), code, "IFF codes are zero or more");
+            _aircraft[IndexOf(id)].IffCode = code;
+        }
+
         /// <summary>Add an aircraft and the seat that flies it. Ids must rise, so the tick order and the Fix are stable.</summary>
         public void Add(Aircraft aircraft, ISeat seat)
         {
@@ -128,7 +143,8 @@ namespace DeepWater.AirWing.Core
                 throw new ArgumentException($"Aircraft ids must rise: {aircraft.Id} after {_aircraft[_aircraft.Count - 1].Id}.", nameof(aircraft));
             _aircraft.Add(aircraft);
             _seats.Add(seat ?? throw new ArgumentNullException(nameof(seat)));
-            _radars.Add(aircraft.Profile.Radar.IsSet ? new JetRadar(aircraft.Id, aircraft.Profile.Radar) : null);
+            _radars.Add(aircraft.Profile.Radar.IsSet ? new JetRadar(aircraft.Id, aircraft.Profile.Radar, aircraft.Profile.Iff) : null);
+            _receivers.Add(aircraft.Profile.WarningReceiver.IsSet ? new WarningReceiver(aircraft.Id, aircraft.Profile.WarningReceiver) : null);
         }
 
         /// <summary>Hand aircraft <paramref name="id"/> to another seat. Takes effect on the next tick (W18).</summary>
@@ -248,8 +264,17 @@ namespace DeepWater.AirWing.Core
         void RadarStage(long tick)
         {
             double tickS = Math.Round(Clock.TickSeconds, 6);
+            _paints.Clear();
             for (int i = 0; i < _aircraft.Count; i++)
-                _radars[i]?.Step(tick, tickS, _aircraft[i], _issued[i], _aircraft, _surface, RadarWorld, _radarDraws);
+            {
+                JetRadar r = _radars[i];
+                if (r == null) continue;
+                r.Step(tick, tickS, _aircraft[i], _issued[i], _aircraft, _surface, RadarWorld, _radarDraws);
+                _paints.AddRange(r.Paints);
+            }
+            // The warning receivers hear this tick's paints, after every radar has looked (J3).
+            for (int i = 0; i < _aircraft.Count; i++)
+                _receivers[i]?.Step(tick, tickS, _aircraft[i], _aircraft, _paints);
         }
 
         int IndexOrNone(int id)

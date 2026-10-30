@@ -25,12 +25,16 @@ namespace DeepWater.AirWing.Core.Radar
     /// flying is silent.</item>
     /// </list>
     /// Which aircraft made each track (<see cref="TryTruth"/>) is kept for the core's own use (the warning receiver and the
-    /// radar missile, later slices). A pilot reads <see cref="Tracks"/>.
+    /// radar missile). A pilot reads <see cref="Tracks"/> and what IFF said of each (<see cref="IdentityOf"/>, J5): the
+    /// <see cref="PilotSwitches.Interrogate"/> press asks every track inside the beam, and a jet in the asker's code
+    /// answers at its transponder's reply chance (one seeded draw each). Each beam crossing a jet is a
+    /// <see cref="RadarPaint"/> for that jet's warning receiver (J3), detected or not.
     /// </summary>
     public sealed class JetRadar
     {
         public readonly int AircraftId;
         public readonly RadarProfile Profile;
+        public readonly IffProfile Iff;
 
         readonly double _snrAt1mDb;
         readonly TrackFileSettings _fileSettings;
@@ -39,8 +43,11 @@ namespace DeepWater.AirWing.Core.Radar
         readonly List<int> _stale = new List<int>();
         readonly List<Plot> _plots = new List<Plot>();
         readonly List<int> _plotOwners = new List<int>();
+        readonly Dictionary<int, TrackIdentity> _identity = new Dictionary<int, TrackIdentity>();
+        readonly List<RadarPaint> _paintsNow = new List<RadarPaint>();
         int _resets;
         int _misses;
+        long _lastAskTick = long.MinValue / 2;
 
         /// <summary>What the radar is doing now.</summary>
         public RadarMode Mode { get; private set; }
@@ -61,11 +68,25 @@ namespace DeepWater.AirWing.Core.Radar
         /// <summary>Every live track: tentative, confirmed or coasting.</summary>
         public IReadOnlyList<RadarTrack> Tracks => _file.Tracks;
 
-        public JetRadar(int aircraftId, in RadarProfile profile)
+        /// <summary>This tick's beam crossings (J3): the core hands them to the warning receivers.</summary>
+        public IReadOnlyList<RadarPaint> Paints => _paintsNow;
+
+        /// <summary>IFF interrogations honoured in all, and friends' answers received (J5).</summary>
+        public int Interrogations { get; private set; }
+        public int Answers { get; private set; }
+
+        /// <summary>What IFF has said about track <paramref name="trackId"/> (J5): friend once it answered, else unknown.</summary>
+        public TrackIdentity IdentityOf(int trackId) => _identity.TryGetValue(trackId, out TrackIdentity i) ? i : TrackIdentity.Unknown;
+
+        public JetRadar(int aircraftId, in RadarProfile profile) : this(aircraftId, profile, default) { }
+
+        public JetRadar(int aircraftId, in RadarProfile profile, in IffProfile iff)
         {
             profile.Validate();
+            if (iff.IsSet) iff.Validate();
             AircraftId = aircraftId;
             Profile = profile;
+            Iff = iff;
             _snrAt1mDb = JetRadarLook.SnrAt1mDb(profile);
             TrackFileSettings s = TrackFileSettings.Textbook(profile.TrackSigmaM, profile.TrackMaxSpeedMps, profile.TrackMaxAccelMps2);
             s.ConfirmHits = profile.ConfirmHits;
@@ -84,7 +105,9 @@ namespace DeepWater.AirWing.Core.Radar
         {
             _file = new TrackFile(_fileSettings);
             _truth.Clear();
+            _identity.Clear();
             _lastLooks.Clear();
+            _lastAskTick = long.MinValue / 2;
             Mode = Profile.StartMode;
             SearchMode = Profile.StartMode == RadarMode.Off ? RadarMode.RangeWhileSearch : Profile.StartMode;
             LockedTrackId = 0;
@@ -101,6 +124,7 @@ namespace DeepWater.AirWing.Core.Radar
         {
             if (self.Resets != _resets) { _resets = self.Resets; Clear(); }
             Emitting = false;
+            _paintsNow.Clear();
             if (self.State.Status != FlightStatus.Flying) return;
 
             Obey(command, self, all);
@@ -110,6 +134,12 @@ namespace DeepWater.AirWing.Core.Radar
             double timeS = (tick + 1) * tickS;
             double? seaGamma = world.Sea ? Clutter.SeaGammaDb(world.SeaBeaufort, RadarEquation.WavelengthM(Profile.Terms.FrequencyHz)) : (double?)null;
             float myHeight = HeightAbove(self.State.Position, surface);
+
+            if (command.Has(PilotSwitches.Interrogate) && Iff.IsSet && tick - _lastAskTick >= Math.Max(1L, (long)Math.Round(Iff.InterrogateIntervalS / tickS)))
+            {
+                _lastAskTick = tick;
+                Interrogate(self, all, draws);
+            }
 
             if (Mode == RadarMode.SingleTarget)
             {
@@ -125,8 +155,11 @@ namespace DeepWater.AirWing.Core.Radar
             for (int i = 0; i < all.Count; i++)
             {
                 Aircraft o = all[i];
-                if (o.Id == AircraftId || o.State.Status != FlightStatus.Flying || !o.Profile.RadarSignature.IsSet) continue;
-                if (!JetRadarLook.InVolume(volume, self.State.Position, self.State.Attitude, o.State.Position, out _)) continue;
+                if (o.Id == AircraftId || o.State.Status != FlightStatus.Flying) continue;
+                if (!JetRadarLook.InVolume(volume, self.State.Position, self.State.Attitude, o.State.Position, out float range)) continue;
+                if (range > RadarEquation.HorizonM(myHeight, HeightAbove(o.State.Position, surface))) continue;
+                _paintsNow.Add(new RadarPaint(AircraftId, o.Id, PaintKind.Search));   // the beam crossed it, seen or not
+                if (!o.Profile.RadarSignature.IsSet) continue;
                 JetLookResult look = LookAt(self, o, 0.0, surface, seaGamma, myHeight, draws);
                 if (!look.Detected) continue;
                 _plots.Add(look.Plot);
@@ -204,8 +237,10 @@ namespace DeepWater.AirWing.Core.Radar
             Aircraft target = null;
             for (int i = 0; i < all.Count; i++) if (all[i].Id == LockedAircraftId) { target = all[i]; break; }
             if (target != null && target.State.Status == FlightStatus.Flying && target.Profile.RadarSignature.IsSet
-                && JetRadarLook.InGimbal(Profile, self.State.Position, self.State.Attitude, target.State.Position))
+                && JetRadarLook.InGimbal(Profile, self.State.Position, self.State.Attitude, target.State.Position)
+                && (target.State.Position - self.State.Position).magnitude <= RadarEquation.HorizonM(myHeight, HeightAbove(target.State.Position, surface)))
             {
+                _paintsNow.Add(new RadarPaint(AircraftId, target.Id, PaintKind.Track));
                 JetLookResult look = LookAt(self, target, Profile.SingleTargetGainDb, surface, seaGamma, myHeight, draws);
                 if (look.Detected) { _plots.Add(look.Plot); _plotOwners.Add(target.Id); }
             }
@@ -230,6 +265,33 @@ namespace DeepWater.AirWing.Core.Radar
             return look;
         }
 
+        /// <summary>
+        /// One IFF challenge (J5) to every live track inside the beam (the search volume, or for a lock the gimbal and the
+        /// locked track only), in track order: a flying jet in this jet's code, with a transponder, answers at its reply
+        /// chance; the track then reads friend. No answer leaves the track as it was: IFF never says hostile.
+        /// </summary>
+        void Interrogate(Aircraft self, IReadOnlyList<Aircraft> all, DeterministicRng draws)
+        {
+            Interrogations++;
+            if (self.IffCode == 0) return;   // no code to ask in
+            RadarModeProfile? volume = Profile.Volume(Mode);
+            foreach (RadarTrack t in _file.Tracks)
+            {
+                if (Mode == RadarMode.SingleTarget && t.Id != LockedTrackId) continue;
+                var at = new Vector3((float)t.Position.X, (float)t.Position.Y, (float)t.Position.Z);
+                bool inBeam = volume.HasValue
+                    ? JetRadarLook.InVolume(volume.Value, self.State.Position, self.State.Attitude, at, out _)
+                    : JetRadarLook.InGimbal(Profile, self.State.Position, self.State.Attitude, at);
+                if (!inBeam || !_truth.TryGetValue(t.Id, out int who)) continue;
+                Aircraft o = null;
+                for (int i = 0; i < all.Count; i++) if (all[i].Id == who) { o = all[i]; break; }
+                if (o == null || o.State.Status != FlightStatus.Flying || !o.Profile.Iff.IsSet || o.IffCode != self.IffCode) continue;
+                if (!draws.Chance(o.Profile.Iff.ReplyChance, out _)) continue;
+                _identity[t.Id] = TrackIdentity.Friend;
+                Answers++;
+            }
+        }
+
         /// <summary>After a scan: each track's maker is the owner of the plot that last updated it; dropped tracks are forgotten.</summary>
         void RecordTruth()
         {
@@ -238,7 +300,7 @@ namespace DeepWater.AirWing.Core.Radar
             if (_truth.Count <= _file.Tracks.Count) return;
             _stale.Clear();
             foreach (int id in _truth.Keys) if (!_file.TryGet(id, out _)) _stale.Add(id);
-            foreach (int id in _stale) _truth.Remove(id);
+            foreach (int id in _stale) { _truth.Remove(id); _identity.Remove(id); }
         }
 
         bool Due(long tick, float periodS, double tickS)

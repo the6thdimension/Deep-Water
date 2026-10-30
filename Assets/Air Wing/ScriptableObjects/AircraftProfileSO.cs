@@ -241,6 +241,18 @@ namespace DeepWater.AirWing.ScriptableObjects
         [Tooltip("Radar cross-section seen from the nose, the beam and the tail, dBsm.")]
         public double rcsNoseDbsm, rcsBeamDbsm, rcsTailDbsm;
 
+        [Header("IFF (J5; AUTHORED; the code itself is set per fight, not here)")]
+        public bool iffSet;
+        [Tooltip("Chance the transponder answers a challenge in its code, 0 … 1.")]
+        public float iffReplyChance;
+        [Tooltip("Least seconds between two honoured interrogations.")]
+        public float iffInterrogateIntervalS;
+
+        [Header("Radar warning receiver (J3; AUTHORED)")]
+        public bool rwrSet;
+        [Tooltip("Seconds a radar stays shown after it last painted the jet: searching, and tracking or guiding.")]
+        public float rwrSearchHoldS, rwrTrackHoldS;
+
         [Header("Provenance (W8)")]
         [TextArea(8, 40)]
         public string provenance = "";
@@ -436,6 +448,10 @@ namespace DeepWater.AirWing.ScriptableObjects
                     Rcs = new RHRadarSuite.Detection.AspectRcs { NoseDbsm = rcsNoseDbsm, BeamDbsm = rcsBeamDbsm, TailDbsm = rcsTailDbsm },
                     IsSet = true,
                 };
+            if (iffSet)
+                profile.Iff = new DeepWater.AirWing.Core.Radar.IffProfile { IsSet = true, ReplyChance = iffReplyChance, InterrogateIntervalS = iffInterrogateIntervalS };
+            if (rwrSet)
+                profile.WarningReceiver = new DeepWater.AirWing.Core.Radar.WarningReceiverProfile { IsSet = true, SearchHoldS = rwrSearchHoldS, TrackHoldS = rwrTrackHoldS };
             profile.Validate();
             return profile;
         }

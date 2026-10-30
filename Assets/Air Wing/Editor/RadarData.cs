@@ -7,7 +7,7 @@ using UnityEngine;
 namespace DeepWater.AirWing.Editor
 {
     /// <summary>
-    /// Deep Water → Air Wing → Apply Radar Data to F-A-18E (SENSORS-CONCEPT J1, J2, J6, J15, J16). Writes a generic game
+    /// Deep Water → Air Wing → Apply Radar Data to F-A-18E (SENSORS-CONCEPT J1, J2, J3, J5, J6, J15, J16). Writes a generic game
     /// radar and the jet's radar signature into the F/A-18E profile, with the provenance, as MissileData does for the
     /// missile. Every number is AUTHORED for a game sized to the 40 km arena (J15): not any real radar, no real data
     /// (Air Wing BLUEPRINT constraint 8). The peak power is not chosen but solved: the power at which a 5 dBsm target at
@@ -65,6 +65,15 @@ namespace DeepWater.AirWing.Editor
             so.rcsNoseDbsm = 3.0;
             so.rcsBeamDbsm = 12.0;
             so.rcsTailDbsm = 7.0;
+            // IFF (J5): a friend answers 19 times in 20; a held button asks once a second.
+            so.iffSet = true;
+            so.iffReplyChance = 0.95f;            // AUTHORED: "a small set chance of no answer"
+            so.iffInterrogateIntervalS = 1f;      // AUTHORED
+            // The warning receiver (J3): a search radar stays shown a little longer than its slowest sweep (4 s);
+            // a track or a missile's guidance (10 looks a second) clears half a second after it stops.
+            so.rwrSet = true;
+            so.rwrSearchHoldS = 5f;               // AUTHORED
+            so.rwrTrackHoldS = 0.5f;              // AUTHORED
 
             // Solve the power: SNR is linear in power, so one step from a 1 W guess.
             so.radarPeakPowerW = 1.0;
@@ -83,7 +92,9 @@ namespace DeepWater.AirWing.Editor
                 "radarSttLookS 0.1 (ten looks a second), radarSttGainDb 6, radarSttDropMisses 10 (a second of misses loses the lock). " +
                 "Track file, all AUTHORED: radarTrackSigmaM 150, radarTrackMaxSpeedMps 700, radarTrackMaxAccelMps2 90 (a 9 G turn), " +
                 "radarConfirmHits 2 of radarConfirmLooks 3 to confirm, radarDropAfterMisses 3. Starts in range-while-search. " +
-                "Signature: rcsNoseDbsm 3, rcsBeamDbsm 12, rcsTailDbsm 7 (a generic fighter).";
+                "Signature: rcsNoseDbsm 3, rcsBeamDbsm 12, rcsTailDbsm 7 (a generic fighter). " +
+                "IFF (J5), AUTHORED: iffReplyChance 0.95 (a friend answers 19 times in 20), iffInterrogateIntervalS 1; the code is set per fight. " +
+                "Warning receiver (J3), AUTHORED: rwrSearchHoldS 5 (outlasts the 4 s sweep), rwrTrackHoldS 0.5.";
             string prov = so.provenance ?? "";
             int at = prov.IndexOf(Marker, System.StringComparison.Ordinal);
             if (at >= 0)

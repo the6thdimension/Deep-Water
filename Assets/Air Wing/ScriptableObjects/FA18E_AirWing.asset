@@ -287,6 +287,12 @@ MonoBehaviour:
   rcsNoseDbsm: 3
   rcsBeamDbsm: 12
   rcsTailDbsm: 7
+  iffSet: 1
+  iffReplyChance: 0.95
+  iffInterrogateIntervalS: 1
+  rwrSet: 1
+  rwrSearchHoldS: 5
+  rwrTrackHoldS: 0.5
   provenance: "Sources and tags in full: Assets/Air Wing/Calibration~/F18E-SOURCES.md
     (read 2026-10-25).\nPUBLIC = official page; CALIBRATED = fitted to one public
     figure (C16); AUTHORED = our estimate.\n\nspanFt 44.9: PUBLIC, Navy fact file
@@ -389,4 +395,7 @@ MonoBehaviour:
     Track file, all AUTHORED: radarTrackSigmaM 150, radarTrackMaxSpeedMps 700, radarTrackMaxAccelMps2
     90 (a 9 G turn), radarConfirmHits 2 of radarConfirmLooks 3 to confirm, radarDropAfterMisses
     3. Starts in range-while-search. Signature: rcsNoseDbsm 3, rcsBeamDbsm 12, rcsTailDbsm
-    7 (a generic fighter)."
+    7 (a generic fighter). IFF (J5), AUTHORED: iffReplyChance 0.95 (a friend answers
+    19 times in 20), iffInterrogateIntervalS 1; the code is set per fight. Warning
+    receiver (J3), AUTHORED: rwrSearchHoldS 5 (outlasts the 4 s sweep), rwrTrackHoldS
+    0.5."

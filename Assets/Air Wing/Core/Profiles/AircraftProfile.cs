@@ -132,6 +132,10 @@ namespace DeepWater.AirWing.Core.Profiles
         public DeepWater.AirWing.Core.Radar.RadarProfile Radar;
         /// <summary>How big it looks to a radar (J1); unset: radars do not see it.</summary>
         public DeepWater.AirWing.Core.Radar.RadarSignatureProfile RadarSignature;
+        /// <summary>The IFF interrogator and transponder (J5); unset: it neither asks nor answers.</summary>
+        public DeepWater.AirWing.Core.Radar.IffProfile Iff;
+        /// <summary>The radar warning receiver (J3); unset: it hears nothing.</summary>
+        public DeepWater.AirWing.Core.Radar.WarningReceiverProfile WarningReceiver;
 
         /// <summary>Airframe L1 and Flight Controls L1 come as a pair: one without the other cannot fly.</summary>
         public bool HasL1 => AirframeL1.IsSet && ControlsL1.IsSet;
@@ -148,6 +152,8 @@ namespace DeepWater.AirWing.Core.Profiles
             if (Combat.IsSet) Combat.Validate();
             if (Missiles.IsSet) Missiles.Validate();
             if (Radar.IsSet) Radar.Validate();
+            if (Iff.IsSet) Iff.Validate();
+            if (WarningReceiver.IsSet) WarningReceiver.Validate();
         }
     }
 }

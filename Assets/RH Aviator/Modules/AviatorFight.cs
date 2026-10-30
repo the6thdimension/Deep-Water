@@ -36,7 +36,11 @@ namespace DeepWater.Aviator.Modules
                 return;
             }
             _fight = new Engagement { Hunted = () => _runner.PlayerAircraftId };
-            if (_runner.PlayerAircraftId != 0) _fight.Join(_runner.PlayerAircraftId, playerSide);
+            if (_runner.PlayerAircraftId != 0)
+            {
+                _fight.Join(_runner.PlayerAircraftId, playerSide);
+                _runner.Flight.SetIffCode(_runner.PlayerAircraftId, (int)playerSide);   // one IFF code per side (SENSORS-CONCEPT J5)
+            }
             // The pilots seat themselves in their own Start; order after them on the first FixedUpdate.
         }
 
@@ -53,6 +57,7 @@ namespace DeepWater.Aviator.Modules
                     if (p.FightSide == Side.None || p.Seat == null) continue;
                     int id = p.GetComponent<AircraftView>().AircraftId;
                     _fight.Join(id, p.FightSide);
+                    _runner.Flight.SetIffCode(id, (int)p.FightSide);
                 }
                 foreach (AviatorPilot p in FindObjectsByType<AviatorPilot>(FindObjectsInactive.Exclude))
                     if (p.FightSide != Side.None && p.Seat != null) p.Seat.FightIn(p.GetComponent<AircraftView>().AircraftId, _fight);

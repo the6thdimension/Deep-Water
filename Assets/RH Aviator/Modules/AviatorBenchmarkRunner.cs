@@ -114,6 +114,7 @@ namespace DeepWater.Aviator.Modules
                 if (ai) seat = seats[i] = new AviatorSeat(core, e, p, new RuleLog());
                 core.Add(AircraftFactory.Build(i + 1, e, sheet, start), seat);
                 fight.Join(i + 1, blue ? Side.Blue : Side.Red);
+                core.SetIffCode(i + 1, (int)(blue ? Side.Blue : Side.Red));
             }
             if (ai) for (int i = 0; i < n; i++) seats[i].FightIn(i + 1, fight);
             // Into the fight first: the timing starts once they have met.

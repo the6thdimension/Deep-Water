@@ -35,6 +35,12 @@ namespace DeepWater.AirWing.Core
         /// <summary>The state the aircraft was built with; <see cref="PilotSwitches.Reset"/> returns it here.</summary>
         public readonly AirframeState Start;
 
+        /// <summary>
+        /// The IFF code its transponder answers in (SENSORS-CONCEPT J5); 0: none, it never answers. Set by whoever runs the
+        /// fight (<see cref="FlightCore.SetIffCode"/>): the core knows codes, not sides.
+        /// </summary>
+        public int IffCode { get; internal set; }
+
         /// <summary>How many times the aircraft has been reset (presentation watches it to snap, not sweep).</summary>
         public int Resets { get; private set; }
 

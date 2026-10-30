@@ -99,10 +99,10 @@ Plan only; the criteria are written before any code, per `spike-with-pass-criter
 
 ## Phase 2 — Weather and the full coast
 
-### Slice 5 — METOC L0 (E13)
-- [ ] METOC's detailed questions asked and recorded (E26 onward).
-- [ ] `MetocReport` (wind, visibility, cloud, ceiling, time and sun, rain) on its Watch; HDRP sky, cloud and fog draw it; sensors read visibility.
-- [ ] The sea grown from wind × exposure × duration; the Douglas dial as a labelled god override. Reckoning R21 marked superseded.
+### Slice 5 — METOC L0 (E13) — moved ahead, now tracked in `Assets/METOC/ROADMAP.md`
+- [x] METOC's detailed questions asked and recorded (E26–E47, 2026-10-30, `Assets/METOC/BLUEPRINT.md`). E26 reverses E20's order in part: METOC's sky slices come now.
+- [ ] `MetocReport` (wind, visibility, cloud, ceiling, time and sun, rain) on its Watch; HDRP sky, cloud and fog draw it. Sensors read it in their own streams (METOC E36).
+- [ ] The sea grown from wind × exposure × duration; the Douglas dial as a labelled god override. Open ocean first (METOC E36); exposure joins after this phase's slice 2. Reckoning R21 already marked superseded.
 
 ### Slice 6+ — Coast rungs 2–4 (E6)
 - [ ] Rung 2: lee shelter from exposure.

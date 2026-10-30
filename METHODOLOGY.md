@@ -480,6 +480,20 @@ These are the fixed points around which the methodology orbits. Every principle 
     - It dropped `VLSManager`'s random wind on purpose, because it breaks determinism.
   - *Exercised again:* Air Wing slices 0 and 1e (`Assets/_Archive/FighterJet Scripts_legacy/`, `Aircraft_Handlers_legacy/`, `Dogfight_legacy/`). The 1e checklist found that `WaypointManager.cs` needed the dead `FighterJetController` to compile, so the two were archived together.
 
+- **C62. Count fixed steps from an anchor; never add each step to a large time.** A double near 8.5 × 10⁸ s (Universal Time from J2000, in 2026) resolves only about 0.12 µs, so `t += dt` rounds on every step and the error grows with the run. Keep the anchor, the step count and the step length, and compute anchor + n·dt. Move the anchor only on a jump, a new rate or a new step length.
+  - *Exercised:* METOC `MetocClock` (2026-10-30). Added up, 500 steps of 1.2 s (20 ms at 60× day speed) lost 24 µs. Counted, a game day of 50 Hz steps ends within 2 ulp of the exact time (`Clock_DoesNotDrift_OverAGameDayOfFiftyHertzSteps`).
+- **C63. An App UI `Panel` over a 3D view must be cleared, or it hides the scene.** The Panel paints its theme's opaque background, so a full-screen UIDocument with a default Panel covers the camera while the UI on it looks right. Give the Panel a clear background, an absolute full-screen box and `PickingMode.Ignore` (in code or USS, as General Quarters' range does). Check it from a capture of the play view; seeing the UI proves nothing.
+  - *Exercised:* METOC demo (2026-10-30). The first play run's four captures were flat grey with both panels drawn, and SIX saw "nothing on the screen". Cleared, the same driver captured the sky at noon, low sun, dusk and night.
+- **C64. A `ProfilerRecorder` stops on `Reset()`; start it again, and print the sample count beside every average.** A harness that resets its recorders between A/B arms and reads them later gets no samples. Every marker then reads 0 ms, which looks like "free" instead of "not measured". Printing n beside each average (300/300, 0/0) makes a dead recorder obvious.
+  - *Exercised:* METOC's E46 A/B (2026-10-30). The first run read 0 ms on all 15 markers with 0/0 samples. With `Start()` after `Reset()` it read 300/300, and the sky's cubemap passes showed 0.44 ms against 0.16 ms.
+- **C65. Draw an environment through a runtime overlay volume, never by writing the shared profile.** In play mode a change to a `VolumeProfile` asset persists to disk, so a sim that drives the sky by editing the shared profile rewrites the owner's sky every session. Instead:
+  - create a `DontSave` profile at run time holding only what the sim drives (`Add<T>(false)`, then `.Override(v)` per parameter);
+  - put it on a global Volume above the shared one, and destroy both when disabled;
+  - verify on the camera's volume stack, not on the profile.
+  - *Exercised:* METOC `HdrpMetocRenderer` (E42, 2026-10-30). In all four shots the camera stack's `limitMin` equalled the reckoned floor (EV 10.02, 10.02, 2.41, −4.74). After the play runs, the shared sky profile and the HDRP default profile were unchanged on disk.
+- **C66. An angle-change gate has a floor set by float precision; know it before reading a "threshold 0" run.** `Vector3.Angle` reads 0 below about 0.02°, because the float `acos` of a dot product near 1 cannot see less. So "move when the angle exceeds 0" moves about every 0.02°, not every frame. When the floor matters, compare the reckoned values in double.
+  - *Exercised:* METOC's E46 A/B (2026-10-30). At 60× day speed the sun moves 0.004° per frame; with the quantum at 0 the drawn sun moved 56–57 times in 300 frames, not 300.
+
 ---
 
 ## Open questions
@@ -577,3 +591,4 @@ These are the fixed points around which the methodology orbits. Every principle 
 - **2026-10-29** — RH Aviator auto-train and brain choice (A17, A18). Added C55 (find the line in the other program's source before waiting on its event) and C56 (check a learned model's input size, not only its version).
 - **2026-10-29** — RH Aviator headless training (A19). Added C57 (put every agent's decisions on one shared clock).
 - **2026-10-29** — RH Aviator friendly-fire measurement (TRAINING-CONCEPT M35, M36). Added C58 (split a fight's outcomes by who did them before reading a training curve).
+- **2026-10-30** — METOC slice 1 (time of day, sun, moon, light; `Assets/METOC/ROADMAP.md`). Added C62 (count steps from an anchor), C63 (clear an App UI Panel over a 3D view), C64 (a ProfilerRecorder stops on Reset; print the sample count), C65 (draw the environment through a runtime overlay volume) and C66 (an angle gate's float floor).

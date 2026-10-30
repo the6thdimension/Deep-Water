@@ -106,7 +106,7 @@ The coast ladder is in §4. What it means for Sea State:
 - The Douglas dial becomes the god role's labelled override.
 - Everything METOC decides is reckoned (CPU, on its Watch, seeded gusts). HDRP's sky, clouds and fog only draw it.
 - Its ladder is in §4. It must not block coastal ship operations.
-- METOC's own detailed questions (front shapes, gust model parameters, the visibility-to-fog mapping checked in HDRP's source) are asked when its first slice starts, and recorded here as E-numbers.
+- METOC's own detailed questions are recorded in **`Assets/METOC/BLUEPRINT.md`** (E26 onward, 2026-10-30). Front shapes and gust parameters wait for METOC L1–L2.
 
 ### 3.6 Real landforms (E1, E17)
 - **Second source, after fictional theatres.**
@@ -166,7 +166,7 @@ E1–E20 are SIX's picks of 2026-10-24, in round order, locked 2026-10-25. Leani
 | E17 | Real-landform route | **Copy Cartographer's coordinate core and import downloaded files** converted offline with GDAL. No network code | Same | Locked |
 | E18 | Module boundaries | **Theatre** (land, seabed, coast coupling), **METOC** (atmosphere), **Gravity** (shared core); Sea State stays its own | Same | Locked |
 | E19 | Names | **The military-planning family:** Theatre, Theatre type, Overlay, Exposure, Gravity, METOC, METOC report | Charting family | Locked |
-| E20 | Slice order | **Theatre first:** spike → baked fictional theatre → coast rung 1 + grounding on demo hulls → General Quarters adopts Gravity → METOC L0 → coast rungs 2–4 | Same | Locked |
+| E20 | Slice order | **Theatre first:** spike → baked fictional theatre → coast rung 1 + grounding on demo hulls → General Quarters adopts Gravity → METOC L0 → coast rungs 2–4. **Reversed in part 2026-10-30 (METOC E26, SIX):** METOC's sky slices (time, sun, cloud, visibility, rain) come now; the coastal-ship-ops slices keep their order after them. METOC's sea growth runs as open ocean until the exposure map exists | Same | Locked; order amended by METOC E26 (reversal) |
 | E21 | Mixing curved and flat modules | **A theatre admits only modules that use Gravity;** flat-earth modules keep their own flat scenes until they adopt | — | Locked (accepted 2026-10-25) |
 | E22 | The far ring | **Look only, to ~200 km.** Sensors never need it: a straight line between two points in the box stays in the box. accepted by SIX (2026-10-25) | — | Locked (accepted 2026-10-25) |
 | E23 | The class word | **Ground** for the class map (true on land and seabed; "Material" collides with Unity's `Material`). **Going** reserved for the derived land-movement rating. Family 2's "Going" overclaimed for the seabed | — | Locked (accepted 2026-10-25) |
@@ -235,3 +235,4 @@ Inherited from Reckoning: R2 (everything deterministic eventually), R5 (a few sh
 ## Change log
 - **2026-10-24** — Stock-take (read-only), then the 20-question interview: E1–E20 picked by SIX in five rounds. E6, E7, E12, E13, E15 and E19 differ from Claude's leaning. E13 supersedes Reckoning R21. E21–E25 proposed. Blueprint written, awaiting lock.
 - **2026-10-25** — Locked by SIX: E1–E20 Locked, E21–E25 accepted, the first theatre is a strait (Q3), the spike runs in the project on its own branch (Q5). Q4 (revoking the public Cesium and ArcGIS keys) stays open.
+- **2026-10-30** — SIX brought weather and time of day forward. METOC's interview (E26–E47) lives in `Assets/METOC/BLUEPRINT.md`; E26 reverses E20's order in part (METOC's sky slices now, coastal ship ops after). §3.5 points there.

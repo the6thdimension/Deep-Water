@@ -1,0 +1,22 @@
+{
+    "name": "DeepWater.Metoc.Editor",
+    "rootNamespace": "DeepWater.Metoc.Editor",
+    "references": [
+        "DeepWater.Metoc",
+        "DeepWater.Metoc.Hdrp",
+        "DeepWater.Metoc.Examples",
+        "Unity.RenderPipelines.HighDefinition.Runtime",
+        "Unity.RenderPipelines.Core.Runtime"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

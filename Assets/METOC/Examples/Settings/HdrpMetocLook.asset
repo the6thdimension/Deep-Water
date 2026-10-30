@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a35c9d805aea0204b84f3ec66a640258, type: 3}
+  m_Name: HdrpMetocLook
+  m_EditorClassIdentifier: DeepWater.Metoc.Hdrp::DeepWater.Metoc.Hdrp.HdrpMetocLookSO
+  sunLookMultiplier: 1.49
+  moonLookMultiplier: 1
+  moonColorTemperatureK: 4100
+  dayFloorEv: 10.021231
+  adaptationBiasEv: 2
+  absoluteMinEv: -6
+  overlayPriority: 100
+  redrawQuantumDeg: 0

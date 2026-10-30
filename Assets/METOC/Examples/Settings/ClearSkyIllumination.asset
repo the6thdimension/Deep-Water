@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f5b603db53695b439b50200dd9f77c0, type: 3}
+  m_Name: ClearSkyIllumination
+  m_EditorClassIdentifier: DeepWater.Metoc::DeepWater.Metoc.IlluminationProfileSO
+  solarAboveAirLux: 127500
+  solarExtinction: 0.21
+  diffuseA: 0.8
+  diffuseB: 15.5
+  diffuseC: 0.5
+  twilightElevationDeg:
+  - -6
+  - -12
+  - -18
+  twilightLux:
+  - 3.4
+  - 0.008
+  - 0.0006
+  moonFullMagnitude: -12.73
+  moonPhaseLinear: 0.026
+  moonPhaseQuartic: 0.000000004
+  moonExtinctionMag: 0.172
+  moonMeanDistanceKm: 384400
+  nightSkyLux: 0.002
+  provenance: "IES Lighting Handbook clear-sky daylight model (direct E0\xB7exp(-c\xB7m)\xB7sin
+    h + diffuse A + B\xB7sin^C h): from memory, verify. Twilight table after Bond
+    & Henderson (1963) / USNO: from memory, verify. Moon: Krisciunas & Schaefer (1991),
+    PASP 103, 1033. Air mass: Kasten & Young (1989), Applied Optics 28, 4735. Night
+    sky 0.002 lux: from memory, verify."

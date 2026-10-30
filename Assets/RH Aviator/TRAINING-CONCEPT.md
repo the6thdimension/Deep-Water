@@ -309,7 +309,7 @@ each of the learning jets' trigger presses.
 | The radar picture before the radar slice | M7's second half needs RH Radar Suite's core on the jet (GQ G61) |
 | Learning from recorded human play (imitation) | Not asked for; a later option to speed up the first rounds |
 | Cloud training | Paid; only on SIX's go |
-| Countermeasures | Not in this push (SIX, 2026-10-27) |
+| ~~Countermeasures~~ | ~~Not in this push (SIX, 2026-10-27)~~. Reversed 2026-10-29: chaff and flares (Air Wing `SENSORS-CONCEPT.md` J4) |
 
 ## 8. Risks
 

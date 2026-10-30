@@ -168,7 +168,7 @@ namespace DeepWater.Aviator.Core
         {
             _fight = engagement ?? throw new ArgumentNullException(nameof(engagement));
             if (_fight.SideOf(aircraftId) == Side.None) throw new ArgumentException($"aircraft {aircraftId} has no side in the engagement");
-            _eyes = new Perception(aircraftId, _pilot, _core.Clock.TickSeconds, truth: false);
+            _eyes = new Perception(aircraftId, _pilot, _core.Clock.TickSeconds, truth: false, seed: _core.Seed);
             _targetId = 0;
             _holdAltitudeM = float.NaN;
             Fire(_core.Tick, aircraftId, "ordered: fight", PilotMode.Fight, $"{_fight.SideOf(aircraftId)}; sees {_pilot.FieldOfViewDeg:F0}° round its nose, {_pilot.ReactionDelayS:F2} s late");

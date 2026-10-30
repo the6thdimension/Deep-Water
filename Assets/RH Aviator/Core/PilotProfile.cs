@@ -96,6 +96,13 @@ namespace DeepWater.Aviator.Core
         /// </summary>
         public float FieldOfViewDeg, ReactionDelayS, MemoryS, VisualRangeM;
         /// <summary>
+        /// Spotting by size (SENSORS-CONCEPT J8): a jet inside the field of view and visual range, not yet known, is seen
+        /// at a rate per second of <see cref="SpotRatePerS"/> / (1 + (d / (<see cref="SpotHalfRangeM"/> × size))²), where
+        /// size is 1 seen from the beam, <see cref="SpotNoseSize"/> nose-on and <see cref="SpotTailSize"/> from behind: a
+        /// seeded draw each tick. 0 rate: the hard edge, seen the moment it is in view (before J8).
+        /// </summary>
+        public float SpotRatePerS, SpotHalfRangeM, SpotNoseSize, SpotTailSize;
+        /// <summary>
         /// The fighting speed (knots); lead and lag, seconds of the target's velocity ahead of or behind it (0: pure
         /// pursuit only, a rookie); lag inside this range (metres) when closing faster than this (knots), slower by this (knots).
         /// </summary>
@@ -211,6 +218,13 @@ namespace DeepWater.Aviator.Core
             if (ReactionDelayS < 0f) throw new ArgumentOutOfRangeException(nameof(ReactionDelayS), ReactionDelayS, "must not be negative");
             Positive(MemoryS, nameof(MemoryS));
             Positive(VisualRangeM, nameof(VisualRangeM));
+            if (SpotRatePerS < 0f) throw new ArgumentOutOfRangeException(nameof(SpotRatePerS), SpotRatePerS, "must not be negative (zero: the hard edge)");
+            if (SpotRatePerS > 0f)
+            {
+                Positive(SpotHalfRangeM, nameof(SpotHalfRangeM));
+                if (!(SpotNoseSize > 0f && SpotNoseSize <= 1f)) throw new ArgumentOutOfRangeException(nameof(SpotNoseSize), SpotNoseSize, "must be in (0, 1]: a fraction of the beam view");
+                if (!(SpotTailSize > 0f && SpotTailSize <= 1f)) throw new ArgumentOutOfRangeException(nameof(SpotTailSize), SpotTailSize, "must be in (0, 1]: a fraction of the beam view");
+            }
             Positive(CornerKt, nameof(CornerKt));
             Positive(FightFloorM, nameof(FightFloorM));
             Positive(ClearRangeM, nameof(ClearRangeM));

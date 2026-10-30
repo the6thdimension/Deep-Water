@@ -28,6 +28,9 @@ namespace DeepWater.Aviator.Core
     /// <b>Pilot L1</b> sees an aircraft only when it lay inside the pilot's field of view and visual range, as things
     /// stood the reaction delay ago, and remembers the last sight when it is lost (ageing; forgotten after the memory
     /// time). The delay is a ring of past pictures, so what the pilot "sees" now is exactly what was true then.
+    /// Spotting by size (SENSORS-CONCEPT J8): a jet in view that the pilot does not know yet is first seen by a seeded
+    /// draw each tick, at a rate that falls with distance and with how small it looks (nose-on is hardest; see
+    /// <see cref="SpotRatePerS"/>); one it knows (seen, not yet forgotten) is seen again the moment it is in view.
     /// Pure and deterministic; no allocation after the first ticks.
     /// </summary>
     public sealed class Perception
@@ -37,6 +40,9 @@ namespace DeepWater.Aviator.Core
         readonly float _cosHalfFov, _rangeSq;
         readonly long _memoryTicks;
         readonly bool _truth;
+        readonly PilotProfile _pilot;
+        readonly float _tickS;
+        readonly DeterministicRng _draws;
         readonly AircraftRecord[][] _ring;
         readonly int[] _ringCount;
         int _head = -1;
@@ -44,11 +50,15 @@ namespace DeepWater.Aviator.Core
         readonly Dictionary<int, Contact> _contacts = new Dictionary<int, Contact>();
         readonly List<int> _ids = new List<int>();
 
-        /// <param name="truth">Pilot L0: no field of view, no delay, no forgetting.</param>
-        public Perception(int selfId, in PilotProfile p, double tickSeconds, bool truth)
+        /// <param name="truth">Pilot L0: no field of view, no delay, no forgetting, no spotting chance.</param>
+        /// <param name="seed">The fight's seed (<c>FlightCore.Seed</c>): each pilot's eyes draw from a stream of their own.</param>
+        public Perception(int selfId, in PilotProfile p, double tickSeconds, bool truth, ulong seed = 1)
         {
             _self = selfId;
             _truth = truth;
+            _pilot = p;
+            _tickS = (float)Math.Round(tickSeconds, 6);
+            _draws = new DeterministicRng(seed ^ 0x73706F7474696E67UL ^ ((ulong)(uint)selfId * 0x9E3779B97F4A7C15UL));
             _delayTicks = truth ? 0 : Math.Max(0, (int)Math.Round(p.ReactionDelayS / Math.Round(tickSeconds, 6)));
             _cosHalfFov = Mathf.Cos(Mathf.Clamp(p.FieldOfViewDeg, 0f, 180f) * Mathf.Deg2Rad);
             _rangeSq = p.VisualRangeM * p.VisualRangeM;
@@ -92,8 +102,8 @@ namespace DeepWater.Aviator.Core
                 int id = seen[i].Id;
                 if (id == _self) continue;
                 AirframeState other = seen[i].State;
-                bool visible = other.Status == FlightStatus.Flying && (_truth || (haveMe && InView(me, other)));
                 _contacts.TryGetValue(id, out Contact c);
+                bool visible = other.Status == FlightStatus.Flying && (_truth || (haveMe && InView(me, other) && (c.Known || Spots(me, other))));
                 // Never seen and not in view: nothing to remember (slice 3d: storing it made an unseen jet "known").
                 if (!visible && !c.Known) continue;
                 c.Id = id;
@@ -117,6 +127,38 @@ namespace DeepWater.Aviator.Core
             if (d2 > _rangeSq || d2 < 1e-4f) return d2 < 1e-4f;
             Vector3 nose = me.Attitude * Vector3.forward;
             return Vector3.Dot(nose, to) >= _cosHalfFov * Mathf.Sqrt(d2);
+        }
+
+        /// <summary>One draw: is a jet in view but not known spotted this tick (J8)?</summary>
+        bool Spots(in AirframeState me, in AirframeState other)
+        {
+            if (_pilot.SpotRatePerS <= 0f) return true;
+            float p = 1f - Mathf.Exp(-SpotRatePerS(_pilot, me.Position, other) * _tickS);
+            return _draws.NextFloat01() < p;
+        }
+
+        /// <summary>
+        /// How big <paramref name="other"/> looks from <paramref name="eye"/> against its beam view (J8): 1 from the
+        /// side, the pilot's nose size head-on, its tail size from behind, blended by the square of the aspect's cosine.
+        /// </summary>
+        public static float ApparentSize(in PilotProfile p, Vector3 eye, in AirframeState other)
+        {
+            Vector3 to = eye - other.Position;
+            float d = to.magnitude;
+            if (d < 1e-3f) return 1f;
+            float c = Vector3.Dot(other.Attitude * Vector3.forward, to / d);   // 1: it points at the eye, −1: away
+            float end = c >= 0f ? p.SpotNoseSize : p.SpotTailSize;
+            return 1f + (end - 1f) * c * c;
+        }
+
+        /// <summary>
+        /// The rate per second at which a jet in view is first spotted (J8):
+        /// SpotRatePerS / (1 + (d / (SpotHalfRangeM × size))²), the apparent area falling with the square of the distance.
+        /// </summary>
+        public static float SpotRatePerS(in PilotProfile p, Vector3 eye, in AirframeState other)
+        {
+            float d = (other.Position - eye).magnitude / (p.SpotHalfRangeM * ApparentSize(p, eye, other));
+            return p.SpotRatePerS / (1f + d * d);
         }
 
         void Age(long tick)

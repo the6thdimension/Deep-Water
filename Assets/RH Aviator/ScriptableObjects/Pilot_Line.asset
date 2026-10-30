@@ -85,6 +85,10 @@ MonoBehaviour:
   reactionDelayS: 0.7
   memoryS: 8
   visualRangeM: 8000
+  spotRatePerS: 1
+  spotHalfRangeM: 4000
+  spotNoseSize: 0.5
+  spotTailSize: 0.6
   cornerKt: 330
   leadS: 1
   lagS: 1
@@ -132,13 +136,17 @@ MonoBehaviour:
     rolloutPedalPerM, rolloutPedalPerDeg, bingoFlightTimeS (a STAND-IN for bingo
     fuel until fuel burn exists; 0 = never). The fight (Pilot L1, W38, W45; a game's
     skill numbers, AUTHORED, not any real pilot's or air force's): fieldOfViewDeg,
-    reactionDelayS, memoryS, visualRangeM, cornerKt, leadS, lagS, lagRangeM, overshootClosureKt,
-    lagSlowKt, threatRangeM, threatConeDeg, fightFloorM, clearRangeM, slowKt (energy
-    sense; 0 = none), turnMatch, rangeKtPerM, attackRangeM, chaseOverKt (range control;
-    0 = none), avoidM, avoidS (collision avoidance); joinAvoidM (25 m, inside the
-    40 m slot spacing: a join with no fight avoids too, after a survey of four-ship
-    joins found crossed joins meeting at 0 m). Trigger discipline (Gunnery K6): gunRangeM
-    900, triggerMils 12 (a burst that would pass within 12 mils of where the target
-    will be; AUTHORED). Missile discipline (Air Wing W65, A16; SIX 2026-10-29: rookies
-    early, aces close): missileRangeM 3500 (launch with the seeker locked on its
-    target inside 3.5 km, one at a time; AUTHORED)."
+    reactionDelayS, memoryS, visualRangeM, spotting by size (SENSORS-CONCEPT J8,
+    SIX 2026-10-29): spotRatePerS 1 (close up, seen in about a second), spotHalfRangeM
+    4000 (a jet seen from the beam is spotted at half that rate 4 km out), spotNoseSize
+    0.5 and spotTailSize 0.6 (nose-on a jet looks half its beam size, from behind
+    six tenths: a game's guess, not measured); cornerKt, leadS, lagS, lagRangeM,
+    overshootClosureKt, lagSlowKt, threatRangeM, threatConeDeg, fightFloorM, clearRangeM,
+    slowKt (energy sense; 0 = none), turnMatch, rangeKtPerM, attackRangeM, chaseOverKt
+    (range control; 0 = none), avoidM, avoidS (collision avoidance); joinAvoidM (25
+    m, inside the 40 m slot spacing: a join with no fight avoids too, after a survey
+    of four-ship joins found crossed joins meeting at 0 m). Trigger discipline (Gunnery
+    K6): gunRangeM 900, triggerMils 12 (a burst that would pass within 12 mils of
+    where the target will be; AUTHORED). Missile discipline (Air Wing W65, A16; SIX
+    2026-10-29: rookies early, aces close): missileRangeM 3500 (launch with the seeker
+    locked on its target inside 3.5 km, one at a time; AUTHORED)."

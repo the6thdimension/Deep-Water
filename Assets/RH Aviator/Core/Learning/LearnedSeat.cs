@@ -71,7 +71,7 @@ namespace DeepWater.Aviator.Core
             if (fresh)
             {
                 // A new life (or the seat handed back): look again from nothing, and hold what the jet has until told.
-                _eyes = new Perception(aircraftId, _pilot, _core.Clock.TickSeconds, truth: false);
+                _eyes = new Perception(aircraftId, _pilot, _core.Clock.TickSeconds, truth: false, seed: _core.Seed);
                 _resets = me.Resets;
                 _commands = 0;
                 _command = Hold(state);

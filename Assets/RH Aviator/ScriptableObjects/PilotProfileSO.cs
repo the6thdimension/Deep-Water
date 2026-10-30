@@ -113,6 +113,12 @@ namespace DeepWater.Aviator.ScriptableObjects
         public float reactionDelayS;
         public float memoryS;
         public float visualRangeM;
+        [Tooltip("Spotting by size (J8): the rate per second a jet in view is first seen close up (0: the hard edge).")]
+        public float spotRatePerS;
+        [Tooltip("The distance, metres, at which a jet seen from the beam is spotted at half that rate.")]
+        public float spotHalfRangeM;
+        [Tooltip("How big a jet looks nose-on and from behind, as a fraction of the beam view.")]
+        public float spotNoseSize, spotTailSize;
         public float cornerKt;
         [Tooltip("Seconds of the target's velocity ahead of it (0: no lead pursuit).")]
         public float leadS;
@@ -178,6 +184,7 @@ namespace DeepWater.Aviator.ScriptableObjects
                 GlidePathDeg = glidePathDeg, TouchdownM = touchdownM, FlareHeightM = flareHeightM, FlarePathDeg = flarePathDeg, FinalCarrotM = finalCarrotM,
                 RolloutPedalPerM = rolloutPedalPerM, RolloutPedalPerDeg = rolloutPedalPerDeg, BingoFlightTimeS = bingoFlightTimeS,
                 FieldOfViewDeg = fieldOfViewDeg, ReactionDelayS = reactionDelayS, MemoryS = memoryS, VisualRangeM = visualRangeM,
+                SpotRatePerS = spotRatePerS, SpotHalfRangeM = spotHalfRangeM, SpotNoseSize = spotNoseSize, SpotTailSize = spotTailSize,
                 CornerKt = cornerKt, LeadS = leadS, LagS = lagS, LagRangeM = lagRangeM, OvershootClosureKt = overshootClosureKt, LagSlowKt = lagSlowKt,
                 ThreatRangeM = threatRangeM, ThreatConeDeg = threatConeDeg, FightFloorM = fightFloorM, ClearRangeM = clearRangeM, SlowKt = slowKt, TurnMatch = turnMatch, RangeKtPerM = rangeKtPerM, AttackRangeM = attackRangeM, ChaseOverKt = chaseOverKt, AvoidM = avoidM, AvoidS = avoidS, JoinAvoidM = joinAvoidM, GunRangeM = gunRangeM, TriggerMils = triggerMils, MissileRangeM = missileRangeM, SlotClimbDegPerM = slotClimbDegPerM, SlotGPerPathDeg = slotGPerPathDeg, SlotRotationShare = slotRotationShare,
             };

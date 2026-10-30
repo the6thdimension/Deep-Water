@@ -212,6 +212,7 @@ namespace DeepWater.Aviator.Tests
         {
             AircraftProfile e = E();
             PilotProfile line = Pilot(AviatorTools.LinePilotPath);
+            line.SpotRatePerS = 0f;   // the delay alone: with spotting by size the first sight is a draw (J8, SpottingTests)
             var core = new FlightCore(new SubstepClock(0.02f, 4), new FlatSurface(0f));
             var fight = new Engagement();
             var log = new RuleLog();
@@ -324,6 +325,7 @@ namespace DeepWater.Aviator.Tests
         {
             AircraftProfile e = E();
             PilotProfile p = Pilot(AviatorTools.LinePilotPath);
+            p.SpotRatePerS = 0f;   // the field of view and the delay alone; spotting by size has its own tests (J8)
             var eyes = new Perception(1, p, 0.02, truth: false);
             AirframeState me = Start(e, Vector3.zero, 0f, 300f);
             AirframeState ahead = Start(e, new Vector3(0f, 0f, 2000f), 0f, 300f), behind = Start(e, new Vector3(0f, 0f, -2000f), 0f, 300f);

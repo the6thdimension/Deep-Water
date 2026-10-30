@@ -85,6 +85,10 @@ MonoBehaviour:
   reactionDelayS: 0.35
   memoryS: 12
   visualRangeM: 10000
+  spotRatePerS: 1.5
+  spotHalfRangeM: 5000
+  spotNoseSize: 0.5
+  spotTailSize: 0.6
   cornerKt: 320
   leadS: 1.2
   lagS: 1.2
@@ -132,18 +136,23 @@ MonoBehaviour:
     rolloutPedalPerM, rolloutPedalPerDeg, bingoFlightTimeS (a STAND-IN for bingo
     fuel until fuel burn exists; 0 = never). The fight (Pilot L1, W38, W45; a game's
     skill numbers, AUTHORED, not any real pilot's or air force's): fieldOfViewDeg,
-    reactionDelayS, memoryS, visualRangeM, cornerKt, leadS, lagS, lagRangeM, overshootClosureKt,
-    lagSlowKt, threatRangeM, threatConeDeg, fightFloorM, clearRangeM, slowKt (energy
-    sense; 0 = none), turnMatch, rangeKtPerM, attackRangeM, chaseOverKt (range control;
-    0 = none), avoidM, avoidS (collision avoidance); joinAvoidM (25 m, inside the
-    40 m slot spacing: a join with no fight avoids too, after a survey of four-ship
-    joins found crossed joins meeting at 0 m). Trigger discipline (Gunnery K6): gunRangeM
-    900, triggerMils 12 (a burst that would pass within 12 mils of where the target
-    will be; AUTHORED). Missile discipline (Air Wing W65, A16; SIX 2026-10-29: rookies
-    early, aces close): missileRangeM 3500 (launch with the seeker locked on its
-    target inside 3.5 km, one at a time; AUTHORED). Ace, from the line pilot (AUTHORED):
-    maxG 7 (inside the F/A-18E's 7.5), maxBankDeg 75, fieldOfViewDeg 150, reactionDelayS
-    0.35, memoryS 12, visualRangeM 10000, cornerKt 320, leadS 1.2, lagS 1.2, threatRangeM
+    reactionDelayS, memoryS, visualRangeM, spotting by size (SENSORS-CONCEPT J8,
+    SIX 2026-10-29): spotRatePerS 1 (close up, seen in about a second), spotHalfRangeM
+    4000 (a jet seen from the beam is spotted at half that rate 4 km out), spotNoseSize
+    0.5 and spotTailSize 0.6 (nose-on a jet looks half its beam size, from behind
+    six tenths: a game's guess, not measured); cornerKt, leadS, lagS, lagRangeM,
+    overshootClosureKt, lagSlowKt, threatRangeM, threatConeDeg, fightFloorM, clearRangeM,
+    slowKt (energy sense; 0 = none), turnMatch, rangeKtPerM, attackRangeM, chaseOverKt
+    (range control; 0 = none), avoidM, avoidS (collision avoidance); joinAvoidM (25
+    m, inside the 40 m slot spacing: a join with no fight avoids too, after a survey
+    of four-ship joins found crossed joins meeting at 0 m). Trigger discipline (Gunnery
+    K6): gunRangeM 900, triggerMils 12 (a burst that would pass within 12 mils of
+    where the target will be; AUTHORED). Missile discipline (Air Wing W65, A16; SIX
+    2026-10-29: rookies early, aces close): missileRangeM 3500 (launch with the seeker
+    locked on its target inside 3.5 km, one at a time; AUTHORED). Ace, from the line
+    pilot (AUTHORED): maxG 7 (inside the F/A-18E's 7.5), maxBankDeg 75, fieldOfViewDeg
+    150, reactionDelayS 0.35, memoryS 12, visualRangeM 10000, spotRatePerS 1.5 and
+    spotHalfRangeM 5000 (spots sooner), cornerKt 320, leadS 1.2, lagS 1.2, threatRangeM
     2000, slowKt 240, turnMatch 1, gunRangeM 800 and triggerMils 6 (waits for the
     shot: close and tight), missileRangeM 2500 (launches close, where the missile
     has the energy)."

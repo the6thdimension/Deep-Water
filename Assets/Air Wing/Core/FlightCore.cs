@@ -62,6 +62,8 @@ namespace DeepWater.AirWing.Core
 
         /// <summary>Every game missile in flight, and what each did (W65). Presentation draws them from it.</summary>
         public readonly MissilesInFlight Missiles = new MissilesInFlight();
+        /// <summary>The fight's seed (the guns' stream; the missiles' and radars' are derived from it). Others derive theirs from it too.</summary>
+        public ulong Seed { get; }
         readonly DeterministicRng _missileDraws;
 
         /// <summary>Every hit so far, in tick order.</summary>
@@ -98,6 +100,7 @@ namespace DeepWater.AirWing.Core
             Clock = clock;
             _surface = surface ?? throw new ArgumentNullException(nameof(surface));
             _probe = probe ?? new SurfaceProbe(surface);
+            Seed = gunnerySeed;
             _gunDraws = new DeterministicRng(gunnerySeed);
             // The missiles draw from their own sequence, so a missile never shifts the guns' luck (or the other way).
             _missileDraws = new DeterministicRng(gunnerySeed ^ 0x6D697373696C6573UL);

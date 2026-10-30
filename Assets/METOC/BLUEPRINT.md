@@ -1,6 +1,6 @@
 # METOC — blueprint (the atmosphere: time, sun, cloud, rain, wind)
 
-> **Status: LOCKED BLUEPRINT (SIX, 2026-10-30). Slice 1 built, seen in play and on `main` (`c788fda2`). Slice 2 built and seen in play on `feat/metoc` (2026-10-30); E31 picked (128/8).** SIX answered sixteen questions on 2026-10-30 in four rounds (E26–E41). Fourteen picks are Claude's leaning; two are not (E35, E38). E42–E47 were Claude's proposals, locked by SIX after slice 1 (M1, M2). E48–E52 are SIX's slice 2 picks, all Claude's leaning. The parent decisions are in `Assets/Theatre/BLUEPRINT.md` (E4, E13, E18–E20).
+> **Status: LOCKED BLUEPRINT (SIX, 2026-10-30). Slices 1 and 2 built, seen in play and on `main` (`368504b6`); E31 picked (128/8). Slice 3 (rain) built and seen in play on `feat/metoc` (2026-10-30).** SIX answered sixteen questions on 2026-10-30 in four rounds (E26–E41). Fourteen picks are Claude's leaning; two are not (E35, E38). E42–E47 were Claude's proposals, locked by SIX after slice 1 (M1, M2). E48–E52 are SIX's slice 2 picks, and E53–E56 SIX's slice 3 picks, all Claude's leaning. E57 (how bright a drawn drop is) is Claude's proposal from the slice 3 spike, open for SIX (M6). The parent decisions are in `Assets/Theatre/BLUEPRINT.md` (E4, E13, E18–E20).
 > **This document's one job:** say what METOC is and why, and record every decision behind it. Work order and progress live in `ROADMAP.md`, not here.
 
 ## 1. In plain language
@@ -30,6 +30,7 @@ METOC keeps all of it and drives only the parts it decides.
 **Honest limits.**
 - The sun is good to about 0.02° and the moon to about 0.3° (low-precision public algorithms, E28). Time is Universal Time; the ~69 s between UT and Terrestrial Time and leap seconds are ignored (E44).
 - Ground illuminance is a clear-sky model built from published formulas and a twilight table (E45). Clouds dim it from slice 2. It is not a radiative-transfer model.
+- Rain's extinction is a from-memory power law in the rate (E54). The drawn drops are a look: a real 10 mm/h rain holds about 3 000 drops in a cubic metre (from memory), and the box around the camera draws 40 000 in 38 400 m³ (E53, E57).
 - Fictional theatres have an authored latitude and longitude.
 - Until Theatre's exposure map exists, the wind can only grow an open-ocean sea (E36).
 
@@ -56,6 +57,11 @@ Names follow E19's military-planning family. Code names are proposals until thei
 | **Cloud transmission** | The share of clear-sky light that reaches the ground under the main layer (E49) | `IlluminationState.CloudTransmission` |
 | **Weather preset** | A named weather state as an asset (E35), METAR-labelled | `MetocWeatherSO` |
 | **Cover calibration** | The measured table of HDRP `shapeFactor` against covered sky (E48) | `CloudCoverCalibration` |
+| **Rain rate** | Rain at the surface, mm/h, a weather field that blends (E53); 0 is dry. Classed light, moderate, heavy or violent (WMO), METAR −RA, RA, +RA | `RainMmPerHour` |
+| **Rain extinction** | How much rain dims a beam, per metre, from the rate (E54) | `MetocReport.RainExtinctionPerM` |
+| **Effective visibility** | The visibility through the air and the rain together (E54); the set visibility is the air's alone | `MetocReport.EffectiveVisibilityM` |
+| **Rain graph** | The VFX Graph that draws the drops, built from code (E53) | `MetocRain.vfx`, `MetocRainVfxBuilder`, `MetocRain` |
+| **Weather-effects budget** | ≤ 0.5 ms GPU for drawn weather effects, beside E4's sky budget (E56) | — |
 
 ## 3. Architecture
 
@@ -73,7 +79,8 @@ MetocDirector (MonoBehaviour, FixedUpdate, before the sea)                      
 HdrpMetocRenderer (MonoBehaviour, LateUpdate) + HdrpMetocLookSO                                                 unreckoned
    ├─ the Sun light: direction, intensity (≈128 000 lux above the air, E39); HDRP's sky attenuates it
    ├─ a Moon light: direction, phase, intensity (E39); only the brighter body casts shadows (E43)
-   └─ overlay volume (runtime profile, higher priority, E42): exposure floor from Illumination (E40); later clouds, fog, rain
+   └─ overlay volume (runtime profile, higher priority, E42): exposure floor from Illumination (E40); clouds, rain's cloud dimmers, fog, 2D layer
+MetocRain (MonoBehaviour, LateUpdate) + MetocRain.vfx: a box of drops that follows the camera; count, fall and brightness from the report and the look (E53, E57)
 MetocPanel (App UI, E35) + keys: readout of the report; sliders and keys issue METOC orders
 ```
 
@@ -128,6 +135,11 @@ E26–E41 are SIX's picks of 2026-10-30, in round order. "Leaning" is Claude's r
 | E50 | The night's look (M3) | **`adaptationBiasEv` 4:** the exposure floor sits 4 EV above the metered ground light, about two stops darker than slice 1, as a night photograph is underexposed | Same | Locked (SIX, 2026-10-30) |
 | E51 | Visibility | **Its own field:** meteorological optical range at the surface, metres, set by the scenario or god orders (rain lowers it in slice 3). With it, the top of the layer that limits it (fog bank or haze). HDRP's fog: extinction = ln(20) / visibility (WMO's 5 % contrast), uniform to half the layer's top and fading out by its top (LOOK). Labels by WMO: fog below 1 km, mist or haze to 5 km | Same | Locked (SIX, 2026-10-30) |
 | E52 | High cloud | **A high-cloud field (oktas) drives the 2D cloud layer's opacity,** so a clear report looks clear. The ceiling and the dimming use the main layer only: a labelled limit (thin cirrus barely dims). Opacity is not coverage: the 2D layer's map has its own fixed coverage | Same | Locked (SIX, 2026-10-30) |
+| E53 | Rain, and how it is drawn | **A rain rate in mm/h, a weather field that blends linearly (E33);** WMO classes light < 2.5, moderate 2.5–10, heavy 10–50, violent > 50 mm/h (from memory, verify); METAR −RA, RA, +RA. It falls straight down until slice 4's wind. **Drawn with VFX Graph, the graph built from code** (Deep Water → METOC → Build Rain VFX) by an editor-only assembly named after one of the package's own test assemblies, which the package grants its internals to: no vendor edit, and the graph is reviewable C#. Run first as a spike with pass criteria (compiles, renders streaks, ≤ 0.5 ms), Shuriken the fallback: passed. A box of drops around the camera; the drawn count follows the rate through a LOOK factor (40 000 · (R/10)^0.6, under the graph's capacity). No splashes or wet surfaces (E32). Presets Light rain, Rain and Heavy rain, and a rain slider | Same (the classes, blends, straight fall, presets and count were stated defaults SIX did not object to) | Locked (SIX, 2026-10-30) |
+| E54 | Rain and visibility | **Extinctions add:** rain's extinction ≈ 0.25·R^0.63 per km for R mm/h (from memory, labelled in `IlluminationProfileSO`; the free-space-optics fit 1.076·R^0.67 dB/km = 0.248·R^0.67 per km agrees within 10 % to about 13 mm/h and is 16 % higher at 50) adds to the air's ln 20 / V. Effective visibility = ln 20 / (ln 20 / V + σ_rain). The report carries the set and the effective visibility; the fog draws the effective one, up to the cloud base under rain (one HDRP fog profile: a shallow fog bank under rain is drawn as deep as the rain) | Same | Locked (SIX, 2026-10-30) |
+| E55 | Rain and light | **Drawn darker only:** rain darkens the drawn clouds through HDRP's sun and ambient light dimmers, 1 − 0.6·R / (R + 8) (LOOK). The reckoned light stays Kasten & Czeplak on the cover (E49). Presets pair rain with 7–8 oktas; rain under little cloud is allowed | Same | Locked (SIX, 2026-10-30) |
+| E56 | The cost of rain | **Its own budget: ≤ 0.5 ms GPU for weather effects,** in heavy rain at 2560×1440, beside E4's sky budget. Measured through `MetocRain`: 0.14–0.16 ms at 20 mm/h (60 629 drops) and 0.23 ms at the cap (124 518), 0.012 ms CPU (ROADMAP, slice 3) | Same | Locked (SIX, 2026-10-30) |
+| E57 | How bright a drawn drop is | **Luminance k·E/π with k = 3**, E the reckoned ground light (a sky of uniform luminance L lights the ground with E = πL), and the graph's output applies the camera's exposure, as HDRP does to the sky. Opacity 0.4, 4 mm wide, 0.4 m streaks, faded within 0.3–1.5 m of the camera, falling 6.5 m/s. All LOOK, in `HdrpMetocLookSO`. k = 0.6 vanished against the sky; k 1, 2 and 3 were shot and 3 picked. At night the drops dim with the light (0.014 nits under 0.015 lux) | — (Claude's pick from the spike) | Proposed; SIX's look call (M6) |
 
 Inherited: Theatre E2 (frame), E4 (budget: terrain + sky ≤ 2 ms GPU, ≤ 0.5 ms CPU), E13 (the full atmosphere pack), E18 (METOC is its own module), E19 (names), E24 (sensors bend their own rays); Reckoning R15 (Watches), R20 (labelled assists), R22 (fog of war).
 
@@ -147,6 +159,8 @@ Inherited: Theatre E2 (frame), E4 (budget: terrain + sky ≤ 2 ms GPU, ≤ 0.5 m
 | Not doing | Why, and the revisit trigger |
 |---|---|
 | Wet surfaces | E32. Needs a wetness input on ship, deck and aircraft materials, some vendor. Revisit after rain ships |
+| Splashes, rain rings on the sea, drops on the lens | E53's default. Revisit with wet surfaces |
+| Rain blown by the wind | Slice 4 brings the wind; the drops fall straight down until then |
 | Sensors reading METOC | E36. Each sensor's own stream wires it in |
 | Fronts, wind fields, gusts | L1–L2 |
 | Lightning, snow, hail, sand | Not in L0. Revisit with a scenario that needs them |
@@ -162,7 +176,9 @@ Inherited: Theatre E2 (frame), E4 (budget: terrain + sky ≤ 2 ms GPU, ≤ 0.5 m
 | **A moving sun may re-render the sky every frame** | Measured in slice 1 (E46): ≤0.44 ms GPU per frame at 60×, negligible at 1× |
 | **HDRP's exposure limits are tuned for daylight** | E40: the floor follows the reckoned light. Seen at noon, low sun, dusk and night (2026-10-30): the picture never goes black, but the night reads bright (M3) |
 | **One Unity Editor, several sessions** | Check the Editor's state before play, compile or reload; ask SIX when another session is using it |
-| **From-memory constants** (the twilight table, the solar luminous efficacy, the starlight floor) | Labelled in the SO; cited before any sensor relies on them |
+| **From-memory constants** (the twilight table, the solar luminous efficacy, the starlight floor, rain's extinction and the WMO rain classes) | Labelled in the SO; cited before any sensor relies on them |
+| **The rain graph is built through a package's internals** (E53) | Editor only; nothing at run time depends on it. If Unity's own VFX test package is ever added, the builder's assembly takes another granted name. A VFX Graph update that changes the model breaks the builder loudly (every missing slot throws with what it found) |
+| **Night rain is nearly invisible** (E57): drops dim with the reckoned light, as real rain does without a lamp | A look call for SIX (M6); lights on ships and aircraft will light it later |
 
 ## 9. Open questions for SIX
 
@@ -173,6 +189,7 @@ Inherited: Theatre E2 (frame), E4 (budget: terrain + sky ≤ 2 ms GPU, ≤ 0.5 m
 | ~~M3~~ | ~~The night's look~~ Bias 4 (E50), SIX 2026-10-30 | — |
 | M4 | E4: the sky is ≈2.18 ms GPU in the demo's sea-level view under Broken at 128/8, ≈0.2 ms over, before terrain. Accept it for now, measure 64/6 on the final sky and in Dogfight Training's view, or wait for terrain to set the real number? Leaning: measure both views at 128/8 and 64/6 before cutting more | One A/B run, ≈10 min; a look call for SIX |
 | M5 | One cover table for every cloud base, or a table per base? A 1 500 m deck reads up to 0.09 cover (about ¾ okta) less than the 750 m table assumes. Leaning: keep one table until a scenario's deck sits far from 750 m, then add a base axis to the table | A base axis is a slice of its own: three calibration runs and a 2D lookup |
+| M6 | The rain's look (E57): drops at 3·E/π, opacity 0.4, 4 mm by 0.4 m, 40 000 drops at 10 mm/h. Keep it, or make it fainter or denser? Leaning: keep it; the slice 3 shots read as rain by day, and night rain dark | A look call; each change is one SO value |
 
 ## 10. Glossary
 
@@ -183,9 +200,14 @@ Inherited: Theatre E2 (frame), E4 (budget: terrain + sky ≤ 2 ms GPU, ≤ 0.5 m
 - **Air mass:** how much atmosphere light crosses, relative to straight up.
 - **EV100:** exposure value at ISO 100. One step halves or doubles the light.
 - **Lux:** light falling on a surface. Noon sun ≈ 100 000 lux, full moon ≈ 0.25 lux, a clear moonless night ≈ 0.002 lux.
+- **Nit:** luminance, the brightness of a surface seen from a direction (candela per square metre). A white surface under E lux reads about E/π nits.
+- **Extinction:** the share of a beam lost per metre. A beam keeps e^(−σd) after d metres; at the visibility it keeps 5 %, so σ = ln 20 / visibility.
+- **Rain rate:** the depth of water rain would leave in an hour, mm/h.
 
 ## Change log
 - **2026-10-30** — The interview: E26–E41 picked by SIX in four rounds (E35 and E38 differ from Claude's leaning). E26 reverses Theatre E20's order. E42–E47 proposed. Edit-mode baseline of the current sky measured. Blueprint written; SIX's baseline files committed (`08580940`).
 - **2026-10-30** — Slice 1 built: the clock, almanac, illumination, simulation, director, HDRP renderer, demo and App UI panel; 37/37 EditMode tests. Seen in play at noon, low sun, dusk and night, and the screenshots were sent to SIX. E46 measured and left Open for SIX (M2), leaning 0. The existing sky measured ≈3.2 ms GPU in the demo's sea-level view (risk updated). M3 added: the night's look.
 - **2026-10-30** — Slice 1 fast-forwarded into `main` (`c788fda2`, SIX). Slice 2 interview: SIX locked E42–E45, E47 (M1) and E46 at quantum 0 (M2), and picked E48–E52 (cover measured then solved, Kasten & Czeplak dimming with Beer–Lambert deferred, night bias 4, visibility as its own field, high cloud on the 2D layer). All picks were Claude's leaning.
 - **2026-10-30** — Slice 2 built on `feat/metoc`: weather in the core with logged blends, Kasten & Czeplak dimming, six presets, HDRP clouds, fog and the 2D layer through the overlay, the cover calibration, the panel's weather controls; 54/54 EditMode tests. Seen in play in the six presets by day and under clear and overcast at night; screenshots sent to SIX. The calibration's first runs read a black sky and drew one cloud pattern three times; both fixed (ROADMAP). E31 measured and picked by SIX (128/8). M4 (the remaining ≈0.2 ms over E4) and M5 (a table per cloud base) added.
+- **2026-10-30** — Slice 2 fast-forwarded into `main` (`368504b6`). Slice 3 interview: SIX picked E53–E56 (VFX Graph built by code as a spike, extinctions add, rain darkens the drawn clouds only, its own 0.5 ms budget), all Claude's leaning, and did not object to the stated defaults (WMO classes, a blending field, straight fall, three presets, count by a look factor, no splashes). The spike's first build drew white "thermite" (HDRP's unlit VFX outputs skip exposure); SIX asked to keep it, saved as `Assets/_VFX/Thermite/`.
+- **2026-10-30** — Slice 3 built on `feat/metoc`: the rain field, rain's extinction and the effective visibility in the report, the fog drawing it, rain darkening the drawn clouds, the rain graph and its builder, `MetocRain`, three presets and the panel's rain slider; 63/63 EditMode tests. Seen in play in light, moderate and heavy rain by day and in rain at night; screenshots sent to SIX. Cost measured (E56). E57 proposed and M6 added.

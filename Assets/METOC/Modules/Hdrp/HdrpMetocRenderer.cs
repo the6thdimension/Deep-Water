@@ -11,16 +11,17 @@ namespace DeepWater.Metoc.Hdrp
     /// light at the reckoned bodies, sets their above-air illuminance (HDRP's Physically Based Sky dims and reddens
     /// them through the air and hides them below the horizon), gives shadows to the body whose beam is up, and lowers
     /// the auto-exposure floor with the reckoned ground light. It draws the weather too: the volumetric clouds' cover,
-    /// base and thickness, the fog from the visibility, and the 2D layer from the high cloud (E48, E51, E52). Nothing
-    /// it draws feeds back into the report.
+    /// base and thickness, darkened under rain (E55), the fog from the visibility through the air and the rain (E51,
+    /// E54), and the 2D layer from the high cloud (E48, E52). The rain itself is <see cref="MetocRain"/>. Nothing it
+    /// draws feeds back into the report.
     /// <para>
     /// The sun light keeps its above-air value at night on purpose: the sky already removes it below the horizon,
     /// and the moon (shaded as "reflect sun light") takes its brightness from it.
     /// </para>
     /// <para>
     /// Exposure goes through a runtime overlay volume (E42): its own global volume above the shared sky, with a profile
-    /// made at run time that overrides only what METOC decides: <c>limitMin</c>, and the cloud, fog and cloud-layer
-    /// parameters above. Everything else falls through to the shared sky. No sky asset is written: in play mode, an
+    /// made at run time that overrides only what METOC decides: <c>limitMin</c>, and the cloud (with its light dimmers),
+    /// fog and cloud-layer parameters above. Everything else falls through to the shared sky. No sky asset is written: in play mode, an
     /// edit to a profile asset persists to disk.
     /// </para>
     /// <para>
@@ -57,6 +58,8 @@ namespace DeepWater.Metoc.Hdrp
         public HdrpMetocLookSO Look => look;
         /// <summary>The volumetric clouds' shapeFactor written this frame (1 when the clouds are off).</summary>
         public float CloudShapeFactor { get; private set; }
+        /// <summary>How much the rain darkens the drawn clouds this frame, 0 to the look's maximum (E55).</summary>
+        public float CloudRainDim { get; private set; }
         /// <summary>Whether the cover comes from a measured table (E48) rather than the uncalibrated guess.</summary>
         public bool CoverCalibrated => look != null && look.cloudCover != null && look.cloudCover.Problem() == null;
 
@@ -144,12 +147,13 @@ namespace DeepWater.Metoc.Hdrp
                 ExposureFloorEv = (float)MetocExposure.FloorEv(r.Light.TotalLux, look.adaptationBiasEv, look.absoluteMinEv, look.dayFloorEv);
                 _exposure.limitMin.Override(ExposureFloorEv);
 
-                DrawWeather(r.Weather);
+                DrawWeather(r);
             }
         }
 
-        void DrawWeather(in MetocWeather w)
+        void DrawWeather(in MetocReport r)
         {
+            MetocWeather w = r.Weather;
             // Volumetric clouds: off when clear, else the shapeFactor that covers the reckoned share of the sky (E48).
             bool cloudy = w.CoverOktas > 0;
             CloudShapeFactor = cloudy ? ShapeFactorFor(w.CoverOktas / 8.0) : 1f;
@@ -160,8 +164,22 @@ namespace DeepWater.Metoc.Hdrp
             SetOrRelease(_clouds.numPrimarySteps, look.cloudPrimarySteps);
             SetOrRelease(_clouds.numLightSteps, look.cloudLightSteps);
 
-            // Fog from the visibility (E51).
-            MetocFogSettings f = MetocFog.For(w, look.fogUniformFraction, look.fogDistanceFactor, look.fogMinDistanceM);
+            // Rain darkens the drawn clouds only (E55): their sun and ambient light, not their shape or the reckoned light.
+            // Dry, the shared sky's dimmers (1) show through.
+            CloudRainDim = (float)MetocFog.CloudDim(w.RainMmPerHour, look.rainCloudDimMax, look.rainCloudDimHalfRateMmPerHour);
+            if (CloudRainDim > 0f)
+            {
+                _clouds.sunLightDimmer.Override(1f - CloudRainDim);
+                _clouds.ambientLightProbeDimmer.Override(1f - CloudRainDim);
+            }
+            else
+            {
+                _clouds.sunLightDimmer.overrideState = false;
+                _clouds.ambientLightProbeDimmer.overrideState = false;
+            }
+
+            // Fog from the visibility through the air and the rain (E51, E54).
+            MetocFogSettings f = MetocFog.For(w, r.EffectiveVisibilityM, look.fogUniformFraction, look.fogDistanceFactor, look.fogMinDistanceM);
             _fog.enabled.Override(true);
             _fog.meanFreePath.Override((float)f.MeanFreePathM);
             _fog.baseHeight.Override((float)f.BaseHeightM);

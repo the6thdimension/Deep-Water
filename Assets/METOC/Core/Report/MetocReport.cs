@@ -3,9 +3,9 @@ using System;
 namespace DeepWater.Metoc
 {
     /// <summary>
-    /// The weather at a place and time (Theatre E19): the time, the sun, the moon, the reckoned light (E27, E41), and
-    /// the cloud and visibility with their ceiling and labels (E30, E51). Rain and wind join in later slices. Readers
-    /// take it as it is; nothing drawn feeds back into it.
+    /// The weather at a place and time (Theatre E19): the time, the sun, the moon, the reckoned light (E27, E41), the
+    /// cloud and visibility with their ceiling and labels (E30, E51), and the rain with the visibility through it (E53,
+    /// E54). Wind joins in a later slice. Readers take it as it is; nothing drawn feeds back into it.
     /// </summary>
     public readonly struct MetocReport
     {
@@ -16,9 +16,16 @@ namespace DeepWater.Metoc
         public readonly MoonState Moon;
         public readonly IlluminationState Light;
         public readonly MetocWeather Weather;
+        /// <summary>The rain's extinction of visible light, per metre (E54); 0 when dry.</summary>
+        public readonly double RainExtinctionPerM;
+        /// <summary>
+        /// The visibility through the air and the rain together, metres (E54): what an eye at the surface sees. The
+        /// weather's <see cref="MetocWeather.VisibilityM"/> is the air's alone, as set.
+        /// </summary>
+        public readonly double EffectiveVisibilityM;
 
         public MetocReport(long tick, double utSeconds, double daySpeed, in MetocPlace place, in SunState sun, in MoonState moon,
-            in IlluminationState light, in MetocWeather weather)
+            in IlluminationState light, in MetocWeather weather, double rainExtinctionPerM, double effectiveVisibilityM)
         {
             Tick = tick;
             UtSeconds = utSeconds;
@@ -28,6 +35,8 @@ namespace DeepWater.Metoc
             Moon = moon;
             Light = light;
             Weather = weather;
+            RainExtinctionPerM = rainExtinctionPerM;
+            EffectiveVisibilityM = effectiveVisibilityM;
         }
 
         public string TimeText => FormatUt(UtSeconds);
@@ -60,7 +69,8 @@ namespace DeepWater.Metoc
             Mix(Moon.Sky.ElevationDeg); Mix(Moon.Sky.AzimuthDeg); Mix(Moon.PhaseAngleDeg); Mix(Moon.DistanceKm);
             Mix(Light.SunLux); Mix(Light.MoonLux); Mix(Light.NightSkyLux); Mix(Light.CloudTransmission);
             Mix(Weather.CoverOktas); Mix(Weather.CloudBaseM); Mix(Weather.CloudThicknessM); Mix(Weather.HighCloudOktas);
-            Mix(Weather.VisibilityM); Mix(Weather.ObscurationTopM);
+            Mix(Weather.VisibilityM); Mix(Weather.ObscurationTopM); Mix(Weather.RainMmPerHour);
+            Mix(RainExtinctionPerM); Mix(EffectiveVisibilityM);
             return h;
         }
     }

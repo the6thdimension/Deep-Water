@@ -4,8 +4,8 @@ using NUnit.Framework;
 namespace DeepWater.Metoc.Tests
 {
     /// <summary>
-    /// Slice 2's weather (E30, E33, E49, E51, E52): validation, the METAR and WMO labels, blends, cloud dimming, and
-    /// weather orders in the reckoned core.
+    /// The weather (slice 2, E30, E33, E49, E51, E52; slice 3's rain, E53, E54): validation, the METAR and WMO labels,
+    /// blends, cloud dimming, rain's extinction and weather orders in the reckoned core.
     /// </summary>
     public class MetocWeatherTests
     {
@@ -15,6 +15,7 @@ namespace DeepWater.Metoc.Tests
 
         static MetocWeather WithCover(double oktas) => new MetocWeather(oktas, 1500, 1000, 0, 30000, 1000);
         static MetocWeather WithVisibility(double m) => new MetocWeather(0, 1500, 1000, 0, m, 1000);
+        static MetocWeather WithRain(double mmPerHour) => new MetocWeather(8, 600, 3000, 0, 20000, 450, mmPerHour);
 
         static MetocSimulation Sim(in MetocWeather start, double daySpeed = 60) =>
             new MetocSimulation(new MetocScenario(Calendar.UtSeconds(2026, 10, 30, 14, 24, 0), new MetocPlace(30, -40), daySpeed, start),
@@ -34,6 +35,81 @@ namespace DeepWater.Metoc.Tests
             StringAssert.Contains("visibility", WithVisibility(0.5).Problem());
             StringAssert.Contains("visibility", WithVisibility(double.PositiveInfinity).Problem());
             StringAssert.Contains("obscuration top", new MetocWeather(0, 1500, 1000, 0, 30000, 0).Problem());
+            StringAssert.Contains("rain", WithRain(-0.1).Problem());
+            StringAssert.Contains("rain", WithRain(500.1).Problem());
+            StringAssert.Contains("rain", WithRain(double.NaN).Problem());
+            Assert.IsNull(WithRain(500).Problem());
+        }
+
+        [Test]
+        public void RainClasses_FollowWmo_AndMetar()
+        {
+            Assert.AreEqual("", WithRain(0).RainIntensity);
+            Assert.AreEqual("", WithRain(0).RainCode);
+            Assert.IsFalse(WithRain(0).Raining);
+            Assert.AreEqual("light", WithRain(2.49).RainIntensity);
+            Assert.AreEqual("-RA", WithRain(2.49).RainCode);
+            Assert.AreEqual("moderate", WithRain(2.5).RainIntensity);
+            Assert.AreEqual("RA", WithRain(9.99).RainCode);
+            Assert.AreEqual("heavy", WithRain(10).RainIntensity);
+            Assert.AreEqual("+RA", WithRain(10).RainCode);
+            Assert.AreEqual("heavy", WithRain(50).RainIntensity);
+            Assert.AreEqual("violent", WithRain(50.01).RainIntensity);
+            Assert.AreEqual("+RA", WithRain(80).RainCode, "METAR has no violent class");
+            StringAssert.Contains("+RA 20 mm/h", WithRain(20).ToString());
+            StringAssert.DoesNotContain("RA", WithRain(0).ToString());
+        }
+
+        [Test]
+        public void RainExtinction_AddsToTheAirs()
+        {
+            var p = new IlluminationProfile();
+            Assert.AreEqual(0.0, Visibility.RainExtinctionPerM(0, p));
+            Assert.AreEqual(20000, Visibility.EffectiveM(20000, 0), "dry is exactly the air's visibility");
+            // 0.25 · 10^0.63 per km = 0.25 · 4.265795 = 1.066449 per km.
+            Assert.AreEqual(1.066449e-3, Visibility.RainExtinctionPerM(10, p), 1e-9);
+            // ln 20 / 1.066449e-3 = 2 801.2 m through clear air; 20 km of air brings it to 2 463.1 m.
+            Assert.AreEqual(2801.2, Visibility.EffectiveM(1e6, Visibility.RainExtinctionPerM(10, p)), 0.1);
+            Assert.AreEqual(2463.1, Visibility.EffectiveM(20000, Visibility.RainExtinctionPerM(10, p)), 0.1);
+            // 50 mm/h on its own: about 1 km.
+            Assert.AreEqual(1018.1, Visibility.EffectiveM(1e6, Visibility.RainExtinctionPerM(50, p)), 0.1);
+            // Rain only ever shortens the visibility.
+            Assert.Less(Visibility.EffectiveM(500, Visibility.RainExtinctionPerM(1, p)), 500);
+        }
+
+        [Test]
+        public void TheReport_CarriesTheSetAndTheEffectiveVisibility()
+        {
+            var sim = Sim(new MetocWeather(8, 600, 3000, 0, 20000, 450, 10));
+            Assert.AreEqual(20000, sim.Report.Weather.VisibilityM, "the set visibility is the air's");
+            Assert.AreEqual(1.066449e-3, sim.Report.RainExtinctionPerM, 1e-9);
+            Assert.AreEqual(2463.1, sim.Report.EffectiveVisibilityM, 0.1);
+            var dry = Sim(Overcast);
+            Assert.AreEqual(0.0, dry.Report.RainExtinctionPerM);
+            Assert.AreEqual(Overcast.VisibilityM, dry.Report.EffectiveVisibilityM);
+        }
+
+        [Test]
+        public void Rain_Blends_Linearly_AndDriesOut()
+        {
+            var rain = new MetocWeather(8, 600, 3000, 0, 20000, 450, 20);
+            Assert.AreEqual(10, MetocWeather.Blend(Overcast, rain, 0.5).RainMmPerHour, 1e-12);
+            var sim = Sim(rain);
+            sim.Issue(MetocOrder.SetWeather(Overcast, 120, "test"));
+            for (int i = 0; i < 110; i++) sim.Step(Step);
+            Assert.AreEqual(0, sim.Report.Weather.RainMmPerHour);
+            Assert.IsFalse(sim.Report.Weather.Raining);
+            Assert.AreEqual(Overcast.VisibilityM, sim.Report.EffectiveVisibilityM);
+        }
+
+        [Test]
+        public void ABadRainOrder_IsRefused()
+        {
+            var sim = Sim(Clear);
+            sim.Issue(MetocOrder.SetWeather(WithRain(-1), 10, "test"));
+            sim.Step(Step);
+            Assert.IsNotNull(sim.Log[0].Refused);
+            Assert.AreEqual(0, sim.Report.Weather.RainMmPerHour);
         }
 
         [Test]
@@ -179,6 +255,7 @@ namespace DeepWater.Metoc.Tests
             var a = Sim(Clear);
             var b = Sim(WithVisibility(29999));
             Assert.AreNotEqual(a.Report.Fingerprint(), b.Report.Fingerprint());
+            Assert.AreNotEqual(Sim(WithRain(0)).Report.Fingerprint(), Sim(WithRain(0.1)).Report.Fingerprint(), "and the rain");
         }
     }
 }

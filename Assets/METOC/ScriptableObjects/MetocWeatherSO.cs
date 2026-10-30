@@ -3,8 +3,8 @@ using UnityEngine;
 namespace DeepWater.Metoc
 {
     /// <summary>
-    /// A weather preset (slice 2, E30, E51, E52): the main cloud layer, high cloud, and the visibility with the top of
-    /// the layer that limits it. A scenario starts from one; the panel blends between them. Values are AUTHORED
+    /// A weather preset (slice 2, E30, E51, E52; slice 3, E53): the main cloud layer, high cloud, the visibility with the
+    /// top of the layer that limits it, and the rain. A scenario starts from one; the panel blends between them. Values are AUTHORED
     /// archetypes unless the provenance says otherwise.
     /// </summary>
     [CreateAssetMenu(menuName = "Deep Water/METOC/Weather Preset", fileName = "MetocWeather")]
@@ -31,11 +31,16 @@ namespace DeepWater.Metoc
         [Tooltip("Top of the fog bank or haze layer, metres.")]
         [Min(1f)] public double obscurationTopM = 1000.0;
 
+        [Header("Rain (E53)")]
+        [Tooltip("Rain rate, mm/h; 0 is dry. WMO: light below 2.5, moderate to 10, heavy to 50, violent above. Its " +
+                 "extinction adds to the visibility above (E54).")]
+        [Min(0f)] public double rainMmPerHour;
+
         [TextArea(2, 6)]
         public string provenance = "AUTHORED: a game-level archetype, not an observation.";
 
         public MetocWeather ToWeather() =>
-            new MetocWeather(coverOktas, cloudBaseM, cloudThicknessM, highCloudOktas, visibilityM, obscurationTopM);
+            new MetocWeather(coverOktas, cloudBaseM, cloudThicknessM, highCloudOktas, visibilityM, obscurationTopM, rainMmPerHour);
 
         void OnValidate()
         {

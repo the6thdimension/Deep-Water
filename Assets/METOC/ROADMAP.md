@@ -1,8 +1,8 @@
 # METOC — Roadmap
 
-**This document's one job:** what to do next, and what is done. Why each piece exists is in `BLUEPRINT.md` (E26–E47).
+**This document's one job:** what to do next, and what is done. Why each piece exists is in `BLUEPRINT.md` (E26–E57).
 
-**Status: BLUEPRINT LOCKED (2026-10-30). Slices 1 and 2 built and seen in play (2026-10-30); E31 picked by SIX (128/8). Slice 3 (rain) next. M4 and M5 wait on SIX.**
+**Status: BLUEPRINT LOCKED (2026-10-30). Slices 1, 2 and 3 built and seen in play (2026-10-30); slices 1 and 2 on `main` (`368504b6`), slice 3 on `feat/metoc`. Slice 4 (the wind grows the sea) next. M4, M5 and M6 wait on SIX.**
 
 **Rules (same as Theatre and General Quarters):**
 - Slices MAY be reordered for dependency.
@@ -155,8 +155,75 @@ At night the exposure floor read EV −2.74 under a clear sky and −4.74 under 
 - **The final sky, 128/8 and the final table** (`shapeFactor` 0.715, more cloud): volumetric clouds 1.27 ms (trace 1.00), Physically Based Sky 0.51, the 2D layer 0.23, fog on opaque 0.17. **The sky totals ≈2.18 ms**, against ≈3.2 ms before this slice: still ≈0.2 ms over E4's 2 ms in this view, before terrain (M4).
 - Volumetric fog read zero samples again (likely async compute, unverified).
 
-## Slice 3 — Rain (E32)
-- [ ] Rate in mm/h with METAR classes; VFX Graph rain in a camera-following box; visibility and cloud darkening from the rate.
+## Slice 3 — Rain (E32, E53–E57)
+
+Interview done 2026-10-30: E53–E56 picked (BLUEPRINT). Slice 2 on `main` (`368504b6`).
+
+- [x] The spike (E53): **Deep Water → METOC → Build Rain VFX** builds `MetocRain.vfx` from code, through the editor-only assembly `Unity.Testing.VisualEffectGraph.Editor`, which VFX Graph grants its internals to. Pass criteria fixed before the build: it compiles, it renders streaks, and it costs ≤ 0.5 ms GPU. **Passed** (table below); the Shuriken fallback was not needed (2026-10-30).
+- [x] The rain field in `MetocWeather`: mm/h, validated 0–500, blends linearly; WMO intensity and METAR code; the report's fingerprint mixes it (2026-10-30).
+- [x] Rain's extinction (E54): `Visibility` in the core, its constants in `IlluminationProfileSO` (from memory, labelled). The report carries `RainExtinctionPerM` and `EffectiveVisibilityM`. 10 mm/h alone gives 2 801 m; with 20 km of air, 2 463 m (2026-10-30).
+- [x] HDRP draws it: the fog from the effective visibility, up to the cloud base under rain; rain darkens the drawn clouds' sun and ambient dimmers (E55), released to the shared sky's when dry (2026-10-30).
+- [x] `MetocRain` (LateUpdate, marker `METOC.Rain`): moves the box to the camera's position (not its rotation) and sets the count, fall, size and brightness from the report and the look (E57). Once the last drop has fallen after the rain ends, it switches the effect off. A graph that lacks a property is refused, naming the menu that rebuilds it (2026-10-30).
+- [x] Presets Light rain (7 oktas, 1.5 mm/h), Rain (8, 5) and Heavy rain (8, 20), visibility 20 km of air in each. The panel's rain slider runs 0–100 mm/h on a square-root scale. The readout shows the rain, its class, the visibility through it, how much the clouds are darkened and the drops drawn (2026-10-30).
+- [x] The thermite: the spike's first build, kept at SIX's request as `Assets/_VFX/Thermite/Thermite.vfx` and `Thermite.prefab`. It is a frozen copy: exposure is skipped, and its box sits on the prefab's transform. It draws in play: 59 792 drops, not culled (2026-10-30).
+- [x] Tests:
+  - rain validation, classes and codes;
+  - extinction and effective visibility, and the report;
+  - blends and drying out, and a bad rain order;
+  - fog under rain, cloud dimming, drawn drops and drop luminance.
+
+  63/63 (9 new), Test Runner, EditMode (2026-10-30).
+- [x] *Done when:* tests green (63/63); the demo seen in light, moderate and heavy rain by day and in rain at night, with screenshots (sent to SIX 2026-10-30); the cost measured against E56; METHODOLOGY C71–C74; committed and pushed on `feat/metoc`.
+
+### Slice 3 — measured (2026-10-30)
+
+Editor, play mode, Game view 2560×1440, quality High Fidelity, RTX 3070 Ti Laptop GPU. The METOC demo at 30° N, 40° W, 2026-10-30 14:24 UT (sun 46.1°), eye at 102 m, looking 4° up towards the north-west. Three `Unity.exe` processes were running: this Editor and two others, likely its asset-import workers (not checked). No trainer was running.
+
+**The spike (E53).**
+
+| Pass criterion | Result |
+|---|---|
+| Compiles | Yes: 4 contexts, capacity 131 072, 10 exposed properties (11 in the spike, before the box moved onto the object) |
+| Renders streaks | Yes, in play (the shots below) |
+| ≤ 0.5 ms GPU | 0.11 ms for 60 000 drops driven by hand in the spike; 0.14–0.16 ms through `MetocRain` (below) |
+
+**The look (E57).** With the camera's exposure applied, a drop at 0.6·E/π is as bright as the overcast sky and vanished. k 1, 2 and 3 were shot, and 3 was kept, with opacity 0.4 and 4 mm width. SIX's look call: M6.
+
+**The rain set** (screenshots sent to SIX).
+
+| Shot | Report | Effective visibility | Ground light | Drops drawn | Drop luminance | Cloud dimmers | Fog (mean free path, uniform to, gone by) |
+|---|---|---|---|---|---|---|---|
+| Light rain | BKN 7/8 at 900 m, −RA 1.5 mm/h | 6 340 m (rain 0.323 per km) | 43 781 lux | 12 815 | 41 808 nits | 0.905 | 2 116 m, 450 m, 900 m |
+| Rain | OVC 8/8 at 600 m, RA 5 mm/h | 3 571 m (0.689 per km) | 20 900 lux | 26 390 | 19 958 nits | 0.769 | 1 192 m, 300 m, 600 m |
+| Heavy rain | OVC 8/8 at 450 m, +RA 20 mm/h | 1 664 m (1.650 per km) | 20 900 lux | 60 629 | 19 958 nits | 0.571 | 555 m, 225 m, 450 m |
+| Rain at night (03:00 UT) | as Rain; moon 48.5°, 80 % lit | 3 571 m | 0.015 lux, floor EV −3.4 | 26 390 | 0.014 nits | 0.769 | as Rain |
+| Overcast, dry | OVC 8/8 at 450 m, 8 km | 8 000 m | 20 900 lux | 0, effect off | — | 1.000 (the shared sky's) | 2 670 m, 225 m, 450 m |
+
+- Light rain and rain read as streaks over a sea that fades out before the horizon. In heavy rain the horizon is gone: 1.7 km of visibility, seen from 102 m up.
+- The brown cast is the shared overcast sky's: the dry overcast shot has it too.
+- At night the drops are faint grey lines on black. They dim with the reckoned light, as real rain does when no lamp lights it.
+
+**E56: the cost of rain.** Heavy rain (20 mm/h) with `MetocRain` on and off in ABAB order, then once at the drop cap (100 mm/h). 300 frames after 300 warm-up frames, so the box is full before the count starts. GPU ms per frame from `ProfilerRecorder` with `GpuRecorder`; `METOC.Rain` is CPU.
+
+| Run | Rain | Drops | Init | Update | Transparent pass | Rain, GPU | Volumetric clouds | `METOC.Rain` (CPU) |
+|---|---|---|---|---|---|---|---|---|
+| A1 | on, 20 mm/h | 60 629 | 0.0067 | 0.0430 | 0.1082 | **0.158** | 0.578 | 0.0122 |
+| B1 | off | 0 | 0 | 0 | 0.0000 | 0 | 0.448 | — |
+| A2 | on, 20 mm/h | 60 629 | 0.0049 | 0.0382 | 0.0919 | **0.135** | 0.436 | 0.0119 |
+| B2 | off | 0 | 0 | 0 | 0 | 0 | 0.437 | — |
+| Cap | on, 100 mm/h | 124 518 | 0.0053 | 0.0467 | 0.1737 | **0.226** | 0.439 | 0.0130 |
+
+- `ForwardTransparent` holds only the rain in this scene: it reads zero with the rain off. The drops' draw, `RenderQuadIndirect` (0.087–0.169 ms), runs inside it.
+- E56's 0.5 ms holds with room: about 0.16 ms in heavy rain and 0.23 ms at the cap.
+- The clouds' 0.58 ms in A1 against 0.44 ms in the other runs is the first run after a weather change, or noise. Rain changes only the clouds' dimmers, not their trace.
+- `METOC.Draw` read 0.022–0.024 ms CPU, against 0.018 ms in slice 1.
+
+**Do not re-learn.**
+- *Exposure skipped.* By default HDRP's unlit VFX outputs write their colour without the camera's exposure. A colour of 0.6 then drew white at EV 10: the "thermite". `useExposureWeight` on the output applies the exposure (weight 1), and the colour is then in nits.
+- *Local slots.* A world-space particle system still reads its bounds, birth box, Tile/Warp volume and velocity in the effect's own space. A camera position fed into a box centre on an object that also moves counts the move twice, and the effect is culled; the thermite prefab was, until its binder came off. Move the object, and keep the centres at 0.
+- *Reset stops a recorder* (C64, re-learned in the spike). Call `ProfilerRecorder.Reset()`, then `Start()`.
+- *A screenshot is written late.* `ScreenCapture.CaptureScreenshot` in the Editor writes on a later frame. The dry overcast frame landed 6 s late, after the next step had spawned the thermite, and showed the thermite; it was retaken. Wait for the file before changing the scene (C74).
+- *The builder's assembly name.* `Unity.Testing.VisualEffectGraph.Editor` is granted VFX Graph's internals (`Editor/PackageInfo.cs`). If `com.unity.testing.visualeffectgraph` is ever installed, rename the assembly to another granted name.
 
 ## Slice 4 — The wind grows the sea (E36)
 - [ ] Wind speed and direction in the report; Sea State's Douglas sea and wind direction driven through its existing setters, with growth over duration, labelled open-ocean; the Douglas dial as the god's labelled override.

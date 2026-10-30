@@ -11,7 +11,7 @@ namespace DeepWater.Metoc.Examples
 {
     /// <summary>
     /// The METOC demo's runtime panel (App UI, E35): a readout of the report and sliders for the date, the time of day,
-    /// latitude, longitude and day speed, the weather presets as buttons and sliders for the weather, plus keys. Every
+    /// latitude, longitude and day speed, the weather presets as buttons and sliders for the weather and the rain, plus keys. Every
     /// slider, button and key issues a <see cref="MetocOrder"/> through the director, so every change is in the order
     /// log; nothing here sets METOC's state directly. A drag issues at most one order per kind per frame. While no
     /// slider has been touched for a moment, the sliders follow the report.
@@ -28,6 +28,8 @@ namespace DeepWater.Metoc.Examples
         [SerializeField] MetocDirector director;
         [Tooltip("Optional: shows the exposure floor it writes.")]
         [SerializeField] HdrpMetocRenderer metocRenderer;
+        [Tooltip("Optional: shows how many drops it draws.")]
+        [SerializeField] MetocRain rain;
         [Tooltip("Readout refreshes per second (real time).")]
         [SerializeField] float refreshHz = 10f;
         [Tooltip("The date slider's reach either side of the scenario's start date, days.")]
@@ -38,8 +40,9 @@ namespace DeepWater.Metoc.Examples
         [Min(0f)] [SerializeField] float presetBlendDayMinutes = 15f;
 
         const float MinVisibilityLog10 = 2f, MaxVisibilityLog10 = 4.7f;   // 100 m to 50 km
+        const float MaxRainRoot = 10f;   // the rain slider is √(mm/h), so light rain has room: 0 to 100 mm/h
 
-        SliderFloat _date, _time, _lat, _lon, _speed, _cover, _base, _high, _visibility;
+        SliderFloat _date, _time, _lat, _lon, _speed, _cover, _base, _high, _visibility, _rain;
         AppText _readout;
         readonly StringBuilder _sb = new StringBuilder(512);
         double _startMidnightUt, _pausedSpeed = 1;
@@ -118,6 +121,7 @@ namespace DeepWater.Metoc.Examples
             _base = AddSlider(card, "Cloud base", 0f, 5000f, 50f, v => $"{v:0} m", () => _weatherDirty = true);
             _high = AddSlider(card, "High cloud", 0f, 8f, 1f, v => $"{v:0}/8", () => _weatherDirty = true);
             _visibility = AddSlider(card, "Visibility", MinVisibilityLog10, MaxVisibilityLog10, 0.02f, v => Distance(Math.Pow(10, v)), () => _weatherDirty = true);
+            _rain = AddSlider(card, "Rain", 0f, MaxRainRoot, 0.05f, v => RainText(v * v), () => _weatherDirty = true);
 
             var help = new AppText("T / Shift+T  ±1 h     = / −  day speed ×2 / ÷2     P  pause") { size = TextSize.XS };
             help.style.opacity = 0.7f;
@@ -195,7 +199,8 @@ namespace DeepWater.Metoc.Examples
             {
                 // The sliders change what they show; thickness and the obscuration top stay as the target has them.
                 MetocWeather t = director.Simulation.WeatherTarget;
-                var w = new MetocWeather(_cover.value, _base.value, t.CloudThicknessM, _high.value, Math.Pow(10, _visibility.value), t.ObscurationTopM);
+                var w = new MetocWeather(_cover.value, _base.value, t.CloudThicknessM, _high.value, Math.Pow(10, _visibility.value), t.ObscurationTopM,
+                    _rain.value * _rain.value);
                 director.Issue(MetocOrder.SetWeather(w, 0, Issuer));
                 _weatherDirty = false;
             }
@@ -214,6 +219,7 @@ namespace DeepWater.Metoc.Examples
             _base.SetValueWithoutNotify(Mathf.Clamp((float)r.Weather.CloudBaseM, _base.lowValue, _base.highValue));
             _high.SetValueWithoutNotify((float)r.Weather.HighCloudOktas);
             _visibility.SetValueWithoutNotify(Mathf.Clamp((float)Math.Log10(r.Weather.VisibilityM), MinVisibilityLog10, MaxVisibilityLog10));
+            _rain.SetValueWithoutNotify(Mathf.Clamp((float)Math.Sqrt(r.Weather.RainMmPerHour), 0f, MaxRainRoot));
         }
 
         string Readout(in MetocReport r)
@@ -231,15 +237,24 @@ namespace DeepWater.Metoc.Examples
             _sb.Append($" · cloud lets {r.Light.CloudTransmission:P0} of the light through").AppendLine();
             _sb.Append($"Visibility {Distance(w.VisibilityM)}");
             if (w.ObscurationLabel.Length > 0) _sb.Append($" · {w.ObscurationLabel} to {w.ObscurationTopM:0} m");
+            if (w.Raining)
+                _sb.AppendLine().Append($"Rain {w.RainCode} {w.RainMmPerHour:0.#} mm/h, {w.RainIntensity} · visibility through it {Distance(r.EffectiveVisibilityM)}");
             if (director.Simulation.BlendProgress < 1) _sb.AppendLine().Append($"Blending to {director.Simulation.WeatherTarget.CoverCode}, {director.Simulation.BlendProgress:P0}");
             if (metocRenderer != null && metocRenderer.isActiveAndEnabled)
             {
                 _sb.AppendLine().Append($"Exposure floor EV {metocRenderer.ExposureFloorEv:0.0} · clouds' shapeFactor {metocRenderer.CloudShapeFactor:0.000}");
                 if (!metocRenderer.CoverCalibrated) _sb.Append(" (UNCALIBRATED)");
+                if (metocRenderer.CloudRainDim > 0f) _sb.Append($" · rain darkens them {metocRenderer.CloudRainDim:P0}");
             }
+            if (rain != null && rain.isActiveAndEnabled && rain.Drawing) _sb.AppendLine().Append($"Drawing {rain.DrawnDrops:N0} drops at {Nits(rain.DropLuminanceNits)}");
             _sb.AppendLine().Append($"Tick {r.Tick}   orders logged {director.Simulation.Log.Count}");
             return _sb.ToString();
         }
+
+        static string RainText(double mmPerHour) =>
+            mmPerHour <= 0 ? "none" : $"{mmPerHour:0.#} mm/h {new MetocWeather(8, 600, 3000, 0, 20000, 450, mmPerHour).RainCode}";
+
+        static string Nits(double n) => n >= 10 ? $"{n:0} nits" : $"{n:0.###} nits";
 
         static string Distance(double m) => m >= 10000 ? $"{m / 1000:0} km" : m >= 1000 ? $"{m / 1000:0.0} km" : $"{m:0} m";
 

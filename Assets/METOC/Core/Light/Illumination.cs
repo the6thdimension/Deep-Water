@@ -3,8 +3,9 @@ using System;
 namespace DeepWater.Metoc
 {
     /// <summary>
-    /// The constants of the clear-sky light model (E45). An <c>IlluminationProfileSO</c> fills it, with provenance;
-    /// the defaults here are those values, so a test can build one without an asset.
+    /// The constants of the clear-sky light model (E45), the cloud's dimming of it (E49) and the rain's extinction of it
+    /// (E54). An <c>IlluminationProfileSO</c> fills it, with provenance; the defaults here are those values, so a test can
+    /// build one without an asset.
     /// </summary>
     public sealed class IlluminationProfile
     {
@@ -29,6 +30,11 @@ namespace DeepWater.Metoc
         /// verify). Overcast lets 1 − A through (E49).
         /// </summary>
         public double CloudDimmingA = 0.75, CloudDimmingB = 3.4;
+        /// <summary>
+        /// Rain's extinction of visible light, a·R^b per km for R mm/h (E54; from memory, verify): 0.25 and 0.63. The
+        /// free-space-optics fit 1.076·R^0.67 dB/km is 0.248·R^0.67 per km, close to it (also from memory, verify).
+        /// </summary>
+        public double RainExtinctionPerKm = 0.25, RainExtinctionExponent = 0.63;
     }
 
     /// <summary>

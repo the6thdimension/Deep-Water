@@ -3,9 +3,10 @@ using System;
 namespace DeepWater.Metoc
 {
     /// <summary>
-    /// The weather METOC decides (slice 2, E30, E51, E52): one main cloud layer (cover, base, thickness), high cloud,
-    /// and the visibility at the surface with the top of the layer that limits it. Heights are metres above sea level.
-    /// A blend can hold a fraction of an okta; the METAR code rounds it.
+    /// The weather METOC decides (slice 2, E30, E51, E52; slice 3, E53): one main cloud layer (cover, base, thickness),
+    /// high cloud, the visibility at the surface with the top of the layer that limits it, and the rain rate. Heights are
+    /// metres above sea level. A blend can hold a fraction of an okta; the METAR code rounds it.
+    /// <para>The visibility is the air's without the rain; the report adds the rain's extinction to it (E54).</para>
     /// </summary>
     public readonly struct MetocWeather
     {
@@ -19,9 +20,11 @@ namespace DeepWater.Metoc
         public readonly double VisibilityM;
         /// <summary>The top of the fog bank or haze that limits the visibility, metres (E51).</summary>
         public readonly double ObscurationTopM;
+        /// <summary>Rain rate at the surface, mm/h (E53); 0 is no rain. It falls from the cloud base.</summary>
+        public readonly double RainMmPerHour;
 
         public MetocWeather(double coverOktas, double cloudBaseM, double cloudThicknessM, double highCloudOktas, double visibilityM,
-            double obscurationTopM)
+            double obscurationTopM, double rainMmPerHour = 0)
         {
             CoverOktas = coverOktas;
             CloudBaseM = cloudBaseM;
@@ -29,6 +32,7 @@ namespace DeepWater.Metoc
             HighCloudOktas = highCloudOktas;
             VisibilityM = visibilityM;
             ObscurationTopM = obscurationTopM;
+            RainMmPerHour = rainMmPerHour;
         }
 
         /// <summary>Null when valid, else why not. A boundary check: METOC refuses a bad weather, it never clamps one.</summary>
@@ -40,10 +44,14 @@ namespace DeepWater.Metoc
             if (!InRange(CloudThicknessM, 1, 20000)) return $"cloud thickness {CloudThicknessM} m is outside 1–20 000 m";
             if (!InRange(VisibilityM, 1, 1e6)) return $"visibility {VisibilityM} m is outside 1 m–1 000 km";
             if (!InRange(ObscurationTopM, 1, 20000)) return $"obscuration top {ObscurationTopM} m is outside 1–20 000 m";
+            if (!InRange(RainMmPerHour, 0, MaxRainMmPerHour)) return $"rain {RainMmPerHour} mm/h is outside 0–{MaxRainMmPerHour:0} mm/h";
             return null;
         }
 
         static bool InRange(double v, double lo, double hi) => v >= lo && v <= hi;   // false for NaN
+
+        /// <summary>The most rain METOC takes, mm/h: above any hourly rate on record (about 300 mm/h; from memory, verify).</summary>
+        public const double MaxRainMmPerHour = 500;
 
         /// <summary>The main layer's cover rounded to whole oktas, as a METAR report gives it.</summary>
         public int CoverOktasRounded => (int)Math.Round(CoverOktas, MidpointRounding.AwayFromZero);
@@ -67,9 +75,21 @@ namespace DeepWater.Metoc
         /// <summary>WMO: fog below 1 km, mist or haze to 5 km, nothing to report above (E51).</summary>
         public string ObscurationLabel => VisibilityM < 1000 ? "fog" : VisibilityM <= 5000 ? "mist or haze" : "";
 
+        /// <summary>Whether rain falls.</summary>
+        public bool Raining => RainMmPerHour > 0;
+
+        /// <summary>
+        /// The rain's intensity class (E53, WMO; from memory, verify): light below 2.5 mm/h, moderate to 10, heavy to 50,
+        /// violent above; empty when dry.
+        /// </summary>
+        public string RainIntensity => !Raining ? "" : RainMmPerHour < 2.5 ? "light" : RainMmPerHour < 10 ? "moderate" : RainMmPerHour <= 50 ? "heavy" : "violent";
+
+        /// <summary>METAR rain: −RA light, RA moderate, +RA heavy or violent (METAR has no violent class); empty when dry.</summary>
+        public string RainCode => !Raining ? "" : RainMmPerHour < 2.5 ? "-RA" : RainMmPerHour < 10 ? "RA" : "+RA";
+
         /// <summary>
         /// The weather a fraction <paramref name="t"/> of the way from <paramref name="a"/> to <paramref name="b"/> (E33):
-        /// cover and heights linearly, visibility and the obscuration top in log space, since they span decades.
+        /// cover, heights and rain linearly, visibility and the obscuration top in log space, since they span decades.
         /// </summary>
         public static MetocWeather Blend(in MetocWeather a, in MetocWeather b, double t)
         {
@@ -81,7 +101,8 @@ namespace DeepWater.Metoc
                 Lerp(a.CloudThicknessM, b.CloudThicknessM, t),
                 Lerp(a.HighCloudOktas, b.HighCloudOktas, t),
                 LogLerp(a.VisibilityM, b.VisibilityM, t),
-                LogLerp(a.ObscurationTopM, b.ObscurationTopM, t));
+                LogLerp(a.ObscurationTopM, b.ObscurationTopM, t),
+                Lerp(a.RainMmPerHour, b.RainMmPerHour, t));
         }
 
         static double Lerp(double a, double b, double t) => a + (b - a) * t;
@@ -89,6 +110,6 @@ namespace DeepWater.Metoc
 
         public override string ToString() =>
             $"{CoverCode} {CoverOktas:0.#}/8 at {CloudBaseM:0} m ({CloudThicknessM:0} m thick), high {HighCloudOktas:0.#}/8, " +
-            $"visibility {VisibilityM:0} m to {ObscurationTopM:0} m";
+            $"visibility {VisibilityM:0} m to {ObscurationTopM:0} m" + (Raining ? $", {RainCode} {RainMmPerHour:0.#} mm/h" : "");
     }
 }

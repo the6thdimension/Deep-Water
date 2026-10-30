@@ -58,5 +58,37 @@ namespace DeepWater.Metoc.Hdrp
         [Tooltip("LOOK. The 2D cloud layer's opacity at 8 oktas of high cloud; it scales linearly with the oktas. " +
                  "Opacity is not coverage: this is a look, not a measured match.")]
         [Range(0f, 1f)] public float highCloudOpacityAtEightOktas = 1f;
+
+        [Header("Rain clouds (E55)")]
+        [Tooltip("LOOK. Rain darkens the drawn clouds (their sun and ambient light dimmers) by up to this share. The " +
+                 "reckoned light stays Kasten & Czeplak on the cover (SIX, 2026-10-30: drawn darker only).")]
+        [Range(0f, 1f)] public float rainCloudDimMax = 0.6f;
+        [Tooltip("LOOK. The rain rate that darkens the clouds by half the maximum, mm/h.")]
+        [Min(0.01f)] public float rainCloudDimHalfRateMmPerHour = 8f;
+
+        [Header("Rain drops (E53, MetocRain)")]
+        [Tooltip("LOOK. Drops drawn at 10 mm/h. A real 10 mm/h rain holds about 3 000 drops per cubic metre (Marshall–" +
+                 "Palmer; from memory, verify), far more than can be drawn, so the count is a look.")]
+        [Min(0f)] public float rainDropsAt10MmPerHour = 40000f;
+        [Tooltip("LOOK. The drawn count goes as (rate / 10 mm/h) to this power, capped by the graph's capacity.")]
+        [Range(0f, 2f)] public float rainDropsExponent = 0.6f;
+        [Tooltip("LOOK. The box of drops around the camera, metres (x, height, z). Drops wrap inside it.")]
+        public Vector3 rainBoxSizeM = new Vector3(40f, 24f, 40f);
+        [Tooltip("LOOK. How fast the drawn drops fall, m/s (a 2 mm drop falls about 6.5 m/s, Gunn & Kinzer 1949; from " +
+                 "memory, verify). Straight down until wind (slice 4).")]
+        [Min(0.1f)] public float rainFallSpeedMps = 6.5f;
+        [Tooltip("LOOK. A drawn drop's width, metres.")]
+        [Min(0.0001f)] public float rainDropWidthM = 0.004f;
+        [Tooltip("LOOK. A drawn drop's streak length, metres (the drop's fall during an eye's or a camera's exposure).")]
+        [Min(0.0001f)] public float rainStreakLengthM = 0.4f;
+        [Tooltip("LOOK. A drop's luminance as a multiple of E/π, where E is the reckoned ground light (a sky of uniform " +
+                 "luminance L gives E = πL). 3 (slice 3 spike): 0.6 vanished against the sky.")]
+        [Min(0f)] public float rainLuminanceFactor = 3f;
+        [Tooltip("LOOK. A drop's opacity.")]
+        [Range(0f, 1f)] public float rainAlpha = 0.4f;
+        [Tooltip("LOOK. Drops nearer the camera than this are fully faded, metres.")]
+        [Min(0f)] public float rainFadedDistanceM = 0.3f;
+        [Tooltip("LOOK. Drops farther than this are fully drawn, metres.")]
+        [Min(0f)] public float rainVisibleDistanceM = 1.5f;
     }
 }

@@ -99,7 +99,9 @@ namespace DeepWater.Metoc
             var sun = Almanac.Sun(_clock.UtSeconds, _place.LatitudeDeg, _place.LongitudeDeg);
             var moon = Almanac.Moon(_clock.UtSeconds, _place.LatitudeDeg, _place.LongitudeDeg, sun);
             var light = Illumination.Compute(sun, moon, _light, _weather.CoverOktas);
-            return new MetocReport(Tick, _clock.UtSeconds, _clock.DaySpeed, _place, sun, moon, light, _weather);
+            double rainExtinction = Visibility.RainExtinctionPerM(_weather.RainMmPerHour, _light);
+            return new MetocReport(Tick, _clock.UtSeconds, _clock.DaySpeed, _place, sun, moon, light, _weather,
+                rainExtinction, Visibility.EffectiveM(_weather.VisibilityM, rainExtinction));
         }
     }
 }

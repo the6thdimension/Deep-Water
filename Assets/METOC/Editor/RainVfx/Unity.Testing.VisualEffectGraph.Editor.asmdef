@@ -1,0 +1,20 @@
+{
+    "name": "Unity.Testing.VisualEffectGraph.Editor",
+    "rootNamespace": "DeepWater.Metoc.Editor.RainVfx",
+    "references": [
+        "DeepWater.Metoc.Hdrp",
+        "Unity.VisualEffectGraph.Editor",
+        "Unity.VisualEffectGraph.Runtime"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

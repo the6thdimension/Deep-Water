@@ -3,7 +3,7 @@ using UnityEngine;
 namespace DeepWater.Metoc
 {
     /// <summary>
-    /// The light model's constants (E45, E49), with provenance. Values marked "from memory, verify" are labelled
+    /// The light model's constants (E45, E49, E54), with provenance. Values marked "from memory, verify" are labelled
     /// until each is checked against its source (blueprint §8).
     /// </summary>
     [CreateAssetMenu(menuName = "Deep Water/METOC/Illumination Profile", fileName = "IlluminationProfile")]
@@ -36,13 +36,19 @@ namespace DeepWater.Metoc
         [Tooltip("T = 1 − A·(N/8)^B for N oktas of the main layer; overcast lets 1 − A through.")]
         public double cloudDimmingA = 0.75, cloudDimmingB = 3.4;
 
+        [Header("Rain extinction (E54; from memory, verify)")]
+        [Tooltip("Rain's extinction of visible light, a·R^b per km for R mm/h. It adds to the air's ln 20 / visibility.")]
+        public double rainExtinctionPerKm = 0.25, rainExtinctionExponent = 0.63;
+
         [TextArea(3, 8)]
         public string provenance =
             "IES Lighting Handbook clear-sky daylight model (direct E0·exp(-c·m)·sin h + diffuse A + B·sin^C h): from memory, verify. " +
             "Twilight table after Bond & Henderson (1963) / USNO: from memory, verify. " +
             "Moon: Krisciunas & Schaefer (1991), PASP 103, 1033. Air mass: Kasten & Young (1989), Applied Optics 28, 4735. " +
             "Night sky 0.002 lux: from memory, verify. " +
-            "Cloud dimming 1 − 0.75·(N/8)^3.4: Kasten & Czeplak (1980), Solar Energy 24, 177; from memory, verify.";
+            "Cloud dimming 1 − 0.75·(N/8)^3.4: Kasten & Czeplak (1980), Solar Energy 24, 177; from memory, verify. " +
+            "Rain extinction 0.25·R^0.63 per km (R mm/h): from memory, verify; the free-space-optics fit 1.076·R^0.67 dB/km " +
+            "(= 0.248·R^0.67 per km) agrees within 10 % up to about 13 mm/h and reads 16 % more at 50 mm/h, also from memory.";
 
         public IlluminationProfile ToProfile() => new IlluminationProfile
         {
@@ -61,6 +67,8 @@ namespace DeepWater.Metoc
             NightSkyLux = nightSkyLux,
             CloudDimmingA = cloudDimmingA,
             CloudDimmingB = cloudDimmingB,
+            RainExtinctionPerKm = rainExtinctionPerKm,
+            RainExtinctionExponent = rainExtinctionExponent,
         };
 
         void OnValidate()

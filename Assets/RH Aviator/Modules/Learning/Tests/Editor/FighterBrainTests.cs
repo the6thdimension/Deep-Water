@@ -68,6 +68,7 @@ namespace DeepWater.Aviator.Learning.Tests
                     Assert.AreEqual(BehaviorType.Default, jet.GetComponent<BehaviorParameters>().BehaviorType);
                     Assert.AreEqual(1, jet.GetComponent<BehaviorParameters>().TeamId, "red is team 1 for self-play");
                     Assert.IsNull(jet.GetComponent<BehaviorParameters>().Model, "the latest brain is set only in play, so the scene never names a git-ignored file");
+                    Assert.IsTrue(jet.GetComponent<BehaviorParameters>().DeterministicInference, "a brain flying without the trainer takes its best guess (sensors-bc, 2026-10-30)");
                 }
 
                 two.gameObject.AddComponent<JetBrain>().Set(true, FighterBrain.Scripted, null);

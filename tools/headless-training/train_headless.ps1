@@ -82,6 +82,15 @@ switch ($Action) {
                 Rename-Item -Path $runDir -NewName $aside
                 Log "$Run had no checkpoint to resume: set aside as $aside (nothing deleted)"
             }
+            # The trainer writes each player's log afresh to run_logs/Player-N.log on every start, so a restart used to lose
+            # the who-shot-whom counts before it (sensors-bc, 2026-10-30): move the last start's logs aside first.
+            $playerLogs = @(Get-ChildItem -Path (Join-Path $runDir "run_logs") -Filter "Player-*.log" -ErrorAction SilentlyContinue)
+            if ($playerLogs.Count -gt 0) {
+                $kept = Join-Path $runDir ("run_logs\players-" + ($playerLogs | Sort-Object LastWriteTime | Select-Object -Last 1).LastWriteTime.ToString("yyyyMMdd-HHmmss"))
+                New-Item -ItemType Directory -Force -Path $kept | Out-Null
+                $playerLogs | Move-Item -Destination $kept
+                Log "the last start's $($playerLogs.Count) player logs kept in $kept"
+            }
             $log = Join-Path $StateDir ("trainer-" + (Get-Date -Format "yyyyMMdd-HHmmss") + ".log")
             $flags = "`"$Config`" --run-id=$Run --results-dir=`"$resultsArg`" --env=`"$Player`" --num-envs=$Envs --no-graphics --timeout-wait=600 --max-lifetime-restarts=0"
             if ($resume) { $flags += " --resume" }

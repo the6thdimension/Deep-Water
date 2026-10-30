@@ -337,7 +337,27 @@ namespace DeepWater.Aviator.Learning
             if (tick > 0 && tick % WhoShotWhomEveryTicks == 0)
                 Debug.Log($"[WHO-SHOT-WHOM] tick {tick}, step {Academy.Instance.StepCount}: missiles at enemies / at friends (radar of them): " +
                           $"learning {_shots[0, 0]} / {_shots[0, 1]} ({_shots[0, 2]}); stand-in or teacher {_shots[1, 0]} / {_shots[1, 1]} ({_shots[1, 2]}); " +
-                          $"rule pilots {_shots[2, 0]} / {_shots[2, 1]} ({_shots[2, 2]})", this);
+                          $"rule pilots {_shots[2, 0]} / {_shots[2, 1]} ({_shots[2, 2]}); " +
+                          $"credits blue {FightStats.Credits(_prices.SideNet(Side.Blue))}, red {FightStats.Credits(_prices.SideNet(Side.Red))}; " +
+                          $"learning jets: kills {LearnedTally(a => a.Kills)}, friends shot down {LearnedTally(a => a.FriendlyKills)}, " +
+                          $"deaths {LearnedTally(a => a.Deaths)}, net {FightStats.Credits(LearnedNet())}", this);
+        }
+
+        // The price ledger's counts summed over the jets the learned pilots fly now (C58: split by who did it). The judge
+        // of a run is this line and the who-shot-whom counts, not the trainer's Elo: a jet's episode ends only when it goes
+        // down, always on a loss, so ML-Agents' rating can only fall (TRAINING-CONCEPT, 2026-10-30).
+        int LearnedTally(System.Func<JetAccount, int> count)
+        {
+            int n = 0;
+            foreach (FighterAgent a in _agents) if (a.enabled && a.Seat != null) n += count(_prices.Of(a.AircraftId));
+            return n;
+        }
+
+        float LearnedNet()
+        {
+            float n = 0f;
+            foreach (FighterAgent a in _agents) if (a.enabled && a.Seat != null) n += _prices.Of(a.AircraftId).Net;
+            return n;
         }
 
         void OnGUI()

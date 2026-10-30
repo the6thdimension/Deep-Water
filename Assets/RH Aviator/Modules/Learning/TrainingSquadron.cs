@@ -197,12 +197,20 @@ namespace DeepWater.Aviator.Learning
                 if (behaviour != null)
                 {
                     if (behaviour.TeamId != team) { behaviour.TeamId = team; changed = true; }
+                    // A brain flying without the trainer takes its best guess instead of sampling its noise: a brain whose
+                    // noise grew in training otherwise flies at random (sensors-bc, 2026-10-30). The trainer, when connected,
+                    // samples regardless. This setter does not rebuild a started agent's policy, so a change in play is
+                    // followed by one that does (the inference device, set to itself) unless the brain changes below anyway.
+                    bool guess = !behaviour.DeterministicInference;
+                    if (guess) { behaviour.DeterministicInference = true; changed = true; }
                     // Each setter rebuilds a started agent's policy, and InferenceOnly with no model throws: the model goes
                     // in before the type when the type needs it, after it otherwise.
                     bool modelFirst = type == BehaviorType.InferenceOnly;
-                    if (modelFirst && behaviour.Model != model) { behaviour.Model = model; changed = true; }
-                    if (behaviour.BehaviorType != type) { behaviour.BehaviorType = type; changed = true; }
-                    if (!modelFirst && behaviour.Model != model) { behaviour.Model = model; changed = true; }
+                    bool rebuilt = false;
+                    if (modelFirst && behaviour.Model != model) { behaviour.Model = model; changed = rebuilt = true; }
+                    if (behaviour.BehaviorType != type) { behaviour.BehaviorType = type; changed = rebuilt = true; }
+                    if (!modelFirst && behaviour.Model != model) { behaviour.Model = model; changed = rebuilt = true; }
+                    if (guess && playing && !rebuilt) behaviour.InferenceDevice = behaviour.InferenceDevice;
                 }
                 if (rule != null)
                 {

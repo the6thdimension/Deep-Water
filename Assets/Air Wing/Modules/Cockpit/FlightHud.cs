@@ -2,10 +2,12 @@ using UnityEngine;
 using DeepWater.AirWing.Core.Atmosphere;
 using DeepWater.AirWing.Core.Cockpit;
 using DeepWater.AirWing.Core.Gates;
+using DeepWater.AirWing.Core.Radar;
 using DeepWater.AirWing.Core.Seats;
 using DeepWater.AirWing.Modules.Aircraft;
 using DeepWater.AirWing.Modules.World;
 using DeepWater.Gunnery.Guns;
+using RHRadarSuite.Tracking;
 
 namespace DeepWater.AirWing.Modules.Cockpit
 {
@@ -14,6 +16,9 @@ namespace DeepWater.AirWing.Modules.Cockpit
     /// each with its unit; the active device and seat; each part's level and any fallback. A velocity-vector marker
     /// shows where the jet is going, and a ring shows the mouse aim while the instructor flies. With a gate course
     /// (slice 1e), the next gate, its bands and a marker on it, and what the jet held through the last one.
+    /// With a radar (SENSORS-CONCEPT J10), a radar display bottom right: its mode and range, each firm track by azimuth
+    /// and range (F an IFF friend, ? asked and not answered, [ ] locked), the warning receiver, chaff and flares left, and
+    /// the keys; the locked track is marked in the view.
     /// <para>Drawn with IMGUI: no assets to set up and nothing to build, which suits a first flight. It allocates a
     /// little per frame; a UI Toolkit HUD can replace it once the layout settles.</para>
     /// </summary>
@@ -29,7 +34,7 @@ namespace DeepWater.AirWing.Modules.Cockpit
         [SerializeField] Color colour = new Color(0.35f, 1f, 0.45f, 0.95f);
 
         AircraftView _view;
-        GUIStyle _left, _right, _centre;
+        GUIStyle _left, _right, _centre, _small;
 
         void OnGUI()
         {
@@ -99,6 +104,80 @@ namespace DeepWater.AirWing.Modules.Cockpit
                     Marker(runner.Flight.Find(aircraft.State.LockTargetId).State.Position, runner.Flight.IsLocked(aircraft) ? "[ LOCK ]" : "[ · · ]", s);
             }
             if (runner.Views.Count > 1 && runner.Roster != null) PickList(w, s, size);
+            JetRadar radar = runner.Flight.RadarOf(aircraft.Id);
+            if (radar != null && aircraft.State.Status == Core.State.FlightStatus.Flying) RadarDisplay(aircraft, radar, w, h, s, size);
+        }
+
+        /// <summary>Azimuth either side of the nose the display spans when the mode has no volume of its own, degrees.</summary>
+        const float DisplayAzimuthDeg = 60f;
+
+        /// <summary>
+        /// The radar display (J10): a B-scope, azimuth across and range up, bottom right; under it the warning receiver,
+        /// the decoys and the keys. What the pilot's instruments show, never the truth: tracks, their IFF answers, the
+        /// warning receiver's contacts.
+        /// </summary>
+        void RadarDisplay(Core.Aircraft a, JetRadar radar, float w, float h, float s, Vector2 size)
+        {
+            float side = 300f * s, x0 = w - 40f * s - side, y0 = h - 6f * size.y - side;
+            RadarProfile p = radar.Profile;
+            RadarModeProfile? volume = p.Volume(radar.Mode == RadarMode.SingleTarget ? radar.SearchMode : radar.Mode);
+            float rangeM = radar.Mode == RadarMode.SingleTarget ? p.SingleTargetRangeM : volume.HasValue ? volume.Value.RangeM : p.SingleTargetRangeM;
+            float azHalf = volume.HasValue ? volume.Value.AzimuthHalfDeg : DisplayAzimuthDeg;
+            if (rangeM <= 0f) rangeM = 40000f;
+            if (azHalf <= 0f) azHalf = DisplayAzimuthDeg;
+
+            // The frame and the centre line.
+            Line(x0, y0, side, 2f * s);
+            Line(x0, y0 + side, side, 2f * s);
+            Line(x0, y0, 2f * s, side);
+            Line(x0 + side, y0, 2f * s, side + 2f * s);
+            Line(x0 + side * 0.5f, y0 + side - 12f * s, 1f * s, 12f * s);
+            string mode = radar.Mode switch
+            {
+                RadarMode.Off => "OFF", RadarMode.RangeWhileSearch => "RWS", RadarMode.TrackWhileScan => "TWS",
+                RadarMode.Dogfight => "DOGFIGHT", RadarMode.SingleTarget => "STT", _ => radar.Mode.ToString().ToUpperInvariant(),
+            };
+            GUI.Label(new Rect(x0, y0 - size.y, side, size.y), $"RDR {mode}  {rangeM / 1000f:F0} KM", _left);
+
+            Quaternion toBody = Quaternion.Inverse(a.State.Attitude);
+            int shown = 0;
+            foreach (RadarTrack t in radar.Tracks)
+            {
+                if (t.State != TrackState.Confirmed && t.State != TrackState.Coasting) continue;
+                Vector3 at = new Vector3((float)t.Position.X, (float)t.Position.Y, (float)t.Position.Z);
+                Vector3 rel = toBody * (at - a.State.Position);
+                float az = Mathf.Atan2(rel.x, rel.z) * Mathf.Rad2Deg, d = rel.magnitude;
+                if (Mathf.Abs(az) > azHalf || d > rangeM) continue;
+                shown++;
+                bool locked = radar.LockedTrackId == t.Id;
+                string glyph = radar.IdentityOf(t.Id) == TrackIdentity.Friend ? "F" : radar.ChallengesOf(t.Id) > 0 ? "?" : "o";
+                if (locked) glyph = $"[{glyph}]";
+                float px = x0 + side * (0.5f + 0.5f * az / azHalf), py = y0 + side * (1f - d / rangeM);
+                GUI.Label(new Rect(px - 30f * s, py - 15f * s, 60f * s, 30f * s), glyph, _centre);
+                if (locked && viewCamera != null) Marker(at, $"[ RDR {d / 1000f:F1} ]", s);
+            }
+            GUI.Label(new Rect(x0, y0 + side, side, size.y), $"{shown} TRK", _right);
+
+            // The warning receiver, strongest first, and the decoys left.
+            WarningReceiver rwr = runner.Flight.WarningReceiverOf(a.Id);
+            string warn = "RWR —";
+            if (rwr != null && rwr.Contacts.Count > 0)
+            {
+                WarningContact c = rwr.Contacts[0];
+                string kind = c.Kind == PaintKind.Missile ? "MISSILE" : c.Kind == PaintKind.Track ? "TRACK" : "SEARCH";
+                warn = $"RWR {kind} {Mathf.Repeat(c.AzimuthDeg, 360f):000}°{(rwr.Contacts.Count > 1 ? $" +{rwr.Contacts.Count - 1}" : "")}";
+            }
+            string decoys = a.Profile.Countermeasures.IsSet ? $"  ·  CHAFF {a.State.Chaff}  FLR {a.State.Flares}" : "";
+            GUI.Label(new Rect(x0 - side, y0 + side + size.y, 2f * side, size.y), warn + decoys, _right);
+            GUI.Label(new Rect(x0 - side, y0 + side + 2f * size.y, 2f * side, size.y), "V MODE · L LOCK · I IFF · C CHAFF · X FLARE · N RDR MSL", _small);
+        }
+
+        void Line(float x, float y, float width, float height)
+        {
+            Color was = GUI.color;
+            GUI.color = colour;
+            GUI.DrawTexture(new Rect(x, y, width, height), Texture2D.whiteTexture);
+            GUI.color = was;
         }
 
         /// <summary>
@@ -180,6 +259,7 @@ namespace DeepWater.AirWing.Modules.Cockpit
             _left.normal.textColor = colour;
             _right = new GUIStyle(_left) { alignment = TextAnchor.UpperRight };
             _centre = new GUIStyle(_left) { alignment = TextAnchor.MiddleCenter };
+            _small = new GUIStyle(_right) { fontSize = Mathf.RoundToInt(15f * Mathf.Max(1f, Screen.height / 1080f)) };
         }
 
         int Target() => followPlayer && runner != null && runner.PlayerAircraftId != 0 ? runner.PlayerAircraftId : aircraftId;

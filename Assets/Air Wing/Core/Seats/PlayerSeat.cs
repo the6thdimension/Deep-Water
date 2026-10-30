@@ -37,6 +37,14 @@ namespace DeepWater.AirWing.Core.Seats
         public bool Fire;
         /// <summary>This source's missile pickle is held (W65; it does not take the stick).</summary>
         public bool FireMissile;
+        /// <summary>This source's radar-missile pickle is held (J10, W68).</summary>
+        public bool FireRadarMissile;
+        /// <summary>Held buttons that act while held (J10): IFF, chaff, flares. Never latched.</summary>
+        public PilotSwitches Held;
+        /// <summary>The radar's mode button was pressed this tick (J10: off, search, track-while-scan, dogfight, off).</summary>
+        public bool RadarModePressed;
+        /// <summary>The radar's lock button was pressed this tick (J10: the track nearest the nose, or unlock).</summary>
+        public bool RadarLockPressed;
 
         public static DeviceSample Idle => new DeviceSample { LeverAbsolute = float.NaN };
     }
@@ -151,6 +159,8 @@ namespace DeepWater.AirWing.Core.Seats
             {
                 f.Stick.Moved = f.Gamepad.Moved = f.Keyboard.Moved = f.MouseMoved = false;
                 f.Stick.Toggles = f.Gamepad.Toggles = f.Keyboard.Toggles = PilotSwitches.None;
+                f.Stick.RadarModePressed = f.Gamepad.RadarModePressed = f.Keyboard.RadarModePressed = false;
+                f.Stick.RadarLockPressed = f.Gamepad.RadarLockPressed = f.Keyboard.RadarLockPressed = false;
                 f.Stick.LeverAbsolute = f.Gamepad.LeverAbsolute = f.Keyboard.LeverAbsolute = float.NaN;
                 f.Stick.LeverRate = f.Gamepad.LeverRate = f.Keyboard.LeverRate = 0f;
             }
@@ -179,6 +189,11 @@ namespace DeepWater.AirWing.Core.Seats
             inputs.Brakes = f.Stick.Brakes || f.Gamepad.Brakes || f.Keyboard.Brakes;   // any source's brakes brake
             inputs.Trigger = f.Stick.Fire || f.Gamepad.Fire || f.Keyboard.Fire;      // and any source's trigger fires
             inputs.Pickle = f.Stick.FireMissile || f.Gamepad.FireMissile || f.Keyboard.FireMissile;   // and any source's pickle launches
+            // The sensors (J10): held buttons act while held; the radar's two buttons are presses, the lock's first.
+            inputs.RadarPickle = f.Stick.FireRadarMissile || f.Gamepad.FireRadarMissile || f.Keyboard.FireRadarMissile;
+            inputs.Switches |= (f.Stick.Held | f.Gamepad.Held | f.Keyboard.Held) & (PilotSwitches.Interrogate | PilotSwitches.Chaff | PilotSwitches.Flare);
+            if (f.Stick.RadarLockPressed || f.Gamepad.RadarLockPressed || f.Keyboard.RadarLockPressed) inputs.Radar = RadarCommand.Lock;   // track 0: the button's lock
+            else if (f.Stick.RadarModePressed || f.Gamepad.RadarModePressed || f.Keyboard.RadarModePressed) inputs.Radar = RadarCommand.NextMode;
 
             LevelHolding = false;
             switch (Owner)

@@ -215,6 +215,33 @@ namespace DeepWater.AirWing.Core.Radar
                 case RadarCommand.TrackWhileScan: Search(RadarMode.TrackWhileScan); return;
                 case RadarCommand.Dogfight: Search(RadarMode.Dogfight); return;
                 case RadarCommand.Unlock: if (Mode == RadarMode.SingleTarget) { Unlock(); Mode = SearchMode; } return;
+                case RadarCommand.NextMode:
+                {
+                    RadarMode from = Mode == RadarMode.SingleTarget ? SearchMode : Mode;
+                    if (from == RadarMode.Dogfight) { Unlock(); Mode = RadarMode.Off; return; }
+                    Search(from == RadarMode.Off ? RadarMode.RangeWhileSearch : from == RadarMode.RangeWhileSearch ? RadarMode.TrackWhileScan : RadarMode.Dogfight);
+                    return;
+                }
+                case RadarCommand.Lock when command.RadarTrack == 0:
+                {
+                    // The player's lock button: unlock while locked, else the firm track nearest the nose in the gimbal.
+                    if (Mode == RadarMode.SingleTarget) { Unlock(); Mode = SearchMode; return; }
+                    if (Mode == RadarMode.Off) return;
+                    Vector3 nose = self.State.Attitude * Vector3.forward;
+                    int best = 0, bestWho = 0;
+                    float bestCos = -2f;
+                    foreach (RadarTrack t in _file.Tracks)
+                    {
+                        if (t.State != TrackState.Confirmed && t.State != TrackState.Coasting) continue;
+                        if (!_truth.TryGetValue(t.Id, out int who)) continue;
+                        Vector3 at = new Vector3((float)t.Position.X, (float)t.Position.Y, (float)t.Position.Z);
+                        if (!JetRadarLook.InGimbal(Profile, self.State.Position, self.State.Attitude, at)) continue;
+                        float c = Vector3.Dot(nose, (at - self.State.Position).normalized);
+                        if (c > bestCos || (c == bestCos && t.Id < best)) { bestCos = c; best = t.Id; bestWho = who; }
+                    }
+                    if (best != 0) LockOn(best, bestWho);
+                    return;
+                }
                 case RadarCommand.Lock:
                 {
                     if (Mode == RadarMode.Off || !_file.TryGet(command.RadarTrack, out RadarTrack t)) return;

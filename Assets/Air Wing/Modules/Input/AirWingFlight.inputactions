@@ -112,6 +112,60 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "RadarMode",
+                    "type": "Button",
+                    "id": "a63106d9-6313-4b91-ada7-9a34c246ffa4",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "RadarLock",
+                    "type": "Button",
+                    "id": "0e28f15b-71f1-4508-9f02-28af6517e939",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Interrogate",
+                    "type": "Button",
+                    "id": "86066701-a98d-4513-bcce-6eee7e4cf8a0",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Chaff",
+                    "type": "Button",
+                    "id": "6cbd5771-7b51-4f86-8123-254b9ab0846d",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Flare",
+                    "type": "Button",
+                    "id": "6171401c-1c91-49db-8855-3ea8ddf5acbf",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "FireRadarMissile",
+                    "type": "Button",
+                    "id": "2f0ac09f-33b2-45c5-abb5-f4317449c123",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -345,6 +399,72 @@
                     "action": "FireMissile",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9d76f393-cc9c-4138-80a6-126320a2eb56",
+                    "path": "<Keyboard>/v",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RadarMode",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a931f9b8-58ed-4831-b4d1-69ba4cb0a78d",
+                    "path": "<Keyboard>/l",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RadarLock",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "44e24333-a5d5-4a30-a8f2-3b5a4de70f79",
+                    "path": "<Keyboard>/i",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Interrogate",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "af50246b-655f-4757-998f-b45ce588cf1f",
+                    "path": "<Keyboard>/c",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Chaff",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7f974a98-0ac2-4e0f-92cf-0639067d9c14",
+                    "path": "<Keyboard>/x",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Flare",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3a6c6013-f6a9-4fdc-a06d-700d00df9c23",
+                    "path": "<Keyboard>/n",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "FireRadarMissile",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },
@@ -485,6 +605,60 @@
                     "name": "FireMissile",
                     "type": "Button",
                     "id": "a580392c-753b-4fc8-bc84-a3930c0489f6",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "RadarMode",
+                    "type": "Button",
+                    "id": "e339c1b8-75b7-465d-8a76-bc65d937f9a3",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "RadarLock",
+                    "type": "Button",
+                    "id": "66c359d6-6709-4928-8dfd-e4f1b993c8f2",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Interrogate",
+                    "type": "Button",
+                    "id": "ab901423-32a4-4839-81ec-efe297677c68",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Chaff",
+                    "type": "Button",
+                    "id": "b3a9d085-eb19-40df-b942-b5d1daaac5ea",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Flare",
+                    "type": "Button",
+                    "id": "edd9b1a2-596c-4d3f-b260-daa8a14cfc6d",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "FireRadarMissile",
+                    "type": "Button",
+                    "id": "0b15bda0-2f94-40df-b500-6162d4b5cae2",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -656,6 +830,72 @@
                     "action": "FireMissile",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1798f8c6-acff-4621-bcd4-3eb2677d17cb",
+                    "path": "<Gamepad>/start",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RadarMode",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7806134c-590d-4f91-987d-bfb7b95c7291",
+                    "path": "<Gamepad>/rightStickPress",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RadarLock",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "28e26d90-a238-49b1-a8dd-5c6cfa6aefc7",
+                    "path": "<Gamepad>/dpad/up",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Interrogate",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9212751f-d152-474a-b8c8-6aa2d2a45d6c",
+                    "path": "<Gamepad>/dpad/left",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Chaff",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "00942396-f671-4070-b470-6774c6f9efe3",
+                    "path": "<Gamepad>/leftStickPress",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Flare",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7a4ca537-f52d-4a55-86b6-df3d81758689",
+                    "path": "<Gamepad>/leftShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "FireRadarMissile",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },
@@ -743,6 +983,60 @@
                     "name": "FireMissile",
                     "type": "Button",
                     "id": "c61b93f0-cd4d-45a3-8d02-5f52d442b13a",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "RadarMode",
+                    "type": "Button",
+                    "id": "f717fe23-8862-4d9d-8dc6-a59b6cc16a0c",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "RadarLock",
+                    "type": "Button",
+                    "id": "73a49e9f-d0e2-462d-a874-e67a240ff25b",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Interrogate",
+                    "type": "Button",
+                    "id": "48bf8203-2873-4c00-8ff8-3165359996f4",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Chaff",
+                    "type": "Button",
+                    "id": "ca170f49-194f-444c-9ab6-b074b61c84ff",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Flare",
+                    "type": "Button",
+                    "id": "afb5dab3-cdff-405a-9281-468b4ba24fbd",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "FireRadarMissile",
+                    "type": "Button",
+                    "id": "036321e9-4438-42b0-a53b-a4a25b977f50",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -857,6 +1151,72 @@
                     "processors": "",
                     "groups": "",
                     "action": "FireMissile",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6c673bbc-b2bd-428b-b3b0-47d0a842deec",
+                    "path": "<Joystick>/button7",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RadarMode",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "91afcfd3-d48d-470c-a300-9b0708913668",
+                    "path": "<Joystick>/button8",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RadarLock",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a778d1f7-02ef-4b89-b0ed-098a64b198a2",
+                    "path": "<Joystick>/button9",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Interrogate",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "46cd2430-8b76-47de-b4b9-d7b563dd68b1",
+                    "path": "<Joystick>/button10",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Chaff",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "16204014-0ce2-43d9-8836-6e5306e89179",
+                    "path": "<Joystick>/button11",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Flare",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ed124106-6cbb-45ba-9c6a-9926500d392a",
+                    "path": "<Joystick>/button12",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "FireRadarMissile",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

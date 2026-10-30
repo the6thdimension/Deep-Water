@@ -58,7 +58,14 @@ namespace DeepWater.AirWing.Modules.Input
             public readonly InputAction Fire;
             /// <summary>The missile pickle, held (W65): right mouse and M, the Xbox right shoulder, stick button 6.</summary>
             public readonly InputAction FireMissile;
+            /// <summary>
+            /// The sensors (SENSORS-CONCEPT J10), each optional: radar mode (V, the Xbox Menu button, stick button 7), lock
+            /// (L, right stick press, button 8), IFF held (I, D-pad up, button 9), chaff held (C, D-pad left, button 10),
+            /// flares held (X, left stick press, button 11), radar missile (N, the Xbox left shoulder, button 12).
+            /// </summary>
+            public readonly InputAction RadarMode, RadarLock, Interrogate, Chaff, Flare, FireRadarMissile;
             public PilotSwitches Pressed;
+            public bool ModePressed, LockPressed;
 
             public Source(InputActionMap map)
             {
@@ -72,6 +79,12 @@ namespace DeepWater.AirWing.Modules.Input
                 Brakes = map.FindAction("Brakes", false);
                 Fire = map.FindAction("Fire", false);
                 FireMissile = map.FindAction("FireMissile", false);
+                RadarMode = map.FindAction("RadarMode", false);
+                RadarLock = map.FindAction("RadarLock", false);
+                Interrogate = map.FindAction("Interrogate", false);
+                Chaff = map.FindAction("Chaff", false);
+                Flare = map.FindAction("Flare", false);
+                FireRadarMissile = map.FindAction("FireRadarMissile", false);
             }
 
             public void Poll()
@@ -81,6 +94,8 @@ namespace DeepWater.AirWing.Modules.Input
                 if (SpeedBrake.WasPressedThisFrame()) Pressed ^= PilotSwitches.SpeedBrake;
                 if (Gear.WasPressedThisFrame()) Pressed ^= PilotSwitches.GearDown;
                 if (Reset != null && Reset.WasPressedThisFrame()) Pressed |= PilotSwitches.Reset;   // a press, never undone by a second
+                if (RadarMode != null && RadarMode.WasPressedThisFrame()) ModePressed = true;
+                if (RadarLock != null && RadarLock.WasPressedThisFrame()) LockPressed = true;
             }
         }
 
@@ -167,6 +182,13 @@ namespace DeepWater.AirWing.Modules.Input
             s.Brakes = src.Brakes != null && src.Brakes.IsPressed();
             s.Fire = src.Fire != null && src.Fire.IsPressed();
             s.FireMissile = src.FireMissile != null && src.FireMissile.IsPressed();
+            s.FireRadarMissile = src.FireRadarMissile != null && src.FireRadarMissile.IsPressed();
+            if (src.Interrogate != null && src.Interrogate.IsPressed()) s.Held |= PilotSwitches.Interrogate;
+            if (src.Chaff != null && src.Chaff.IsPressed()) s.Held |= PilotSwitches.Chaff;
+            if (src.Flare != null && src.Flare.IsPressed()) s.Held |= PilotSwitches.Flare;
+            s.RadarModePressed = src.ModePressed;
+            s.RadarLockPressed = src.LockPressed;
+            src.ModePressed = src.LockPressed = false;
             s.Toggles = src.Pressed;
             src.Pressed = PilotSwitches.None;
             return s;

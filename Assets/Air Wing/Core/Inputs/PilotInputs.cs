@@ -31,9 +31,12 @@ namespace DeepWater.AirWing.Core.Inputs
 
     /// <summary>
     /// What the pilot asks of the radar this tick (SENSORS-CONCEPT J2, J6): a momentary command, not a held switch;
-    /// <see cref="None"/> leaves it as it is. <see cref="Lock"/> names the track in <see cref="PilotInputs.RadarTrack"/>.
+    /// <see cref="None"/> leaves it as it is. <see cref="Lock"/> names the track in <see cref="PilotInputs.RadarTrack"/>;
+    /// a lock naming track 0 is the player's button (J10): the firm track nearest the nose inside the gimbal, or, while
+    /// locked, unlock. <see cref="NextMode"/> (J10, the player's other button) steps off, range-while-search,
+    /// track-while-scan, dogfight and back to off.
     /// </summary>
-    public enum RadarCommand : byte { None = 0, Off = 1, RangeWhileSearch = 2, TrackWhileScan = 3, Dogfight = 4, Lock = 5, Unlock = 6 }
+    public enum RadarCommand : byte { None = 0, Off = 1, RangeWhileSearch = 2, TrackWhileScan = 3, Dogfight = 4, Lock = 5, Unlock = 6, NextMode = 7 }
 
     /// <summary>
     /// The only way anything changes an aircraft (BLUEPRINT §1, rule 1; W6). The player's devices, the mouse

@@ -1,0 +1,14 @@
+{
+    "name": "POSEIDON.Reckoning",
+    "rootNamespace": "POSEIDON.Reckoning",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}

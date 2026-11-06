@@ -1,0 +1,11 @@
+{
+  "name": "com.realmhaus.poseidon.reckoning",
+  "version": "0.1.0",
+  "displayName": "POSEIDON Reckoning",
+  "description": "The deterministic core of POSEIDON: one Chronometer, a written system order, Orders as the only input, a Fix every tick, stateless random draws, snapshots and cause records. Pure C#, no engine references.",
+  "unity": "6000.4",
+  "author": {
+    "name": "REALMHAUS"
+  },
+  "dependencies": {}
+}
